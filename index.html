@@ -1,0 +1,1633 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Click Factory Expense Tracker</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#eef2ff',
+                            100: '#e0e7ff',
+                            500: '#6366f1',
+                            600: '#4f46e5',
+                            700: '#4338ca',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        ::-webkit-scrollbar {
+            width: 4px;
+            height: 4px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        .dark ::-webkit-scrollbar-thumb {
+            background: #475569;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .app-container {
+            max-width: 480px;
+            margin: 0 auto;
+            min-height: 100vh;
+            background-color: #f8fafc;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+        }
+        @media (min-width: 640px) {
+            .app-container {
+                min-height: 90vh;
+                margin-top: 3vh;
+                margin-bottom: 3vh;
+                border-radius: 2.5rem;
+                overflow: hidden;
+                border: 8px solid #1e293b;
+            }
+        }
+    </style>
+</head>
+<body class="bg-slate-900 text-slate-800 dark:text-slate-100 flex flex-col justify-center items-center h-full">
+
+    <div id="app" class="app-container w-full flex flex-col relative dark:bg-slate-950 transition-colors duration-200">
+        <!-- Application renders dynamically via JavaScript -->
+    </div>
+
+    <!-- Notification Toast Container -->
+    <div id="toast-container" class="fixed top-4 left-1/2 transform -translate-x-1/2 z-50 flex flex-col gap-2 pointer-events-none w-11/12 max-w-sm"></div>
+
+    <script>
+        const STORAGE_KEY = 'click_factory_expense_tracker_admin_auth_v4';
+
+        const initialData = {
+            currentUser: null,
+            adminPassword: 'adminpassword',
+            users: [
+                { id: 'usr_adm', name: 'Admin Manager', username: 'admin', password: 'adminpassword', role: 'admin', email: 'admin@clickfactory.com' },
+                { id: 'usr_1', name: 'User One', username: 'user1', password: 'password', role: 'user', email: 'user1@clickfactory.com' },
+                { id: 'usr_2', name: 'User Two', username: 'user2', password: 'password', role: 'user', email: 'user2@clickfactory.com' }
+            ],
+            expenses: [
+                {
+                    id: 'exp_1',
+                    userId: 'usr_1',
+                    userName: 'User One',
+                    title: 'Studio Lighting Setup Maintenance',
+                    amount: 3500,
+                    category: 'Office',
+                    date: '2026-10-01',
+                    notes: 'Replaced LED bulb softboxes in studio floor 2.',
+                    billAttachment: null,
+                    createdAt: '2026-10-01T10:00:00.000Z'
+                },
+                {
+                    id: 'exp_2',
+                    userId: 'usr_1',
+                    userName: 'User One',
+                    title: 'Outdoor Commercial Shoot Cab Fare',
+                    amount: 1200,
+                    category: 'Shoot',
+                    date: '2026-10-02',
+                    notes: 'Travel expense for crew equipment transport.',
+                    billAttachment: null,
+                    createdAt: '2026-10-02T14:30:00.000Z'
+                }
+            ],
+            passwordRequests: [],
+            activeTab: 'home',
+            filterCategory: 'All',
+            filterMonth: 'All',
+            filterUser: 'All',
+            searchQuery: '',
+            darkMode: true,
+            editingExpenseId: null,
+            tempBillData: null,
+            authView: 'login' // 'login' or 'forgot'
+        };
+
+        let state = loadState();
+
+        function loadState() {
+            const saved = localStorage.getItem(STORAGE_KEY);
+            if (saved) {
+                try {
+                    const parsed = JSON.parse(saved);
+                    return { ...initialData, ...parsed, authView: 'login' };
+                } catch(e) {
+                    console.error('Error loading state', e);
+                }
+            }
+            return initialData;
+        }
+
+        function saveState() {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+        }
+
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            const bgClass = type === 'success' ? 'bg-emerald-600 text-white' : type === 'error' ? 'bg-rose-600 text-white' : 'bg-slate-800 text-white';
+            const icon = type === 'success' ? 'fa-circle-check' : type === 'error' ? 'fa-circle-exclamation' : 'fa-circle-info';
+            
+            toast.className = `${bgClass} px-4 py-3 rounded-xl shadow-lg flex items-center space-x-3 text-sm font-medium transform transition-all duration-300 translate-y-[-20px] opacity-0 pointer-events-auto`;
+            toast.innerHTML = `<i class="fa-solid ${icon} text-lg"></i><span class="flex-1">${message}</span>`;
+            
+            container.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.classList.remove('translate-y-[-20px]', 'opacity-0');
+            }, 10);
+
+            setTimeout(() => {
+                toast.classList.add('translate-y-[-20px]', 'opacity-0');
+                setTimeout(() => toast.remove(), 300);
+            }, 3500);
+        }
+
+        function formatCurrency(amount) {
+            return '₹' + Number(amount).toLocaleString('en-IN');
+        }
+
+        function formatDate(dateString) {
+            if (!dateString) return '';
+            const options = { year: 'numeric', month: 'short', day: 'numeric' };
+            return new Date(dateString).toLocaleDateString('en-IN', options);
+        }
+
+        function formatMonthName(yearMonth) {
+            if (!yearMonth || yearMonth === 'All') return 'All Months';
+            const [year, month] = yearMonth.split('-');
+            const date = new Date(year, month - 1, 1);
+            return date.toLocaleDateString('en-IN', { month: 'long', year: 'numeric' });
+        }
+
+        function render() {
+            const app = document.getElementById('app');
+            
+            if (state.darkMode) {
+                document.documentElement.classList.add('dark');
+            } else {
+                document.documentElement.classList.remove('dark');
+            }
+
+            if (!state.currentUser) {
+                if (state.authView === 'forgot') {
+                    app.innerHTML = renderForgotPasswordPage();
+                } else {
+                    app.innerHTML = renderLoginPage();
+                }
+                return;
+            }
+
+            const isAdmin = state.currentUser.role === 'admin';
+
+            app.innerHTML = `
+                <!-- Top Header Bar -->
+                <header class="sticky top-0 z-40 bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 px-4 py-3 flex items-center justify-between">
+                    <div class="flex items-center space-x-2.5">
+                        <div class="w-10 h-10 rounded-xl bg-white dark:bg-slate-800 p-1 flex items-center justify-center shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden shrink-0">
+                            <img src="https://clickfactoryphotography.com/wp-content/uploads/2022/04/crop-logo.gif" alt="Click Factory Logo" class="w-full h-full object-contain" onerror="this.src='https://placehold.co/40x40/4f46e5/ffffff?text=CF'">
+                        </div>
+                        <div>
+                            <h1 class="font-bold text-xs sm:text-base leading-tight tracking-tight text-slate-900 dark:text-white">Click Factory</h1>
+                            <p class="text-[11px] text-slate-500 dark:text-slate-400 font-medium">
+                                ${isAdmin ? '<span class="text-indigo-600 dark:text-indigo-400 font-semibold"><i class="fa-solid fa-shield-halved mr-1"></i>Admin Portal</span>' : `Expense Tracker`}
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-center space-x-2">
+                        <button onclick="toggleDarkMode()" class="w-9 h-9 rounded-xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition">
+                            <i class="fa-solid ${state.darkMode ? 'fa-sun text-amber-400' : 'fa-moon text-slate-600'} text-sm"></i>
+                        </button>
+                        <button onclick="handleLogout()" class="w-9 h-9 rounded-xl bg-rose-50 dark:bg-rose-950/50 flex items-center justify-center text-rose-600 dark:text-rose-400 hover:bg-rose-100 transition border border-rose-200/50 dark:border-rose-800/50" title="Logout">
+                            <i class="fa-solid fa-arrow-right-from-bracket text-sm"></i>
+                        </button>
+                    </div>
+                </header>
+
+                <!-- Scrollable Body Content -->
+                <main class="flex-1 overflow-y-auto pb-24 pt-4 px-4">
+                    ${renderActiveTabContent()}
+                </main>
+
+                <!-- Bottom Navigation Bar -->
+                <nav class="absolute bottom-0 left-0 right-0 z-40 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-t border-slate-200 dark:border-slate-800 px-2 py-2 flex items-center justify-around shadow-lg">
+                    <button onclick="switchTab('home')" class="flex flex-col items-center justify-center w-14 py-1 rounded-xl transition ${state.activeTab === 'home' ? 'text-indigo-600 dark:text-indigo-400 font-semibold' : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300'}">
+                        <i class="fa-solid fa-house text-base mb-0.5"></i>
+                        <span class="text-[9px]">Expenses</span>
+                    </button>
+
+                    <button onclick="switchTab('add')" class="flex flex-col items-center justify-center -mt-5 group">
+                        <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-indigo-600 to-violet-600 flex items-center justify-center text-white shadow-lg shadow-indigo-500/30 transform group-hover:scale-105 transition active:scale-95">
+                            <i class="fa-solid fa-plus text-lg"></i>
+                        </div>
+                        <span class="text-[9px] text-slate-600 dark:text-slate-400 font-medium mt-1">Add New</span>
+                    </button>
+
+                    ${isAdmin ? `
+                    <button onclick="switchTab('admin')" class="flex flex-col items-center justify-center w-14 py-1 rounded-xl transition ${state.activeTab === 'admin' ? 'text-indigo-600 dark:text-indigo-400 font-semibold' : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300'}">
+                        <i class="fa-solid fa-chart-pie text-base mb-0.5"></i>
+                        <span class="text-[9px]">Summary</span>
+                    </button>
+                    <button onclick="switchTab('requests')" class="flex flex-col items-center justify-center w-14 py-1 rounded-xl transition relative ${state.activeTab === 'requests' ? 'text-indigo-600 dark:text-indigo-400 font-semibold' : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300'}">
+                        <i class="fa-solid fa-key text-base mb-0.5"></i>
+                        <span class="text-[9px]">Requests</span>
+                        ${state.passwordRequests.filter(r => r.status === 'pending').length > 0 ? `<span class="absolute top-1 right-2 w-2 h-2 rounded-full bg-rose-500"></span>` : ''}
+                    </button>
+                    <button onclick="switchTab('users')" class="flex flex-col items-center justify-center w-14 py-1 rounded-xl transition ${state.activeTab === 'users' ? 'text-indigo-600 dark:text-indigo-400 font-semibold' : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300'}">
+                        <i class="fa-solid fa-users text-base mb-0.5"></i>
+                        <span class="text-[9px]">Users</span>
+                    </button>
+                    ` : `
+                    <button onclick="switchTab('analytics')" class="flex flex-col items-center justify-center w-16 py-1 rounded-xl transition ${state.activeTab === 'analytics' ? 'text-indigo-600 dark:text-indigo-400 font-semibold' : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300'}">
+                        <i class="fa-solid fa-chart-column text-base mb-0.5"></i>
+                        <span class="text-[9px]">Summary</span>
+                    </button>
+                    `}
+
+                    <button onclick="switchTab('profile')" class="flex flex-col items-center justify-center w-14 py-1 rounded-xl transition ${state.activeTab === 'profile' ? 'text-indigo-600 dark:text-indigo-400 font-semibold' : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300'}">
+                        <i class="fa-solid fa-user-circle text-base mb-0.5"></i>
+                        <span class="text-[9px]">Profile</span>
+                    </button>
+                </nav>
+
+                <!-- Modal Container -->
+                <div id="modal-root"></div>
+            `;
+        }
+
+        function renderLoginPage() {
+            return `
+                <div class="flex-1 flex flex-col justify-center px-6 py-12 animate-fadeIn">
+                    <div class="sm:mx-auto sm:w-full sm:max-w-sm text-center mb-6">
+                        <div class="w-20 h-20 bg-white dark:bg-slate-800 rounded-3xl p-3 flex items-center justify-center mx-auto mb-4 shadow-xl border border-slate-200 dark:border-slate-700 overflow-hidden">
+                            <img src="https://clickfactoryphotography.com/wp-content/uploads/2022/04/crop-logo.gif" alt="Click Factory Logo" class="w-full h-full object-contain" onerror="this.src='https://placehold.co/80x80/4f46e5/ffffff?text=CF'">
+                        </div>
+                        <h2 class="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">Click Factory</h2>
+                        <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Expense Tracker & Management Portal</p>
+                    </div>
+
+                    <div class="bg-white dark:bg-slate-900 py-8 px-6 shadow-xl rounded-3xl border border-slate-200 dark:border-slate-800 sm:mx-auto sm:w-full sm:max-w-sm space-y-5">
+                        <form onsubmit="handleLoginSubmit(event)" class="space-y-4">
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">Username</label>
+                                <div class="relative">
+                                    <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                                        <i class="fa-solid fa-user text-sm"></i>
+                                    </span>
+                                    <input type="text" id="login-username" required placeholder="Enter username" class="w-full pl-10 pr-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 text-slate-900 dark:text-white">
+                                </div>
+                            </div>
+
+                            <div>
+                                <div class="flex items-center justify-between mb-1.5">
+                                    <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider">Password</label>
+                                    <button type="button" onclick="setAuthView('forgot')" class="text-xs text-indigo-600 dark:text-indigo-400 font-semibold hover:underline">Forgot Password?</button>
+                                </div>
+                                <div class="relative">
+                                    <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                                        <i class="fa-solid fa-lock text-sm"></i>
+                                    </span>
+                                    <input type="password" id="login-password" required placeholder="••••••••" class="w-full pl-10 pr-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 text-slate-900 dark:text-white">
+                                </div>
+                            </div>
+
+                            <button type="submit" class="w-full py-3.5 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 text-white font-semibold rounded-2xl shadow-lg shadow-indigo-500/25 transition text-sm flex items-center justify-center space-x-2">
+                                <i class="fa-solid fa-right-to-bracket"></i>
+                                <span>Sign In</span>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderForgotPasswordPage() {
+            return `
+                <div class="flex-1 flex flex-col justify-center px-6 py-12 animate-fadeIn">
+                    <div class="sm:mx-auto sm:w-full sm:max-w-sm text-center mb-6">
+                        <div class="w-16 h-16 bg-indigo-50 dark:bg-indigo-950/60 rounded-3xl flex items-center justify-center mx-auto mb-4 text-indigo-600 dark:text-indigo-400 text-2xl shadow-sm border border-indigo-200 dark:border-indigo-800">
+                            <i class="fa-solid fa-key"></i>
+                        </div>
+                        <h2 class="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">Password Recovery</h2>
+                        <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Request an authentication code from Admin</p>
+                    </div>
+
+                    <div class="bg-white dark:bg-slate-900 py-8 px-6 shadow-xl rounded-3xl border border-slate-200 dark:border-slate-800 sm:mx-auto sm:w-full sm:max-w-sm space-y-4">
+                        <form onsubmit="handleForgotPasswordSubmit(event)" class="space-y-4">
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">Username</label>
+                                <input type="text" id="forgot-username" required placeholder="Enter your username" class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 text-slate-900 dark:text-white">
+                            </div>
+
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">Admin Auth Code (6-digit)</label>
+                                <input type="text" id="forgot-auth-code" maxlength="6" placeholder="Enter code provided by Admin" class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm tracking-widest text-center font-bold focus:outline-none focus:ring-2 focus:ring-indigo-500 text-slate-900 dark:text-white">
+                            </div>
+
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">New Password</label>
+                                <input type="password" id="forgot-new-password" required placeholder="Enter new password" class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 text-slate-900 dark:text-white">
+                            </div>
+
+                            <div class="flex flex-col gap-2 pt-1">
+                                <button type="button" onclick="requestAdminAuthCode()" class="w-full py-2.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-indigo-600 dark:text-indigo-400 font-semibold rounded-2xl transition text-xs border border-slate-200 dark:border-slate-700">
+                                    <i class="fa-solid fa-paper-plane mr-1.5"></i> Request Code from Admin
+                                </button>
+                                <button type="submit" class="w-full py-3.5 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-2xl shadow-lg shadow-indigo-500/25 transition text-sm">
+                                    Reset Password with Code
+                                </button>
+                            </div>
+                        </form>
+
+                        <div class="text-center pt-2">
+                            <button type="button" onclick="setAuthView('login')" class="text-xs font-semibold text-indigo-600 dark:text-indigo-400 hover:underline">
+                                <i class="fa-solid fa-arrow-left mr-1"></i> Back to Sign In
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function setAuthView(view) {
+            state.authView = view;
+            render();
+        }
+
+        function requestAdminAuthCode() {
+            const username = document.getElementById('forgot-username').value.trim().toLowerCase();
+            if (!username) {
+                showToast('Please enter your username first to request a code.', 'error');
+                return;
+            }
+
+            const user = state.users.find(u => u.username.toLowerCase() === username);
+            if (!user) {
+                showToast('Username not found in system records.', 'error');
+                return;
+            }
+
+            let existingReq = state.passwordRequests.find(r => r.username.toLowerCase() === username && r.status === 'pending');
+            let code = '';
+            if (existingReq) {
+                code = existingReq.code;
+            } else {
+                code = Math.floor(100000 + Math.random() * 900000).toString();
+                state.passwordRequests.unshift({
+                    id: 'req_' + Date.now(),
+                    username: user.username,
+                    name: user.name,
+                    code: code,
+                    status: 'pending',
+                    createdAt: new Date().toISOString()
+                });
+                saveState();
+            }
+
+            showToast('Authentication code requested successfully! Please contact Admin to receive your 6-digit code.', 'success');
+        }
+
+        function handleForgotPasswordSubmit(e) {
+            e.preventDefault();
+            const username = document.getElementById('forgot-username').value.trim().toLowerCase();
+            const authCode = document.getElementById('forgot-auth-code').value.trim();
+            const newPassword = document.getElementById('forgot-new-password').value;
+
+            const user = state.users.find(u => u.username.toLowerCase() === username);
+            if (!user) {
+                showToast('Username not found.', 'error');
+                return;
+            }
+
+            const req = state.passwordRequests.find(r => r.username.toLowerCase() === username && r.status === 'pending');
+            if (!req || req.code !== authCode) {
+                showToast('Invalid or unapproved authentication code. Please request code from admin.', 'error');
+                return;
+            }
+
+            if (!newPassword || newPassword.length < 4) {
+                showToast('Password must be at least 4 characters long.', 'error');
+                return;
+            }
+
+            user.password = newPassword;
+            if (user.role === 'admin') {
+                state.adminPassword = newPassword;
+            }
+            req.status = 'approved';
+            saveState();
+            showToast('Password reset successfully! Please sign in.', 'success');
+            setAuthView('login');
+        }
+
+        function handleLoginSubmit(e) {
+            e.preventDefault();
+            const username = document.getElementById('login-username').value.trim().toLowerCase();
+            const password = document.getElementById('login-password').value;
+
+            const foundUser = state.users.find(u => u.username.toLowerCase() === username && u.password === password);
+            if (foundUser) {
+                state.currentUser = foundUser;
+                state.activeTab = 'home';
+                saveState();
+                showToast(`Welcome back, ${foundUser.name}!`, 'success');
+                render();
+            } else {
+                showToast('Invalid username or password.', 'error');
+            }
+        }
+
+        function handleLogout() {
+            state.currentUser = null;
+            saveState();
+            showToast('Logged out successfully.', 'info');
+            render();
+        }
+
+        function renderActiveTabContent() {
+            switch(state.activeTab) {
+                case 'home':
+                    return renderHomeTab();
+                case 'add':
+                    return renderAddEditTab();
+                case 'admin':
+                    return state.currentUser.role === 'admin' ? renderAdminTab() : renderHomeTab();
+                case 'requests':
+                    return state.currentUser.role === 'admin' ? renderPasswordRequestsTab() : renderHomeTab();
+                case 'users':
+                    return state.currentUser.role === 'admin' ? renderUserManagementTab() : renderHomeTab();
+                case 'analytics':
+                    return renderUserAnalyticsTab();
+                case 'profile':
+                    return renderProfileTab();
+                default:
+                    return renderHomeTab();
+            }
+        }
+
+        function switchTab(tab) {
+            state.activeTab = tab;
+            state.editingExpenseId = null;
+            state.tempBillData = null;
+            render();
+        }
+
+        function toggleDarkMode() {
+            state.darkMode = !state.darkMode;
+            saveState();
+            render();
+        }
+
+        function renderHomeTab() {
+            const isAdmin = state.currentUser.role === 'admin';
+            
+            let filtered = state.expenses.filter(exp => {
+                if (!isAdmin && exp.userId !== state.currentUser.id) return false;
+                if (isAdmin && state.filterUser !== 'All' && exp.userId !== state.filterUser) return false;
+                if (state.filterCategory !== 'All' && exp.category !== state.filterCategory) return false;
+                if (state.filterMonth !== 'All' && !exp.date.startsWith(state.filterMonth)) return false;
+                if (state.searchQuery.trim() !== '') {
+                    const q = state.searchQuery.toLowerCase();
+                    const matchTitle = exp.title.toLowerCase().includes(q);
+                    const matchNotes = exp.notes && exp.notes.toLowerCase().includes(q);
+                    const matchUser = exp.userName.toLowerCase().includes(q);
+                    if (!matchTitle && !matchNotes && !matchUser) return false;
+                }
+                return true;
+            });
+
+            filtered.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+            const totalAmount = filtered.reduce((sum, e) => sum + e.amount, 0);
+            const officeTotal = filtered.filter(e => e.category === 'Office').reduce((sum, e) => sum + e.amount, 0);
+            const shootTotal = filtered.filter(e => e.category === 'Shoot').reduce((sum, e) => sum + e.amount, 0);
+
+            const monthsSet = new Set(state.expenses.map(e => e.date.substring(0, 7)));
+            const availableMonths = Array.from(monthsSet).sort().reverse();
+
+            return `
+                <div class="space-y-4 animate-fadeIn">
+                    <!-- Summary Card -->
+                    <div class="bg-gradient-to-br from-indigo-600 to-violet-700 rounded-3xl p-5 text-white shadow-xl shadow-indigo-500/20 relative overflow-hidden">
+                        <div class="absolute -right-6 -bottom-6 w-32 h-32 bg-white/10 rounded-full blur-2xl pointer-events-none"></div>
+                        <div class="flex justify-between items-start mb-3">
+                            <div>
+                                <p class="text-indigo-200 text-xs font-medium uppercase tracking-wider">
+                                    ${isAdmin ? 'Total Filtered Expenses' : 'My Total Expenses'}
+                                </p>
+                                <h2 class="text-3xl font-bold tracking-tight mt-0.5">${formatCurrency(totalAmount)}</h2>
+                            </div>
+                            <span class="bg-white/20 backdrop-blur-md text-white text-xs font-semibold px-2.5 py-1 rounded-full">
+                                ${filtered.length} Items
+                            </span>
+                        </div>
+                        
+                        <div class="grid grid-cols-2 gap-3 mt-4 pt-4 border-t border-white/15">
+                            <div class="bg-black/10 backdrop-blur-sm rounded-2xl p-2.5">
+                                <div class="flex items-center space-x-1.5 text-indigo-200 text-xs mb-1">
+                                    <i class="fa-solid fa-briefcase"></i>
+                                    <span>Office</span>
+                                </div>
+                                <p class="font-bold text-sm sm:text-base">${formatCurrency(officeTotal)}</p>
+                            </div>
+                            <div class="bg-black/10 backdrop-blur-sm rounded-2xl p-2.5">
+                                <div class="flex items-center space-x-1.5 text-indigo-200 text-xs mb-1">
+                                    <i class="fa-solid fa-clapperboard"></i>
+                                    <span>Shoot</span>
+                                </div>
+                                <p class="font-bold text-sm sm:text-base">${formatCurrency(shootTotal)}</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Search & Filters -->
+                    <div class="space-y-2.5">
+                        <div class="relative">
+                            <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                                <i class="fa-solid fa-magnifying-glass text-sm"></i>
+                            </span>
+                            <input type="text" id="search-input" value="${state.searchQuery}" oninput="handleSearchInput(event)" placeholder="Search expenses, notes, user..." class="w-full pl-10 pr-4 py-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 shadow-sm transition text-slate-900 dark:text-white">
+                            ${state.searchQuery ? `<button onclick="clearSearch()" class="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark"></i></button>` : ''}
+                        </div>
+
+                        <div class="flex items-center space-x-2 overflow-x-auto pb-1 no-scrollbar">
+                            <button onclick="setFilterCategory('All')" class="px-3.5 py-1.5 rounded-xl text-xs font-medium whitespace-nowrap transition ${state.filterCategory === 'All' ? 'bg-indigo-600 text-white shadow-md shadow-indigo-500/20' : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-800'}">
+                                All Categories
+                            </button>
+                            <button onclick="setFilterCategory('Office')" class="px-3.5 py-1.5 rounded-xl text-xs font-medium whitespace-nowrap transition ${state.filterCategory === 'Office' ? 'bg-indigo-600 text-white shadow-md shadow-indigo-500/20' : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-800'}">
+                                Office Expense
+                            </button>
+                            <button onclick="setFilterCategory('Shoot')" class="px-3.5 py-1.5 rounded-xl text-xs font-medium whitespace-nowrap transition ${state.filterCategory === 'Shoot' ? 'bg-indigo-600 text-white shadow-md shadow-indigo-500/20' : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-800'}">
+                                Shoot Expense
+                            </button>
+                        </div>
+
+                        <div class="flex items-center space-x-2">
+                            <div class="flex-1 relative">
+                                <select onchange="setFilterMonth(this.value)" class="w-full appearance-none bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-3 py-2 text-xs font-medium text-slate-700 dark:text-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                                    <option value="All" ${state.filterMonth === 'All' ? 'selected' : ''}>All Months</option>
+                                    ${availableMonths.map(m => `<option value="${m}" ${state.filterMonth === m ? 'selected' : ''}>${formatMonthName(m)}</option>`).join('')}
+                                </select>
+                                <span class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none text-slate-400 text-xs">
+                                    <i class="fa-solid fa-chevron-down"></i>
+                                </span>
+                            </div>
+
+                            ${isAdmin ? `
+                            <div class="flex-1 relative">
+                                <select onchange="setFilterUser(this.value)" class="w-full appearance-none bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-3 py-2 text-xs font-medium text-slate-700 dark:text-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                                    <option value="All" ${state.filterUser === 'All' ? 'selected' : ''}>All Users</option>
+                                    ${state.users.map(u => `<option value="${u.id}" ${state.filterUser === u.id ? 'selected' : ''}>${u.name}</option>`).join('')}
+                                </select>
+                                <span class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none text-slate-400 text-xs">
+                                    <i class="fa-solid fa-chevron-down"></i>
+                                </span>
+                            </div>
+                            ` : ''}
+                        </div>
+                    </div>
+
+                    <!-- Expenses List -->
+                    <div class="space-y-3 mt-4">
+                        <div class="flex items-center justify-between px-1">
+                            <h3 class="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Expense Records</h3>
+                            ${isAdmin ? `
+                                <button onclick="exportFilteredCSV()" class="text-xs font-semibold text-indigo-600 dark:text-indigo-400 hover:underline flex items-center space-x-1">
+                                    <i class="fa-solid fa-download"></i><span>Export CSV</span>
+                                </button>
+                            ` : ''}
+                        </div>
+
+                        ${filtered.length === 0 ? `
+                            <div class="bg-white dark:bg-slate-900 rounded-3xl p-8 text-center border border-slate-200 dark:border-slate-800 shadow-sm mt-4">
+                                <div class="w-14 h-14 bg-slate-100 dark:bg-slate-800 text-slate-400 rounded-full flex items-center justify-center mx-auto mb-3 text-xl">
+                                    <i class="fa-solid fa-receipt"></i>
+                                </div>
+                                <h4 class="font-semibold text-slate-700 dark:text-slate-300 mb-1">No expenses found</h4>
+                                <p class="text-xs text-slate-500 dark:text-slate-400 mb-4">Try changing filters or add a new expense record.</p>
+                                <button onclick="switchTab('add')" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-medium shadow-md shadow-indigo-500/20 transition">
+                                    <i class="fa-solid fa-plus mr-1.5"></i>Add Expense
+                                </button>
+                            </div>
+                        ` : ''}
+
+                        ${filtered.map(exp => {
+                            const isOffice = exp.category === 'Office';
+                            const canEdit = isAdmin || exp.userId === state.currentUser.id;
+                            return `
+                                <div class="bg-white dark:bg-slate-900 rounded-2xl p-4 border border-slate-200 dark:border-slate-800 shadow-sm hover:shadow-md transition relative group">
+                                    <div class="flex items-start justify-between">
+                                        <div class="flex items-start space-x-3">
+                                            <div class="w-10 h-10 rounded-xl ${isOffice ? 'bg-amber-500/10 text-amber-600 dark:text-amber-400' : 'bg-indigo-500/10 text-indigo-600 dark:text-indigo-400'} flex items-center justify-center shrink-0 mt-0.5">
+                                                <i class="fa-solid ${isOffice ? 'fa-briefcase' : 'fa-clapperboard'}"></i>
+                                            </div>
+                                            <div>
+                                                <h4 class="font-semibold text-sm text-slate-900 dark:text-white leading-tight mb-0.5">${escapeHtml(exp.title)}</h4>
+                                                <div class="flex items-center space-x-2 text-xs text-slate-500 dark:text-slate-400">
+                                                    <span><i class="fa-regular fa-calendar mr-1"></i>${formatDate(exp.date)}</span>
+                                                    <span>•</span>
+                                                    <span class="font-medium text-indigo-600 dark:text-indigo-400">${exp.category}</span>
+                                                    <span>•</span><span class="italic text-slate-600 dark:text-slate-300">${escapeHtml(exp.userName)}</span>
+                                                </div>
+                                                ${exp.notes ? `<p class="text-xs text-slate-600 dark:text-slate-400 mt-2 bg-slate-50 dark:bg-slate-800/50 p-2 rounded-xl border border-slate-100 dark:border-slate-800/80">${escapeHtml(exp.notes)}</p>` : ''}
+                                                
+                                                ${exp.billAttachment ? `
+                                                    <div class="mt-2.5 flex items-center space-x-2">
+                                                        <button onclick="viewBillModal('${exp.id}')" class="inline-flex items-center space-x-1.5 px-2.5 py-1 rounded-lg bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 text-xs font-medium border border-indigo-200/60 dark:border-indigo-800/60 hover:bg-indigo-100 transition">
+                                                            <i class="fa-solid fa-paperclip"></i>
+                                                            <span>View Attached Bill</span>
+                                                        </button>
+                                                    </div>
+                                                ` : ''}
+                                            </div>
+                                        </div>
+                                        <div class="text-right shrink-0">
+                                            <span class="font-bold text-base text-slate-900 dark:text-white">${formatCurrency(exp.amount)}</span>
+                                            ${canEdit ? `
+                                                <div class="flex items-center justify-end space-x-2 mt-2">
+                                                    <button onclick="startEditExpense('${exp.id}')" class="w-7 h-7 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-indigo-50 hover:text-indigo-600 dark:hover:bg-indigo-950 dark:hover:text-indigo-400 transition flex items-center justify-center text-xs" title="Edit">
+                                                        <i class="fa-solid fa-pen"></i>
+                                                    </button>
+                                                    <button onclick="confirmDeleteExpense('${exp.id}')" class="w-7 h-7 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-rose-50 hover:text-rose-600 dark:hover:bg-rose-950 dark:hover:text-rose-400 transition flex items-center justify-center text-xs" title="Delete">
+                                                        <i class="fa-solid fa-trash"></i>
+                                                    </button>
+                                                </div>
+                                            ` : ''}
+                                        </div>
+                                    </div>
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
+        function handleSearchInput(e) {
+            state.searchQuery = e.target.value;
+            const input = document.getElementById('search-input');
+            const cursorPos = input ? input.selectionStart : 0;
+            render();
+            const newInput = document.getElementById('search-input');
+            if (newInput) {
+                newInput.focus();
+                newInput.setSelectionRange(cursorPos, cursorPos);
+            }
+        }
+
+        function clearSearch() {
+            state.searchQuery = '';
+            render();
+        }
+
+        function setFilterCategory(cat) {
+            state.filterCategory = cat;
+            render();
+        }
+
+        function setFilterMonth(month) {
+            state.filterMonth = month;
+            render();
+        }
+
+        function setFilterUser(userId) {
+            state.filterUser = userId;
+            render();
+        }
+
+        function renderAddEditTab() {
+            const isEditing = Boolean(state.editingExpenseId);
+            let expense = {
+                title: '',
+                amount: '',
+                category: 'Office',
+                date: new Date().toISOString().split('T')[0],
+                notes: '',
+                billAttachment: null
+            };
+
+            if (isEditing) {
+                const found = state.expenses.find(e => e.id === state.editingExpenseId);
+                if (found) expense = found;
+            }
+
+            const currentBill = state.tempBillData !== null ? state.tempBillData : expense.billAttachment;
+
+            return `
+                <div class="space-y-4 animate-fadeIn">
+                    <div class="flex items-center justify-between mb-2">
+                        <div>
+                            <h2 class="text-lg font-bold text-slate-900 dark:text-white">
+                                ${isEditing ? 'Edit Expense' : 'Add New Expense'}
+                            </h2>
+                            <p class="text-xs text-slate-500 dark:text-slate-400">
+                                ${isEditing ? 'Update the expense details below' : 'Record an Office or Shoot expense'}
+                            </p>
+                        </div>
+                        ${isEditing ? `
+                            <button onclick="cancelEdit()" class="text-xs font-medium text-slate-500 hover:text-slate-700 dark:hover:text-slate-300">
+                                Cancel Edit
+                            </button>
+                        ` : ''}
+                    </div>
+
+                    <form onsubmit="handleExpenseSubmit(event)" class="bg-white dark:bg-slate-900 rounded-3xl p-5 border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">Expense Type</label>
+                            <div class="grid grid-cols-2 gap-3">
+                                <button type="button" onclick="setFormCategory('Office')" id="btn-cat-office" class="py-3 px-4 rounded-2xl border font-medium text-sm flex items-center justify-center space-x-2 transition ${expense.category === 'Office' ? 'bg-indigo-600 text-white border-indigo-600 shadow-md shadow-indigo-500/20' : 'bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700'}">
+                                    <i class="fa-solid fa-briefcase"></i>
+                                    <span>Office Expense</span>
+                                </button>
+                                <button type="button" onclick="setFormCategory('Shoot')" id="btn-cat-shoot" class="py-3 px-4 rounded-2xl border font-medium text-sm flex items-center justify-center space-x-2 transition ${expense.category === 'Shoot' ? 'bg-indigo-600 text-white border-indigo-600 shadow-md shadow-indigo-500/20' : 'bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700'}">
+                                    <i class="fa-solid fa-clapperboard"></i>
+                                    <span>Shoot Expense</span>
+                                </button>
+                            </div>
+                            <input type="hidden" id="expense-category" value="${expense.category}">
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">Amount (₹)</label>
+                            <div class="relative">
+                                <span class="absolute inset-y-0 left-0 pl-4 flex items-center font-bold text-slate-400">₹</span>
+                                <input type="number" id="expense-amount" value="${expense.amount}" required min="1" step="any" placeholder="0.00" class="w-full pl-9 pr-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-base font-semibold focus:outline-none focus:ring-2 focus:ring-indigo-500 text-slate-900 dark:text-white">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">Title / Description</label>
+                            <input type="text" id="expense-title" value="${escapeHtml(expense.title)}" required placeholder="e.g., Studio Rent, Camera Rental, Catering" class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 text-slate-900 dark:text-white">
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">Date</label>
+                            <input type="date" id="expense-date" value="${expense.date}" required class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 text-slate-900 dark:text-white">
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">Notes / Receipt details (Optional)</label>
+                            <textarea id="expense-notes" rows="3" placeholder="Add any vendor details, invoice numbers or remarks..." class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 text-slate-900 dark:text-white">${escapeHtml(expense.notes)}</textarea>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">Bill / Receipt Attachment (Optional)</label>
+                            
+                            ${currentBill ? `
+                                <div class="bg-indigo-50 dark:bg-indigo-950/60 p-3 rounded-2xl border border-indigo-200 dark:border-indigo-800 flex items-center justify-between mb-2">
+                                    <div class="flex items-center space-x-2 text-indigo-600 dark:text-indigo-400 text-xs font-semibold">
+                                        <i class="fa-solid fa-file-image text-base"></i>
+                                        <span>Bill attached successfully</span>
+                                    </div>
+                                    <div class="flex items-center space-x-2">
+                                        <button type="button" onclick="previewCurrentTempBill()" class="px-2.5 py-1 bg-indigo-600 text-white rounded-lg text-xs">Preview</button>
+                                        <button type="button" onclick="removeBillAttachment(event)" class="px-2.5 py-1 bg-rose-600 text-white rounded-lg text-xs">Remove</button>
+                                    </div>
+                                </div>
+                            ` : ''}
+
+                            <div class="grid grid-cols-2 gap-2">
+                                <div class="relative border-2 border-dashed border-slate-200 dark:border-slate-700 rounded-2xl p-3 text-center bg-slate-50 dark:bg-slate-800/40 hover:border-indigo-500 transition cursor-pointer">
+                                    <input type="file" id="bill-file-input" accept="image/*" onchange="handleBillUpload(event)" class="absolute inset-0 opacity-0 cursor-pointer w-full h-full">
+                                    <div class="flex flex-col items-center justify-center space-y-1">
+                                        <div class="w-8 h-8 rounded-xl bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 flex items-center justify-center text-xs">
+                                            <i class="fa-solid fa-cloud-arrow-up"></i>
+                                        </div>
+                                        <p class="text-[11px] font-semibold text-slate-700 dark:text-slate-300">Upload File</p>
+                                        <p class="text-[9px] text-slate-400">PNG, JPG</p>
+                                    </div>
+                                </div>
+
+                                <button type="button" onclick="openCameraCaptureModal()" class="border-2 border-dashed border-slate-200 dark:border-slate-700 rounded-2xl p-3 text-center bg-slate-50 dark:bg-slate-800/40 hover:border-indigo-500 transition flex flex-col items-center justify-center space-y-1">
+                                    <div class="w-8 h-8 rounded-xl bg-violet-50 dark:bg-violet-950/60 text-violet-600 dark:text-violet-400 flex items-center justify-center text-xs">
+                                        <i class="fa-solid fa-camera"></i>
+                                    </div>
+                                    <p class="text-[11px] font-semibold text-slate-700 dark:text-slate-300">Capture Bill</p>
+                                    <p class="text-[9px] text-slate-400">Use Camera</p>
+                                </button>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="w-full py-3.5 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 text-white font-semibold rounded-2xl shadow-lg shadow-indigo-500/25 transition flex items-center justify-center space-x-2">
+                            <i class="fa-solid ${isEditing ? 'fa-floppy-disk' : 'fa-circle-plus'}"></i>
+                            <span>${isEditing ? 'Save Changes' : 'Submit Expense'}</span>
+                        </button>
+                    </form>
+                </div>
+            `;
+        }
+
+        function handleBillUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(uploadEvent) {
+                state.tempBillData = uploadEvent.target.result;
+                showToast('Bill attached successfully!', 'success');
+                render();
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function openCameraCaptureModal() {
+            const root = document.getElementById('modal-root');
+            root.innerHTML = `
+                <div class="fixed inset-0 z-50 bg-slate-950/90 backdrop-blur-md flex flex-col items-center justify-center p-4 animate-fadeIn">
+                    <div class="w-full max-w-md bg-slate-900 rounded-3xl overflow-hidden border border-slate-800 shadow-2xl flex flex-col">
+                        <div class="p-4 bg-slate-800/80 flex items-center justify-between border-b border-slate-700">
+                            <h3 class="font-bold text-sm text-white flex items-center space-x-2">
+                                <i class="fa-solid fa-camera text-indigo-400"></i>
+                                <span>Capture Bill Receipt</span>
+                            </h3>
+                            <button onclick="closeModal()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+                        </div>
+                        
+                        <div class="relative bg-black flex-1 flex items-center justify-center min-h-[300px]">
+                            <video id="camera-stream" autoplay playsinline class="w-full h-full object-cover max-h-[50vh]"></video>
+                            <canvas id="camera-canvas" class="hidden"></canvas>
+                        </div>
+
+                        <div class="p-5 bg-slate-900 flex items-center justify-around">
+                            <button type="button" onclick="closeModal()" class="px-4 py-2.5 rounded-xl bg-slate-800 text-slate-300 text-xs font-semibold">Cancel</button>
+                            <button type="button" onclick="takeSnapshot()" class="w-14 h-14 rounded-full bg-indigo-600 hover:bg-indigo-700 text-white flex items-center justify-center shadow-lg shadow-indigo-500/40 text-xl">
+                                <i class="fa-solid fa-camera"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            const videoElement = document.getElementById('camera-stream');
+            navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' }, audio: false })
+                .then(stream => {
+                    window.activeCameraStream = stream;
+                    videoElement.srcObject = stream;
+                })
+                .catch(err => {
+                    console.error('Camera access error:', err);
+                    showToast('Unable to access device camera. Please check permissions or upload file.', 'error');
+                    closeModal();
+                });
+        }
+
+        function takeSnapshot() {
+            const videoElement = document.getElementById('camera-stream');
+            const canvasElement = document.getElementById('camera-canvas');
+            if (!videoElement) return;
+
+            canvasElement.width = videoElement.videoWidth || 640;
+            canvasElement.height = videoElement.videoHeight || 480;
+            const ctx = canvasElement.getContext('2d');
+            ctx.drawImage(videoElement, 0, 0, canvasElement.width, canvasElement.height);
+
+            const dataUrl = canvasElement.toDataURL('image/jpeg', 0.85);
+            
+            if (window.activeCameraStream) {
+                window.activeCameraStream.getTracks().forEach(track => track.stop());
+                window.activeCameraStream = null;
+            }
+
+            state.tempBillData = dataUrl;
+            closeModal();
+            showToast('Bill captured successfully!', 'success');
+            render();
+        }
+
+        function removeBillAttachment(event) {
+            if (event) event.stopPropagation();
+            state.tempBillData = null;
+            if (state.editingExpenseId) {
+                const found = state.expenses.find(e => e.id === state.editingExpenseId);
+                if (found) found.billAttachment = null;
+            }
+            showToast('Bill attachment removed.', 'info');
+            render();
+        }
+
+        function previewCurrentTempBill() {
+            const currentBill = state.tempBillData;
+            if (!currentBill) return;
+
+            const root = document.getElementById('modal-root');
+            root.innerHTML = `
+                <div class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 animate-fadeIn">
+                    <div class="bg-white dark:bg-slate-900 rounded-3xl p-5 max-w-md w-full border border-slate-200 dark:border-slate-800 shadow-2xl space-y-4">
+                        <div class="flex items-center justify-between">
+                            <h3 class="font-bold text-sm text-slate-900 dark:text-white">Attached Bill Preview</h3>
+                            <button onclick="closeModal()" class="text-slate-400 hover:text-slate-600 text-lg"><i class="fa-solid fa-xmark"></i></button>
+                        </div>
+                        <div class="bg-slate-100 dark:bg-slate-800 rounded-2xl overflow-hidden flex items-center justify-center max-h-[60vh]">
+                            <img src="${currentBill}" alt="Bill Preview" class="max-w-full max-h-[60vh] object-contain">
+                        </div>
+                        <button onclick="closeModal()" class="w-full py-2.5 bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 font-semibold rounded-xl text-xs transition">
+                            Close Preview
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+        function viewBillModal(expenseId) {
+            const exp = state.expenses.find(e => e.id === expenseId);
+            if (!exp || !exp.billAttachment) return;
+
+            const root = document.getElementById('modal-root');
+            root.innerHTML = `
+                <div class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 animate-fadeIn">
+                    <div class="bg-white dark:bg-slate-900 rounded-3xl p-5 max-w-md w-full border border-slate-200 dark:border-slate-800 shadow-2xl space-y-4">
+                        <div class="flex items-center justify-between">
+                            <h3 class="font-bold text-sm text-slate-900 dark:text-white">Bill Receipt: ${escapeHtml(exp.title)}</h3>
+                            <button onclick="closeModal()" class="text-slate-400 hover:text-slate-600 text-lg"><i class="fa-solid fa-xmark"></i></button>
+                        </div>
+                        <div class="bg-slate-100 dark:bg-slate-800 rounded-2xl overflow-hidden flex items-center justify-center max-h-[60vh]">
+                            <img src="${exp.billAttachment}" alt="Expense Bill" class="max-w-full max-h-[60vh] object-contain">
+                        </div>
+                        <button onclick="closeModal()" class="w-full py-2.5 bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 font-semibold rounded-xl text-xs transition">
+                            Close Viewer
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+        function setFormCategory(cat) {
+            document.getElementById('expense-category').value = cat;
+            const btnOffice = document.getElementById('btn-cat-office');
+            const btnShoot = document.getElementById('btn-cat-shoot');
+            if (cat === 'Office') {
+                btnOffice.className = 'py-3 px-4 rounded-2xl border font-medium text-sm flex items-center justify-center space-x-2 transition bg-indigo-600 text-white border-indigo-600 shadow-md shadow-indigo-500/20';
+                btnShoot.className = 'py-3 px-4 rounded-2xl border font-medium text-sm flex items-center justify-center space-x-2 transition bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700';
+            } else {
+                btnShoot.className = 'py-3 px-4 rounded-2xl border font-medium text-sm flex items-center justify-center space-x-2 transition bg-indigo-600 text-white border-indigo-600 shadow-md shadow-indigo-500/20';
+                btnOffice.className = 'py-3 px-4 rounded-2xl border font-medium text-sm flex items-center justify-center space-x-2 transition bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700';
+            }
+        }
+
+        function handleExpenseSubmit(event) {
+            event.preventDefault();
+            const category = document.getElementById('expense-category').value;
+            const amount = parseFloat(document.getElementById('expense-amount').value);
+            const title = document.getElementById('expense-title').value.trim();
+            const date = document.getElementById('expense-date').value;
+            const notes = document.getElementById('expense-notes').value.trim();
+            const billAttachment = state.tempBillData;
+
+            if (!title || isNaN(amount) || amount <= 0 || !date) {
+                showToast('Please fill in all required fields with valid values.', 'error');
+                return;
+            }
+
+            if (state.editingExpenseId) {
+                state.expenses = state.expenses.map(e => {
+                    if (e.id === state.editingExpenseId) {
+                        return {
+                            ...e,
+                            title,
+                            amount,
+                            category,
+                            date,
+                            notes,
+                            billAttachment: billAttachment !== null ? billAttachment : e.billAttachment
+                        };
+                    }
+                    return e;
+                });
+                state.editingExpenseId = null;
+                state.tempBillData = null;
+                showToast('Expense updated successfully!', 'success');
+            } else {
+                const newExp = {
+                    id: 'exp_' + Date.now(),
+                    userId: state.currentUser.id,
+                    userName: state.currentUser.name,
+                    title,
+                    amount,
+                    category,
+                    date,
+                    notes,
+                    billAttachment,
+                    createdAt: new Date().toISOString()
+                };
+                state.expenses.unshift(newExp);
+                state.tempBillData = null;
+                showToast('Expense added successfully!', 'success');
+            }
+
+            saveState();
+            switchTab('home');
+        }
+
+        function startEditExpense(id) {
+            state.editingExpenseId = id;
+            state.tempBillData = null;
+            state.activeTab = 'add';
+            render();
+        }
+
+        function cancelEdit() {
+            state.editingExpenseId = null;
+            state.tempBillData = null;
+            switchTab('home');
+        }
+
+        function confirmDeleteExpense(id) {
+            showConfirmModal(
+                'Delete Expense',
+                'Are you sure you want to delete this expense record? This action cannot be undone.',
+                () => {
+                    state.expenses = state.expenses.filter(e => e.id !== id);
+                    saveState();
+                    showToast('Expense deleted.', 'success');
+                    render();
+                }
+            );
+        }
+
+        function renderAdminTab() {
+            const monthlyMap = {};
+            state.expenses.forEach(exp => {
+                const monthKey = exp.date ? exp.date.substring(0, 7) : 'Unknown';
+                if (!monthlyMap[monthKey]) {
+                    monthlyMap[monthKey] = { month: monthKey, office: 0, shoot: 0, total: 0, count: 0 };
+                }
+                if (exp.category === 'Office') {
+                    monthlyMap[monthKey].office += exp.amount;
+                } else if (exp.category === 'Shoot') {
+                    monthlyMap[monthKey].shoot += exp.amount;
+                }
+                monthlyMap[monthKey].total += exp.amount;
+                monthlyMap[monthKey].count += 1;
+            });
+
+            const sortedMonths = Object.keys(monthlyMap).sort().reverse();
+            const grandTotal = state.expenses.reduce((s, e) => s + e.amount, 0);
+            const totalOffice = state.expenses.filter(e => e.category === 'Office').reduce((s, e) => s + e.amount, 0);
+            const totalShoot = state.expenses.filter(e => e.category === 'Shoot').reduce((s, e) => s + e.amount, 0);
+
+            return `
+                <div class="space-y-4 animate-fadeIn">
+                    <div class="bg-gradient-to-br from-slate-900 to-indigo-950 rounded-3xl p-5 text-white shadow-xl relative overflow-hidden border border-indigo-500/20">
+                        <div class="flex justify-between items-start mb-3">
+                            <div>
+                                <p class="text-indigo-300 text-xs font-semibold uppercase tracking-wider flex items-center">
+                                    <i class="fa-solid fa-shield-halved mr-1.5"></i>Admin Summary
+                                </p>
+                                <h2 class="text-3xl font-bold tracking-tight mt-0.5">${formatCurrency(grandTotal)}</h2>
+                            </div>
+                            <button onclick="exportAllCSV()" class="bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold px-3.5 py-2 rounded-xl shadow-md transition flex items-center space-x-1.5">
+                                <i class="fa-solid fa-file-arrow-down"></i>
+                                <span>Export All CSV</span>
+                            </button>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-3 mt-4 pt-4 border-t border-white/10">
+                            <div>
+                                <span class="text-xs text-slate-400">Total Office</span>
+                                <p class="font-bold text-sm sm:text-base text-amber-400">${formatCurrency(totalOffice)}</p>
+                            </div>
+                            <div>
+                                <span class="text-xs text-slate-400">Total Shoot</span>
+                                <p class="font-bold text-sm sm:text-base text-indigo-400">${formatCurrency(totalShoot)}</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white dark:bg-slate-900 rounded-3xl p-4 border border-slate-200 dark:border-slate-800 shadow-sm">
+                        <h3 class="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-3">Export User Reports</h3>
+                        <div class="space-y-2">
+                            ${state.users.map(u => {
+                                const userExpCount = state.expenses.filter(e => e.userId === u.id).length;
+                                const userTotal = state.expenses.filter(e => e.userId === u.id).reduce((s, e) => s + e.amount, 0);
+                                return `
+                                    <div class="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-100 dark:border-slate-800">
+                                        <div class="flex items-center space-x-3">
+                                            <div class="w-9 h-9 rounded-xl bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 flex items-center justify-center font-bold text-sm">
+                                                ${u.name.charAt(0)}
+                                            </div>
+                                            <div>
+                                                <h4 class="font-semibold text-sm text-slate-900 dark:text-white">${u.name}</h4>
+                                                <p class="text-xs text-slate-500">${userExpCount} records • ${formatCurrency(userTotal)}</p>
+                                            </div>
+                                        </div>
+                                        <button onclick="exportUserCSV('${u.id}', '${u.name}')" class="px-3 py-1.5 bg-indigo-50 dark:bg-indigo-950/50 hover:bg-indigo-100 dark:hover:bg-indigo-900 text-indigo-600 dark:text-indigo-400 text-xs font-semibold rounded-xl transition border border-indigo-200/50 dark:border-indigo-800/50 flex items-center space-x-1">
+                                            <i class="fa-solid fa-download"></i><span>CSV</span>
+                                        </button>
+                                    </div>
+                                `;
+                            }).join('')}
+                        </div>
+                    </div>
+
+                    <div class="space-y-3">
+                        <h3 class="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider px-1">Month-by-Month Summary</h3>
+
+                        ${sortedMonths.length === 0 ? `
+                            <p class="text-xs text-slate-400 text-center py-4">No monthly records available.</p>
+                        ` : ''}
+
+                        ${sortedMonths.map(monthKey => {
+                            const data = monthlyMap[monthKey];
+                            return `
+                                <div class="bg-white dark:bg-slate-900 rounded-3xl p-4 border border-slate-200 dark:border-slate-800 shadow-sm space-y-3">
+                                    <div class="flex items-center justify-between">
+                                        <div class="flex items-center space-x-2">
+                                            <div class="w-8 h-8 rounded-xl bg-violet-500/10 text-violet-600 dark:text-violet-400 flex items-center justify-center text-xs font-bold">
+                                                <i class="fa-solid fa-calendar-days"></i>
+                                            </div>
+                                            <h4 class="font-bold text-sm text-slate-900 dark:text-white">${formatMonthName(monthKey)}</h4>
+                                        </div>
+                                        <span class="text-xs font-semibold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 px-2.5 py-1 rounded-full">
+                                            ${data.count} Expenses
+                                        </span>
+                                    </div>
+
+                                    <div class="grid grid-cols-3 gap-2 pt-2 border-t border-slate-100 dark:border-slate-800">
+                                        <div class="bg-slate-50 dark:bg-slate-800/50 p-2.5 rounded-2xl text-center">
+                                            <span class="text-[10px] uppercase font-semibold text-slate-400 block mb-0.5">Office</span>
+                                            <span class="font-bold text-xs sm:text-sm text-slate-800 dark:text-slate-200">${formatCurrency(data.office)}</span>
+                                        </div>
+                                        <div class="bg-slate-50 dark:bg-slate-800/50 p-2.5 rounded-2xl text-center">
+                                            <span class="text-[10px] uppercase font-semibold text-slate-400 block mb-0.5">Shoot</span>
+                                            <span class="font-bold text-xs sm:text-sm text-slate-800 dark:text-slate-200">${formatCurrency(data.shoot)}</span>
+                                        </div>
+                                        <div class="bg-indigo-50 dark:bg-indigo-950/40 p-2.5 rounded-2xl text-center border border-indigo-100 dark:border-indigo-900/50">
+                                            <span class="text-[10px] uppercase font-semibold text-indigo-600 dark:text-indigo-400 block mb-0.5">Total</span>
+                                            <span class="font-bold text-xs sm:text-sm text-indigo-600 dark:text-indigo-400">${formatCurrency(data.total)}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderPasswordRequestsTab() {
+            const requests = state.passwordRequests;
+            return `
+                <div class="space-y-4 animate-fadeIn">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h2 class="text-lg font-bold text-slate-900 dark:text-white">Password Recovery Requests</h2>
+                            <p class="text-xs text-slate-500 dark:text-slate-400">View and manage 6-digit auth codes for user password resets</p>
+                        </div>
+                    </div>
+
+                    <div class="space-y-3">
+                        ${requests.length === 0 ? `
+                            <div class="bg-white dark:bg-slate-900 rounded-3xl p-8 text-center border border-slate-200 dark:border-slate-800 shadow-sm">
+                                <div class="w-14 h-14 bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 rounded-full flex items-center justify-center mx-auto mb-3 text-xl">
+                                    <i class="fa-solid fa-key"></i>
+                                </div>
+                                <h4 class="font-semibold text-slate-700 dark:text-slate-300 mb-1">No pending requests</h4>
+                                <p class="text-xs text-slate-500">When users request a password reset, their 6-digit auth code will appear here exclusively for admin review.</p>
+                            </div>
+                        ` : ''}
+
+                        ${requests.map(req => {
+                            const isPending = req.status === 'pending';
+                            return `
+                                <div class="bg-white dark:bg-slate-900 rounded-2xl p-4 border border-slate-200 dark:border-slate-800 shadow-sm flex items-center justify-between">
+                                    <div class="space-y-1">
+                                        <div class="flex items-center space-x-2">
+                                            <h4 class="font-semibold text-sm text-slate-900 dark:text-white">${escapeHtml(req.name)}</h4>
+                                            <span class="text-xs text-slate-400">(@${escapeHtml(req.username)})</span>
+                                        </div>
+                                        <div class="flex items-center space-x-2">
+                                            <span class="text-xs text-slate-500">Admin Auth Code:</span>
+                                            <span class="px-2 py-0.5 bg-indigo-50 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-400 font-mono font-bold text-sm tracking-widest rounded-lg border border-indigo-200/50">${req.code}</span>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center space-x-2">
+                                        <span class="px-2.5 py-1 rounded-full text-xs font-semibold ${isPending ? 'bg-amber-500/10 text-amber-600' : 'bg-emerald-500/10 text-emerald-600'}">
+                                            ${isPending ? 'Pending' : 'Approved'}
+                                        </span>
+                                        ${isPending ? `
+                                            <button onclick="dismissRequest('${req.id}')" class="w-8 h-8 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-400 hover:text-rose-600 flex items-center justify-center text-xs" title="Dismiss">
+                                                <i class="fa-solid fa-xmark"></i>
+                                            </button>
+                                        ` : ''}
+                                    </div>
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
+        function dismissRequest(reqId) {
+            state.passwordRequests = state.passwordRequests.filter(r => r.id !== reqId);
+            saveState();
+            showToast('Request dismissed.', 'info');
+            render();
+        }
+
+        function renderUserManagementTab() {
+            return `
+                <div class="space-y-4 animate-fadeIn">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h2 class="text-lg font-bold text-slate-900 dark:text-white">User Management</h2>
+                            <p class="text-xs text-slate-500 dark:text-slate-400">Add or remove system users & administrators</p>
+                        </div>
+                        <button onclick="openAddUserModal()" class="px-3.5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-semibold shadow-md shadow-indigo-500/20 transition flex items-center space-x-1.5">
+                            <i class="fa-solid fa-user-plus"></i>
+                            <span>Add User</span>
+                        </button>
+                    </div>
+
+                    <div class="space-y-2.5">
+                        ${state.users.map(u => {
+                            const expCount = state.expenses.filter(e => e.userId === u.id).length;
+                            const isCurrent = u.id === state.currentUser.id;
+                            return `
+                                <div class="bg-white dark:bg-slate-900 rounded-2xl p-4 border border-slate-200 dark:border-slate-800 shadow-sm flex items-center justify-between">
+                                    <div class="flex items-center space-x-3">
+                                        <div class="w-10 h-10 rounded-xl ${u.role === 'admin' ? 'bg-indigo-500/10 text-indigo-600 dark:text-indigo-400' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400'} flex items-center justify-center font-bold text-sm">
+                                            ${u.name.charAt(0)}
+                                        </div>
+                                        <div>
+                                            <div class="flex items-center space-x-2">
+                                                <h4 class="font-semibold text-sm text-slate-900 dark:text-white">${escapeHtml(u.name)}</h4>${isCurrent ? '<span class="text-[10px] bg-emerald-500/10 text-emerald-600 font-semibold px-2 py-0.5 rounded-full">Active</span>' : ''}
+                                            </div>
+                                            <p class="text-xs text-slate-500 dark:text-slate-400">@${escapeHtml(u.username)} • <span class="capitalize font-medium text-indigo-600 dark:text-indigo-400">${u.role}</span> •${expCount} expenses</p>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center space-x-2">
+                                        ${state.users.length > 1 && !isCurrent ? `
+                                            <button onclick="confirmRemoveUser('${u.id}', '${escapeHtml(u.name)}')" class="w-8 h-8 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-500 hover:bg-rose-50 hover:text-rose-600 transition flex items-center justify-center text-xs" title="Remove User">
+                                                <i class="fa-solid fa-trash"></i>
+                                            </button>
+                                        ` : ''}
+                                    </div>
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
+        function openAddUserModal() {
+            const root = document.getElementById('modal-root');
+            root.innerHTML = `
+                <div class="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-sm flex items-center justify-center p-4 animate-fadeIn">
+                    <div class="bg-white dark:bg-slate-900 rounded-3xl p-6 max-w-sm w-full border border-slate-200 dark:border-slate-800 shadow-2xl space-y-4">
+                        <div class="flex items-center justify-between">
+                            <h3 class="font-bold text-base text-slate-900 dark:text-white">Add New User</h3>
+                            <button onclick="closeModal()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark"></i></button>
+                        </div>
+                        <form onsubmit="handleAddNewUser(event)" class="space-y-3">
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Full Name</label>
+                                <input type="text" id="new-user-name" required placeholder="e.g., Priya Sharma" class="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 text-slate-900 dark:text-white">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Username</label>
+                                <input type="text" id="new-user-username" required placeholder="user3" class="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 text-slate-900 dark:text-white">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Password</label>
+                                <input type="password" id="new-user-password" required placeholder="••••••••" class="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 text-slate-900 dark:text-white">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Role</label>
+                                <select id="new-user-role" class="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 text-slate-900 dark:text-white">
+                                    <option value="user">Regular User</option>
+                                    <option value="admin">Administrator</option>
+                                </select>
+                            </div>
+                            <div class="pt-2">
+                                <button type="submit" class="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-xl shadow-md shadow-indigo-500/20 transition text-sm">
+                                    Create User Account
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            `;
+        }
+
+        function handleAddNewUser(e) {
+            e.preventDefault();
+            const name = document.getElementById('new-user-name').value.trim();
+            const username = document.getElementById('new-user-username').value.trim().toLowerCase();
+            const password = document.getElementById('new-user-password').value;
+            const role = document.getElementById('new-user-role').value;
+
+            if (!name || !username || !password) {
+                showToast('Please fill in all user details.', 'error');
+                return;
+            }
+
+            if (state.users.some(u => u.username.toLowerCase() === username)) {
+                showToast('Username already exists. Choose another.', 'error');
+                return;
+            }
+
+            const newUser = {
+                id: 'usr_' + Date.now(),
+                name,
+                username,
+                password,
+                role,
+                email: `${username}@clickfactory.com`
+            };
+
+            state.users.push(newUser);
+            saveState();
+            closeModal();
+            showToast(`User ${name} added successfully!`, 'success');
+            render();
+        }
+
+        function confirmRemoveUser(userId, userName) {
+            showConfirmModal(
+                'Remove User',
+                `Are you sure you want to remove user "${userName}"? Their recorded expenses will also be removed.`,
+                () => {
+                    state.users = state.users.filter(u => u.id !== userId);
+                    state.expenses = state.expenses.filter(e => e.userId !== userId);
+                    saveState();
+                    showToast(`User ${userName} removed.`, 'success');
+                    render();
+                }
+            );
+        }
+
+        function renderUserAnalyticsTab() {
+            const userExpenses = state.expenses.filter(e => e.userId === state.currentUser.id);
+            const total = userExpenses.reduce((s, e) => s + e.amount, 0);
+            const office = userExpenses.filter(e => e.category === 'Office').reduce((s, e) => s + e.amount, 0);
+            const shoot = userExpenses.filter(e => e.category === 'Shoot').reduce((s, e) => s + e.amount, 0);
+
+            const monthlyMap = {};
+            userExpenses.forEach(exp => {
+                const monthKey = exp.date ? exp.date.substring(0, 7) : 'Unknown';
+                if (!monthlyMap[monthKey]) monthlyMap[monthKey] = { office: 0, shoot: 0, total: 0 };
+                if (exp.category === 'Office') monthlyMap[monthKey].office += exp.amount;
+                if (exp.category === 'Shoot') monthlyMap[monthKey].shoot += exp.amount;
+                monthlyMap[monthKey].total += exp.amount;
+            });
+            const months = Object.keys(monthlyMap).sort().reverse();
+
+            return `
+                <div class="space-y-4 animate-fadeIn">
+                    <div class="bg-gradient-to-br from-violet-600 to-indigo-700 rounded-3xl p-5 text-white shadow-xl">
+                        <p class="text-violet-200 text-xs font-semibold uppercase tracking-wider">My Expense Summary</p>
+                        <h2 class="text-3xl font-bold tracking-tight mt-0.5">${formatCurrency(total)}</h2>
+                        
+                        <div class="grid grid-cols-2 gap-3 mt-4 pt-4 border-t border-white/15">
+                            <div>
+                                <span class="text-xs text-violet-200">Office Expense</span>
+                                <p class="font-bold text-base">${formatCurrency(office)}</p>
+                            </div>
+                            <div>
+                                <span class="text-xs text-violet-200">Shoot Expense</span>
+                                <p class="font-bold text-base">${formatCurrency(shoot)}</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="space-y-3">
+                        <div class="flex items-center justify-between px-1">
+                            <h3 class="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Monthly Breakdown</h3>
+                            <button onclick="exportUserCSV('${state.currentUser.id}', '${state.currentUser.name}')" class="text-xs font-semibold text-indigo-600 dark:text-indigo-400 hover:underline flex items-center space-x-1">
+                                <i class="fa-solid fa-download"></i><span>Export CSV</span>
+                            </button>
+                        </div>
+
+                        ${months.length === 0 ? `
+                            <div class="bg-white dark:bg-slate-900 rounded-3xl p-6 text-center border border-slate-200 dark:border-slate-800">
+                                <p class="text-xs text-slate-400">No expense records found.</p>
+                            </div>
+                        ` : ''}
+
+                        ${months.map(m => `
+                            <div class="bg-white dark:bg-slate-900 rounded-2xl p-4 border border-slate-200 dark:border-slate-800 shadow-sm space-y-2">
+                                <div class="flex items-center justify-between">
+                                    <span class="font-bold text-sm text-slate-900 dark:text-white">${formatMonthName(m)}</span>
+                                    <span class="font-bold text-sm text-indigo-600 dark:text-indigo-400">${formatCurrency(monthlyMap[m].total)}</span>
+                                </div>
+                                <div class="flex justify-between text-xs text-slate-500 dark:text-slate-400 pt-2 border-t border-slate-100 dark:border-slate-800">
+                                    <span>Office: ${formatCurrency(monthlyMap[m].office)}</span>
+                                    <span>Shoot: ${formatCurrency(monthlyMap[m].shoot)}</span>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderProfileTab() {
+            return `
+                <div class="space-y-4 animate-fadeIn">
+                    <div class="bg-white dark:bg-slate-900 rounded-3xl p-6 border border-slate-200 dark:border-slate-800 shadow-sm text-center">
+                        <div class="w-20 h-20 bg-white dark:bg-slate-800 rounded-2xl p-2 flex items-center justify-center mx-auto mb-3 shadow-md border border-slate-200 dark:border-slate-700 overflow-hidden">
+                            <img src="https://clickfactoryphotography.com/wp-content/uploads/2022/04/crop-logo.gif" alt="Click Factory Logo" class="w-full h-full object-contain" onerror="this.src='https://placehold.co/80x80/4f46e5/ffffff?text=CF'">
+                        </div>
+                        <h2 class="font-bold text-lg text-slate-900 dark:text-white">${state.currentUser.name}</h2>
+                        <p class="text-xs text-slate-500 dark:text-slate-400 mb-1">@${state.currentUser.username}</p>
+                        <span class="inline-block px-3 py-1 rounded-full text-xs font-semibold ${state.currentUser.role === 'admin' ? 'bg-indigo-50 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-400 border border-indigo-200/50 dark:border-indigo-800' : 'bg-emerald-50 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400 border border-emerald-200/50 dark:border-emerald-800'}">
+                            ${state.currentUser.role === 'admin' ? 'Administrator' : 'Regular User'}
+                        </span>
+                    </div>
+
+                    ${state.currentUser.role === 'admin' ? `
+                    <div class="bg-white dark:bg-slate-900 rounded-3xl p-4 border border-slate-200 dark:border-slate-800 shadow-sm space-y-3">
+                        <h3 class="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider px-1">Admin Security</h3>
+                        <button onclick="openChangePasswordModal()" class="w-full py-2.5 px-4 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-xs font-semibold transition flex items-center justify-center space-x-2">
+                            <i class="fa-solid fa-key"></i>
+                            <span>Change Admin Password</span>
+                        </button>
+                    </div>
+                    ` : ''}
+
+                    <!-- Developer Attribution -->
+                    <div class="text-center py-2">
+                        <p class="text-[11px] font-medium text-slate-400 dark:text-slate-500">
+                            Click Factory Expense Tracker • Developed by <span class="font-bold text-indigo-600 dark:text-indigo-400">SK Techmedia</span>
+                        </p>
+                    </div>
+                </div>
+            `;
+        }
+
+        function openChangePasswordModal() {
+            const root = document.getElementById('modal-root');
+            root.innerHTML = `
+                <div class="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-sm flex items-center justify-center p-4 animate-fadeIn">
+                    <div class="bg-white dark:bg-slate-900 rounded-3xl p-6 max-w-sm w-full border border-slate-200 dark:border-slate-800 shadow-2xl space-y-4">
+                        <div class="flex items-center justify-between">
+                            <h3 class="font-bold text-base text-slate-900 dark:text-white">Change Admin Password</h3>
+                            <button onclick="closeModal()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark"></i></button>
+                        </div>
+                        <form onsubmit="handlePasswordChange(event)" class="space-y-3">
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Current Password</label>
+                                <input type="password" id="current-pass" required class="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 text-slate-900 dark:text-white">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">New Password</label>
+                                <input type="password" id="new-pass" required class="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 text-slate-900 dark:text-white">
+                            </div>
+                            <div class="pt-2">
+                                <button type="submit" class="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-xl shadow-md transition text-sm">Update Password</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            `;
+        }
+
+        function handlePasswordChange(e) {
+            e.preventDefault();
+            const current = document.getElementById('current-pass').value;
+            const newPass = document.getElementById('new-pass').value;
+
+            if (current !== state.adminPassword) {
+                showToast('Current password incorrect.', 'error');
+                return;
+            }
+
+            if (!newPass || newPass.length < 4) {
+                showToast('Password must be at least 4 characters long.', 'error');
+                return;
+            }
+
+            state.adminPassword = newPass;
+            const adminUser = state.users.find(u => u.role === 'admin');
+            if (adminUser) adminUser.password = newPass;
+            saveState();
+            closeModal();
+            showToast('Admin password updated successfully!', 'success');
+        }
+
+        function exportUserCSV(userId, userName) {
+            const userExpenses = state.expenses.filter(e => e.userId === userId);
+            downloadCSV(userExpenses, `${userName.replace(/\s+/g, '_')}_expenses.csv`);
+        }
+
+        function exportFilteredCSV() {
+            let filtered = state.expenses.filter(exp => {
+                if (state.filterUser !== 'All' && exp.userId !== state.filterUser) return false;
+                if (state.filterCategory !== 'All' && exp.category !== state.filterCategory) return false;
+                if (state.filterMonth !== 'All' && !exp.date.startsWith(state.filterMonth)) return false;
+                return true;
+            });
+            downloadCSV(filtered, 'filtered_expenses_report.csv');
+        }
+
+        function exportAllCSV() {
+            downloadCSV(state.expenses, 'all_company_expenses.csv');
+        }
+
+        function downloadCSV(dataArray, filename) {
+            if (dataArray.length === 0) {
+                showToast('No records available to export.', 'error');
+                return;
+            }
+
+            const headers = ['ID', 'User', 'Title', 'Category', 'Amount (INR)', 'Date', 'Notes', 'Has Bill'];
+            const rows = dataArray.map(e => [
+                e.id,
+                `"${e.userName || ''}"`,
+                `"${(e.title || '').replace(/"/g, '""')}"`,
+                e.category,
+                e.amount,
+                e.date,
+                `"${(e.notes || '').replace(/"/g, '""')}"`,
+                e.billAttachment ? 'Yes' : 'No'
+            ]);
+
+            const csvContent = 'data:text/csv;charset=utf-8,' + 
+                [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
+            
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement('a');
+            link.setAttribute('href', encodedUri);
+            link.setAttribute('download', filename);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+
+            showToast(`Successfully exported ${dataArray.length} records to CSV!`, 'success');
+        }
+
+        function showConfirmModal(title, message, onConfirm) {
+            const root = document.getElementById('modal-root');
+            root.innerHTML = `
+                <div class="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-sm flex items-center justify-center p-4 animate-fadeIn">
+                    <div class="bg-white dark:bg-slate-900 rounded-3xl p-6 max-w-sm w-full border border-slate-200 dark:border-slate-800 shadow-2xl space-y-4">
+                        <div class="w-12 h-12 rounded-2xl bg-rose-500/10 text-rose-600 flex items-center justify-center text-xl mx-auto">
+                            <i class="fa-solid fa-triangle-exclamation"></i>
+                        </div>
+                        <div class="text-center">
+                            <h3 class="font-bold text-base text-slate-900 dark:text-white mb-1">${title}</h3>
+                            <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">${message}</p>
+                        </div>
+                        <div class="grid grid-cols-2 gap-3 pt-2">
+                            <button onclick="closeModal()" class="py-2.5 px-4 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-semibold">
+                                Cancel
+                            </button>
+                            <button id="modal-confirm-btn" class="py-2.5 px-4 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-semibold shadow-md">
+                                Confirm
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.getElementById('modal-confirm-btn').onclick = () => {
+                closeModal();
+                onConfirm();
+            };
+        }
+
+        function closeModal() {
+            if (window.activeCameraStream) {
+                window.activeCameraStream.getTracks().forEach(track => track.stop());
+                window.activeCameraStream = null;
+            }
+            document.getElementById('modal-root').innerHTML = '';
+        }
+
+        function escapeHtml(str) {
+            if (!str) return '';
+            return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+        }
+
+        // Initialize App on load
+        window.onload = function() {
+            render();
+        };
+    </script>
+</body>
+</html>
