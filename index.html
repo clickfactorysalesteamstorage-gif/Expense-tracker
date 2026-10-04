@@ -51,25 +51,30 @@
             -webkit-tap-highlight-color: transparent;
         }
         .app-container {
-            max-width: 480px;
-            margin: 0 auto;
+            width: 100%;
+            max-width: 100%;
             min-height: 100vh;
             background-color: #f8fafc;
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
         }
         @media (min-width: 640px) {
             .app-container {
-                min-height: 90vh;
-                margin-top: 3vh;
-                margin-bottom: 3vh;
+                max-width: 520px;
+                min-height: 92vh;
+                margin: 4vh auto;
                 border-radius: 2.5rem;
                 overflow: hidden;
+                box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
                 border: 8px solid #1e293b;
+            }
+        }
+        @media (min-width: 1024px) {
+            .app-container {
+                max-width: 560px;
             }
         }
     </style>
 </head>
-<body class="bg-slate-900 text-slate-800 dark:text-slate-100 flex flex-col justify-center items-center h-full">
+<body class="bg-slate-900 text-slate-800 dark:text-slate-100 flex flex-col justify-center items-center h-full selection:bg-indigo-500 selection:text-white">
 
     <div id="app" class="app-container w-full flex flex-col relative dark:bg-slate-950 transition-colors duration-200">
         <!-- Application renders dynamically via JavaScript -->
@@ -79,7 +84,7 @@
     <div id="toast-container" class="fixed top-4 left-1/2 transform -translate-x-1/2 z-50 flex flex-col gap-2 pointer-events-none w-11/12 max-w-sm"></div>
 
     <script>
-        const STORAGE_KEY = 'click_factory_expense_tracker_admin_auth_v4';
+        const STORAGE_KEY = 'click_factory_expense_tracker_admin_auth_v6';
 
         const initialData = {
             currentUser: null,
@@ -98,6 +103,7 @@
                     amount: 3500,
                     category: 'Office',
                     date: '2026-10-01',
+                    clientNamePlace: '',
                     notes: 'Replaced LED bulb softboxes in studio floor 2.',
                     billAttachment: null,
                     createdAt: '2026-10-01T10:00:00.000Z'
@@ -110,6 +116,7 @@
                     amount: 1200,
                     category: 'Shoot',
                     date: '2026-10-02',
+                    clientNamePlace: 'Acme Corp / Chennai Studio',
                     notes: 'Travel expense for crew equipment transport.',
                     billAttachment: null,
                     createdAt: '2026-10-02T14:30:00.000Z'
@@ -152,7 +159,7 @@
             const bgClass = type === 'success' ? 'bg-emerald-600 text-white' : type === 'error' ? 'bg-rose-600 text-white' : 'bg-slate-800 text-white';
             const icon = type === 'success' ? 'fa-circle-check' : type === 'error' ? 'fa-circle-exclamation' : 'fa-circle-info';
             
-            toast.className = `${bgClass} px-4 py-3 rounded-xl shadow-lg flex items-center space-x-3 text-sm font-medium transform transition-all duration-300 translate-y-[-20px] opacity-0 pointer-events-auto`;
+            toast.className = `${bgClass} px-4 py-3 rounded-2xl shadow-xl flex items-center space-x-3 text-sm font-medium transform transition-all duration-300 translate-y-[-20px] opacity-0 pointer-events-auto`;
             toast.innerHTML = `<i class="fa-solid ${icon} text-lg"></i><span class="flex-1">${message}</span>`;
             
             container.appendChild(toast);
@@ -206,13 +213,13 @@
 
             app.innerHTML = `
                 <!-- Top Header Bar -->
-                <header class="sticky top-0 z-40 bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 px-4 py-3 flex items-center justify-between">
-                    <div class="flex items-center space-x-2.5">
-                        <div class="w-10 h-10 rounded-xl bg-white dark:bg-slate-800 p-1 flex items-center justify-center shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden shrink-0">
+                <header class="sticky top-0 z-40 bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 px-4 sm:px-6 py-3.5 flex items-center justify-between">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-10 h-10 rounded-2xl bg-white dark:bg-slate-800 p-1 flex items-center justify-center shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden shrink-0">
                             <img src="https://clickfactoryphotography.com/wp-content/uploads/2022/04/crop-logo.gif" alt="Click Factory Logo" class="w-full h-full object-contain" onerror="this.src='https://placehold.co/40x40/4f46e5/ffffff?text=CF'">
                         </div>
                         <div>
-                            <h1 class="font-bold text-xs sm:text-base leading-tight tracking-tight text-slate-900 dark:text-white">Click Factory</h1>
+                            <h1 class="font-bold text-sm sm:text-base leading-tight tracking-tight text-slate-900 dark:text-white">Click Factory</h1>
                             <p class="text-[11px] text-slate-500 dark:text-slate-400 font-medium">
                                 ${isAdmin ? '<span class="text-indigo-600 dark:text-indigo-400 font-semibold"><i class="fa-solid fa-shield-halved mr-1"></i>Admin Portal</span>' : `Expense Tracker`}
                             </p>
@@ -220,58 +227,58 @@
                     </div>
                     
                     <div class="flex items-center space-x-2">
-                        <button onclick="toggleDarkMode()" class="w-9 h-9 rounded-xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition">
+                        <button onclick="toggleDarkMode()" class="w-10 h-10 rounded-2xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition">
                             <i class="fa-solid ${state.darkMode ? 'fa-sun text-amber-400' : 'fa-moon text-slate-600'} text-sm"></i>
                         </button>
-                        <button onclick="handleLogout()" class="w-9 h-9 rounded-xl bg-rose-50 dark:bg-rose-950/50 flex items-center justify-center text-rose-600 dark:text-rose-400 hover:bg-rose-100 transition border border-rose-200/50 dark:border-rose-800/50" title="Logout">
+                        <button onclick="handleLogout()" class="w-10 h-10 rounded-2xl bg-rose-50 dark:bg-rose-950/50 flex items-center justify-center text-rose-600 dark:text-rose-400 hover:bg-rose-100 transition border border-rose-200/50 dark:border-rose-800/50" title="Logout">
                             <i class="fa-solid fa-arrow-right-from-bracket text-sm"></i>
                         </button>
                     </div>
                 </header>
 
                 <!-- Scrollable Body Content -->
-                <main class="flex-1 overflow-y-auto pb-24 pt-4 px-4">
+                <main class="flex-1 overflow-y-auto pb-28 pt-4 px-4 sm:px-6">
                     ${renderActiveTabContent()}
                 </main>
 
                 <!-- Bottom Navigation Bar -->
-                <nav class="absolute bottom-0 left-0 right-0 z-40 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-t border-slate-200 dark:border-slate-800 px-2 py-2 flex items-center justify-around shadow-lg">
-                    <button onclick="switchTab('home')" class="flex flex-col items-center justify-center w-14 py-1 rounded-xl transition ${state.activeTab === 'home' ? 'text-indigo-600 dark:text-indigo-400 font-semibold' : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300'}">
+                <nav class="absolute bottom-0 left-0 right-0 z-40 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-t border-slate-200 dark:border-slate-800 px-3 py-2.5 flex items-center justify-around shadow-2xl">
+                    <button onclick="switchTab('home')" class="flex flex-col items-center justify-center w-14 py-1 rounded-2xl transition ${state.activeTab === 'home' ? 'text-indigo-600 dark:text-indigo-400 font-semibold' : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300'}">
                         <i class="fa-solid fa-house text-base mb-0.5"></i>
-                        <span class="text-[9px]">Expenses</span>
+                        <span class="text-[10px]">Expenses</span>
                     </button>
 
-                    <button onclick="switchTab('add')" class="flex flex-col items-center justify-center -mt-5 group">
-                        <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-indigo-600 to-violet-600 flex items-center justify-center text-white shadow-lg shadow-indigo-500/30 transform group-hover:scale-105 transition active:scale-95">
-                            <i class="fa-solid fa-plus text-lg"></i>
+                    <button onclick="switchTab('add')" class="flex flex-col items-center justify-center -mt-6 group">
+                        <div class="w-14 h-14 rounded-3xl bg-gradient-to-tr from-indigo-600 to-violet-600 flex items-center justify-center text-white shadow-xl shadow-indigo-500/30 transform group-hover:scale-105 transition active:scale-95">
+                            <i class="fa-solid fa-plus text-xl"></i>
                         </div>
-                        <span class="text-[9px] text-slate-600 dark:text-slate-400 font-medium mt-1">Add New</span>
+                        <span class="text-[10px] text-slate-600 dark:text-slate-400 font-medium mt-1">Add New</span>
                     </button>
 
                     ${isAdmin ? `
-                    <button onclick="switchTab('admin')" class="flex flex-col items-center justify-center w-14 py-1 rounded-xl transition ${state.activeTab === 'admin' ? 'text-indigo-600 dark:text-indigo-400 font-semibold' : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300'}">
+                    <button onclick="switchTab('admin')" class="flex flex-col items-center justify-center w-14 py-1 rounded-2xl transition ${state.activeTab === 'admin' ? 'text-indigo-600 dark:text-indigo-400 font-semibold' : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300'}">
                         <i class="fa-solid fa-chart-pie text-base mb-0.5"></i>
-                        <span class="text-[9px]">Summary</span>
+                        <span class="text-[10px]">Summary</span>
                     </button>
-                    <button onclick="switchTab('requests')" class="flex flex-col items-center justify-center w-14 py-1 rounded-xl transition relative ${state.activeTab === 'requests' ? 'text-indigo-600 dark:text-indigo-400 font-semibold' : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300'}">
+                    <button onclick="switchTab('requests')" class="flex flex-col items-center justify-center w-14 py-1 rounded-2xl transition relative ${state.activeTab === 'requests' ? 'text-indigo-600 dark:text-indigo-400 font-semibold' : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300'}">
                         <i class="fa-solid fa-key text-base mb-0.5"></i>
-                        <span class="text-[9px]">Requests</span>
+                        <span class="text-[10px]">Requests</span>
                         ${state.passwordRequests.filter(r => r.status === 'pending').length > 0 ? `<span class="absolute top-1 right-2 w-2 h-2 rounded-full bg-rose-500"></span>` : ''}
                     </button>
-                    <button onclick="switchTab('users')" class="flex flex-col items-center justify-center w-14 py-1 rounded-xl transition ${state.activeTab === 'users' ? 'text-indigo-600 dark:text-indigo-400 font-semibold' : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300'}">
+                    <button onclick="switchTab('users')" class="flex flex-col items-center justify-center w-14 py-1 rounded-2xl transition ${state.activeTab === 'users' ? 'text-indigo-600 dark:text-indigo-400 font-semibold' : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300'}">
                         <i class="fa-solid fa-users text-base mb-0.5"></i>
-                        <span class="text-[9px]">Users</span>
+                        <span class="text-[10px]">Users</span>
                     </button>
                     ` : `
-                    <button onclick="switchTab('analytics')" class="flex flex-col items-center justify-center w-16 py-1 rounded-xl transition ${state.activeTab === 'analytics' ? 'text-indigo-600 dark:text-indigo-400 font-semibold' : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300'}">
+                    <button onclick="switchTab('analytics')" class="flex flex-col items-center justify-center w-16 py-1 rounded-2xl transition ${state.activeTab === 'analytics' ? 'text-indigo-600 dark:text-indigo-400 font-semibold' : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300'}">
                         <i class="fa-solid fa-chart-column text-base mb-0.5"></i>
-                        <span class="text-[9px]">Summary</span>
+                        <span class="text-[10px]">Summary</span>
                     </button>
                     `}
 
-                    <button onclick="switchTab('profile')" class="flex flex-col items-center justify-center w-14 py-1 rounded-xl transition ${state.activeTab === 'profile' ? 'text-indigo-600 dark:text-indigo-400 font-semibold' : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300'}">
+                    <button onclick="switchTab('profile')" class="flex flex-col items-center justify-center w-14 py-1 rounded-2xl transition ${state.activeTab === 'profile' ? 'text-indigo-600 dark:text-indigo-400 font-semibold' : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300'}">
                         <i class="fa-solid fa-user-circle text-base mb-0.5"></i>
-                        <span class="text-[9px]">Profile</span>
+                        <span class="text-[10px]">Profile</span>
                     </button>
                 </nav>
 
@@ -282,8 +289,8 @@
 
         function renderLoginPage() {
             return `
-                <div class="flex-1 flex flex-col justify-center px-6 py-12 animate-fadeIn">
-                    <div class="sm:mx-auto sm:w-full sm:max-w-sm text-center mb-6">
+                <div class="flex-1 flex flex-col justify-center px-6 py-12 animate-fadeIn max-w-sm mx-auto w-full">
+                    <div class="text-center mb-6">
                         <div class="w-20 h-20 bg-white dark:bg-slate-800 rounded-3xl p-3 flex items-center justify-center mx-auto mb-4 shadow-xl border border-slate-200 dark:border-slate-700 overflow-hidden">
                             <img src="https://clickfactoryphotography.com/wp-content/uploads/2022/04/crop-logo.gif" alt="Click Factory Logo" class="w-full h-full object-contain" onerror="this.src='https://placehold.co/80x80/4f46e5/ffffff?text=CF'">
                         </div>
@@ -291,7 +298,7 @@
                         <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Expense Tracker & Management Portal</p>
                     </div>
 
-                    <div class="bg-white dark:bg-slate-900 py-8 px-6 shadow-xl rounded-3xl border border-slate-200 dark:border-slate-800 sm:mx-auto sm:w-full sm:max-w-sm space-y-5">
+                    <div class="bg-white dark:bg-slate-900 py-8 px-6 shadow-xl rounded-3xl border border-slate-200 dark:border-slate-800 space-y-5">
                         <form onsubmit="handleLoginSubmit(event)" class="space-y-4">
                             <div>
                                 <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">Username</label>
@@ -299,7 +306,7 @@
                                     <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
                                         <i class="fa-solid fa-user text-sm"></i>
                                     </span>
-                                    <input type="text" id="login-username" required placeholder="Enter username" class="w-full pl-10 pr-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 text-slate-900 dark:text-white">
+                                    <input type="text" id="login-username" required placeholder="Enter username" class="w-full pl-10 pr-4 py-3.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 text-slate-900 dark:text-white">
                                 </div>
                             </div>
 
@@ -312,7 +319,7 @@
                                     <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
                                         <i class="fa-solid fa-lock text-sm"></i>
                                     </span>
-                                    <input type="password" id="login-password" required placeholder="••••••••" class="w-full pl-10 pr-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 text-slate-900 dark:text-white">
+                                    <input type="password" id="login-password" required placeholder="••••••••" class="w-full pl-10 pr-4 py-3.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 text-slate-900 dark:text-white">
                                 </div>
                             </div>
 
@@ -328,8 +335,8 @@
 
         function renderForgotPasswordPage() {
             return `
-                <div class="flex-1 flex flex-col justify-center px-6 py-12 animate-fadeIn">
-                    <div class="sm:mx-auto sm:w-full sm:max-w-sm text-center mb-6">
+                <div class="flex-1 flex flex-col justify-center px-6 py-12 animate-fadeIn max-w-sm mx-auto w-full">
+                    <div class="text-center mb-6">
                         <div class="w-16 h-16 bg-indigo-50 dark:bg-indigo-950/60 rounded-3xl flex items-center justify-center mx-auto mb-4 text-indigo-600 dark:text-indigo-400 text-2xl shadow-sm border border-indigo-200 dark:border-indigo-800">
                             <i class="fa-solid fa-key"></i>
                         </div>
@@ -337,25 +344,25 @@
                         <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Request an authentication code from Admin</p>
                     </div>
 
-                    <div class="bg-white dark:bg-slate-900 py-8 px-6 shadow-xl rounded-3xl border border-slate-200 dark:border-slate-800 sm:mx-auto sm:w-full sm:max-w-sm space-y-4">
+                    <div class="bg-white dark:bg-slate-900 py-8 px-6 shadow-xl rounded-3xl border border-slate-200 dark:border-slate-800 space-y-4">
                         <form onsubmit="handleForgotPasswordSubmit(event)" class="space-y-4">
                             <div>
                                 <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">Username</label>
-                                <input type="text" id="forgot-username" required placeholder="Enter your username" class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 text-slate-900 dark:text-white">
+                                <input type="text" id="forgot-username" required placeholder="Enter your username" class="w-full px-4 py-3.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 text-slate-900 dark:text-white">
                             </div>
 
                             <div>
                                 <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">Admin Auth Code (6-digit)</label>
-                                <input type="text" id="forgot-auth-code" maxlength="6" placeholder="Enter code provided by Admin" class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm tracking-widest text-center font-bold focus:outline-none focus:ring-2 focus:ring-indigo-500 text-slate-900 dark:text-white">
+                                <input type="text" id="forgot-auth-code" maxlength="6" placeholder="Enter code provided by Admin" class="w-full px-4 py-3.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm tracking-widest text-center font-bold focus:outline-none focus:ring-2 focus:ring-indigo-500 text-slate-900 dark:text-white">
                             </div>
 
                             <div>
                                 <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">New Password</label>
-                                <input type="password" id="forgot-new-password" required placeholder="Enter new password" class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 text-slate-900 dark:text-white">
+                                <input type="password" id="forgot-new-password" required placeholder="Enter new password" class="w-full px-4 py-3.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 text-slate-900 dark:text-white">
                             </div>
 
-                            <div class="flex flex-col gap-2 pt-1">
-                                <button type="button" onclick="requestAdminAuthCode()" class="w-full py-2.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-indigo-600 dark:text-indigo-400 font-semibold rounded-2xl transition text-xs border border-slate-200 dark:border-slate-700">
+                            <div class="flex flex-col gap-2.5 pt-1">
+                                <button type="button" onclick="requestAdminAuthCode()" class="w-full py-3 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-indigo-600 dark:text-indigo-400 font-semibold rounded-2xl transition text-xs border border-slate-200 dark:border-slate-700">
                                     <i class="fa-solid fa-paper-plane mr-1.5"></i> Request Code from Admin
                                 </button>
                                 <button type="submit" class="w-full py-3.5 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-2xl shadow-lg shadow-indigo-500/25 transition text-sm">
@@ -516,7 +523,8 @@
                     const matchTitle = exp.title.toLowerCase().includes(q);
                     const matchNotes = exp.notes && exp.notes.toLowerCase().includes(q);
                     const matchUser = exp.userName.toLowerCase().includes(q);
-                    if (!matchTitle && !matchNotes && !matchUser) return false;
+                    const matchClient = exp.clientNamePlace && exp.clientNamePlace.toLowerCase().includes(q);
+                    if (!matchTitle && !matchNotes && !matchUser && !matchClient) return false;
                 }
                 return true;
             });
@@ -533,29 +541,29 @@
             return `
                 <div class="space-y-4 animate-fadeIn">
                     <!-- Summary Card -->
-                    <div class="bg-gradient-to-br from-indigo-600 to-violet-700 rounded-3xl p-5 text-white shadow-xl shadow-indigo-500/20 relative overflow-hidden">
+                    <div class="bg-gradient-to-br from-indigo-600 to-violet-700 rounded-3xl p-5 sm:p-6 text-white shadow-xl shadow-indigo-500/20 relative overflow-hidden">
                         <div class="absolute -right-6 -bottom-6 w-32 h-32 bg-white/10 rounded-full blur-2xl pointer-events-none"></div>
                         <div class="flex justify-between items-start mb-3">
                             <div>
                                 <p class="text-indigo-200 text-xs font-medium uppercase tracking-wider">
                                     ${isAdmin ? 'Total Filtered Expenses' : 'My Total Expenses'}
                                 </p>
-                                <h2 class="text-3xl font-bold tracking-tight mt-0.5">${formatCurrency(totalAmount)}</h2>
+                                <h2 class="text-2xl sm:text-3xl font-bold tracking-tight mt-0.5">${formatCurrency(totalAmount)}</h2>
                             </div>
-                            <span class="bg-white/20 backdrop-blur-md text-white text-xs font-semibold px-2.5 py-1 rounded-full">
+                            <span class="bg-white/20 backdrop-blur-md text-white text-xs font-semibold px-3 py-1 rounded-full">
                                 ${filtered.length} Items
                             </span>
                         </div>
                         
                         <div class="grid grid-cols-2 gap-3 mt-4 pt-4 border-t border-white/15">
-                            <div class="bg-black/10 backdrop-blur-sm rounded-2xl p-2.5">
+                            <div class="bg-black/10 backdrop-blur-sm rounded-2xl p-3">
                                 <div class="flex items-center space-x-1.5 text-indigo-200 text-xs mb-1">
                                     <i class="fa-solid fa-briefcase"></i>
                                     <span>Office</span>
                                 </div>
                                 <p class="font-bold text-sm sm:text-base">${formatCurrency(officeTotal)}</p>
                             </div>
-                            <div class="bg-black/10 backdrop-blur-sm rounded-2xl p-2.5">
+                            <div class="bg-black/10 backdrop-blur-sm rounded-2xl p-3">
                                 <div class="flex items-center space-x-1.5 text-indigo-200 text-xs mb-1">
                                     <i class="fa-solid fa-clapperboard"></i>
                                     <span>Shoot</span>
@@ -566,45 +574,45 @@
                     </div>
 
                     <!-- Search & Filters -->
-                    <div class="space-y-2.5">
+                    <div class="space-y-3">
                         <div class="relative">
-                            <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                            <span class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400">
                                 <i class="fa-solid fa-magnifying-glass text-sm"></i>
                             </span>
-                            <input type="text" id="search-input" value="${state.searchQuery}" oninput="handleSearchInput(event)" placeholder="Search expenses, notes, user..." class="w-full pl-10 pr-4 py-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 shadow-sm transition text-slate-900 dark:text-white">
-                            ${state.searchQuery ? `<button onclick="clearSearch()" class="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark"></i></button>` : ''}
+                            <input type="text" id="search-input" value="${state.searchQuery}" oninput="handleSearchInput(event)" placeholder="Search expenses, notes, client, user..." class="w-full pl-10 pr-4 py-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 shadow-sm transition text-slate-900 dark:text-white">
+                            ${state.searchQuery ? `<button onclick="clearSearch()" class="absolute inset-y-0 right-0 pr-4 flex items-center text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark"></i></button>` : ''}
                         </div>
 
                         <div class="flex items-center space-x-2 overflow-x-auto pb-1 no-scrollbar">
-                            <button onclick="setFilterCategory('All')" class="px-3.5 py-1.5 rounded-xl text-xs font-medium whitespace-nowrap transition ${state.filterCategory === 'All' ? 'bg-indigo-600 text-white shadow-md shadow-indigo-500/20' : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-800'}">
+                            <button onclick="setFilterCategory('All')" class="px-4 py-2 rounded-2xl text-xs font-medium whitespace-nowrap transition ${state.filterCategory === 'All' ? 'bg-indigo-600 text-white shadow-md shadow-indigo-500/20' : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-800'}">
                                 All Categories
                             </button>
-                            <button onclick="setFilterCategory('Office')" class="px-3.5 py-1.5 rounded-xl text-xs font-medium whitespace-nowrap transition ${state.filterCategory === 'Office' ? 'bg-indigo-600 text-white shadow-md shadow-indigo-500/20' : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-800'}">
+                            <button onclick="setFilterCategory('Office')" class="px-4 py-2 rounded-2xl text-xs font-medium whitespace-nowrap transition ${state.filterCategory === 'Office' ? 'bg-indigo-600 text-white shadow-md shadow-indigo-500/20' : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-800'}">
                                 Office Expense
                             </button>
-                            <button onclick="setFilterCategory('Shoot')" class="px-3.5 py-1.5 rounded-xl text-xs font-medium whitespace-nowrap transition ${state.filterCategory === 'Shoot' ? 'bg-indigo-600 text-white shadow-md shadow-indigo-500/20' : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-800'}">
+                            <button onclick="setFilterCategory('Shoot')" class="px-4 py-2 rounded-2xl text-xs font-medium whitespace-nowrap transition ${state.filterCategory === 'Shoot' ? 'bg-indigo-600 text-white shadow-md shadow-indigo-500/20' : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-800'}">
                                 Shoot Expense
                             </button>
                         </div>
 
-                        <div class="flex items-center space-x-2">
-                            <div class="flex-1 relative">
-                                <select onchange="setFilterMonth(this.value)" class="w-full appearance-none bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-3 py-2 text-xs font-medium text-slate-700 dark:text-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                            <div class="relative">
+                                <select onchange="setFilterMonth(this.value)" class="w-full appearance-none bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl px-3.5 py-2.5 text-xs font-medium text-slate-700 dark:text-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500">
                                     <option value="All" ${state.filterMonth === 'All' ? 'selected' : ''}>All Months</option>
                                     ${availableMonths.map(m => `<option value="${m}" ${state.filterMonth === m ? 'selected' : ''}>${formatMonthName(m)}</option>`).join('')}
                                 </select>
-                                <span class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none text-slate-400 text-xs">
+                                <span class="absolute inset-y-0 right-0 pr-3.5 flex items-center pointer-events-none text-slate-400 text-xs">
                                     <i class="fa-solid fa-chevron-down"></i>
                                 </span>
                             </div>
 
                             ${isAdmin ? `
-                            <div class="flex-1 relative">
-                                <select onchange="setFilterUser(this.value)" class="w-full appearance-none bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-3 py-2 text-xs font-medium text-slate-700 dark:text-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                            <div class="relative">
+                                <select onchange="setFilterUser(this.value)" class="w-full appearance-none bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl px-3.5 py-2.5 text-xs font-medium text-slate-700 dark:text-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500">
                                     <option value="All" ${state.filterUser === 'All' ? 'selected' : ''}>All Users</option>
                                     ${state.users.map(u => `<option value="${u.id}" ${state.filterUser === u.id ? 'selected' : ''}>${u.name}</option>`).join('')}
                                 </select>
-                                <span class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none text-slate-400 text-xs">
+                                <span class="absolute inset-y-0 right-0 pr-3.5 flex items-center pointer-events-none text-slate-400 text-xs">
                                     <i class="fa-solid fa-chevron-down"></i>
                                 </span>
                             </div>
@@ -625,12 +633,12 @@
 
                         ${filtered.length === 0 ? `
                             <div class="bg-white dark:bg-slate-900 rounded-3xl p-8 text-center border border-slate-200 dark:border-slate-800 shadow-sm mt-4">
-                                <div class="w-14 h-14 bg-slate-100 dark:bg-slate-800 text-slate-400 rounded-full flex items-center justify-center mx-auto mb-3 text-xl">
+                                <div class="w-14 h-14 bg-slate-100 dark:bg-slate-800 text-slate-400 rounded-2xl flex items-center justify-center mx-auto mb-3 text-xl">
                                     <i class="fa-solid fa-receipt"></i>
                                 </div>
                                 <h4 class="font-semibold text-slate-700 dark:text-slate-300 mb-1">No expenses found</h4>
                                 <p class="text-xs text-slate-500 dark:text-slate-400 mb-4">Try changing filters or add a new expense record.</p>
-                                <button onclick="switchTab('add')" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-medium shadow-md shadow-indigo-500/20 transition">
+                                <button onclick="switchTab('add')" class="px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl text-xs font-medium shadow-md shadow-indigo-500/20 transition">
                                     <i class="fa-solid fa-plus mr-1.5"></i>Add Expense
                                 </button>
                             </div>
@@ -640,25 +648,33 @@
                             const isOffice = exp.category === 'Office';
                             const canEdit = isAdmin || exp.userId === state.currentUser.id;
                             return `
-                                <div class="bg-white dark:bg-slate-900 rounded-2xl p-4 border border-slate-200 dark:border-slate-800 shadow-sm hover:shadow-md transition relative group">
-                                    <div class="flex items-start justify-between">
-                                        <div class="flex items-start space-x-3">
-                                            <div class="w-10 h-10 rounded-xl ${isOffice ? 'bg-amber-500/10 text-amber-600 dark:text-amber-400' : 'bg-indigo-500/10 text-indigo-600 dark:text-indigo-400'} flex items-center justify-center shrink-0 mt-0.5">
+                                <div class="bg-white dark:bg-slate-900 rounded-3xl p-4.5 border border-slate-200 dark:border-slate-800 shadow-sm hover:shadow-md transition relative group">
+                                    <div class="flex items-start justify-between gap-3">
+                                        <div class="flex items-start space-x-3 flex-1 min-w-0">
+                                            <div class="w-10 h-10 rounded-2xl ${isOffice ? 'bg-amber-500/10 text-amber-600 dark:text-amber-400' : 'bg-indigo-500/10 text-indigo-600 dark:text-indigo-400'} flex items-center justify-center shrink-0 mt-0.5">
                                                 <i class="fa-solid ${isOffice ? 'fa-briefcase' : 'fa-clapperboard'}"></i>
                                             </div>
-                                            <div>
-                                                <h4 class="font-semibold text-sm text-slate-900 dark:text-white leading-tight mb-0.5">${escapeHtml(exp.title)}</h4>
-                                                <div class="flex items-center space-x-2 text-xs text-slate-500 dark:text-slate-400">
+                                            <div class="flex-1 min-w-0">
+                                                <h4 class="font-semibold text-sm text-slate-900 dark:text-white leading-snug mb-0.5 truncate">${escapeHtml(exp.title)}</h4>
+                                                
+                                                ${!isOffice && exp.clientNamePlace ? `
+                                                    <div class="mb-1 text-xs font-medium text-violet-600 dark:text-violet-400 flex items-center space-x-1 truncate">
+                                                        <i class="fa-solid fa-location-dot shrink-0"></i>
+                                                        <span class="truncate">Client/Place: ${escapeHtml(exp.clientNamePlace)}</span>
+                                                    </div>
+                                                ` : ''}
+
+                                                <div class="flex items-center flex-wrap gap-1.5 text-xs text-slate-500 dark:text-slate-400 mt-1">
                                                     <span><i class="fa-regular fa-calendar mr-1"></i>${formatDate(exp.date)}</span>
                                                     <span>•</span>
                                                     <span class="font-medium text-indigo-600 dark:text-indigo-400">${exp.category}</span>
                                                     <span>•</span><span class="italic text-slate-600 dark:text-slate-300">${escapeHtml(exp.userName)}</span>
                                                 </div>
-                                                ${exp.notes ? `<p class="text-xs text-slate-600 dark:text-slate-400 mt-2 bg-slate-50 dark:bg-slate-800/50 p-2 rounded-xl border border-slate-100 dark:border-slate-800/80">${escapeHtml(exp.notes)}</p>` : ''}
+                                                ${exp.notes ? `<p class="text-xs text-slate-600 dark:text-slate-400 mt-2 bg-slate-50 dark:bg-slate-800/50 p-2.5 rounded-2xl border border-slate-100 dark:border-slate-800/80">${escapeHtml(exp.notes)}</p>` : ''}
                                                 
                                                 ${exp.billAttachment ? `
                                                     <div class="mt-2.5 flex items-center space-x-2">
-                                                        <button onclick="viewBillModal('${exp.id}')" class="inline-flex items-center space-x-1.5 px-2.5 py-1 rounded-lg bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 text-xs font-medium border border-indigo-200/60 dark:border-indigo-800/60 hover:bg-indigo-100 transition">
+                                                        <button onclick="viewBillModal('${exp.id}')" class="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-xl bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 text-xs font-medium border border-indigo-200/60 dark:border-indigo-800/60 hover:bg-indigo-100 transition">
                                                             <i class="fa-solid fa-paperclip"></i>
                                                             <span>View Attached Bill</span>
                                                         </button>
@@ -666,14 +682,14 @@
                                                 ` : ''}
                                             </div>
                                         </div>
-                                        <div class="text-right shrink-0">
-                                            <span class="font-bold text-base text-slate-900 dark:text-white">${formatCurrency(exp.amount)}</span>
+                                        <div class="text-right shrink-0 flex flex-col items-end">
+                                            <span class="font-bold text-base sm:text-lg text-slate-900 dark:text-white">${formatCurrency(exp.amount)}</span>
                                             ${canEdit ? `
-                                                <div class="flex items-center justify-end space-x-2 mt-2">
-                                                    <button onclick="startEditExpense('${exp.id}')" class="w-7 h-7 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-indigo-50 hover:text-indigo-600 dark:hover:bg-indigo-950 dark:hover:text-indigo-400 transition flex items-center justify-center text-xs" title="Edit">
+                                                <div class="flex items-center space-x-1.5 mt-2">
+                                                    <button onclick="startEditExpense('${exp.id}')" class="w-8 h-8 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-indigo-50 hover:text-indigo-600 dark:hover:bg-indigo-950 dark:hover:text-indigo-400 transition flex items-center justify-center text-xs" title="Edit">
                                                         <i class="fa-solid fa-pen"></i>
                                                     </button>
-                                                    <button onclick="confirmDeleteExpense('${exp.id}')" class="w-7 h-7 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-rose-50 hover:text-rose-600 dark:hover:bg-rose-950 dark:hover:text-rose-400 transition flex items-center justify-center text-xs" title="Delete">
+                                                    <button onclick="confirmDeleteExpense('${exp.id}')" class="w-8 h-8 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-rose-50 hover:text-rose-600 dark:hover:bg-rose-950 dark:hover:text-rose-400 transition flex items-center justify-center text-xs" title="Delete">
                                                         <i class="fa-solid fa-trash"></i>
                                                     </button>
                                                 </div>
@@ -727,6 +743,7 @@
                 amount: '',
                 category: 'Office',
                 date: new Date().toISOString().split('T')[0],
+                clientNamePlace: '',
                 notes: '',
                 billAttachment: null
             };
@@ -756,7 +773,7 @@
                         ` : ''}
                     </div>
 
-                    <form onsubmit="handleExpenseSubmit(event)" class="bg-white dark:bg-slate-900 rounded-3xl p-5 border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
+                    <form onsubmit="handleExpenseSubmit(event)" class="bg-white dark:bg-slate-900 rounded-3xl p-5 sm:p-6 border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
                         <div>
                             <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">Expense Type</label>
                             <div class="grid grid-cols-2 gap-3">
@@ -772,50 +789,61 @@
                             <input type="hidden" id="expense-category" value="${expense.category}">
                         </div>
 
+                        <!-- Shoot specific Client Name & Place input container -->
+                        <div id="client-input-container" class="${expense.category === 'Shoot' ? '' : 'hidden'}">
+                            <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">Client Name & Place</label>
+                            <div class="relative">
+                                <span class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400">
+                                    <i class="fa-solid fa-location-dot text-sm"></i>
+                                </span>
+                                <input type="text" id="expense-client" value="${escapeHtml(expense.clientNamePlace || '')}" placeholder="e.g., Acme Corp / Outdoor Studio Location" class="w-full pl-10 pr-4 py-3.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 text-slate-900 dark:text-white">
+                            </div>
+                        </div>
+
                         <div>
                             <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">Amount (₹)</label>
                             <div class="relative">
                                 <span class="absolute inset-y-0 left-0 pl-4 flex items-center font-bold text-slate-400">₹</span>
-                                <input type="number" id="expense-amount" value="${expense.amount}" required min="1" step="any" placeholder="0.00" class="w-full pl-9 pr-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-base font-semibold focus:outline-none focus:ring-2 focus:ring-indigo-500 text-slate-900 dark:text-white">
+                                <input type="number" id="expense-amount" value="${expense.amount}" required min="1" step="any" placeholder="0.00" class="w-full pl-9 pr-4 py-3.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-base font-semibold focus:outline-none focus:ring-2 focus:ring-indigo-500 text-slate-900 dark:text-white">
                             </div>
                         </div>
 
                         <div>
                             <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">Title / Description</label>
-                            <input type="text" id="expense-title" value="${escapeHtml(expense.title)}" required placeholder="e.g., Studio Rent, Camera Rental, Catering" class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 text-slate-900 dark:text-white">
+                            <input type="text" id="expense-title" value="${escapeHtml(expense.title)}" required placeholder="e.g., Studio Rent, Camera Rental, Catering" class="w-full px-4 py-3.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 text-slate-900 dark:text-white">
                         </div>
 
                         <div>
                             <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">Date</label>
-                            <input type="date" id="expense-date" value="${expense.date}" required class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 text-slate-900 dark:text-white">
+                            <input type="date" id="expense-date" value="${expense.date}" required class="w-full px-4 py-3.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 text-slate-900 dark:text-white">
                         </div>
 
                         <div>
                             <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">Notes / Receipt details (Optional)</label>
-                            <textarea id="expense-notes" rows="3" placeholder="Add any vendor details, invoice numbers or remarks..." class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 text-slate-900 dark:text-white">${escapeHtml(expense.notes)}</textarea>
+                            <textarea id="expense-notes" rows="3" placeholder="Add any vendor details, invoice numbers or remarks..." class="w-full px-4 py-3.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 text-slate-900 dark:text-white">${escapeHtml(expense.notes)}</textarea>
                         </div>
 
                         <div>
                             <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">Bill / Receipt Attachment (Optional)</label>
                             
                             ${currentBill ? `
-                                <div class="bg-indigo-50 dark:bg-indigo-950/60 p-3 rounded-2xl border border-indigo-200 dark:border-indigo-800 flex items-center justify-between mb-2">
+                                <div class="bg-indigo-50 dark:bg-indigo-950/60 p-3.5 rounded-2xl border border-indigo-200 dark:border-indigo-800 flex items-center justify-between mb-3">
                                     <div class="flex items-center space-x-2 text-indigo-600 dark:text-indigo-400 text-xs font-semibold">
                                         <i class="fa-solid fa-file-image text-base"></i>
                                         <span>Bill attached successfully</span>
                                     </div>
                                     <div class="flex items-center space-x-2">
-                                        <button type="button" onclick="previewCurrentTempBill()" class="px-2.5 py-1 bg-indigo-600 text-white rounded-lg text-xs">Preview</button>
-                                        <button type="button" onclick="removeBillAttachment(event)" class="px-2.5 py-1 bg-rose-600 text-white rounded-lg text-xs">Remove</button>
+                                        <button type="button" onclick="previewCurrentTempBill()" class="px-3 py-1.5 bg-indigo-600 text-white rounded-xl text-xs font-medium">Preview</button>
+                                        <button type="button" onclick="removeBillAttachment(event)" class="px-3 py-1.5 bg-rose-600 text-white rounded-xl text-xs font-medium">Remove</button>
                                     </div>
                                 </div>
                             ` : ''}
 
-                            <div class="grid grid-cols-2 gap-2">
-                                <div class="relative border-2 border-dashed border-slate-200 dark:border-slate-700 rounded-2xl p-3 text-center bg-slate-50 dark:bg-slate-800/40 hover:border-indigo-500 transition cursor-pointer">
+                            <div class="grid grid-cols-2 gap-2.5">
+                                <div class="relative border-2 border-dashed border-slate-200 dark:border-slate-700 rounded-2xl p-3.5 text-center bg-slate-50 dark:bg-slate-800/40 hover:border-indigo-500 transition cursor-pointer">
                                     <input type="file" id="bill-file-input" accept="image/*" onchange="handleBillUpload(event)" class="absolute inset-0 opacity-0 cursor-pointer w-full h-full">
                                     <div class="flex flex-col items-center justify-center space-y-1">
-                                        <div class="w-8 h-8 rounded-xl bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 flex items-center justify-center text-xs">
+                                        <div class="w-9 h-9 rounded-2xl bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 flex items-center justify-center text-xs">
                                             <i class="fa-solid fa-cloud-arrow-up"></i>
                                         </div>
                                         <p class="text-[11px] font-semibold text-slate-700 dark:text-slate-300">Upload File</p>
@@ -823,8 +851,8 @@
                                     </div>
                                 </div>
 
-                                <button type="button" onclick="openCameraCaptureModal()" class="border-2 border-dashed border-slate-200 dark:border-slate-700 rounded-2xl p-3 text-center bg-slate-50 dark:bg-slate-800/40 hover:border-indigo-500 transition flex flex-col items-center justify-center space-y-1">
-                                    <div class="w-8 h-8 rounded-xl bg-violet-50 dark:bg-violet-950/60 text-violet-600 dark:text-violet-400 flex items-center justify-center text-xs">
+                                <button type="button" onclick="openCameraCaptureModal()" class="border-2 border-dashed border-slate-200 dark:border-slate-700 rounded-2xl p-3.5 text-center bg-slate-50 dark:bg-slate-800/40 hover:border-indigo-500 transition flex flex-col items-center justify-center space-y-1">
+                                    <div class="w-9 h-9 rounded-2xl bg-violet-50 dark:bg-violet-950/60 text-violet-600 dark:text-violet-400 flex items-center justify-center text-xs">
                                         <i class="fa-solid fa-camera"></i>
                                     </div>
                                     <p class="text-[11px] font-semibold text-slate-700 dark:text-slate-300">Capture Bill</p>
@@ -833,7 +861,7 @@
                             </div>
                         </div>
 
-                        <button type="submit" class="w-full py-3.5 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 text-white font-semibold rounded-2xl shadow-lg shadow-indigo-500/25 transition flex items-center justify-center space-x-2">
+                        <button type="submit" class="w-full py-4 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 text-white font-semibold rounded-2xl shadow-lg shadow-indigo-500/25 transition flex items-center justify-center space-x-2">
                             <i class="fa-solid ${isEditing ? 'fa-floppy-disk' : 'fa-circle-plus'}"></i>
                             <span>${isEditing ? 'Save Changes' : 'Submit Expense'}</span>
                         </button>
@@ -873,7 +901,7 @@
                         </div>
 
                         <div class="p-5 bg-slate-900 flex items-center justify-around">
-                            <button type="button" onclick="closeModal()" class="px-4 py-2.5 rounded-xl bg-slate-800 text-slate-300 text-xs font-semibold">Cancel</button>
+                            <button type="button" onclick="closeModal()" class="px-5 py-3 rounded-2xl bg-slate-800 text-slate-300 text-xs font-semibold">Cancel</button>
                             <button type="button" onclick="takeSnapshot()" class="w-14 h-14 rounded-full bg-indigo-600 hover:bg-indigo-700 text-white flex items-center justify-center shadow-lg shadow-indigo-500/40 text-xl">
                                 <i class="fa-solid fa-camera"></i>
                             </button>
@@ -944,7 +972,7 @@
                         <div class="bg-slate-100 dark:bg-slate-800 rounded-2xl overflow-hidden flex items-center justify-center max-h-[60vh]">
                             <img src="${currentBill}" alt="Bill Preview" class="max-w-full max-h-[60vh] object-contain">
                         </div>
-                        <button onclick="closeModal()" class="w-full py-2.5 bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 font-semibold rounded-xl text-xs transition">
+                        <button onclick="closeModal()" class="w-full py-3 bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 font-semibold rounded-2xl text-xs transition">
                             Close Preview
                         </button>
                     </div>
@@ -961,13 +989,13 @@
                 <div class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 animate-fadeIn">
                     <div class="bg-white dark:bg-slate-900 rounded-3xl p-5 max-w-md w-full border border-slate-200 dark:border-slate-800 shadow-2xl space-y-4">
                         <div class="flex items-center justify-between">
-                            <h3 class="font-bold text-sm text-slate-900 dark:text-white">Bill Receipt: ${escapeHtml(exp.title)}</h3>
-                            <button onclick="closeModal()" class="text-slate-400 hover:text-slate-600 text-lg"><i class="fa-solid fa-xmark"></i></button>
+                            <h3 class="font-bold text-sm text-slate-900 dark:text-white truncate">Bill Receipt: ${escapeHtml(exp.title)}</h3>
+                            <button onclick="closeModal()" class="text-slate-400 hover:text-slate-600 text-lg ml-2"><i class="fa-solid fa-xmark"></i></button>
                         </div>
                         <div class="bg-slate-100 dark:bg-slate-800 rounded-2xl overflow-hidden flex items-center justify-center max-h-[60vh]">
                             <img src="${exp.billAttachment}" alt="Expense Bill" class="max-w-full max-h-[60vh] object-contain">
                         </div>
-                        <button onclick="closeModal()" class="w-full py-2.5 bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 font-semibold rounded-xl text-xs transition">
+                        <button onclick="closeModal()" class="w-full py-3 bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 font-semibold rounded-2xl text-xs transition">
                             Close Viewer
                         </button>
                     </div>
@@ -979,12 +1007,16 @@
             document.getElementById('expense-category').value = cat;
             const btnOffice = document.getElementById('btn-cat-office');
             const btnShoot = document.getElementById('btn-cat-shoot');
+            const clientContainer = document.getElementById('client-input-container');
+
             if (cat === 'Office') {
                 btnOffice.className = 'py-3 px-4 rounded-2xl border font-medium text-sm flex items-center justify-center space-x-2 transition bg-indigo-600 text-white border-indigo-600 shadow-md shadow-indigo-500/20';
                 btnShoot.className = 'py-3 px-4 rounded-2xl border font-medium text-sm flex items-center justify-center space-x-2 transition bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700';
+                if (clientContainer) clientContainer.classList.add('hidden');
             } else {
                 btnShoot.className = 'py-3 px-4 rounded-2xl border font-medium text-sm flex items-center justify-center space-x-2 transition bg-indigo-600 text-white border-indigo-600 shadow-md shadow-indigo-500/20';
                 btnOffice.className = 'py-3 px-4 rounded-2xl border font-medium text-sm flex items-center justify-center space-x-2 transition bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700';
+                if (clientContainer) clientContainer.classList.remove('hidden');
             }
         }
 
@@ -994,6 +1026,7 @@
             const amount = parseFloat(document.getElementById('expense-amount').value);
             const title = document.getElementById('expense-title').value.trim();
             const date = document.getElementById('expense-date').value;
+            const clientNamePlace = category === 'Shoot' ? document.getElementById('expense-client').value.trim() : '';
             const notes = document.getElementById('expense-notes').value.trim();
             const billAttachment = state.tempBillData;
 
@@ -1011,6 +1044,7 @@
                             amount,
                             category,
                             date,
+                            clientNamePlace,
                             notes,
                             billAttachment: billAttachment !== null ? billAttachment : e.billAttachment
                         };
@@ -1029,6 +1063,7 @@
                     amount,
                     category,
                     date,
+                    clientNamePlace,
                     notes,
                     billAttachment,
                     createdAt: new Date().toISOString()
@@ -1091,15 +1126,15 @@
 
             return `
                 <div class="space-y-4 animate-fadeIn">
-                    <div class="bg-gradient-to-br from-slate-900 to-indigo-950 rounded-3xl p-5 text-white shadow-xl relative overflow-hidden border border-indigo-500/20">
+                    <div class="bg-gradient-to-br from-slate-900 to-indigo-950 rounded-3xl p-5 sm:p-6 text-white shadow-xl relative overflow-hidden border border-indigo-500/20">
                         <div class="flex justify-between items-start mb-3">
                             <div>
                                 <p class="text-indigo-300 text-xs font-semibold uppercase tracking-wider flex items-center">
                                     <i class="fa-solid fa-shield-halved mr-1.5"></i>Admin Summary
                                 </p>
-                                <h2 class="text-3xl font-bold tracking-tight mt-0.5">${formatCurrency(grandTotal)}</h2>
+                                <h2 class="text-2xl sm:text-3xl font-bold tracking-tight mt-0.5">${formatCurrency(grandTotal)}</h2>
                             </div>
-                            <button onclick="exportAllCSV()" class="bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold px-3.5 py-2 rounded-xl shadow-md transition flex items-center space-x-1.5">
+                            <button onclick="exportAllCSV()" class="bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold px-4 py-2.5 rounded-2xl shadow-md transition flex items-center space-x-1.5">
                                 <i class="fa-solid fa-file-arrow-down"></i>
                                 <span>Export All CSV</span>
                             </button>
@@ -1117,24 +1152,24 @@
                         </div>
                     </div>
 
-                    <div class="bg-white dark:bg-slate-900 rounded-3xl p-4 border border-slate-200 dark:border-slate-800 shadow-sm">
+                    <div class="bg-white dark:bg-slate-900 rounded-3xl p-4 sm:p-5 border border-slate-200 dark:border-slate-800 shadow-sm">
                         <h3 class="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-3">Export User Reports</h3>
-                        <div class="space-y-2">
+                        <div class="space-y-2.5">
                             ${state.users.map(u => {
                                 const userExpCount = state.expenses.filter(e => e.userId === u.id).length;
                                 const userTotal = state.expenses.filter(e => e.userId === u.id).reduce((s, e) => s + e.amount, 0);
                                 return `
-                                    <div class="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-100 dark:border-slate-800">
+                                    <div class="flex items-center justify-between p-3.5 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-100 dark:border-slate-800">
                                         <div class="flex items-center space-x-3">
-                                            <div class="w-9 h-9 rounded-xl bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 flex items-center justify-center font-bold text-sm">
+                                            <div class="w-10 h-10 rounded-2xl bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 flex items-center justify-center font-bold text-sm shrink-0">
                                                 ${u.name.charAt(0)}
                                             </div>
-                                            <div>
-                                                <h4 class="font-semibold text-sm text-slate-900 dark:text-white">${u.name}</h4>
+                                            <div class="min-w-0">
+                                                <h4 class="font-semibold text-sm text-slate-900 dark:text-white truncate">${u.name}</h4>
                                                 <p class="text-xs text-slate-500">${userExpCount} records • ${formatCurrency(userTotal)}</p>
                                             </div>
                                         </div>
-                                        <button onclick="exportUserCSV('${u.id}', '${u.name}')" class="px-3 py-1.5 bg-indigo-50 dark:bg-indigo-950/50 hover:bg-indigo-100 dark:hover:bg-indigo-900 text-indigo-600 dark:text-indigo-400 text-xs font-semibold rounded-xl transition border border-indigo-200/50 dark:border-indigo-800/50 flex items-center space-x-1">
+                                        <button onclick="exportUserCSV('${u.id}', '${u.name}')" class="px-3.5 py-2 bg-indigo-50 dark:bg-indigo-950/50 hover:bg-indigo-100 dark:hover:bg-indigo-900 text-indigo-600 dark:text-indigo-400 text-xs font-semibold rounded-xl transition border border-indigo-200/50 dark:border-indigo-800/50 flex items-center space-x-1 shrink-0">
                                             <i class="fa-solid fa-download"></i><span>CSV</span>
                                         </button>
                                     </div>
@@ -1153,7 +1188,7 @@
                         ${sortedMonths.map(monthKey => {
                             const data = monthlyMap[monthKey];
                             return `
-                                <div class="bg-white dark:bg-slate-900 rounded-3xl p-4 border border-slate-200 dark:border-slate-800 shadow-sm space-y-3">
+                                <div class="bg-white dark:bg-slate-900 rounded-3xl p-4.5 border border-slate-200 dark:border-slate-800 shadow-sm space-y-3">
                                     <div class="flex items-center justify-between">
                                         <div class="flex items-center space-x-2">
                                             <div class="w-8 h-8 rounded-xl bg-violet-500/10 text-violet-600 dark:text-violet-400 flex items-center justify-center text-xs font-bold">
@@ -1161,7 +1196,7 @@
                                             </div>
                                             <h4 class="font-bold text-sm text-slate-900 dark:text-white">${formatMonthName(monthKey)}</h4>
                                         </div>
-                                        <span class="text-xs font-semibold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 px-2.5 py-1 rounded-full">
+                                        <span class="text-xs font-semibold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 px-3 py-1 rounded-full">
                                             ${data.count} Expenses
                                         </span>
                                     </div>
@@ -1202,7 +1237,7 @@
                     <div class="space-y-3">
                         ${requests.length === 0 ? `
                             <div class="bg-white dark:bg-slate-900 rounded-3xl p-8 text-center border border-slate-200 dark:border-slate-800 shadow-sm">
-                                <div class="w-14 h-14 bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 rounded-full flex items-center justify-center mx-auto mb-3 text-xl">
+                                <div class="w-14 h-14 bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 rounded-2xl flex items-center justify-center mx-auto mb-3 text-xl">
                                     <i class="fa-solid fa-key"></i>
                                 </div>
                                 <h4 class="font-semibold text-slate-700 dark:text-slate-300 mb-1">No pending requests</h4>
@@ -1213,19 +1248,19 @@
                         ${requests.map(req => {
                             const isPending = req.status === 'pending';
                             return `
-                                <div class="bg-white dark:bg-slate-900 rounded-2xl p-4 border border-slate-200 dark:border-slate-800 shadow-sm flex items-center justify-between">
-                                    <div class="space-y-1">
-                                        <div class="flex items-center space-x-2">
-                                            <h4 class="font-semibold text-sm text-slate-900 dark:text-white">${escapeHtml(req.name)}</h4>
-                                            <span class="text-xs text-slate-400">(@${escapeHtml(req.username)})</span>
+                                <div class="bg-white dark:bg-slate-900 rounded-2xl p-4.5 border border-slate-200 dark:border-slate-800 shadow-sm flex items-center justify-between gap-3">
+                                    <div class="space-y-1 min-w-0">
+                                        <div class="flex items-center space-x-2 truncate">
+                                            <h4 class="font-semibold text-sm text-slate-900 dark:text-white truncate">${escapeHtml(req.name)}</h4>
+                                            <span class="text-xs text-slate-400 shrink-0">(@${escapeHtml(req.username)})</span>
                                         </div>
                                         <div class="flex items-center space-x-2">
                                             <span class="text-xs text-slate-500">Admin Auth Code:</span>
-                                            <span class="px-2 py-0.5 bg-indigo-50 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-400 font-mono font-bold text-sm tracking-widest rounded-lg border border-indigo-200/50">${req.code}</span>
+                                            <span class="px-2.5 py-0.5 bg-indigo-50 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-400 font-mono font-bold text-sm tracking-widest rounded-xl border border-indigo-200/50">${req.code}</span>
                                         </div>
                                     </div>
-                                    <div class="flex items-center space-x-2">
-                                        <span class="px-2.5 py-1 rounded-full text-xs font-semibold ${isPending ? 'bg-amber-500/10 text-amber-600' : 'bg-emerald-500/10 text-emerald-600'}">
+                                    <div class="flex items-center space-x-2 shrink-0">
+                                        <span class="px-3 py-1 rounded-full text-xs font-semibold ${isPending ? 'bg-amber-500/10 text-amber-600' : 'bg-emerald-500/10 text-emerald-600'}">
                                             ${isPending ? 'Pending' : 'Approved'}
                                         </span>
                                         ${isPending ? `
@@ -1257,32 +1292,32 @@
                             <h2 class="text-lg font-bold text-slate-900 dark:text-white">User Management</h2>
                             <p class="text-xs text-slate-500 dark:text-slate-400">Add or remove system users & administrators</p>
                         </div>
-                        <button onclick="openAddUserModal()" class="px-3.5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-semibold shadow-md shadow-indigo-500/20 transition flex items-center space-x-1.5">
+                        <button onclick="openAddUserModal()" class="px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl text-xs font-semibold shadow-md shadow-indigo-500/20 transition flex items-center space-x-1.5 shrink-0">
                             <i class="fa-solid fa-user-plus"></i>
                             <span>Add User</span>
                         </button>
                     </div>
 
-                    <div class="space-y-2.5">
+                    <div class="space-y-3">
                         ${state.users.map(u => {
                             const expCount = state.expenses.filter(e => e.userId === u.id).length;
                             const isCurrent = u.id === state.currentUser.id;
                             return `
-                                <div class="bg-white dark:bg-slate-900 rounded-2xl p-4 border border-slate-200 dark:border-slate-800 shadow-sm flex items-center justify-between">
-                                    <div class="flex items-center space-x-3">
-                                        <div class="w-10 h-10 rounded-xl ${u.role === 'admin' ? 'bg-indigo-500/10 text-indigo-600 dark:text-indigo-400' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400'} flex items-center justify-center font-bold text-sm">
+                                <div class="bg-white dark:bg-slate-900 rounded-2xl p-4.5 border border-slate-200 dark:border-slate-800 shadow-sm flex items-center justify-between gap-3">
+                                    <div class="flex items-center space-x-3 min-w-0">
+                                        <div class="w-10 h-10 rounded-2xl ${u.role === 'admin' ? 'bg-indigo-500/10 text-indigo-600 dark:text-indigo-400' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400'} flex items-center justify-center font-bold text-sm shrink-0">
                                             ${u.name.charAt(0)}
                                         </div>
-                                        <div>
-                                            <div class="flex items-center space-x-2">
-                                                <h4 class="font-semibold text-sm text-slate-900 dark:text-white">${escapeHtml(u.name)}</h4>${isCurrent ? '<span class="text-[10px] bg-emerald-500/10 text-emerald-600 font-semibold px-2 py-0.5 rounded-full">Active</span>' : ''}
+                                        <div class="min-w-0">
+                                            <div class="flex items-center space-x-2 truncate">
+                                                <h4 class="font-semibold text-sm text-slate-900 dark:text-white truncate">${escapeHtml(u.name)}</h4>${isCurrent ? '<span class="text-[10px] bg-emerald-500/10 text-emerald-600 font-semibold px-2 py-0.5 rounded-full shrink-0">Active</span>' : ''}
                                             </div>
-                                            <p class="text-xs text-slate-500 dark:text-slate-400">@${escapeHtml(u.username)} • <span class="capitalize font-medium text-indigo-600 dark:text-indigo-400">${u.role}</span> •${expCount} expenses</p>
+                                            <p class="text-xs text-slate-500 dark:text-slate-400 truncate">@${escapeHtml(u.username)} • <span class="capitalize font-medium text-indigo-600 dark:text-indigo-400">${u.role}</span> •${expCount} expenses</p>
                                         </div>
                                     </div>
-                                    <div class="flex items-center space-x-2">
+                                    <div class="flex items-center space-x-2 shrink-0">
                                         ${state.users.length > 1 && !isCurrent ? `
-                                            <button onclick="confirmRemoveUser('${u.id}', '${escapeHtml(u.name)}')" class="w-8 h-8 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-500 hover:bg-rose-50 hover:text-rose-600 transition flex items-center justify-center text-xs" title="Remove User">
+                                            <button onclick="confirmRemoveUser('${u.id}', '${escapeHtml(u.name)}')" class="w-9 h-9 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-500 hover:bg-rose-50 hover:text-rose-600 transition flex items-center justify-center text-xs" title="Remove User">
                                                 <i class="fa-solid fa-trash"></i>
                                             </button>
                                         ` : ''}
@@ -1304,28 +1339,28 @@
                             <h3 class="font-bold text-base text-slate-900 dark:text-white">Add New User</h3>
                             <button onclick="closeModal()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark"></i></button>
                         </div>
-                        <form onsubmit="handleAddNewUser(event)" class="space-y-3">
+                        <form onsubmit="handleAddNewUser(event)" class="space-y-3.5">
                             <div>
                                 <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Full Name</label>
-                                <input type="text" id="new-user-name" required placeholder="e.g., Priya Sharma" class="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 text-slate-900 dark:text-white">
+                                <input type="text" id="new-user-name" required placeholder="e.g., Priya Sharma" class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 text-slate-900 dark:text-white">
                             </div>
                             <div>
                                 <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Username</label>
-                                <input type="text" id="new-user-username" required placeholder="user3" class="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 text-slate-900 dark:text-white">
+                                <input type="text" id="new-user-username" required placeholder="user3" class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 text-slate-900 dark:text-white">
                             </div>
                             <div>
                                 <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Password</label>
-                                <input type="password" id="new-user-password" required placeholder="••••••••" class="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 text-slate-900 dark:text-white">
+                                <input type="password" id="new-user-password" required placeholder="••••••••" class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 text-slate-900 dark:text-white">
                             </div>
                             <div>
                                 <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Role</label>
-                                <select id="new-user-role" class="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 text-slate-900 dark:text-white">
+                                <select id="new-user-role" class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 text-slate-900 dark:text-white">
                                     <option value="user">Regular User</option>
                                     <option value="admin">Administrator</option>
                                 </select>
                             </div>
                             <div class="pt-2">
-                                <button type="submit" class="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-xl shadow-md shadow-indigo-500/20 transition text-sm">
+                                <button type="submit" class="w-full py-3.5 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-2xl shadow-md shadow-indigo-500/20 transition text-sm">
                                     Create User Account
                                 </button>
                             </div>
@@ -1400,18 +1435,18 @@
 
             return `
                 <div class="space-y-4 animate-fadeIn">
-                    <div class="bg-gradient-to-br from-violet-600 to-indigo-700 rounded-3xl p-5 text-white shadow-xl">
+                    <div class="bg-gradient-to-br from-violet-600 to-indigo-700 rounded-3xl p-5 sm:p-6 text-white shadow-xl">
                         <p class="text-violet-200 text-xs font-semibold uppercase tracking-wider">My Expense Summary</p>
-                        <h2 class="text-3xl font-bold tracking-tight mt-0.5">${formatCurrency(total)}</h2>
+                        <h2 class="text-2xl sm:text-3xl font-bold tracking-tight mt-0.5">${formatCurrency(total)}</h2>
                         
                         <div class="grid grid-cols-2 gap-3 mt-4 pt-4 border-t border-white/15">
                             <div>
                                 <span class="text-xs text-violet-200">Office Expense</span>
-                                <p class="font-bold text-base">${formatCurrency(office)}</p>
+                                <p class="font-bold text-sm sm:text-base">${formatCurrency(office)}</p>
                             </div>
                             <div>
                                 <span class="text-xs text-violet-200">Shoot Expense</span>
-                                <p class="font-bold text-base">${formatCurrency(shoot)}</p>
+                                <p class="font-bold text-sm sm:text-base">${formatCurrency(shoot)}</p>
                             </div>
                         </div>
                     </div>
@@ -1431,7 +1466,7 @@
                         ` : ''}
 
                         ${months.map(m => `
-                            <div class="bg-white dark:bg-slate-900 rounded-2xl p-4 border border-slate-200 dark:border-slate-800 shadow-sm space-y-2">
+                            <div class="bg-white dark:bg-slate-900 rounded-2xl p-4.5 border border-slate-200 dark:border-slate-800 shadow-sm space-y-2">
                                 <div class="flex items-center justify-between">
                                     <span class="font-bold text-sm text-slate-900 dark:text-white">${formatMonthName(m)}</span>
                                     <span class="font-bold text-sm text-indigo-600 dark:text-indigo-400">${formatCurrency(monthlyMap[m].total)}</span>
@@ -1456,15 +1491,15 @@
                         </div>
                         <h2 class="font-bold text-lg text-slate-900 dark:text-white">${state.currentUser.name}</h2>
                         <p class="text-xs text-slate-500 dark:text-slate-400 mb-1">@${state.currentUser.username}</p>
-                        <span class="inline-block px-3 py-1 rounded-full text-xs font-semibold ${state.currentUser.role === 'admin' ? 'bg-indigo-50 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-400 border border-indigo-200/50 dark:border-indigo-800' : 'bg-emerald-50 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400 border border-emerald-200/50 dark:border-emerald-800'}">
+                        <span class="inline-block px-3.5 py-1 rounded-full text-xs font-semibold ${state.currentUser.role === 'admin' ? 'bg-indigo-50 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-400 border border-indigo-200/50 dark:border-indigo-800' : 'bg-emerald-50 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400 border border-emerald-200/50 dark:border-emerald-800'}">
                             ${state.currentUser.role === 'admin' ? 'Administrator' : 'Regular User'}
                         </span>
                     </div>
 
                     ${state.currentUser.role === 'admin' ? `
-                    <div class="bg-white dark:bg-slate-900 rounded-3xl p-4 border border-slate-200 dark:border-slate-800 shadow-sm space-y-3">
+                    <div class="bg-white dark:bg-slate-900 rounded-3xl p-4.5 border border-slate-200 dark:border-slate-800 shadow-sm space-y-3">
                         <h3 class="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider px-1">Admin Security</h3>
-                        <button onclick="openChangePasswordModal()" class="w-full py-2.5 px-4 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-xs font-semibold transition flex items-center justify-center space-x-2">
+                        <button onclick="openChangePasswordModal()" class="w-full py-3 px-4 rounded-2xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-xs font-semibold transition flex items-center justify-center space-x-2">
                             <i class="fa-solid fa-key"></i>
                             <span>Change Admin Password</span>
                         </button>
@@ -1490,17 +1525,17 @@
                             <h3 class="font-bold text-base text-slate-900 dark:text-white">Change Admin Password</h3>
                             <button onclick="closeModal()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark"></i></button>
                         </div>
-                        <form onsubmit="handlePasswordChange(event)" class="space-y-3">
+                        <form onsubmit="handlePasswordChange(event)" class="space-y-3.5">
                             <div>
                                 <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Current Password</label>
-                                <input type="password" id="current-pass" required class="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 text-slate-900 dark:text-white">
+                                <input type="password" id="current-pass" required class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 text-slate-900 dark:text-white">
                             </div>
                             <div>
                                 <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">New Password</label>
-                                <input type="password" id="new-pass" required class="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 text-slate-900 dark:text-white">
+                                <input type="password" id="new-pass" required class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 text-slate-900 dark:text-white">
                             </div>
                             <div class="pt-2">
-                                <button type="submit" class="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-xl shadow-md transition text-sm">Update Password</button>
+                                <button type="submit" class="w-full py-3.5 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-2xl shadow-md transition text-sm">Update Password</button>
                             </div>
                         </form>
                     </div>
@@ -1556,12 +1591,13 @@
                 return;
             }
 
-            const headers = ['ID', 'User', 'Title', 'Category', 'Amount (INR)', 'Date', 'Notes', 'Has Bill'];
+            const headers = ['ID', 'User', 'Title', 'Category', 'Client & Place', 'Amount (INR)', 'Date', 'Notes', 'Has Bill'];
             const rows = dataArray.map(e => [
                 e.id,
                 `"${e.userName || ''}"`,
                 `"${(e.title || '').replace(/"/g, '""')}"`,
                 e.category,
+                `"${(e.clientNamePlace || '').replace(/"/g, '""')}"`,
                 e.amount,
                 e.date,
                 `"${(e.notes || '').replace(/"/g, '""')}"`,
@@ -1595,10 +1631,10 @@
                             <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">${message}</p>
                         </div>
                         <div class="grid grid-cols-2 gap-3 pt-2">
-                            <button onclick="closeModal()" class="py-2.5 px-4 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-semibold">
+                            <button onclick="closeModal()" class="py-3 px-4 rounded-2xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-semibold">
                                 Cancel
                             </button>
-                            <button id="modal-confirm-btn" class="py-2.5 px-4 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-semibold shadow-md">
+                            <button id="modal-confirm-btn" class="py-3 px-4 rounded-2xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-semibold shadow-md">
                                 Confirm
                             </button>
                         </div>
