@@ -58,6 +58,7 @@
             overflow-x: hidden;
             word-wrap: break-word;
             overflow-wrap: break-word;
+            background-color: #0f172a;
         }
         .app-container {
             width: 100%;
@@ -90,7 +91,7 @@
     <div id="toast-container" class="fixed top-4 left-1/2 transform -translate-x-1/2 z-50 flex flex-col gap-2 pointer-events-none w-11/12 max-w-sm"></div>
 
     <script>
-        const STORAGE_KEY = 'click_factory_expense_tracker_admin_auth_v10';
+        const STORAGE_KEY = 'click_factory_expense_tracker_admin_auth_v11';
 
         const initialData = {
             currentUser: null,
@@ -219,7 +220,7 @@
 
             app.innerHTML = `
                 <!-- Top Header Bar -->
-                <header class="sticky top-0 z-40 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 px-4 py-3 flex items-center justify-between w-full">
+                <header class="sticky top-0 z-40 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 px-4 sm:px-6 py-3.5 flex items-center justify-between w-full">
                     <div class="flex items-center space-x-3 min-w-0 flex-1 pr-2">
                         <div class="w-10 h-10 rounded-2xl bg-white dark:bg-slate-800 p-1 flex items-center justify-center shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden shrink-0">
                             <img src="https://clickfactoryphotography.com/wp-content/uploads/2022/04/crop-logo.gif" alt="Click Factory Logo" class="w-full h-full object-contain" onerror="this.src='https://placehold.co/40x40/4f46e5/ffffff?text=CF'">
@@ -243,48 +244,48 @@
                 </header>
 
                 <!-- Scrollable Body Content -->
-                <main class="flex-1 overflow-y-auto pb-32 pt-4 px-4 sm:px-6 w-full max-w-full">
+                <main class="flex-1 overflow-y-auto pb-36 pt-5 px-4 sm:px-6 w-full max-w-full">
                     ${renderActiveTabContent()}
                 </main>
 
                 <!-- Bottom Navigation Bar -->
-                <nav class="fixed sm:absolute bottom-0 left-0 right-0 z-40 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-t border-slate-200 dark:border-slate-800 px-2 py-2 flex items-center justify-around shadow-2xl w-full">
+                <nav class="fixed sm:absolute bottom-0 left-0 right-0 z-40 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-t border-slate-200 dark:border-slate-800 px-3 py-2.5 flex items-center justify-around shadow-2xl w-full">
                     <button onclick="switchTab('home')" class="flex flex-col items-center justify-center w-12 sm:w-14 py-1 rounded-xl transition ${state.activeTab === 'home' ? 'text-indigo-600 dark:text-indigo-400 font-semibold' : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300'}">
-                        <i class="fa-solid fa-house text-sm sm:text-base mb-0.5"></i>
-                        <span class="text-[9px] sm:text-[10px] truncate">Expenses</span>
+                        <i class="fa-solid fa-house text-sm sm:text-base mb-1"></i>
+                        <span class="text-[9px] sm:text-[10px] truncate leading-none">Expenses</span>
                     </button>
 
-                    <button onclick="switchTab('add')" class="flex flex-col items-center justify-center -mt-5 group shrink-0">
+                    <button onclick="switchTab('add')" class="flex flex-col items-center justify-center -mt-7 group shrink-0">
                         <div class="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl sm:rounded-3xl bg-gradient-to-tr from-indigo-600 to-violet-600 flex items-center justify-center text-white shadow-xl shadow-indigo-500/30 transform group-hover:scale-105 transition active:scale-95">
                             <i class="fa-solid fa-plus text-lg sm:text-xl"></i>
                         </div>
-                        <span class="text-[9px] sm:text-[10px] text-slate-600 dark:text-slate-400 font-medium mt-0.5">Add</span>
+                        <span class="text-[9px] sm:text-[10px] text-slate-600 dark:text-slate-400 font-medium mt-1 leading-none">Add</span>
                     </button>
 
                     ${isAdmin ? `
                     <button onclick="switchTab('admin')" class="flex flex-col items-center justify-center w-12 sm:w-14 py-1 rounded-xl transition ${state.activeTab === 'admin' ? 'text-indigo-600 dark:text-indigo-400 font-semibold' : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300'}">
-                        <i class="fa-solid fa-chart-pie text-sm sm:text-base mb-0.5"></i>
-                        <span class="text-[9px] sm:text-[10px] truncate">Summary</span>
+                        <i class="fa-solid fa-chart-pie text-sm sm:text-base mb-1"></i>
+                        <span class="text-[9px] sm:text-[10px] truncate leading-none">Summary</span>
                     </button>
                     <button onclick="switchTab('requests')" class="flex flex-col items-center justify-center w-12 sm:w-14 py-1 rounded-xl transition relative ${state.activeTab === 'requests' ? 'text-indigo-600 dark:text-indigo-400 font-semibold' : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300'}">
-                        <i class="fa-solid fa-key text-sm sm:text-base mb-0.5"></i>
-                        <span class="text-[9px] sm:text-[10px] truncate">Requests</span>
+                        <i class="fa-solid fa-key text-sm sm:text-base mb-1"></i>
+                        <span class="text-[9px] sm:text-[10px] truncate leading-none">Requests</span>
                         ${state.passwordRequests.filter(r => r.status === 'pending').length > 0 ? `<span class="absolute top-1 right-2 w-2 h-2 rounded-full bg-rose-500"></span>` : ''}
                     </button>
                     <button onclick="switchTab('users')" class="flex flex-col items-center justify-center w-12 sm:w-14 py-1 rounded-xl transition ${state.activeTab === 'users' ? 'text-indigo-600 dark:text-indigo-400 font-semibold' : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300'}">
-                        <i class="fa-solid fa-users text-sm sm:text-base mb-0.5"></i>
-                        <span class="text-[9px] sm:text-[10px] truncate">Users</span>
+                        <i class="fa-solid fa-users text-sm sm:text-base mb-1"></i>
+                        <span class="text-[9px] sm:text-[10px] truncate leading-none">Users</span>
                     </button>
                     ` : `
                     <button onclick="switchTab('analytics')" class="flex flex-col items-center justify-center w-14 sm:w-16 py-1 rounded-xl transition ${state.activeTab === 'analytics' ? 'text-indigo-600 dark:text-indigo-400 font-semibold' : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300'}">
-                        <i class="fa-solid fa-chart-column text-sm sm:text-base mb-0.5"></i>
-                        <span class="text-[9px] sm:text-[10px] truncate">Summary</span>
+                        <i class="fa-solid fa-chart-column text-sm sm:text-base mb-1"></i>
+                        <span class="text-[9px] sm:text-[10px] truncate leading-none">Summary</span>
                     </button>
                     `}
 
                     <button onclick="switchTab('profile')" class="flex flex-col items-center justify-center w-12 sm:w-14 py-1 rounded-xl transition ${state.activeTab === 'profile' ? 'text-indigo-600 dark:text-indigo-400 font-semibold' : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300'}">
-                        <i class="fa-solid fa-user-circle text-sm sm:text-base mb-0.5"></i>
-                        <span class="text-[9px] sm:text-[10px] truncate">Profile</span>
+                        <i class="fa-solid fa-user-circle text-sm sm:text-base mb-1"></i>
+                        <span class="text-[9px] sm:text-[10px] truncate leading-none">Profile</span>
                     </button>
                 </nav>
 
@@ -601,7 +602,7 @@
                             </button>
                         </div>
 
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 w-full">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 w-full">
                             <div class="relative w-full">
                                 <select onchange="setFilterMonth(this.value)" class="w-full appearance-none bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl px-3.5 py-3 text-xs font-medium text-slate-700 dark:text-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500">
                                     <option value="All" ${state.filterMonth === 'All' ? 'selected' : ''}>All Months</option>
@@ -654,34 +655,34 @@
                             const isOffice = exp.category === 'Office';
                             const canEdit = isAdmin || exp.userId === state.currentUser.id;
                             return `
-                                <div class="bg-white dark:bg-slate-900 rounded-3xl p-4.5 border border-slate-200 dark:border-slate-800 shadow-sm hover:shadow-md transition relative group w-full">
+                                <div class="bg-white dark:bg-slate-900 rounded-3xl p-4.5 sm:p-5 border border-slate-200 dark:border-slate-800 shadow-sm hover:shadow-md transition relative group w-full">
                                     <div class="flex items-start justify-between gap-3 w-full">
                                         <div class="flex items-start space-x-3 flex-1 min-w-0">
                                             <div class="w-10 h-10 rounded-2xl ${isOffice ? 'bg-amber-500/10 text-amber-600 dark:text-amber-400' : 'bg-indigo-500/10 text-indigo-600 dark:text-indigo-400'} flex items-center justify-center shrink-0 mt-0.5">
                                                 <i class="fa-solid ${isOffice ? 'fa-briefcase' : 'fa-clapperboard'}"></i>
                                             </div>
                                             <div class="flex-1 min-w-0 pr-1">
-                                                <h4 class="font-semibold text-sm text-slate-900 dark:text-white leading-snug mb-0.5 break-words">${escapeHtml(exp.title)}</h4>
+                                                <h4 class="font-semibold text-sm text-slate-900 dark:text-white leading-snug mb-1 break-words">${escapeHtml(exp.title)}</h4>
                                                 
                                                 ${!isOffice && exp.clientNamePlace ? `
-                                                    <div class="mb-1 text-xs font-medium text-violet-600 dark:text-violet-400 flex items-center space-x-1 min-w-0">
+                                                    <div class="mb-1 text-xs font-medium text-violet-600 dark:text-violet-400 flex items-center space-x-1.5 min-w-0">
                                                         <i class="fa-solid fa-location-dot shrink-0"></i>
                                                         <span class="break-words">Client/Place: ${escapeHtml(exp.clientNamePlace)}</span>
                                                     </div>
                                                 ` : ''}
 
-                                                <div class="flex items-center flex-wrap gap-1 text-xs text-slate-500 dark:text-slate-400 mt-1">
+                                                <div class="flex items-center flex-wrap gap-1.5 text-xs text-slate-500 dark:text-slate-400 mt-1.5">
                                                     <span><i class="fa-regular fa-calendar mr-1"></i>${formatDate(exp.date)}</span>
                                                     <span>•</span>
                                                     <span class="font-medium text-indigo-600 dark:text-indigo-400">${exp.category}</span>
                                                     <span>•</span>
                                                     <span class="italic text-slate-600 dark:text-slate-300 break-all">${escapeHtml(exp.userName)}</span>
                                                 </div>
-                                                ${exp.notes ? `<p class="text-xs text-slate-600 dark:text-slate-400 mt-2 bg-slate-50 dark:bg-slate-800/50 p-2.5 rounded-2xl border border-slate-100 dark:border-slate-800/80 break-words">${escapeHtml(exp.notes)}</p>` : ''}
+                                                ${exp.notes ? `<p class="text-xs text-slate-600 dark:text-slate-400 mt-2.5 bg-slate-50 dark:bg-slate-800/50 p-3 rounded-2xl border border-slate-100 dark:border-slate-800/80 break-words">${escapeHtml(exp.notes)}</p>` : ''}
                                                 
                                                 ${exp.billAttachment ? `
-                                                    <div class="mt-2.5 flex items-center space-x-2">
-                                                        <button onclick="viewBillModal('${exp.id}')" class="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-xl bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 text-xs font-medium border border-indigo-200/60 dark:border-indigo-800/60 hover:bg-indigo-100 transition">
+                                                    <div class="mt-3 flex items-center space-x-2">
+                                                        <button onclick="viewBillModal('${exp.id}')" class="inline-flex items-center space-x-1.5 px-3.5 py-1.5 rounded-xl bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 text-xs font-medium border border-indigo-200/60 dark:border-indigo-800/60 hover:bg-indigo-100 transition">
                                                             <i class="fa-solid fa-paperclip"></i>
                                                             <span>View Attached Bill</span>
                                                         </button>
@@ -692,7 +693,7 @@
                                         <div class="text-right shrink-0 flex flex-col items-end">
                                             <span class="font-bold text-base sm:text-lg text-slate-900 dark:text-white break-all">${formatCurrency(exp.amount)}</span>
                                             ${canEdit ? `
-                                                <div class="flex items-center space-x-1.5 mt-2">
+                                                <div class="flex items-center space-x-1.5 mt-2.5">
                                                     <button onclick="startEditExpense('${exp.id}')" class="w-8 h-8 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-indigo-50 hover:text-indigo-600 dark:hover:bg-indigo-950 dark:hover:text-indigo-400 transition flex items-center justify-center text-xs" title="Edit">
                                                         <i class="fa-solid fa-pen"></i>
                                                     </button>
@@ -780,15 +781,15 @@
                         ` : ''}
                     </div>
 
-                    <form onsubmit="handleExpenseSubmit(event)" class="bg-white dark:bg-slate-900 rounded-3xl p-5 sm:p-6 border border-slate-200 dark:border-slate-800 shadow-sm space-y-4 w-full">
+                    <form onsubmit="handleExpenseSubmit(event)" class="bg-white dark:bg-slate-900 rounded-3xl p-5 sm:p-7 border border-slate-200 dark:border-slate-800 shadow-sm space-y-4 sm:space-y-5 w-full">
                         <div class="w-full">
-                            <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">Expense Type</label>
+                            <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-2">Expense Type</label>
                             <div class="grid grid-cols-2 gap-3 w-full">
-                                <button type="button" onclick="setFormCategory('Office')" id="btn-cat-office" class="py-3 px-2 sm:px-4 rounded-2xl border font-medium text-xs sm:text-sm flex items-center justify-center space-x-1.5 sm:space-x-2 transition truncate ${expense.category === 'Office' ? 'bg-indigo-600 text-white border-indigo-600 shadow-md shadow-indigo-500/20' : 'bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700'}">
+                                <button type="button" onclick="setFormCategory('Office')" id="btn-cat-office" class="py-3.5 px-3 sm:px-4 rounded-2xl border font-medium text-xs sm:text-sm flex items-center justify-center space-x-2 transition truncate ${expense.category === 'Office' ? 'bg-indigo-600 text-white border-indigo-600 shadow-md shadow-indigo-500/20' : 'bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700'}">
                                     <i class="fa-solid fa-briefcase shrink-0"></i>
                                     <span class="truncate">Office Expense</span>
                                 </button>
-                                <button type="button" onclick="setFormCategory('Shoot')" id="btn-cat-shoot" class="py-3 px-2 sm:px-4 rounded-2xl border font-medium text-xs sm:text-sm flex items-center justify-center space-x-1.5 sm:space-x-2 transition truncate ${expense.category === 'Shoot' ? 'bg-indigo-600 text-white border-indigo-600 shadow-md shadow-indigo-500/20' : 'bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700'}">
+                                <button type="button" onclick="setFormCategory('Shoot')" id="btn-cat-shoot" class="py-3.5 px-3 sm:px-4 rounded-2xl border font-medium text-xs sm:text-sm flex items-center justify-center space-x-2 transition truncate ${expense.category === 'Shoot' ? 'bg-indigo-600 text-white border-indigo-600 shadow-md shadow-indigo-500/20' : 'bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700'}">
                                     <i class="fa-solid fa-clapperboard shrink-0"></i>
                                     <span class="truncate">Shoot Expense</span>
                                 </button>
@@ -798,7 +799,7 @@
 
                         <!-- Shoot specific Client Name & Place input container -->
                         <div id="client-input-container" class="${expense.category === 'Shoot' ? '' : 'hidden'} w-full">
-                            <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">Client Name & Place</label>
+                            <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-2">Client Name & Place</label>
                             <div class="relative w-full">
                                 <span class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400">
                                     <i class="fa-solid fa-location-dot text-sm"></i>
@@ -808,7 +809,7 @@
                         </div>
 
                         <div class="w-full">
-                            <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">Amount (₹)</label>
+                            <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-2">Amount (₹)</label>
                             <div class="relative w-full">
                                 <span class="absolute inset-y-0 left-0 pl-4 flex items-center font-bold text-slate-400">₹</span>
                                 <input type="number" id="expense-amount" value="${expense.amount}" required min="1" step="any" placeholder="0.00" class="w-full pl-9 pr-4 py-3.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-base font-semibold focus:outline-none focus:ring-2 focus:ring-indigo-500 text-slate-900 dark:text-white">
@@ -816,25 +817,25 @@
                         </div>
 
                         <div class="w-full">
-                            <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">Title / Description</label>
+                            <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-2">Title / Description</label>
                             <input type="text" id="expense-title" value="${escapeHtml(expense.title)}" required placeholder="e.g., Studio Rent, Camera Rental, Catering" class="w-full px-4 py-3.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 text-slate-900 dark:text-white">
                         </div>
 
                         <div class="w-full">
-                            <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">Date</label>
+                            <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-2">Date</label>
                             <input type="date" id="expense-date" value="${expense.date}" required class="w-full px-4 py-3.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 text-slate-900 dark:text-white">
                         </div>
 
                         <div class="w-full">
-                            <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">Notes / Receipt details (Optional)</label>
+                            <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-2">Notes / Receipt details (Optional)</label>
                             <textarea id="expense-notes" rows="3" placeholder="Add any vendor details, invoice numbers or remarks..." class="w-full px-4 py-3.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 text-slate-900 dark:text-white">${escapeHtml(expense.notes)}</textarea>
                         </div>
 
                         <div class="w-full">
-                            <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">Bill / Receipt Attachment (Optional)</label>
+                            <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-2">Bill / Receipt Attachment (Optional)</label>
                             
                             ${currentBill ? `
-                                <div class="bg-indigo-50 dark:bg-indigo-950/60 p-3.5 rounded-2xl border border-indigo-200 dark:border-indigo-800 flex items-center justify-between mb-3 w-full gap-2">
+                                <div class="bg-indigo-50 dark:bg-indigo-950/60 p-4 rounded-2xl border border-indigo-200 dark:border-indigo-800 flex items-center justify-between mb-3 w-full gap-2">
                                     <div class="flex items-center space-x-2 text-indigo-600 dark:text-indigo-400 text-xs font-semibold min-w-0 flex-1">
                                         <i class="fa-solid fa-file-image text-base shrink-0"></i>
                                         <span class="truncate">Bill attached successfully</span>
@@ -846,11 +847,11 @@
                                 </div>
                             ` : ''}
 
-                            <div class="grid grid-cols-2 gap-2.5 w-full">
-                                <div class="relative border-2 border-dashed border-slate-200 dark:border-slate-700 rounded-2xl p-3.5 text-center bg-slate-50 dark:bg-slate-800/40 hover:border-indigo-500 transition cursor-pointer">
+                            <div class="grid grid-cols-2 gap-3 w-full">
+                                <div class="relative border-2 border-dashed border-slate-200 dark:border-slate-700 rounded-2xl p-4 text-center bg-slate-50 dark:bg-slate-800/40 hover:border-indigo-500 transition cursor-pointer">
                                     <input type="file" id="bill-file-input" accept="image/*" onchange="handleBillUpload(event)" class="absolute inset-0 opacity-0 cursor-pointer w-full h-full">
                                     <div class="flex flex-col items-center justify-center space-y-1">
-                                        <div class="w-9 h-9 rounded-2xl bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 flex items-center justify-center text-xs">
+                                        <div class="w-10 h-10 rounded-2xl bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 flex items-center justify-center text-xs">
                                             <i class="fa-solid fa-cloud-arrow-up"></i>
                                         </div>
                                         <p class="text-[11px] font-semibold text-slate-700 dark:text-slate-300">Upload File</p>
@@ -858,8 +859,8 @@
                                     </div>
                                 </div>
 
-                                <button type="button" onclick="openCameraCaptureModal()" class="border-2 border-dashed border-slate-200 dark:border-slate-700 rounded-2xl p-3.5 text-center bg-slate-50 dark:bg-slate-800/40 hover:border-indigo-500 transition flex flex-col items-center justify-center space-y-1">
-                                    <div class="w-9 h-9 rounded-2xl bg-violet-50 dark:bg-violet-950/60 text-violet-600 dark:text-violet-400 flex items-center justify-center text-xs">
+                                <button type="button" onclick="openCameraCaptureModal()" class="border-2 border-dashed border-slate-200 dark:border-slate-700 rounded-2xl p-4 text-center bg-slate-50 dark:bg-slate-800/40 hover:border-indigo-500 transition flex flex-col items-center justify-center space-y-1">
+                                    <div class="w-10 h-10 rounded-2xl bg-violet-50 dark:bg-violet-950/60 text-violet-600 dark:text-violet-400 flex items-center justify-center text-xs">
                                         <i class="fa-solid fa-camera"></i>
                                     </div>
                                     <p class="text-[11px] font-semibold text-slate-700 dark:text-slate-300">Capture Bill</p>
@@ -868,7 +869,7 @@
                             </div>
                         </div>
 
-                        <button type="submit" class="w-full py-4 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 text-white font-semibold rounded-2xl shadow-lg shadow-indigo-500/25 transition flex items-center justify-center space-x-2">
+                        <button type="submit" class="w-full py-4 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 text-white font-semibold rounded-2xl shadow-lg shadow-indigo-500/25 transition flex items-center justify-center space-x-2 mt-2">
                             <i class="fa-solid ${isEditing ? 'fa-floppy-disk' : 'fa-circle-plus'}"></i>
                             <span>${isEditing ? 'Save Changes' : 'Submit Expense'}</span>
                         </button>
@@ -1017,12 +1018,12 @@
             const clientContainer = document.getElementById('client-input-container');
 
             if (cat === 'Office') {
-                btnOffice.className = 'py-3 px-2 sm:px-4 rounded-2xl border font-medium text-xs sm:text-sm flex items-center justify-center space-x-1.5 sm:space-x-2 transition truncate bg-indigo-600 text-white border-indigo-600 shadow-md shadow-indigo-500/20';
-                btnShoot.className = 'py-3 px-2 sm:px-4 rounded-2xl border font-medium text-xs sm:text-sm flex items-center justify-center space-x-1.5 sm:space-x-2 transition truncate bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700';
+                btnOffice.className = 'py-3.5 px-3 sm:px-4 rounded-2xl border font-medium text-xs sm:text-sm flex items-center justify-center space-x-2 transition truncate bg-indigo-600 text-white border-indigo-600 shadow-md shadow-indigo-500/20';
+                btnShoot.className = 'py-3.5 px-3 sm:px-4 rounded-2xl border font-medium text-xs sm:text-sm flex items-center justify-center space-x-2 transition truncate bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700';
                 if (clientContainer) clientContainer.classList.add('hidden');
             } else {
-                btnShoot.className = 'py-3 px-2 sm:px-4 rounded-2xl border font-medium text-xs sm:text-sm flex items-center justify-center space-x-1.5 sm:space-x-2 transition truncate bg-indigo-600 text-white border-indigo-600 shadow-md shadow-indigo-500/20';
-                btnOffice.className = 'py-3 px-2 sm:px-4 rounded-2xl border font-medium text-xs sm:text-sm flex items-center justify-center space-x-1.5 sm:space-x-2 transition truncate bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700';
+                btnShoot.className = 'py-3.5 px-3 sm:px-4 rounded-2xl border font-medium text-xs sm:text-sm flex items-center justify-center space-x-2 transition truncate bg-indigo-600 text-white border-indigo-600 shadow-md shadow-indigo-500/20';
+                btnOffice.className = 'py-3.5 px-3 sm:px-4 rounded-2xl border font-medium text-xs sm:text-sm flex items-center justify-center space-x-2 transition truncate bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700';
                 if (clientContainer) clientContainer.classList.remove('hidden');
             }
         }
@@ -1492,19 +1493,19 @@
         function renderProfileTab() {
             return `
                 <div class="space-y-4 animate-fadeIn w-full max-w-full">
-                    <div class="bg-white dark:bg-slate-900 rounded-3xl p-6 border border-slate-200 dark:border-slate-800 shadow-sm text-center w-full">
+                    <div class="bg-white dark:bg-slate-900 rounded-3xl p-6 sm:p-7 border border-slate-200 dark:border-slate-800 shadow-sm text-center w-full">
                         <div class="w-20 h-20 bg-white dark:bg-slate-800 rounded-2xl p-2 flex items-center justify-center mx-auto mb-3 shadow-md border border-slate-200 dark:border-slate-700 overflow-hidden">
                             <img src="https://clickfactoryphotography.com/wp-content/uploads/2022/04/crop-logo.gif" alt="Click Factory Logo" class="w-full h-full object-contain" onerror="this.src='https://placehold.co/80x80/4f46e5/ffffff?text=CF'">
                         </div>
                         <h2 class="font-bold text-lg text-slate-900 dark:text-white truncate">${state.currentUser.name}</h2>
-                        <p class="text-xs text-slate-500 dark:text-slate-400 mb-1 truncate">@${state.currentUser.username}</p>
+                        <p class="text-xs text-slate-500 dark:text-slate-400 mb-2 truncate">@${state.currentUser.username}</p>
                         <span class="inline-block px-3.5 py-1 rounded-full text-xs font-semibold ${state.currentUser.role === 'admin' ? 'bg-indigo-50 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-400 border border-indigo-200/50 dark:border-indigo-800' : 'bg-emerald-50 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400 border border-emerald-200/50 dark:border-emerald-800'}">
                             ${state.currentUser.role === 'admin' ? 'Administrator' : 'Regular User'}
                         </span>
                     </div>
 
                     ${state.currentUser.role === 'admin' ? `
-                    <div class="bg-white dark:bg-slate-900 rounded-3xl p-4.5 border border-slate-200 dark:border-slate-800 shadow-sm space-y-3 w-full">
+                    <div class="bg-white dark:bg-slate-900 rounded-3xl p-4.5 sm:p-5 border border-slate-200 dark:border-slate-800 shadow-sm space-y-3 w-full">
                         <h3 class="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider px-1">Admin Security</h3>
                         <button onclick="openChangePasswordModal()" class="w-full py-3 px-4 rounded-2xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-xs font-semibold transition flex items-center justify-center space-x-2">
                             <i class="fa-solid fa-key"></i>
