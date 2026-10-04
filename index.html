@@ -67,11 +67,6 @@
                 border: 8px solid #1e293b;
             }
         }
-        @media (min-width: 1024px) {
-            .app-container {
-                max-width: 560px;
-            }
-        }
     </style>
 </head>
 <body class="bg-slate-900 text-slate-800 dark:text-slate-100 flex flex-col justify-center items-center h-full selection:bg-indigo-500 selection:text-white">
@@ -84,7 +79,7 @@
     <div id="toast-container" class="fixed top-4 left-1/2 transform -translate-x-1/2 z-50 flex flex-col gap-2 pointer-events-none w-11/12 max-w-sm"></div>
 
     <script>
-        const STORAGE_KEY = 'click_factory_expense_tracker_admin_auth_v6';
+        const STORAGE_KEY = 'click_factory_expense_tracker_admin_auth_v7';
 
         const initialData = {
             currentUser: null,
@@ -131,7 +126,7 @@
             darkMode: true,
             editingExpenseId: null,
             tempBillData: null,
-            authView: 'login' // 'login' or 'forgot'
+            authView: 'login'
         };
 
         let state = loadState();
@@ -213,20 +208,20 @@
 
             app.innerHTML = `
                 <!-- Top Header Bar -->
-                <header class="sticky top-0 z-40 bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 px-4 sm:px-6 py-3.5 flex items-center justify-between">
-                    <div class="flex items-center space-x-3">
+                <header class="sticky top-0 z-40 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 px-4 py-3.5 flex items-center justify-between">
+                    <div class="flex items-center space-x-3 min-w-0">
                         <div class="w-10 h-10 rounded-2xl bg-white dark:bg-slate-800 p-1 flex items-center justify-center shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden shrink-0">
                             <img src="https://clickfactoryphotography.com/wp-content/uploads/2022/04/crop-logo.gif" alt="Click Factory Logo" class="w-full h-full object-contain" onerror="this.src='https://placehold.co/40x40/4f46e5/ffffff?text=CF'">
                         </div>
-                        <div>
-                            <h1 class="font-bold text-sm sm:text-base leading-tight tracking-tight text-slate-900 dark:text-white">Click Factory</h1>
-                            <p class="text-[11px] text-slate-500 dark:text-slate-400 font-medium">
+                        <div class="min-w-0">
+                            <h1 class="font-bold text-sm sm:text-base leading-tight tracking-tight text-slate-900 dark:text-white truncate">Click Factory</h1>
+                            <p class="text-[11px] text-slate-500 dark:text-slate-400 font-medium truncate">
                                 ${isAdmin ? '<span class="text-indigo-600 dark:text-indigo-400 font-semibold"><i class="fa-solid fa-shield-halved mr-1"></i>Admin Portal</span>' : `Expense Tracker`}
                             </p>
                         </div>
                     </div>
                     
-                    <div class="flex items-center space-x-2">
+                    <div class="flex items-center space-x-2 shrink-0">
                         <button onclick="toggleDarkMode()" class="w-10 h-10 rounded-2xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition">
                             <i class="fa-solid ${state.darkMode ? 'fa-sun text-amber-400' : 'fa-moon text-slate-600'} text-sm"></i>
                         </button>
@@ -242,7 +237,7 @@
                 </main>
 
                 <!-- Bottom Navigation Bar -->
-                <nav class="absolute bottom-0 left-0 right-0 z-40 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-t border-slate-200 dark:border-slate-800 px-3 py-2.5 flex items-center justify-around shadow-2xl">
+                <nav class="fixed sm:absolute bottom-0 left-0 right-0 z-40 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-t border-slate-200 dark:border-slate-800 px-3 py-2 flex items-center justify-around shadow-2xl">
                     <button onclick="switchTab('home')" class="flex flex-col items-center justify-center w-14 py-1 rounded-2xl transition ${state.activeTab === 'home' ? 'text-indigo-600 dark:text-indigo-400 font-semibold' : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300'}">
                         <i class="fa-solid fa-house text-base mb-0.5"></i>
                         <span class="text-[10px]">Expenses</span>
@@ -289,7 +284,7 @@
 
         function renderLoginPage() {
             return `
-                <div class="flex-1 flex flex-col justify-center px-6 py-12 animate-fadeIn max-w-sm mx-auto w-full">
+                <div class="flex-1 flex flex-col justify-center px-4 py-10 animate-fadeIn max-w-sm mx-auto w-full">
                     <div class="text-center mb-6">
                         <div class="w-20 h-20 bg-white dark:bg-slate-800 rounded-3xl p-3 flex items-center justify-center mx-auto mb-4 shadow-xl border border-slate-200 dark:border-slate-700 overflow-hidden">
                             <img src="https://clickfactoryphotography.com/wp-content/uploads/2022/04/crop-logo.gif" alt="Click Factory Logo" class="w-full h-full object-contain" onerror="this.src='https://placehold.co/80x80/4f46e5/ffffff?text=CF'">
@@ -335,7 +330,7 @@
 
         function renderForgotPasswordPage() {
             return `
-                <div class="flex-1 flex flex-col justify-center px-6 py-12 animate-fadeIn max-w-sm mx-auto w-full">
+                <div class="flex-1 flex flex-col justify-center px-4 py-10 animate-fadeIn max-w-sm mx-auto w-full">
                     <div class="text-center mb-6">
                         <div class="w-16 h-16 bg-indigo-50 dark:bg-indigo-950/60 rounded-3xl flex items-center justify-center mx-auto mb-4 text-indigo-600 dark:text-indigo-400 text-2xl shadow-sm border border-indigo-200 dark:border-indigo-800">
                             <i class="fa-solid fa-key"></i>
@@ -550,7 +545,7 @@
                                 </p>
                                 <h2 class="text-2xl sm:text-3xl font-bold tracking-tight mt-0.5">${formatCurrency(totalAmount)}</h2>
                             </div>
-                            <span class="bg-white/20 backdrop-blur-md text-white text-xs font-semibold px-3 py-1 rounded-full">
+                            <span class="bg-white/20 backdrop-blur-md text-white text-xs font-semibold px-3 py-1 rounded-full shrink-0">
                                 ${filtered.length} Items
                             </span>
                         </div>
@@ -561,14 +556,14 @@
                                     <i class="fa-solid fa-briefcase"></i>
                                     <span>Office</span>
                                 </div>
-                                <p class="font-bold text-sm sm:text-base">${formatCurrency(officeTotal)}</p>
+                                <p class="font-bold text-sm sm:text-base truncate">${formatCurrency(officeTotal)}</p>
                             </div>
                             <div class="bg-black/10 backdrop-blur-sm rounded-2xl p-3">
                                 <div class="flex items-center space-x-1.5 text-indigo-200 text-xs mb-1">
                                     <i class="fa-solid fa-clapperboard"></i>
                                     <span>Shoot</span>
                                 </div>
-                                <p class="font-bold text-sm sm:text-base">${formatCurrency(shootTotal)}</p>
+                                <p class="font-bold text-sm sm:text-base truncate">${formatCurrency(shootTotal)}</p>
                             </div>
                         </div>
                     </div>
@@ -579,7 +574,7 @@
                             <span class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400">
                                 <i class="fa-solid fa-magnifying-glass text-sm"></i>
                             </span>
-                            <input type="text" id="search-input" value="${state.searchQuery}" oninput="handleSearchInput(event)" placeholder="Search expenses, notes, client, user..." class="w-full pl-10 pr-4 py-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 shadow-sm transition text-slate-900 dark:text-white">
+                            <input type="text" id="search-input" value="${state.searchQuery}" oninput="handleSearchInput(event)" placeholder="Search expenses, notes, client, user..." class="w-full pl-10 pr-4 py-3.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 shadow-sm transition text-slate-900 dark:text-white">
                             ${state.searchQuery ? `<button onclick="clearSearch()" class="absolute inset-y-0 right-0 pr-4 flex items-center text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark"></i></button>` : ''}
                         </div>
 
@@ -597,7 +592,7 @@
 
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
                             <div class="relative">
-                                <select onchange="setFilterMonth(this.value)" class="w-full appearance-none bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl px-3.5 py-2.5 text-xs font-medium text-slate-700 dark:text-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                                <select onchange="setFilterMonth(this.value)" class="w-full appearance-none bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl px-3.5 py-3 text-xs font-medium text-slate-700 dark:text-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500">
                                     <option value="All" ${state.filterMonth === 'All' ? 'selected' : ''}>All Months</option>
                                     ${availableMonths.map(m => `<option value="${m}" ${state.filterMonth === m ? 'selected' : ''}>${formatMonthName(m)}</option>`).join('')}
                                 </select>
@@ -608,7 +603,7 @@
 
                             ${isAdmin ? `
                             <div class="relative">
-                                <select onchange="setFilterUser(this.value)" class="w-full appearance-none bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl px-3.5 py-2.5 text-xs font-medium text-slate-700 dark:text-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                                <select onchange="setFilterUser(this.value)" class="w-full appearance-none bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl px-3.5 py-3 text-xs font-medium text-slate-700 dark:text-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500">
                                     <option value="All" ${state.filterUser === 'All' ? 'selected' : ''}>All Users</option>
                                     ${state.users.map(u => `<option value="${u.id}" ${state.filterUser === u.id ? 'selected' : ''}>${u.name}</option>`).join('')}
                                 </select>
@@ -1160,16 +1155,16 @@
                                 const userTotal = state.expenses.filter(e => e.userId === u.id).reduce((s, e) => s + e.amount, 0);
                                 return `
                                     <div class="flex items-center justify-between p-3.5 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-100 dark:border-slate-800">
-                                        <div class="flex items-center space-x-3">
+                                        <div class="flex items-center space-x-3 min-w-0">
                                             <div class="w-10 h-10 rounded-2xl bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 flex items-center justify-center font-bold text-sm shrink-0">
                                                 ${u.name.charAt(0)}
                                             </div>
                                             <div class="min-w-0">
                                                 <h4 class="font-semibold text-sm text-slate-900 dark:text-white truncate">${u.name}</h4>
-                                                <p class="text-xs text-slate-500">${userExpCount} records • ${formatCurrency(userTotal)}</p>
+                                                <p class="text-xs text-slate-500 truncate">${userExpCount} records • ${formatCurrency(userTotal)}</p>
                                             </div>
                                         </div>
-                                        <button onclick="exportUserCSV('${u.id}', '${u.name}')" class="px-3.5 py-2 bg-indigo-50 dark:bg-indigo-950/50 hover:bg-indigo-100 dark:hover:bg-indigo-900 text-indigo-600 dark:text-indigo-400 text-xs font-semibold rounded-xl transition border border-indigo-200/50 dark:border-indigo-800/50 flex items-center space-x-1 shrink-0">
+                                        <button onclick="exportUserCSV('${u.id}', '${u.name}')" class="px-3.5 py-2 bg-indigo-50 dark:bg-indigo-950/50 hover:bg-indigo-100 dark:hover:bg-indigo-900 text-indigo-600 dark:text-indigo-400 text-xs font-semibold rounded-xl transition border border-indigo-200/50 dark:border-indigo-800/50 flex items-center space-x-1 shrink-0 ml-2">
                                             <i class="fa-solid fa-download"></i><span>CSV</span>
                                         </button>
                                     </div>
@@ -1204,15 +1199,15 @@
                                     <div class="grid grid-cols-3 gap-2 pt-2 border-t border-slate-100 dark:border-slate-800">
                                         <div class="bg-slate-50 dark:bg-slate-800/50 p-2.5 rounded-2xl text-center">
                                             <span class="text-[10px] uppercase font-semibold text-slate-400 block mb-0.5">Office</span>
-                                            <span class="font-bold text-xs sm:text-sm text-slate-800 dark:text-slate-200">${formatCurrency(data.office)}</span>
+                                            <span class="font-bold text-xs sm:text-sm text-slate-800 dark:text-slate-200 truncate block">${formatCurrency(data.office)}</span>
                                         </div>
                                         <div class="bg-slate-50 dark:bg-slate-800/50 p-2.5 rounded-2xl text-center">
                                             <span class="text-[10px] uppercase font-semibold text-slate-400 block mb-0.5">Shoot</span>
-                                            <span class="font-bold text-xs sm:text-sm text-slate-800 dark:text-slate-200">${formatCurrency(data.shoot)}</span>
+                                            <span class="font-bold text-xs sm:text-sm text-slate-800 dark:text-slate-200 truncate block">${formatCurrency(data.shoot)}</span>
                                         </div>
                                         <div class="bg-indigo-50 dark:bg-indigo-950/40 p-2.5 rounded-2xl text-center border border-indigo-100 dark:border-indigo-900/50">
                                             <span class="text-[10px] uppercase font-semibold text-indigo-600 dark:text-indigo-400 block mb-0.5">Total</span>
-                                            <span class="font-bold text-xs sm:text-sm text-indigo-600 dark:text-indigo-400">${formatCurrency(data.total)}</span>
+                                            <span class="font-bold text-xs sm:text-sm text-indigo-600 dark:text-indigo-400 truncate block">${formatCurrency(data.total)}</span>
                                         </div>
                                     </div>
                                 </div>
@@ -1442,11 +1437,11 @@
                         <div class="grid grid-cols-2 gap-3 mt-4 pt-4 border-t border-white/15">
                             <div>
                                 <span class="text-xs text-violet-200">Office Expense</span>
-                                <p class="font-bold text-sm sm:text-base">${formatCurrency(office)}</p>
+                                <p class="font-bold text-sm sm:text-base truncate">${formatCurrency(office)}</p>
                             </div>
                             <div>
                                 <span class="text-xs text-violet-200">Shoot Expense</span>
-                                <p class="font-bold text-sm sm:text-base">${formatCurrency(shoot)}</p>
+                                <p class="font-bold text-sm sm:text-base truncate">${formatCurrency(shoot)}</p>
                             </div>
                         </div>
                     </div>
@@ -1489,7 +1484,7 @@
                         <div class="w-20 h-20 bg-white dark:bg-slate-800 rounded-2xl p-2 flex items-center justify-center mx-auto mb-3 shadow-md border border-slate-200 dark:border-slate-700 overflow-hidden">
                             <img src="https://clickfactoryphotography.com/wp-content/uploads/2022/04/crop-logo.gif" alt="Click Factory Logo" class="w-full h-full object-contain" onerror="this.src='https://placehold.co/80x80/4f46e5/ffffff?text=CF'">
                         </div>
-                        <h2 class="font-bold text-lg text-slate-900 dark:text-white">${state.currentUser.name}</h2>
+                        <h2 class="font-bold text-lg text-slate-900 dark:text-white truncate">${state.currentUser.name}</h2>
                         <p class="text-xs text-slate-500 dark:text-slate-400 mb-1">@${state.currentUser.username}</p>
                         <span class="inline-block px-3.5 py-1 rounded-full text-xs font-semibold ${state.currentUser.role === 'admin' ? 'bg-indigo-50 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-400 border border-indigo-200/50 dark:border-indigo-800' : 'bg-emerald-50 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400 border border-emerald-200/50 dark:border-emerald-800'}">
                             ${state.currentUser.role === 'admin' ? 'Administrator' : 'Regular User'}
@@ -1656,7 +1651,7 @@
         }
 
         function escapeHtml(str) {
-            if (!str) return '';
+            if (!str) return;
             return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
         }
 
