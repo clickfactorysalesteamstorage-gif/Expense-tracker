@@ -67,8 +67,6 @@
             background-color: #f8fafc;
             display: flex;
             flex-direction: column;
-            padding-top: env(safe-area-inset-top);
-            padding-bottom: env(safe-area-inset-bottom);
         }
         @media (min-width: 640px) {
             .app-container {
@@ -90,10 +88,10 @@
     </div>
 
     <!-- Notification Toast Container -->
-    <div id="toast-container" class="fixed top-6 left-1/2 transform -translate-x-1/2 z-50 flex flex-col gap-2 pointer-events-none w-11/12 max-w-sm"></div>
+    <div id="toast-container" class="fixed top-12 left-1/2 transform -translate-x-1/2 z-50 flex flex-col gap-2 pointer-events-none w-11/12 max-w-sm"></div>
 
     <script>
-        const STORAGE_KEY = 'click_factory_expense_tracker_admin_auth_v13';
+        const STORAGE_KEY = 'click_factory_expense_tracker_admin_auth_v14';
 
         const initialData = {
             currentUser: null,
@@ -221,8 +219,8 @@
             const isAdmin = state.currentUser.role === 'admin';
 
             app.innerHTML = `
-                <!-- Top Header Bar with Safe Area Top Padding -->
-                <header class="sticky top-0 z-40 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 px-4 sm:px-6 pt-3 pb-3.5 flex items-center justify-between w-full shadow-sm">
+                <!-- Top Header Bar with Safe Top Padding for Notch/Status Bar -->
+                <header class="sticky top-0 z-40 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 px-4 sm:px-6 pt-10 sm:pt-4 pb-3.5 flex items-center justify-between w-full shadow-sm">
                     <div class="flex items-center space-x-3 min-w-0 flex-1 pr-2">
                         <div class="w-10 h-10 rounded-2xl bg-white dark:bg-slate-800 p-1 flex items-center justify-center shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden shrink-0">
                             <img src="https://clickfactoryphotography.com/wp-content/uploads/2022/04/crop-logo.gif" alt="Click Factory Logo" class="w-full h-full object-contain" onerror="this.src='https://placehold.co/40x40/4f46e5/ffffff?text=CF'">
@@ -245,8 +243,8 @@
                     </div>
                 </header>
 
-                <!-- Scrollable Body Content -->
-                <main class="flex-1 overflow-y-auto pb-40 pt-4 px-4 sm:px-6 w-full max-w-full">
+                <!-- Scrollable Body Content with ample bottom padding -->
+                <main class="flex-1 overflow-y-auto pb-44 pt-5 px-4 sm:px-6 w-full max-w-full">
                     ${renderActiveTabContent()}
                 </main>
 
