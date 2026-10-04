@@ -60,6 +60,11 @@
             overflow-wrap: break-word;
             background-color: #0f172a;
         }
+        input[type="date"] {
+            appearance: none;
+            -webkit-appearance: none;
+            min-height: 48px;
+        }
         .app-container {
             width: 100%;
             max-width: 100%;
@@ -93,7 +98,7 @@
     <div id="toast-container" class="fixed top-14 left-1/2 transform -translate-x-1/2 z-50 flex flex-col gap-2 pointer-events-none w-11/12 max-w-sm"></div>
 
     <script>
-        const STORAGE_KEY = 'click_factory_expense_tracker_admin_auth_v16';
+        const STORAGE_KEY = 'click_factory_expense_tracker_admin_auth_v17';
 
         const initialData = {
             currentUser: null,
@@ -221,7 +226,7 @@
             const isAdmin = state.currentUser.role === 'admin';
 
             app.innerHTML = `
-                <!-- Top Header Bar with Safe Top Padding -->
+                <!-- Top Header Bar -->
                 <header class="sticky top-0 z-40 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 px-4 sm:px-6 py-3.5 flex items-center justify-between w-full shadow-sm">
                     <div class="flex items-center space-x-3 min-w-0 flex-1 pr-2">
                         <div class="w-10 h-10 rounded-2xl bg-white dark:bg-slate-800 p-1 flex items-center justify-center shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden shrink-0">
@@ -764,8 +769,8 @@
             const currentBill = state.tempBillData !== null ? state.tempBillData : expense.billAttachment;
 
             return `
-                <div class="space-y-4 animate-fadeIn w-full max-w-full pb-6">
-                    <div class="flex items-center justify-between mb-2">
+                <div class="space-y-4 animate-fadeIn w-full max-w-full pb-8">
+                    <div class="flex items-center justify-between mb-2 px-1">
                         <div class="min-w-0 pr-2">
                             <h2 class="text-lg font-bold text-slate-900 dark:text-white truncate">
                                 ${isEditing ? 'Edit Expense' : 'Add New Expense'}
@@ -781,9 +786,9 @@
                         ` : ''}
                     </div>
 
-                    <form onsubmit="handleExpenseSubmit(event)" class="bg-white dark:bg-slate-900 rounded-3xl p-5 sm:p-7 border border-slate-200 dark:border-slate-800 shadow-sm space-y-5 w-full">
+                    <form onsubmit="handleExpenseSubmit(event)" class="bg-white dark:bg-slate-900 rounded-3xl p-5 sm:p-7 border border-slate-200 dark:border-slate-800 shadow-sm space-y-6 w-full">
                         <div class="w-full">
-                            <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-2">Expense Type</label>
+                            <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-2.5">Expense Type</label>
                             <div class="grid grid-cols-2 gap-3 w-full">
                                 <button type="button" onclick="setFormCategory('Office')" id="btn-cat-office" class="py-3.5 px-3 sm:px-4 rounded-2xl border font-medium text-xs sm:text-sm flex items-center justify-center space-x-2 transition truncate ${expense.category === 'Office' ? 'bg-indigo-600 text-white border-indigo-600 shadow-md shadow-indigo-500/20' : 'bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700'}">
                                     <i class="fa-solid fa-briefcase shrink-0"></i>
@@ -799,7 +804,7 @@
 
                         <!-- Shoot specific Client Name & Place input container -->
                         <div id="client-input-container" class="${expense.category === 'Shoot' ? '' : 'hidden'} w-full">
-                            <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-2">Client Name & Place</label>
+                            <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-2.5">Client Name & Place</label>
                             <div class="relative w-full">
                                 <span class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400">
                                     <i class="fa-solid fa-location-dot text-sm"></i>
@@ -809,7 +814,7 @@
                         </div>
 
                         <div class="w-full">
-                            <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-2">Amount (₹)</label>
+                            <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-2.5">Amount (₹)</label>
                             <div class="relative w-full">
                                 <span class="absolute inset-y-0 left-0 pl-4 flex items-center font-bold text-slate-400">₹</span>
                                 <input type="number" id="expense-amount" value="${expense.amount}" required min="1" step="any" placeholder="0.00" class="w-full pl-9 pr-4 py-3.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-base font-semibold focus:outline-none focus:ring-2 focus:ring-indigo-500 text-slate-900 dark:text-white">
@@ -817,22 +822,22 @@
                         </div>
 
                         <div class="w-full">
-                            <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-2">Title / Description</label>
+                            <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-2.5">Title / Description</label>
                             <input type="text" id="expense-title" value="${escapeHtml(expense.title)}" required placeholder="e.g., Studio Rent, Camera Rental, Catering" class="w-full px-4 py-3.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 text-slate-900 dark:text-white">
                         </div>
 
                         <div class="w-full">
-                            <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-2">Date</label>
+                            <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-2.5">Date</label>
                             <input type="date" id="expense-date" value="${expense.date}" required class="w-full px-4 py-3.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 text-slate-900 dark:text-white">
                         </div>
 
                         <div class="w-full">
-                            <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-2">Notes / Receipt details (Optional)</label>
+                            <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-2.5">Notes / Receipt details (Optional)</label>
                             <textarea id="expense-notes" rows="3" placeholder="Add any vendor details, invoice numbers or remarks..." class="w-full px-4 py-3.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 text-slate-900 dark:text-white">${escapeHtml(expense.notes)}</textarea>
                         </div>
 
                         <div class="w-full">
-                            <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-2">Bill / Receipt Attachment (Optional)</label>
+                            <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-2.5">Bill / Receipt Attachment (Optional)</label>
                             
                             ${currentBill ? `
                                 <div class="bg-indigo-50 dark:bg-indigo-950/60 p-4 rounded-2xl border border-indigo-200 dark:border-indigo-800 flex items-center justify-between mb-3 w-full gap-2">
