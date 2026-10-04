@@ -32,6 +32,9 @@
         }
     </script>
     <style>
+        *, ::before, ::after {
+            box-sizing: border-box;
+        }
         ::-webkit-scrollbar {
             width: 4px;
             height: 4px;
@@ -49,12 +52,18 @@
         body {
             font-family: 'Inter', sans-serif;
             -webkit-tap-highlight-color: transparent;
+            margin: 0;
+            padding: 0;
+            width: 100vw;
+            overflow-x: hidden;
         }
         .app-container {
             width: 100%;
             max-width: 100%;
             min-height: 100vh;
             background-color: #f8fafc;
+            display: flex;
+            flex-direction: column;
         }
         @media (min-width: 640px) {
             .app-container {
@@ -79,7 +88,7 @@
     <div id="toast-container" class="fixed top-4 left-1/2 transform -translate-x-1/2 z-50 flex flex-col gap-2 pointer-events-none w-11/12 max-w-sm"></div>
 
     <script>
-        const STORAGE_KEY = 'click_factory_expense_tracker_admin_auth_v7';
+        const STORAGE_KEY = 'click_factory_expense_tracker_admin_auth_v8';
 
         const initialData = {
             currentUser: null,
@@ -208,12 +217,12 @@
 
             app.innerHTML = `
                 <!-- Top Header Bar -->
-                <header class="sticky top-0 z-40 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 px-4 py-3.5 flex items-center justify-between">
-                    <div class="flex items-center space-x-3 min-w-0">
+                <header class="sticky top-0 z-40 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 px-4 py-3 flex items-center justify-between w-full">
+                    <div class="flex items-center space-x-3 min-w-0 flex-1 pr-2">
                         <div class="w-10 h-10 rounded-2xl bg-white dark:bg-slate-800 p-1 flex items-center justify-center shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden shrink-0">
                             <img src="https://clickfactoryphotography.com/wp-content/uploads/2022/04/crop-logo.gif" alt="Click Factory Logo" class="w-full h-full object-contain" onerror="this.src='https://placehold.co/40x40/4f46e5/ffffff?text=CF'">
                         </div>
-                        <div class="min-w-0">
+                        <div class="min-w-0 flex-1">
                             <h1 class="font-bold text-sm sm:text-base leading-tight tracking-tight text-slate-900 dark:text-white truncate">Click Factory</h1>
                             <p class="text-[11px] text-slate-500 dark:text-slate-400 font-medium truncate">
                                 ${isAdmin ? '<span class="text-indigo-600 dark:text-indigo-400 font-semibold"><i class="fa-solid fa-shield-halved mr-1"></i>Admin Portal</span>' : `Expense Tracker`}
@@ -232,12 +241,12 @@
                 </header>
 
                 <!-- Scrollable Body Content -->
-                <main class="flex-1 overflow-y-auto pb-28 pt-4 px-4 sm:px-6">
+                <main class="flex-1 overflow-y-auto pb-28 pt-4 px-4 sm:px-6 w-full max-w-full">
                     ${renderActiveTabContent()}
                 </main>
 
                 <!-- Bottom Navigation Bar -->
-                <nav class="fixed sm:absolute bottom-0 left-0 right-0 z-40 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-t border-slate-200 dark:border-slate-800 px-3 py-2 flex items-center justify-around shadow-2xl">
+                <nav class="fixed sm:absolute bottom-0 left-0 right-0 z-40 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-t border-slate-200 dark:border-slate-800 px-3 py-2 flex items-center justify-around shadow-2xl w-full">
                     <button onclick="switchTab('home')" class="flex flex-col items-center justify-center w-14 py-1 rounded-2xl transition ${state.activeTab === 'home' ? 'text-indigo-600 dark:text-indigo-400 font-semibold' : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300'}">
                         <i class="fa-solid fa-house text-base mb-0.5"></i>
                         <span class="text-[10px]">Expenses</span>
@@ -293,7 +302,7 @@
                         <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Expense Tracker & Management Portal</p>
                     </div>
 
-                    <div class="bg-white dark:bg-slate-900 py-8 px-6 shadow-xl rounded-3xl border border-slate-200 dark:border-slate-800 space-y-5">
+                    <div class="bg-white dark:bg-slate-900 py-8 px-6 shadow-xl rounded-3xl border border-slate-200 dark:border-slate-800 space-y-5 w-full">
                         <form onsubmit="handleLoginSubmit(event)" class="space-y-4">
                             <div>
                                 <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">Username</label>
@@ -339,7 +348,7 @@
                         <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Request an authentication code from Admin</p>
                     </div>
 
-                    <div class="bg-white dark:bg-slate-900 py-8 px-6 shadow-xl rounded-3xl border border-slate-200 dark:border-slate-800 space-y-4">
+                    <div class="bg-white dark:bg-slate-900 py-8 px-6 shadow-xl rounded-3xl border border-slate-200 dark:border-slate-800 space-y-4 w-full">
                         <form onsubmit="handleForgotPasswordSubmit(event)" class="space-y-4">
                             <div>
                                 <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">Username</label>
@@ -534,16 +543,16 @@
             const availableMonths = Array.from(monthsSet).sort().reverse();
 
             return `
-                <div class="space-y-4 animate-fadeIn">
+                <div class="space-y-4 animate-fadeIn w-full max-w-full">
                     <!-- Summary Card -->
-                    <div class="bg-gradient-to-br from-indigo-600 to-violet-700 rounded-3xl p-5 sm:p-6 text-white shadow-xl shadow-indigo-500/20 relative overflow-hidden">
+                    <div class="bg-gradient-to-br from-indigo-600 to-violet-700 rounded-3xl p-5 sm:p-6 text-white shadow-xl shadow-indigo-500/20 relative overflow-hidden w-full">
                         <div class="absolute -right-6 -bottom-6 w-32 h-32 bg-white/10 rounded-full blur-2xl pointer-events-none"></div>
                         <div class="flex justify-between items-start mb-3">
-                            <div>
-                                <p class="text-indigo-200 text-xs font-medium uppercase tracking-wider">
+                            <div class="min-w-0 flex-1 pr-2">
+                                <p class="text-indigo-200 text-xs font-medium uppercase tracking-wider truncate">
                                     ${isAdmin ? 'Total Filtered Expenses' : 'My Total Expenses'}
                                 </p>
-                                <h2 class="text-2xl sm:text-3xl font-bold tracking-tight mt-0.5">${formatCurrency(totalAmount)}</h2>
+                                <h2 class="text-2xl sm:text-3xl font-bold tracking-tight mt-0.5 truncate">${formatCurrency(totalAmount)}</h2>
                             </div>
                             <span class="bg-white/20 backdrop-blur-md text-white text-xs font-semibold px-3 py-1 rounded-full shrink-0">
                                 ${filtered.length} Items
@@ -551,17 +560,17 @@
                         </div>
                         
                         <div class="grid grid-cols-2 gap-3 mt-4 pt-4 border-t border-white/15">
-                            <div class="bg-black/10 backdrop-blur-sm rounded-2xl p-3">
-                                <div class="flex items-center space-x-1.5 text-indigo-200 text-xs mb-1">
-                                    <i class="fa-solid fa-briefcase"></i>
-                                    <span>Office</span>
+                            <div class="bg-black/10 backdrop-blur-sm rounded-2xl p-3 min-w-0">
+                                <div class="flex items-center space-x-1.5 text-indigo-200 text-xs mb-1 truncate">
+                                    <i class="fa-solid fa-briefcase shrink-0"></i>
+                                    <span class="truncate">Office</span>
                                 </div>
                                 <p class="font-bold text-sm sm:text-base truncate">${formatCurrency(officeTotal)}</p>
                             </div>
-                            <div class="bg-black/10 backdrop-blur-sm rounded-2xl p-3">
-                                <div class="flex items-center space-x-1.5 text-indigo-200 text-xs mb-1">
-                                    <i class="fa-solid fa-clapperboard"></i>
-                                    <span>Shoot</span>
+                            <div class="bg-black/10 backdrop-blur-sm rounded-2xl p-3 min-w-0">
+                                <div class="flex items-center space-x-1.5 text-indigo-200 text-xs mb-1 truncate">
+                                    <i class="fa-solid fa-clapperboard shrink-0"></i>
+                                    <span class="truncate">Shoot</span>
                                 </div>
                                 <p class="font-bold text-sm sm:text-base truncate">${formatCurrency(shootTotal)}</p>
                             </div>
@@ -569,29 +578,29 @@
                     </div>
 
                     <!-- Search & Filters -->
-                    <div class="space-y-3">
-                        <div class="relative">
+                    <div class="space-y-3 w-full">
+                        <div class="relative w-full">
                             <span class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400">
                                 <i class="fa-solid fa-magnifying-glass text-sm"></i>
                             </span>
-                            <input type="text" id="search-input" value="${state.searchQuery}" oninput="handleSearchInput(event)" placeholder="Search expenses, notes, client, user..." class="w-full pl-10 pr-4 py-3.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 shadow-sm transition text-slate-900 dark:text-white">
+                            <input type="text" id="search-input" value="${state.searchQuery}" oninput="handleSearchInput(event)" placeholder="Search expenses, notes, client, user..." class="w-full pl-10 pr-10 py-3.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 shadow-sm transition text-slate-900 dark:text-white">
                             ${state.searchQuery ? `<button onclick="clearSearch()" class="absolute inset-y-0 right-0 pr-4 flex items-center text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark"></i></button>` : ''}
                         </div>
 
-                        <div class="flex items-center space-x-2 overflow-x-auto pb-1 no-scrollbar">
-                            <button onclick="setFilterCategory('All')" class="px-4 py-2 rounded-2xl text-xs font-medium whitespace-nowrap transition ${state.filterCategory === 'All' ? 'bg-indigo-600 text-white shadow-md shadow-indigo-500/20' : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-800'}">
+                        <div class="flex items-center space-x-2 overflow-x-auto pb-1 no-scrollbar w-full">
+                            <button onclick="setFilterCategory('All')" class="px-4 py-2 rounded-2xl text-xs font-medium whitespace-nowrap transition shrink-0 ${state.filterCategory === 'All' ? 'bg-indigo-600 text-white shadow-md shadow-indigo-500/20' : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-800'}">
                                 All Categories
                             </button>
-                            <button onclick="setFilterCategory('Office')" class="px-4 py-2 rounded-2xl text-xs font-medium whitespace-nowrap transition ${state.filterCategory === 'Office' ? 'bg-indigo-600 text-white shadow-md shadow-indigo-500/20' : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-800'}">
+                            <button onclick="setFilterCategory('Office')" class="px-4 py-2 rounded-2xl text-xs font-medium whitespace-nowrap transition shrink-0 ${state.filterCategory === 'Office' ? 'bg-indigo-600 text-white shadow-md shadow-indigo-500/20' : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-800'}">
                                 Office Expense
                             </button>
-                            <button onclick="setFilterCategory('Shoot')" class="px-4 py-2 rounded-2xl text-xs font-medium whitespace-nowrap transition ${state.filterCategory === 'Shoot' ? 'bg-indigo-600 text-white shadow-md shadow-indigo-500/20' : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-800'}">
+                            <button onclick="setFilterCategory('Shoot')" class="px-4 py-2 rounded-2xl text-xs font-medium whitespace-nowrap transition shrink-0 ${state.filterCategory === 'Shoot' ? 'bg-indigo-600 text-white shadow-md shadow-indigo-500/20' : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-800'}">
                                 Shoot Expense
                             </button>
                         </div>
 
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                            <div class="relative">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 w-full">
+                            <div class="relative w-full">
                                 <select onchange="setFilterMonth(this.value)" class="w-full appearance-none bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl px-3.5 py-3 text-xs font-medium text-slate-700 dark:text-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500">
                                     <option value="All" ${state.filterMonth === 'All' ? 'selected' : ''}>All Months</option>
                                     ${availableMonths.map(m => `<option value="${m}" ${state.filterMonth === m ? 'selected' : ''}>${formatMonthName(m)}</option>`).join('')}
@@ -602,7 +611,7 @@
                             </div>
 
                             ${isAdmin ? `
-                            <div class="relative">
+                            <div class="relative w-full">
                                 <select onchange="setFilterUser(this.value)" class="w-full appearance-none bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl px-3.5 py-3 text-xs font-medium text-slate-700 dark:text-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500">
                                     <option value="All" ${state.filterUser === 'All' ? 'selected' : ''}>All Users</option>
                                     ${state.users.map(u => `<option value="${u.id}" ${state.filterUser === u.id ? 'selected' : ''}>${u.name}</option>`).join('')}
@@ -616,18 +625,18 @@
                     </div>
 
                     <!-- Expenses List -->
-                    <div class="space-y-3 mt-4">
+                    <div class="space-y-3 mt-4 w-full">
                         <div class="flex items-center justify-between px-1">
                             <h3 class="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Expense Records</h3>
                             ${isAdmin ? `
-                                <button onclick="exportFilteredCSV()" class="text-xs font-semibold text-indigo-600 dark:text-indigo-400 hover:underline flex items-center space-x-1">
+                                <button onclick="exportFilteredCSV()" class="text-xs font-semibold text-indigo-600 dark:text-indigo-400 hover:underline flex items-center space-x-1 shrink-0">
                                     <i class="fa-solid fa-download"></i><span>Export CSV</span>
                                 </button>
                             ` : ''}
                         </div>
 
                         ${filtered.length === 0 ? `
-                            <div class="bg-white dark:bg-slate-900 rounded-3xl p-8 text-center border border-slate-200 dark:border-slate-800 shadow-sm mt-4">
+                            <div class="bg-white dark:bg-slate-900 rounded-3xl p-8 text-center border border-slate-200 dark:border-slate-800 shadow-sm mt-4 w-full">
                                 <div class="w-14 h-14 bg-slate-100 dark:bg-slate-800 text-slate-400 rounded-2xl flex items-center justify-center mx-auto mb-3 text-xl">
                                     <i class="fa-solid fa-receipt"></i>
                                 </div>
@@ -643,13 +652,13 @@
                             const isOffice = exp.category === 'Office';
                             const canEdit = isAdmin || exp.userId === state.currentUser.id;
                             return `
-                                <div class="bg-white dark:bg-slate-900 rounded-3xl p-4.5 border border-slate-200 dark:border-slate-800 shadow-sm hover:shadow-md transition relative group">
-                                    <div class="flex items-start justify-between gap-3">
+                                <div class="bg-white dark:bg-slate-900 rounded-3xl p-4.5 border border-slate-200 dark:border-slate-800 shadow-sm hover:shadow-md transition relative group w-full">
+                                    <div class="flex items-start justify-between gap-3 w-full">
                                         <div class="flex items-start space-x-3 flex-1 min-w-0">
                                             <div class="w-10 h-10 rounded-2xl ${isOffice ? 'bg-amber-500/10 text-amber-600 dark:text-amber-400' : 'bg-indigo-500/10 text-indigo-600 dark:text-indigo-400'} flex items-center justify-center shrink-0 mt-0.5">
                                                 <i class="fa-solid ${isOffice ? 'fa-briefcase' : 'fa-clapperboard'}"></i>
                                             </div>
-                                            <div class="flex-1 min-w-0">
+                                            <div class="flex-1 min-w-0 pr-1">
                                                 <h4 class="font-semibold text-sm text-slate-900 dark:text-white leading-snug mb-0.5 truncate">${escapeHtml(exp.title)}</h4>
                                                 
                                                 ${!isOffice && exp.clientNamePlace ? `
@@ -659,13 +668,14 @@
                                                     </div>
                                                 ` : ''}
 
-                                                <div class="flex items-center flex-wrap gap-1.5 text-xs text-slate-500 dark:text-slate-400 mt-1">
+                                                <div class="flex items-center flex-wrap gap-1 text-xs text-slate-500 dark:text-slate-400 mt-1">
                                                     <span><i class="fa-regular fa-calendar mr-1"></i>${formatDate(exp.date)}</span>
                                                     <span>•</span>
                                                     <span class="font-medium text-indigo-600 dark:text-indigo-400">${exp.category}</span>
-                                                    <span>•</span><span class="italic text-slate-600 dark:text-slate-300">${escapeHtml(exp.userName)}</span>
+                                                    <span>•</span>
+                                                    <span class="italic text-slate-600 dark:text-slate-300 truncate max-w-[120px]">${escapeHtml(exp.userName)}</span>
                                                 </div>
-                                                ${exp.notes ? `<p class="text-xs text-slate-600 dark:text-slate-400 mt-2 bg-slate-50 dark:bg-slate-800/50 p-2.5 rounded-2xl border border-slate-100 dark:border-slate-800/80">${escapeHtml(exp.notes)}</p>` : ''}
+                                                ${exp.notes ? `<p class="text-xs text-slate-600 dark:text-slate-400 mt-2 bg-slate-50 dark:bg-slate-800/50 p-2.5 rounded-2xl border border-slate-100 dark:border-slate-800/80 break-words">${escapeHtml(exp.notes)}</p>` : ''}
                                                 
                                                 ${exp.billAttachment ? `
                                                     <div class="mt-2.5 flex items-center space-x-2">
@@ -678,7 +688,7 @@
                                             </div>
                                         </div>
                                         <div class="text-right shrink-0 flex flex-col items-end">
-                                            <span class="font-bold text-base sm:text-lg text-slate-900 dark:text-white">${formatCurrency(exp.amount)}</span>
+                                            <span class="font-bold text-base sm:text-lg text-slate-900 dark:text-white whitespace-nowrap">${formatCurrency(exp.amount)}</span>
                                             ${canEdit ? `
                                                 <div class="flex items-center space-x-1.5 mt-2">
                                                     <button onclick="startEditExpense('${exp.id}')" class="w-8 h-8 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-indigo-50 hover:text-indigo-600 dark:hover:bg-indigo-950 dark:hover:text-indigo-400 transition flex items-center justify-center text-xs" title="Edit">
@@ -751,43 +761,43 @@
             const currentBill = state.tempBillData !== null ? state.tempBillData : expense.billAttachment;
 
             return `
-                <div class="space-y-4 animate-fadeIn">
+                <div class="space-y-4 animate-fadeIn w-full max-w-full">
                     <div class="flex items-center justify-between mb-2">
-                        <div>
-                            <h2 class="text-lg font-bold text-slate-900 dark:text-white">
+                        <div class="min-w-0 pr-2">
+                            <h2 class="text-lg font-bold text-slate-900 dark:text-white truncate">
                                 ${isEditing ? 'Edit Expense' : 'Add New Expense'}
                             </h2>
-                            <p class="text-xs text-slate-500 dark:text-slate-400">
+                            <p class="text-xs text-slate-500 dark:text-slate-400 truncate">
                                 ${isEditing ? 'Update the expense details below' : 'Record an Office or Shoot expense'}
                             </p>
                         </div>
                         ${isEditing ? `
-                            <button onclick="cancelEdit()" class="text-xs font-medium text-slate-500 hover:text-slate-700 dark:hover:text-slate-300">
+                            <button onclick="cancelEdit()" class="text-xs font-medium text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 shrink-0">
                                 Cancel Edit
                             </button>
                         ` : ''}
                     </div>
 
-                    <form onsubmit="handleExpenseSubmit(event)" class="bg-white dark:bg-slate-900 rounded-3xl p-5 sm:p-6 border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
-                        <div>
+                    <form onsubmit="handleExpenseSubmit(event)" class="bg-white dark:bg-slate-900 rounded-3xl p-5 sm:p-6 border border-slate-200 dark:border-slate-800 shadow-sm space-y-4 w-full">
+                        <div class="w-full">
                             <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">Expense Type</label>
-                            <div class="grid grid-cols-2 gap-3">
-                                <button type="button" onclick="setFormCategory('Office')" id="btn-cat-office" class="py-3 px-4 rounded-2xl border font-medium text-sm flex items-center justify-center space-x-2 transition ${expense.category === 'Office' ? 'bg-indigo-600 text-white border-indigo-600 shadow-md shadow-indigo-500/20' : 'bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700'}">
-                                    <i class="fa-solid fa-briefcase"></i>
-                                    <span>Office Expense</span>
+                            <div class="grid grid-cols-2 gap-3 w-full">
+                                <button type="button" onclick="setFormCategory('Office')" id="btn-cat-office" class="py-3 px-2 sm:px-4 rounded-2xl border font-medium text-xs sm:text-sm flex items-center justify-center space-x-1.5 sm:space-x-2 transition truncate ${expense.category === 'Office' ? 'bg-indigo-600 text-white border-indigo-600 shadow-md shadow-indigo-500/20' : 'bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700'}">
+                                    <i class="fa-solid fa-briefcase shrink-0"></i>
+                                    <span class="truncate">Office Expense</span>
                                 </button>
-                                <button type="button" onclick="setFormCategory('Shoot')" id="btn-cat-shoot" class="py-3 px-4 rounded-2xl border font-medium text-sm flex items-center justify-center space-x-2 transition ${expense.category === 'Shoot' ? 'bg-indigo-600 text-white border-indigo-600 shadow-md shadow-indigo-500/20' : 'bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700'}">
-                                    <i class="fa-solid fa-clapperboard"></i>
-                                    <span>Shoot Expense</span>
+                                <button type="button" onclick="setFormCategory('Shoot')" id="btn-cat-shoot" class="py-3 px-2 sm:px-4 rounded-2xl border font-medium text-xs sm:text-sm flex items-center justify-center space-x-1.5 sm:space-x-2 transition truncate ${expense.category === 'Shoot' ? 'bg-indigo-600 text-white border-indigo-600 shadow-md shadow-indigo-500/20' : 'bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700'}">
+                                    <i class="fa-solid fa-clapperboard shrink-0"></i>
+                                    <span class="truncate">Shoot Expense</span>
                                 </button>
                             </div>
                             <input type="hidden" id="expense-category" value="${expense.category}">
                         </div>
 
                         <!-- Shoot specific Client Name & Place input container -->
-                        <div id="client-input-container" class="${expense.category === 'Shoot' ? '' : 'hidden'}">
+                        <div id="client-input-container" class="${expense.category === 'Shoot' ? '' : 'hidden'} w-full">
                             <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">Client Name & Place</label>
-                            <div class="relative">
+                            <div class="relative w-full">
                                 <span class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400">
                                     <i class="fa-solid fa-location-dot text-sm"></i>
                                 </span>
@@ -795,46 +805,46 @@
                             </div>
                         </div>
 
-                        <div>
+                        <div class="w-full">
                             <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">Amount (₹)</label>
-                            <div class="relative">
+                            <div class="relative w-full">
                                 <span class="absolute inset-y-0 left-0 pl-4 flex items-center font-bold text-slate-400">₹</span>
                                 <input type="number" id="expense-amount" value="${expense.amount}" required min="1" step="any" placeholder="0.00" class="w-full pl-9 pr-4 py-3.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-base font-semibold focus:outline-none focus:ring-2 focus:ring-indigo-500 text-slate-900 dark:text-white">
                             </div>
                         </div>
 
-                        <div>
+                        <div class="w-full">
                             <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">Title / Description</label>
                             <input type="text" id="expense-title" value="${escapeHtml(expense.title)}" required placeholder="e.g., Studio Rent, Camera Rental, Catering" class="w-full px-4 py-3.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 text-slate-900 dark:text-white">
                         </div>
 
-                        <div>
+                        <div class="w-full">
                             <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">Date</label>
                             <input type="date" id="expense-date" value="${expense.date}" required class="w-full px-4 py-3.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 text-slate-900 dark:text-white">
                         </div>
 
-                        <div>
+                        <div class="w-full">
                             <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">Notes / Receipt details (Optional)</label>
                             <textarea id="expense-notes" rows="3" placeholder="Add any vendor details, invoice numbers or remarks..." class="w-full px-4 py-3.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 text-slate-900 dark:text-white">${escapeHtml(expense.notes)}</textarea>
                         </div>
 
-                        <div>
+                        <div class="w-full">
                             <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">Bill / Receipt Attachment (Optional)</label>
                             
                             ${currentBill ? `
-                                <div class="bg-indigo-50 dark:bg-indigo-950/60 p-3.5 rounded-2xl border border-indigo-200 dark:border-indigo-800 flex items-center justify-between mb-3">
-                                    <div class="flex items-center space-x-2 text-indigo-600 dark:text-indigo-400 text-xs font-semibold">
-                                        <i class="fa-solid fa-file-image text-base"></i>
-                                        <span>Bill attached successfully</span>
+                                <div class="bg-indigo-50 dark:bg-indigo-950/60 p-3.5 rounded-2xl border border-indigo-200 dark:border-indigo-800 flex items-center justify-between mb-3 w-full">
+                                    <div class="flex items-center space-x-2 text-indigo-600 dark:text-indigo-400 text-xs font-semibold truncate pr-2">
+                                        <i class="fa-solid fa-file-image text-base shrink-0"></i>
+                                        <span class="truncate">Bill attached successfully</span>
                                     </div>
-                                    <div class="flex items-center space-x-2">
+                                    <div class="flex items-center space-x-2 shrink-0">
                                         <button type="button" onclick="previewCurrentTempBill()" class="px-3 py-1.5 bg-indigo-600 text-white rounded-xl text-xs font-medium">Preview</button>
                                         <button type="button" onclick="removeBillAttachment(event)" class="px-3 py-1.5 bg-rose-600 text-white rounded-xl text-xs font-medium">Remove</button>
                                     </div>
                                 </div>
                             ` : ''}
 
-                            <div class="grid grid-cols-2 gap-2.5">
+                            <div class="grid grid-cols-2 gap-2.5 w-full">
                                 <div class="relative border-2 border-dashed border-slate-200 dark:border-slate-700 rounded-2xl p-3.5 text-center bg-slate-50 dark:bg-slate-800/40 hover:border-indigo-500 transition cursor-pointer">
                                     <input type="file" id="bill-file-input" accept="image/*" onchange="handleBillUpload(event)" class="absolute inset-0 opacity-0 cursor-pointer w-full h-full">
                                     <div class="flex flex-col items-center justify-center space-y-1">
@@ -1005,12 +1015,12 @@
             const clientContainer = document.getElementById('client-input-container');
 
             if (cat === 'Office') {
-                btnOffice.className = 'py-3 px-4 rounded-2xl border font-medium text-sm flex items-center justify-center space-x-2 transition bg-indigo-600 text-white border-indigo-600 shadow-md shadow-indigo-500/20';
-                btnShoot.className = 'py-3 px-4 rounded-2xl border font-medium text-sm flex items-center justify-center space-x-2 transition bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700';
+                btnOffice.className = 'py-3 px-2 sm:px-4 rounded-2xl border font-medium text-xs sm:text-sm flex items-center justify-center space-x-1.5 sm:space-x-2 transition truncate bg-indigo-600 text-white border-indigo-600 shadow-md shadow-indigo-500/20';
+                btnShoot.className = 'py-3 px-2 sm:px-4 rounded-2xl border font-medium text-xs sm:text-sm flex items-center justify-center space-x-1.5 sm:space-x-2 transition truncate bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700';
                 if (clientContainer) clientContainer.classList.add('hidden');
             } else {
-                btnShoot.className = 'py-3 px-4 rounded-2xl border font-medium text-sm flex items-center justify-center space-x-2 transition bg-indigo-600 text-white border-indigo-600 shadow-md shadow-indigo-500/20';
-                btnOffice.className = 'py-3 px-4 rounded-2xl border font-medium text-sm flex items-center justify-center space-x-2 transition bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700';
+                btnShoot.className = 'py-3 px-2 sm:px-4 rounded-2xl border font-medium text-xs sm:text-sm flex items-center justify-center space-x-1.5 sm:space-x-2 transition truncate bg-indigo-600 text-white border-indigo-600 shadow-md shadow-indigo-500/20';
+                btnOffice.className = 'py-3 px-2 sm:px-4 rounded-2xl border font-medium text-xs sm:text-sm flex items-center justify-center space-x-1.5 sm:space-x-2 transition truncate bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700';
                 if (clientContainer) clientContainer.classList.remove('hidden');
             }
         }
@@ -1120,51 +1130,51 @@
             const totalShoot = state.expenses.filter(e => e.category === 'Shoot').reduce((s, e) => s + e.amount, 0);
 
             return `
-                <div class="space-y-4 animate-fadeIn">
-                    <div class="bg-gradient-to-br from-slate-900 to-indigo-950 rounded-3xl p-5 sm:p-6 text-white shadow-xl relative overflow-hidden border border-indigo-500/20">
+                <div class="space-y-4 animate-fadeIn w-full max-w-full">
+                    <div class="bg-gradient-to-br from-slate-900 to-indigo-950 rounded-3xl p-5 sm:p-6 text-white shadow-xl relative overflow-hidden border border-indigo-500/20 w-full">
                         <div class="flex justify-between items-start mb-3">
-                            <div>
-                                <p class="text-indigo-300 text-xs font-semibold uppercase tracking-wider flex items-center">
-                                    <i class="fa-solid fa-shield-halved mr-1.5"></i>Admin Summary
+                            <div class="min-w-0 flex-1 pr-2">
+                                <p class="text-indigo-300 text-xs font-semibold uppercase tracking-wider flex items-center truncate">
+                                    <i class="fa-solid fa-shield-halved mr-1.5 shrink-0"></i><span class="truncate">Admin Summary</span>
                                 </p>
-                                <h2 class="text-2xl sm:text-3xl font-bold tracking-tight mt-0.5">${formatCurrency(grandTotal)}</h2>
+                                <h2 class="text-2xl sm:text-3xl font-bold tracking-tight mt-0.5 truncate">${formatCurrency(grandTotal)}</h2>
                             </div>
-                            <button onclick="exportAllCSV()" class="bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold px-4 py-2.5 rounded-2xl shadow-md transition flex items-center space-x-1.5">
+                            <button onclick="exportAllCSV()" class="bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold px-4 py-2.5 rounded-2xl shadow-md transition flex items-center space-x-1.5 shrink-0">
                                 <i class="fa-solid fa-file-arrow-down"></i>
                                 <span>Export All CSV</span>
                             </button>
                         </div>
 
                         <div class="grid grid-cols-2 gap-3 mt-4 pt-4 border-t border-white/10">
-                            <div>
-                                <span class="text-xs text-slate-400">Total Office</span>
-                                <p class="font-bold text-sm sm:text-base text-amber-400">${formatCurrency(totalOffice)}</p>
+                            <div class="min-w-0">
+                                <span class="text-xs text-slate-400 truncate block">Total Office</span>
+                                <p class="font-bold text-sm sm:text-base text-amber-400 truncate">${formatCurrency(totalOffice)}</p>
                             </div>
-                            <div>
-                                <span class="text-xs text-slate-400">Total Shoot</span>
-                                <p class="font-bold text-sm sm:text-base text-indigo-400">${formatCurrency(totalShoot)}</p>
+                            <div class="min-w-0">
+                                <span class="text-xs text-slate-400 truncate block">Total Shoot</span>
+                                <p class="font-bold text-sm sm:text-base text-indigo-400 truncate">${formatCurrency(totalShoot)}</p>
                             </div>
                         </div>
                     </div>
 
-                    <div class="bg-white dark:bg-slate-900 rounded-3xl p-4 sm:p-5 border border-slate-200 dark:border-slate-800 shadow-sm">
+                    <div class="bg-white dark:bg-slate-900 rounded-3xl p-4 sm:p-5 border border-slate-200 dark:border-slate-800 shadow-sm w-full">
                         <h3 class="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-3">Export User Reports</h3>
-                        <div class="space-y-2.5">
+                        <div class="space-y-2.5 w-full">
                             ${state.users.map(u => {
                                 const userExpCount = state.expenses.filter(e => e.userId === u.id).length;
                                 const userTotal = state.expenses.filter(e => e.userId === u.id).reduce((s, e) => s + e.amount, 0);
                                 return `
-                                    <div class="flex items-center justify-between p-3.5 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-100 dark:border-slate-800">
-                                        <div class="flex items-center space-x-3 min-w-0">
+                                    <div class="flex items-center justify-between p-3.5 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-100 dark:border-slate-800 w-full gap-2">
+                                        <div class="flex items-center space-x-3 min-w-0 flex-1">
                                             <div class="w-10 h-10 rounded-2xl bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 flex items-center justify-center font-bold text-sm shrink-0">
                                                 ${u.name.charAt(0)}
                                             </div>
-                                            <div class="min-w-0">
+                                            <div class="min-w-0 flex-1">
                                                 <h4 class="font-semibold text-sm text-slate-900 dark:text-white truncate">${u.name}</h4>
                                                 <p class="text-xs text-slate-500 truncate">${userExpCount} records • ${formatCurrency(userTotal)}</p>
                                             </div>
                                         </div>
-                                        <button onclick="exportUserCSV('${u.id}', '${u.name}')" class="px-3.5 py-2 bg-indigo-50 dark:bg-indigo-950/50 hover:bg-indigo-100 dark:hover:bg-indigo-900 text-indigo-600 dark:text-indigo-400 text-xs font-semibold rounded-xl transition border border-indigo-200/50 dark:border-indigo-800/50 flex items-center space-x-1 shrink-0 ml-2">
+                                        <button onclick="exportUserCSV('${u.id}', '${u.name}')" class="px-3.5 py-2 bg-indigo-50 dark:bg-indigo-950/50 hover:bg-indigo-100 dark:hover:bg-indigo-900 text-indigo-600 dark:text-indigo-400 text-xs font-semibold rounded-xl transition border border-indigo-200/50 dark:border-indigo-800/50 flex items-center space-x-1 shrink-0">
                                             <i class="fa-solid fa-download"></i><span>CSV</span>
                                         </button>
                                     </div>
@@ -1173,7 +1183,7 @@
                         </div>
                     </div>
 
-                    <div class="space-y-3">
+                    <div class="space-y-3 w-full">
                         <h3 class="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider px-1">Month-by-Month Summary</h3>
 
                         ${sortedMonths.length === 0 ? `
@@ -1183,30 +1193,30 @@
                         ${sortedMonths.map(monthKey => {
                             const data = monthlyMap[monthKey];
                             return `
-                                <div class="bg-white dark:bg-slate-900 rounded-3xl p-4.5 border border-slate-200 dark:border-slate-800 shadow-sm space-y-3">
+                                <div class="bg-white dark:bg-slate-900 rounded-3xl p-4.5 border border-slate-200 dark:border-slate-800 shadow-sm space-y-3 w-full">
                                     <div class="flex items-center justify-between">
-                                        <div class="flex items-center space-x-2">
-                                            <div class="w-8 h-8 rounded-xl bg-violet-500/10 text-violet-600 dark:text-violet-400 flex items-center justify-center text-xs font-bold">
+                                        <div class="flex items-center space-x-2 min-w-0 pr-2">
+                                            <div class="w-8 h-8 rounded-xl bg-violet-500/10 text-violet-600 dark:text-violet-400 flex items-center justify-center text-xs font-bold shrink-0">
                                                 <i class="fa-solid fa-calendar-days"></i>
                                             </div>
-                                            <h4 class="font-bold text-sm text-slate-900 dark:text-white">${formatMonthName(monthKey)}</h4>
+                                            <h4 class="font-bold text-sm text-slate-900 dark:text-white truncate">${formatMonthName(monthKey)}</h4>
                                         </div>
-                                        <span class="text-xs font-semibold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 px-3 py-1 rounded-full">
+                                        <span class="text-xs font-semibold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 px-3 py-1 rounded-full shrink-0">
                                             ${data.count} Expenses
                                         </span>
                                     </div>
 
                                     <div class="grid grid-cols-3 gap-2 pt-2 border-t border-slate-100 dark:border-slate-800">
-                                        <div class="bg-slate-50 dark:bg-slate-800/50 p-2.5 rounded-2xl text-center">
-                                            <span class="text-[10px] uppercase font-semibold text-slate-400 block mb-0.5">Office</span>
+                                        <div class="bg-slate-50 dark:bg-slate-800/50 p-2.5 rounded-2xl text-center min-w-0">
+                                            <span class="text-[10px] uppercase font-semibold text-slate-400 block mb-0.5 truncate">Office</span>
                                             <span class="font-bold text-xs sm:text-sm text-slate-800 dark:text-slate-200 truncate block">${formatCurrency(data.office)}</span>
                                         </div>
-                                        <div class="bg-slate-50 dark:bg-slate-800/50 p-2.5 rounded-2xl text-center">
-                                            <span class="text-[10px] uppercase font-semibold text-slate-400 block mb-0.5">Shoot</span>
+                                        <div class="bg-slate-50 dark:bg-slate-800/50 p-2.5 rounded-2xl text-center min-w-0">
+                                            <span class="text-[10px] uppercase font-semibold text-slate-400 block mb-0.5 truncate">Shoot</span>
                                             <span class="font-bold text-xs sm:text-sm text-slate-800 dark:text-slate-200 truncate block">${formatCurrency(data.shoot)}</span>
                                         </div>
-                                        <div class="bg-indigo-50 dark:bg-indigo-950/40 p-2.5 rounded-2xl text-center border border-indigo-100 dark:border-indigo-900/50">
-                                            <span class="text-[10px] uppercase font-semibold text-indigo-600 dark:text-indigo-400 block mb-0.5">Total</span>
+                                        <div class="bg-indigo-50 dark:bg-indigo-950/40 p-2.5 rounded-2xl text-center border border-indigo-100 dark:border-indigo-900/50 min-w-0">
+                                            <span class="text-[10px] uppercase font-semibold text-indigo-600 dark:text-indigo-400 block mb-0.5 truncate">Total</span>
                                             <span class="font-bold text-xs sm:text-sm text-indigo-600 dark:text-indigo-400 truncate block">${formatCurrency(data.total)}</span>
                                         </div>
                                     </div>
@@ -1221,17 +1231,17 @@
         function renderPasswordRequestsTab() {
             const requests = state.passwordRequests;
             return `
-                <div class="space-y-4 animate-fadeIn">
+                <div class="space-y-4 animate-fadeIn w-full max-w-full">
                     <div class="flex items-center justify-between">
-                        <div>
-                            <h2 class="text-lg font-bold text-slate-900 dark:text-white">Password Recovery Requests</h2>
-                            <p class="text-xs text-slate-500 dark:text-slate-400">View and manage 6-digit auth codes for user password resets</p>
+                        <div class="min-w-0 pr-2">
+                            <h2 class="text-lg font-bold text-slate-900 dark:text-white truncate">Password Recovery Requests</h2>
+                            <p class="text-xs text-slate-500 dark:text-slate-400 truncate">View and manage 6-digit auth codes for user password resets</p>
                         </div>
                     </div>
 
-                    <div class="space-y-3">
+                    <div class="space-y-3 w-full">
                         ${requests.length === 0 ? `
-                            <div class="bg-white dark:bg-slate-900 rounded-3xl p-8 text-center border border-slate-200 dark:border-slate-800 shadow-sm">
+                            <div class="bg-white dark:bg-slate-900 rounded-3xl p-8 text-center border border-slate-200 dark:border-slate-800 shadow-sm w-full">
                                 <div class="w-14 h-14 bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 rounded-2xl flex items-center justify-center mx-auto mb-3 text-xl">
                                     <i class="fa-solid fa-key"></i>
                                 </div>
@@ -1243,14 +1253,14 @@
                         ${requests.map(req => {
                             const isPending = req.status === 'pending';
                             return `
-                                <div class="bg-white dark:bg-slate-900 rounded-2xl p-4.5 border border-slate-200 dark:border-slate-800 shadow-sm flex items-center justify-between gap-3">
-                                    <div class="space-y-1 min-w-0">
+                                <div class="bg-white dark:bg-slate-900 rounded-2xl p-4.5 border border-slate-200 dark:border-slate-800 shadow-sm flex items-center justify-between gap-3 w-full">
+                                    <div class="space-y-1 min-w-0 flex-1">
                                         <div class="flex items-center space-x-2 truncate">
                                             <h4 class="font-semibold text-sm text-slate-900 dark:text-white truncate">${escapeHtml(req.name)}</h4>
                                             <span class="text-xs text-slate-400 shrink-0">(@${escapeHtml(req.username)})</span>
                                         </div>
-                                        <div class="flex items-center space-x-2">
-                                            <span class="text-xs text-slate-500">Admin Auth Code:</span>
+                                        <div class="flex items-center space-x-2 truncate">
+                                            <span class="text-xs text-slate-500 shrink-0">Admin Auth Code:</span>
                                             <span class="px-2.5 py-0.5 bg-indigo-50 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-400 font-mono font-bold text-sm tracking-widest rounded-xl border border-indigo-200/50">${req.code}</span>
                                         </div>
                                     </div>
@@ -1281,11 +1291,11 @@
 
         function renderUserManagementTab() {
             return `
-                <div class="space-y-4 animate-fadeIn">
+                <div class="space-y-4 animate-fadeIn w-full max-w-full">
                     <div class="flex items-center justify-between">
-                        <div>
-                            <h2 class="text-lg font-bold text-slate-900 dark:text-white">User Management</h2>
-                            <p class="text-xs text-slate-500 dark:text-slate-400">Add or remove system users & administrators</p>
+                        <div class="min-w-0 pr-2">
+                            <h2 class="text-lg font-bold text-slate-900 dark:text-white truncate">User Management</h2>
+                            <p class="text-xs text-slate-500 dark:text-slate-400 truncate">Add or remove system users & administrators</p>
                         </div>
                         <button onclick="openAddUserModal()" class="px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl text-xs font-semibold shadow-md shadow-indigo-500/20 transition flex items-center space-x-1.5 shrink-0">
                             <i class="fa-solid fa-user-plus"></i>
@@ -1293,17 +1303,17 @@
                         </button>
                     </div>
 
-                    <div class="space-y-3">
+                    <div class="space-y-3 w-full">
                         ${state.users.map(u => {
                             const expCount = state.expenses.filter(e => e.userId === u.id).length;
                             const isCurrent = u.id === state.currentUser.id;
                             return `
-                                <div class="bg-white dark:bg-slate-900 rounded-2xl p-4.5 border border-slate-200 dark:border-slate-800 shadow-sm flex items-center justify-between gap-3">
-                                    <div class="flex items-center space-x-3 min-w-0">
+                                <div class="bg-white dark:bg-slate-900 rounded-2xl p-4.5 border border-slate-200 dark:border-slate-800 shadow-sm flex items-center justify-between gap-3 w-full">
+                                    <div class="flex items-center space-x-3 min-w-0 flex-1">
                                         <div class="w-10 h-10 rounded-2xl ${u.role === 'admin' ? 'bg-indigo-500/10 text-indigo-600 dark:text-indigo-400' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400'} flex items-center justify-center font-bold text-sm shrink-0">
                                             ${u.name.charAt(0)}
                                         </div>
-                                        <div class="min-w-0">
+                                        <div class="min-w-0 flex-1">
                                             <div class="flex items-center space-x-2 truncate">
                                                 <h4 class="font-semibold text-sm text-slate-900 dark:text-white truncate">${escapeHtml(u.name)}</h4>${isCurrent ? '<span class="text-[10px] bg-emerald-500/10 text-emerald-600 font-semibold px-2 py-0.5 rounded-full shrink-0">Active</span>' : ''}
                                             </div>
@@ -1334,27 +1344,27 @@
                             <h3 class="font-bold text-base text-slate-900 dark:text-white">Add New User</h3>
                             <button onclick="closeModal()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark"></i></button>
                         </div>
-                        <form onsubmit="handleAddNewUser(event)" class="space-y-3.5">
-                            <div>
+                        <form onsubmit="handleAddNewUser(event)" class="space-y-3.5 w-full">
+                            <div class="w-full">
                                 <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Full Name</label>
                                 <input type="text" id="new-user-name" required placeholder="e.g., Priya Sharma" class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 text-slate-900 dark:text-white">
                             </div>
-                            <div>
+                            <div class="w-full">
                                 <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Username</label>
                                 <input type="text" id="new-user-username" required placeholder="user3" class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 text-slate-900 dark:text-white">
                             </div>
-                            <div>
+                            <div class="w-full">
                                 <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Password</label>
                                 <input type="password" id="new-user-password" required placeholder="••••••••" class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 text-slate-900 dark:text-white">
                             </div>
-                            <div>
+                            <div class="w-full">
                                 <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Role</label>
                                 <select id="new-user-role" class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 text-slate-900 dark:text-white">
                                     <option value="user">Regular User</option>
                                     <option value="admin">Administrator</option>
                                 </select>
                             </div>
-                            <div class="pt-2">
+                            <div class="pt-2 w-full">
                                 <button type="submit" class="w-full py-3.5 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-2xl shadow-md shadow-indigo-500/20 transition text-sm">
                                     Create User Account
                                 </button>
@@ -1429,46 +1439,46 @@
             const months = Object.keys(monthlyMap).sort().reverse();
 
             return `
-                <div class="space-y-4 animate-fadeIn">
-                    <div class="bg-gradient-to-br from-violet-600 to-indigo-700 rounded-3xl p-5 sm:p-6 text-white shadow-xl">
+                <div class="space-y-4 animate-fadeIn w-full max-w-full">
+                    <div class="bg-gradient-to-br from-violet-600 to-indigo-700 rounded-3xl p-5 sm:p-6 text-white shadow-xl w-full">
                         <p class="text-violet-200 text-xs font-semibold uppercase tracking-wider">My Expense Summary</p>
-                        <h2 class="text-2xl sm:text-3xl font-bold tracking-tight mt-0.5">${formatCurrency(total)}</h2>
+                        <h2 class="text-2xl sm:text-3xl font-bold tracking-tight mt-0.5 truncate">${formatCurrency(total)}</h2>
                         
                         <div class="grid grid-cols-2 gap-3 mt-4 pt-4 border-t border-white/15">
-                            <div>
-                                <span class="text-xs text-violet-200">Office Expense</span>
+                            <div class="min-w-0">
+                                <span class="text-xs text-violet-200 truncate block">Office Expense</span>
                                 <p class="font-bold text-sm sm:text-base truncate">${formatCurrency(office)}</p>
                             </div>
-                            <div>
-                                <span class="text-xs text-violet-200">Shoot Expense</span>
+                            <div class="min-w-0">
+                                <span class="text-xs text-violet-200 truncate block">Shoot Expense</span>
                                 <p class="font-bold text-sm sm:text-base truncate">${formatCurrency(shoot)}</p>
                             </div>
                         </div>
                     </div>
 
-                    <div class="space-y-3">
+                    <div class="space-y-3 w-full">
                         <div class="flex items-center justify-between px-1">
                             <h3 class="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Monthly Breakdown</h3>
-                            <button onclick="exportUserCSV('${state.currentUser.id}', '${state.currentUser.name}')" class="text-xs font-semibold text-indigo-600 dark:text-indigo-400 hover:underline flex items-center space-x-1">
+                            <button onclick="exportUserCSV('${state.currentUser.id}', '${state.currentUser.name}')" class="text-xs font-semibold text-indigo-600 dark:text-indigo-400 hover:underline flex items-center space-x-1 shrink-0">
                                 <i class="fa-solid fa-download"></i><span>Export CSV</span>
                             </button>
                         </div>
 
                         ${months.length === 0 ? `
-                            <div class="bg-white dark:bg-slate-900 rounded-3xl p-6 text-center border border-slate-200 dark:border-slate-800">
+                            <div class="bg-white dark:bg-slate-900 rounded-3xl p-6 text-center border border-slate-200 dark:border-slate-800 w-full">
                                 <p class="text-xs text-slate-400">No expense records found.</p>
                             </div>
                         ` : ''}
 
                         ${months.map(m => `
-                            <div class="bg-white dark:bg-slate-900 rounded-2xl p-4.5 border border-slate-200 dark:border-slate-800 shadow-sm space-y-2">
+                            <div class="bg-white dark:bg-slate-900 rounded-2xl p-4.5 border border-slate-200 dark:border-slate-800 shadow-sm space-y-2 w-full">
                                 <div class="flex items-center justify-between">
-                                    <span class="font-bold text-sm text-slate-900 dark:text-white">${formatMonthName(m)}</span>
-                                    <span class="font-bold text-sm text-indigo-600 dark:text-indigo-400">${formatCurrency(monthlyMap[m].total)}</span>
+                                    <span class="font-bold text-sm text-slate-900 dark:text-white truncate pr-2">${formatMonthName(m)}</span>
+                                    <span class="font-bold text-sm text-indigo-600 dark:text-indigo-400 shrink-0">${formatCurrency(monthlyMap[m].total)}</span>
                                 </div>
                                 <div class="flex justify-between text-xs text-slate-500 dark:text-slate-400 pt-2 border-t border-slate-100 dark:border-slate-800">
-                                    <span>Office: ${formatCurrency(monthlyMap[m].office)}</span>
-                                    <span>Shoot: ${formatCurrency(monthlyMap[m].shoot)}</span>
+                                    <span class="truncate pr-1">Office: ${formatCurrency(monthlyMap[m].office)}</span>
+                                    <span class="truncate pl-1 text-right">Shoot: ${formatCurrency(monthlyMap[m].shoot)}</span>
                                 </div>
                             </div>
                         `).join('')}
@@ -1479,20 +1489,20 @@
 
         function renderProfileTab() {
             return `
-                <div class="space-y-4 animate-fadeIn">
-                    <div class="bg-white dark:bg-slate-900 rounded-3xl p-6 border border-slate-200 dark:border-slate-800 shadow-sm text-center">
+                <div class="space-y-4 animate-fadeIn w-full max-w-full">
+                    <div class="bg-white dark:bg-slate-900 rounded-3xl p-6 border border-slate-200 dark:border-slate-800 shadow-sm text-center w-full">
                         <div class="w-20 h-20 bg-white dark:bg-slate-800 rounded-2xl p-2 flex items-center justify-center mx-auto mb-3 shadow-md border border-slate-200 dark:border-slate-700 overflow-hidden">
                             <img src="https://clickfactoryphotography.com/wp-content/uploads/2022/04/crop-logo.gif" alt="Click Factory Logo" class="w-full h-full object-contain" onerror="this.src='https://placehold.co/80x80/4f46e5/ffffff?text=CF'">
                         </div>
                         <h2 class="font-bold text-lg text-slate-900 dark:text-white truncate">${state.currentUser.name}</h2>
-                        <p class="text-xs text-slate-500 dark:text-slate-400 mb-1">@${state.currentUser.username}</p>
+                        <p class="text-xs text-slate-500 dark:text-slate-400 mb-1 truncate">@${state.currentUser.username}</p>
                         <span class="inline-block px-3.5 py-1 rounded-full text-xs font-semibold ${state.currentUser.role === 'admin' ? 'bg-indigo-50 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-400 border border-indigo-200/50 dark:border-indigo-800' : 'bg-emerald-50 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400 border border-emerald-200/50 dark:border-emerald-800'}">
                             ${state.currentUser.role === 'admin' ? 'Administrator' : 'Regular User'}
                         </span>
                     </div>
 
                     ${state.currentUser.role === 'admin' ? `
-                    <div class="bg-white dark:bg-slate-900 rounded-3xl p-4.5 border border-slate-200 dark:border-slate-800 shadow-sm space-y-3">
+                    <div class="bg-white dark:bg-slate-900 rounded-3xl p-4.5 border border-slate-200 dark:border-slate-800 shadow-sm space-y-3 w-full">
                         <h3 class="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider px-1">Admin Security</h3>
                         <button onclick="openChangePasswordModal()" class="w-full py-3 px-4 rounded-2xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-xs font-semibold transition flex items-center justify-center space-x-2">
                             <i class="fa-solid fa-key"></i>
@@ -1502,7 +1512,7 @@
                     ` : ''}
 
                     <!-- Developer Attribution -->
-                    <div class="text-center py-2">
+                    <div class="text-center py-2 w-full">
                         <p class="text-[11px] font-medium text-slate-400 dark:text-slate-500">
                             Click Factory Expense Tracker • Developed by <span class="font-bold text-indigo-600 dark:text-indigo-400">SK Techmedia</span>
                         </p>
@@ -1520,16 +1530,16 @@
                             <h3 class="font-bold text-base text-slate-900 dark:text-white">Change Admin Password</h3>
                             <button onclick="closeModal()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark"></i></button>
                         </div>
-                        <form onsubmit="handlePasswordChange(event)" class="space-y-3.5">
-                            <div>
+                        <form onsubmit="handlePasswordChange(event)" class="space-y-3.5 w-full">
+                            <div class="w-full">
                                 <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Current Password</label>
                                 <input type="password" id="current-pass" required class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 text-slate-900 dark:text-white">
                             </div>
-                            <div>
+                            <div class="w-full">
                                 <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">New Password</label>
                                 <input type="password" id="new-pass" required class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 text-slate-900 dark:text-white">
                             </div>
-                            <div class="pt-2">
+                            <div class="pt-2 w-full">
                                 <button type="submit" class="w-full py-3.5 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-2xl shadow-md transition text-sm">Update Password</button>
                             </div>
                         </form>
@@ -1651,7 +1661,7 @@
         }
 
         function escapeHtml(str) {
-            if (!str) return;
+            if (!str) return '';
             return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
         }
 
