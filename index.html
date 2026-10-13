@@ -98,7 +98,7 @@
     <div id="toast-container" class="fixed top-12 left-1/2 transform -translate-x-1/2 z-50 flex flex-col gap-2 pointer-events-none w-11/12 max-w-sm"></div>
 
     <script>
-        const STORAGE_KEY = 'click_factory_expense_tracker_admin_auth_v20';
+        const STORAGE_KEY = 'click_factory_expense_tracker_admin_auth_v21';
 
         const initialData = {
             currentUser: null,
@@ -145,6 +145,7 @@
             darkMode: true,
             editingExpenseId: null,
             tempBillData: null,
+            tempFormCache: null,
             authView: 'login'
         };
 
@@ -155,7 +156,7 @@
             if (saved) {
                 try {
                     const parsed = JSON.parse(saved);
-                    return { ...initialData, ...parsed, authView: 'login' };
+                    return { ...initialData, ...parsed, authView: 'login', tempFormCache: null };
                 } catch(e) {
                     console.error('Error loading state', e);
                 }
@@ -165,6 +166,24 @@
 
         function saveState() {
             localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+        }
+
+        function updateFormCache() {
+            const clientInput = document.getElementById('expense-client');
+            const amountInput = document.getElementById('expense-amount');
+            const titleInput = document.getElementById('expense-title');
+            const dateInput = document.getElementById('expense-date');
+            const notesInput = document.getElementById('expense-notes');
+            const categoryInput = document.getElementById('expense-category');
+
+            state.tempFormCache = {
+                category: categoryInput ? categoryInput.value : 'Office',
+                clientNamePlace: clientInput ? clientInput.value : '',
+                amount: amountInput ? amountInput.value : '',
+                title: titleInput ? titleInput.value : '',
+                date: dateInput ? dateInput.value : new Date().toISOString().split('T')[0],
+                notes: notesInput ? notesInput.value : ''
+            };
         }
 
         function showToast(message, type = 'success') {
@@ -483,6 +502,7 @@
 
         function handleLogout() {
             state.currentUser = null;
+            state.tempFormCache = null;
             saveState();
             showToast('Logged out successfully.', 'info');
             render();
@@ -513,6 +533,7 @@
             state.activeTab = tab;
             state.editingExpenseId = null;
             state.tempBillData = null;
+            state.tempFormCache = null;
             render();
         }
 
@@ -621,8 +642,7 @@
                             ${isAdmin ? `
                             <div class="relative w-full">
                                 <select onchange="setFilterUser(this.value)" class="w-full appearance-none bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl px-3.5 py-3 text-xs font-medium text-slate-700 dark:text-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                                    <option value="All" ${state.filterUser === 'All' ? 'selected' : ''}>All Users</option>
-                                    ${state.users.map(u => `<option value="${u.id}" ${state.filterUser === u.id ? 'selected' : ''}>${u.name}</option>`).join('')}
+                                    <option value="All" ${state.filterUser === 'All' ? 'selected' : ''}>All Users</option>${state.users.map(u => `<option value="${u.id}" ${state.filterUser === u.id ? 'selected' : ''}>${u.name}</option>`).join('')}
                                 </select>
                                 <span class="absolute inset-y-0 right-0 pr-3.5 flex items-center pointer-events-none text-slate-400 text-xs">
                                     <i class="fa-solid fa-chevron-down"></i>
@@ -667,9 +687,7 @@
                                                 <i class="fa-solid ${isOffice ? 'fa-briefcase' : 'fa-clapperboard'}"></i>
                                             </div>
                                             <div class="flex-1 min-w-0 pr-1">
-                                                <h4 class="font-semibold text-sm text-slate-900 dark:text-white leading-snug mb-1 break-words">${escapeHtml(exp.title)}</h4>
-                                                
-                                                ${!isOffice && exp.clientNamePlace ? `
+                                                <h4 class="font-semibold text-sm text-slate-900 dark:text-white leading-snug mb-1 break-words">${escapeHtml(exp.title)}</h4>${!isOffice && exp.clientNamePlace ? `
                                                     <div class="mb-1 text-xs font-medium text-violet-600 dark:text-violet-400 flex items-center space-x-1.5 min-w-0">
                                                         <i class="fa-solid fa-location-dot shrink-0"></i>
                                                         <span class="break-words">Client/Place: ${escapeHtml(exp.clientNamePlace)}</span>
@@ -696,8 +714,7 @@
                                             </div>
                                         </div>
                                         <div class="text-right shrink-0 flex flex-col items-end">
-                                            <span class="font-bold text-base sm:text-lg text-slate-900 dark:text-white break-all">${formatCurrency(exp.amount)}</span>
-                                            ${canEdit ? `
+                                            <span class="font-bold text-base sm:text-lg text-slate-900 dark:text-white break-all">${formatCurrency(exp.amount)}</span>${canEdit ? `
                                                 <div class="flex items-center space-x-1.5 mt-2.5">
                                                     <button onclick="startEditExpense('${exp.id}')" class="w-8 h-8 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-indigo-50 hover:text-indigo-600 dark:hover:bg-indigo-950 dark:hover:text-indigo-400 transition flex items-center justify-center text-xs" title="Edit">
                                                         <i class="fa-solid fa-pen"></i>
@@ -764,6 +781,8 @@
             if (isEditing) {
                 const found = state.expenses.find(e => e.id === state.editingExpenseId);
                 if (found) expense = found;
+            } else if (state.tempFormCache) {
+                expense = { ...expense, ...state.tempFormCache };
             }
 
             const currentBill = state.tempBillData !== null ? state.tempBillData : expense.billAttachment;
@@ -809,7 +828,7 @@
                                 <span class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400">
                                     <i class="fa-solid fa-location-dot text-sm"></i>
                                 </span>
-                                <input type="text" id="expense-client" value="${escapeHtml(expense.clientNamePlace || '')}" placeholder="e.g., Acme Corp / Outdoor Studio Location" class="w-full pl-10 pr-4 py-3.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 text-slate-900 dark:text-white">
+                                <input type="text" id="expense-client" value="${escapeHtml(expense.clientNamePlace || '')}" oninput="updateFormCache()" placeholder="e.g., Acme Corp / Outdoor Studio Location" class="w-full pl-10 pr-4 py-3.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 text-slate-900 dark:text-white">
                             </div>
                         </div>
 
@@ -817,23 +836,23 @@
                             <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-2.5">Amount (₹)</label>
                             <div class="relative w-full">
                                 <span class="absolute inset-y-0 left-0 pl-4 flex items-center font-bold text-slate-400">₹</span>
-                                <input type="number" id="expense-amount" value="${expense.amount}" required min="1" step="any" placeholder="0.00" class="w-full pl-9 pr-4 py-3.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-base font-semibold focus:outline-none focus:ring-2 focus:ring-indigo-500 text-slate-900 dark:text-white">
+                                <input type="number" id="expense-amount" value="${expense.amount}" oninput="updateFormCache()" required min="1" step="any" placeholder="0.00" class="w-full pl-9 pr-4 py-3.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-base font-semibold focus:outline-none focus:ring-2 focus:ring-indigo-500 text-slate-900 dark:text-white">
                             </div>
                         </div>
 
                         <div class="w-full">
                             <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-2.5">Title / Description</label>
-                            <input type="text" id="expense-title" value="${escapeHtml(expense.title)}" required placeholder="e.g., Studio Rent, Camera Rental, Catering" class="w-full px-4 py-3.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 text-slate-900 dark:text-white">
+                            <input type="text" id="expense-title" value="${escapeHtml(expense.title)}" oninput="updateFormCache()" required placeholder="e.g., Studio Rent, Camera Rental, Catering" class="w-full px-4 py-3.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 text-slate-900 dark:text-white">
                         </div>
 
                         <div class="w-full">
                             <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-2.5">Date</label>
-                            <input type="date" id="expense-date" value="${expense.date}" required class="w-full px-4 py-3.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 text-slate-900 dark:text-white">
+                            <input type="date" id="expense-date" value="${expense.date}" oninput="updateFormCache()" required class="w-full px-4 py-3.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 text-slate-900 dark:text-white">
                         </div>
 
                         <div class="w-full">
                             <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-2.5">Notes / Receipt details (Optional)</label>
-                            <textarea id="expense-notes" rows="3" placeholder="Add any vendor details, invoice numbers or remarks..." class="w-full px-4 py-3.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 text-slate-900 dark:text-white">${escapeHtml(expense.notes)}</textarea>
+                            <textarea id="expense-notes" rows="3" oninput="updateFormCache()" placeholder="Add any vendor details, invoice numbers or remarks..." class="w-full px-4 py-3.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 text-slate-900 dark:text-white">${escapeHtml(expense.notes)}</textarea>
                         </div>
 
                         <div class="w-full">
@@ -884,6 +903,7 @@
         }
 
         function handleBillUpload(event) {
+            updateFormCache();
             const file = event.target.files[0];
             if (!file) return;
             const reader = new FileReader();
@@ -896,6 +916,7 @@
         }
 
         function openCameraCaptureModal() {
+            updateFormCache();
             const root = document.getElementById('modal-root');
             root.innerHTML = `
                 <div class="fixed inset-0 z-50 bg-slate-950/90 backdrop-blur-md flex flex-col items-center justify-center p-4 animate-fadeIn">
@@ -1017,7 +1038,10 @@
         }
 
         function setFormCategory(cat) {
+            updateFormCache();
             document.getElementById('expense-category').value = cat;
+            if(state.tempFormCache) state.tempFormCache.category = cat;
+
             const btnOffice = document.getElementById('btn-cat-office');
             const btnShoot = document.getElementById('btn-cat-shoot');
             const clientContainer = document.getElementById('client-input-container');
@@ -1066,6 +1090,7 @@
                 });
                 state.editingExpenseId = null;
                 state.tempBillData = null;
+                state.tempFormCache = null;
                 showToast('Expense updated successfully!', 'success');
             } else {
                 const newExp = {
@@ -1083,6 +1108,7 @@
                 };
                 state.expenses.unshift(newExp);
                 state.tempBillData = null;
+                state.tempFormCache = null;
                 showToast('Expense added successfully!', 'success');
             }
 
@@ -1093,6 +1119,7 @@
         function startEditExpense(id) {
             state.editingExpenseId = id;
             state.tempBillData = null;
+            state.tempFormCache = null;
             state.activeTab = 'add';
             render();
         }
@@ -1100,6 +1127,7 @@
         function cancelEdit() {
             state.editingExpenseId = null;
             state.tempBillData = null;
+            state.tempFormCache = null;
             switchTab('home');
         }
 
