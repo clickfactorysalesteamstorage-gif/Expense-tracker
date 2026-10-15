@@ -993,40 +993,56 @@
                 return;
             }
 
-            showToast('Saving to cloud...', 'info');
-            const { db, doc, setDoc } = window.FB;
+            showToast('Uploading bill and syncing with cloud...', 'info');
+            const { db, storage, doc, setDoc, storageRef, uploadString, getDownloadURL } = window.FB;
 
             let expenseId = state.editingExpenseId || ('exp_' + Date.now());
             let billUrl = null;
 
-            if (state.tempBillData !== null) {
-                billUrl = state.tempBillData;
-            } else if (state.editingExpenseId) {
-                const existing = state.expenses.find(e => e.id === expenseId);
-                billUrl = existing ? existing.billAttachment : null;
+            try {
+                if (state.tempBillData !== null) {
+                    if (state.tempBillData.startsWith('data:image')) {
+                        try {
+                            const fileRef = storageRef(storage, `bills/${expenseId}.jpg`);
+                            await uploadString(fileRef, state.tempBillData, 'data_url');
+                            billUrl = await getDownloadURL(fileRef);
+                        } catch (storageErr) {
+                            console.warn("Storage upload restricted or failed, falling back to direct base64 storage:", storageErr);
+                            billUrl = state.tempBillData;
+                        }
+                    } else {
+                        billUrl = state.tempBillData;
+                    }
+                } else if (state.editingExpenseId) {
+                    const existing = state.expenses.find(e => e.id === expenseId);
+                    billUrl = existing ? existing.billAttachment : null;
+                }
+
+                const expenseData = {
+                    id: expenseId,
+                    userId: state.currentUser.id,
+                    userName: state.currentUser.name,
+                    title,
+                    amount,
+                    category,
+                    date,
+                    clientNamePlace,
+                    notes,
+                    billAttachment: billUrl,
+                    createdAt: state.editingExpenseId ? (state.expenses.find(e => e.id === expenseId)?.createdAt || new Date().toISOString()) : new Date().toISOString()
+                };
+
+                await setDoc(doc(db, 'expenses', expenseId), expenseData);
+
+                state.editingExpenseId = null;
+                state.tempBillData = null;
+                state.tempFormCache = null;
+                showToast('Expense saved to cloud!', 'success');
+                switchTab('home');
+            } catch (error) {
+                console.error("Cloud save failed:", error);
+                showToast('Failed to save to cloud. Please check connection.', 'error');
             }
-
-            const expenseData = {
-                id: expenseId,
-                userId: state.currentUser.id,
-                userName: state.currentUser.name,
-                title,
-                amount,
-                category,
-                date,
-                clientNamePlace,
-                notes,
-                billAttachment: billUrl,
-                createdAt: state.editingExpenseId ? (state.expenses.find(e => e.id === expenseId)?.createdAt || new Date().toISOString()) : new Date().toISOString()
-            };
-
-            await setDoc(doc(db, 'expenses', expenseId), expenseData);
-
-            state.editingExpenseId = null;
-            state.tempBillData = null;
-            state.tempFormCache = null;
-            showToast('Expense saved to cloud!', 'success');
-            switchTab('home');
         }
 
         function startEditExpense(id) {
@@ -1049,8 +1065,11 @@
                 'Delete Expense',
                 'Are you sure you want to delete this expense record from the cloud?',
                 async () => {
-                    const { db, doc, deleteDoc } = window.FB;
+                    const { db, doc, deleteDoc, storage, storageRef, deleteObject } = window.FB;
                     await deleteDoc(doc(db, 'expenses', id));
+                    if (billUrl && billUrl.includes('firebasestorage')) {
+                        try { await deleteObject(storageRef(storage, `bills/${id}.jpg`)); } catch(e){}
+                    }
                     showToast('Expense deleted.', 'success');
                 }
             );
