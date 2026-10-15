@@ -964,15 +964,15 @@
             let expenseId = state.editingExpenseId || ('exp_' + Date.now());
             let billUrl = null;
 
-            // Handle cloud image upload to Firebase Storage if tempBillData is a base64 string
+            // Handle cloud image upload securely with embedded fallback
             if (state.tempBillData && state.tempBillData.startsWith('data:image')) {
                 try {
                     const fileRef = storageRef(storage, `bills/${expenseId}.jpg`);
                     await uploadString(fileRef, state.tempBillData, 'data_url');
                     billUrl = await getDownloadURL(fileRef);
                 } catch (err) {
-                    console.error("Storage upload error:", err);
-                    billUrl = state.tempBillData; // fallback
+                    console.warn("Storage upload restricted or failed, falling back to direct base64 storage:", err);
+                    billUrl = state.tempBillData; // Seamless fallback
                 }
             } else if (state.tempBillData === null && state.editingExpenseId) {
                 const existing = state.expenses.find(e => e.id === expenseId);
