@@ -683,22 +683,15 @@
                             const canEdit = isAdmin || exp.userId === state.currentUser.id;
                             return `
                                 <div class="bg-white dark:bg-slate-900 rounded-3xl p-4.5 sm:p-5 border border-slate-200 dark:border-slate-800 shadow-sm hover:shadow-md transition relative group w-full">
-                                    <!-- Flex Layout matching target image reference -->
+                                    <!-- Flex Layout ensuring correct vertical stacking order -->
                                     <div class="flex items-start justify-between gap-3 w-full">
-                                        <!-- Left Side: Icon and Title -->
+                                        <!-- Left Side: Icon and Content -->
                                         <div class="flex items-start space-x-3 min-w-0 flex-1">
                                             <div class="w-10 h-10 rounded-2xl ${isOffice ? 'bg-amber-500/10 text-amber-600 dark:text-amber-400' : 'bg-indigo-500/10 text-indigo-600 dark:text-indigo-400'} flex items-center justify-center shrink-0 mt-0.5">
                                                 <i class="fa-solid ${isOffice ? 'fa-briefcase' : 'fa-clapperboard'}"></i>
                                             </div>
                                             <div class="min-w-0 flex-1 pr-1">
                                                 <h4 class="font-semibold text-sm sm:text-base text-slate-900 dark:text-white leading-snug break-words">${escapeHtml(exp.title)}</h4>
-
-                                                ${!isOffice && exp.clientNamePlace ? `
-                                                    <div class="mt-1.5 text-xs font-medium text-violet-600 dark:text-violet-400 flex items-center space-x-1.5 min-w-0">
-                                                        <i class="fa-solid fa-location-dot shrink-0"></i>
-                                                        <span class="break-words">Client/Place: ${escapeHtml(exp.clientNamePlace)}</span>
-                                                    </div>
-                                                ` : ''}
 
                                                 <div class="flex items-center flex-wrap gap-1.5 text-xs text-slate-500 dark:text-slate-400 mt-1.5 w-full">
                                                     <span><i class="fa-regular fa-calendar mr-1"></i>${formatDate(exp.date)}</span>
@@ -707,6 +700,13 @@
                                                     <span>•</span>
                                                     <span class="italic text-slate-600 dark:text-slate-300 break-all">${escapeHtml(exp.userName)}</span>
                                                 </div>
+
+                                                ${!isOffice && exp.clientNamePlace ? `
+                                                    <div class="mt-1.5 text-xs font-medium text-violet-600 dark:text-violet-400 flex items-center space-x-1.5 min-w-0">
+                                                        <i class="fa-solid fa-location-dot shrink-0"></i>
+                                                        <span class="break-words">Client/Place: ${escapeHtml(exp.clientNamePlace)}</span>
+                                                    </div>
+                                                ` : ''}
 
                                                 ${exp.notes ? `<p class="text-xs text-slate-600 dark:text-slate-400 mt-2.5 bg-slate-50 dark:bg-slate-800/50 p-3 rounded-2xl border border-slate-100 dark:border-slate-800/80 break-words">${escapeHtml(exp.notes)}</p>` : ''}
                                                 
