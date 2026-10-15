@@ -823,11 +823,34 @@
             updateFormCache();
             const file = event.target.files[0];
             if (!file) return;
+
             const reader = new FileReader();
             reader.onload = function(uploadEvent) {
-                state.tempBillData = uploadEvent.target.result;
-                showToast('Bill attached!', 'success');
-                render();
+                const img = new Image();
+                img.onload = function() {
+                    const canvas = document.createElement('canvas');
+                    let width = img.width;
+                    let height = img.height;
+                    const maxDim = 800;
+
+                    if (width > height && width > maxDim) {
+                        height = Math.round((height * maxDim) / width);
+                        width = maxDim;
+                    } else if (height > maxDim) {
+                        width = Math.round((width * maxDim) / height);
+                        height = maxDim;
+                    }
+
+                    canvas.width = width;
+                    canvas.height = height;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, width, height);
+
+                    state.tempBillData = canvas.toDataURL('image/jpeg', 0.8);
+                    showToast('Bill attached successfully!', 'success');
+                    render();
+                };
+                img.src = uploadEvent.target.result;
             };
             reader.readAsDataURL(file);
         }
@@ -870,11 +893,23 @@
             const canvasElement = document.getElementById('camera-canvas');
             if (!videoElement) return;
 
-            canvasElement.width = videoElement.videoWidth || 640;
-            canvasElement.height = videoElement.videoHeight || 480;
-            canvasElement.getContext('2d').drawImage(videoElement, 0, 0, canvasElement.width, canvasElement.height);
+            let width = videoElement.videoWidth || 640;
+            let height = videoElement.videoHeight || 480;
+            const maxDim = 800;
 
-            state.tempBillData = canvasElement.toDataURL('image/jpeg', 0.85);
+            if (width > height && width > maxDim) {
+                height = Math.round((height * maxDim) / width);
+                width = maxDim;
+            } else if (height > maxDim) {
+                width = Math.round((width * maxDim) / height);
+                height = maxDim;
+            }
+
+            canvasElement.width = width;
+            canvasElement.height = height;
+            canvasElement.getContext('2d').drawImage(videoElement, 0, 0, width, height);
+
+            state.tempBillData = canvasElement.toDataURL('image/jpeg', 0.8);
             if (window.activeCameraStream) {
                 window.activeCameraStream.getTracks().forEach(track => track.stop());
                 window.activeCameraStream = null;
@@ -959,26 +994,16 @@
             }
 
             showToast('Saving to cloud...', 'info');
-            const { db, storage, doc, setDoc, storageRef, uploadString, getDownloadURL } = window.FB;
+            const { db, doc, setDoc } = window.FB;
 
             let expenseId = state.editingExpenseId || ('exp_' + Date.now());
             let billUrl = null;
 
-            // Handle cloud image upload securely with embedded fallback
-            if (state.tempBillData && state.tempBillData.startsWith('data:image')) {
-                try {
-                    const fileRef = storageRef(storage, `bills/${expenseId}.jpg`);
-                    await uploadString(fileRef, state.tempBillData, 'data_url');
-                    billUrl = await getDownloadURL(fileRef);
-                } catch (err) {
-                    console.warn("Storage upload restricted or failed, falling back to direct base64 storage:", err);
-                    billUrl = state.tempBillData; // Seamless fallback
-                }
-            } else if (state.tempBillData === null && state.editingExpenseId) {
+            if (state.tempBillData !== null) {
+                billUrl = state.tempBillData;
+            } else if (state.editingExpenseId) {
                 const existing = state.expenses.find(e => e.id === expenseId);
                 billUrl = existing ? existing.billAttachment : null;
-            } else {
-                billUrl = state.tempBillData;
             }
 
             const expenseData = {
@@ -1024,11 +1049,8 @@
                 'Delete Expense',
                 'Are you sure you want to delete this expense record from the cloud?',
                 async () => {
-                    const { db, doc, deleteDoc, storage, storageRef, deleteObject } = window.FB;
+                    const { db, doc, deleteDoc } = window.FB;
                     await deleteDoc(doc(db, 'expenses', id));
-                    if (billUrl && billUrl.includes('firebasestorage')) {
-                        try { await deleteObject(storageRef(storage, `bills/${id}.jpg`)); } catch(e){}
-                    }
                     showToast('Expense deleted.', 'success');
                 }
             );
