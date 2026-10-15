@@ -98,7 +98,7 @@
     <div id="toast-container" class="fixed top-12 left-1/2 transform -translate-x-1/2 z-50 flex flex-col gap-2 pointer-events-none w-11/12 max-w-sm"></div>
 
     <script>
-        const STORAGE_KEY = 'click_factory_expense_tracker_admin_auth_v22';
+        const STORAGE_KEY = 'click_factory_expense_tracker_admin_auth_v23';
 
         const initialData = {
             currentUser: null,
@@ -683,34 +683,39 @@
                             const canEdit = isAdmin || exp.userId === state.currentUser.id;
                             return `
                                 <div class="bg-white dark:bg-slate-900 rounded-3xl p-4.5 sm:p-5 border border-slate-200 dark:border-slate-800 shadow-sm hover:shadow-md transition relative group w-full">
-                                    <!-- Flex Layout matching reference design -->
-                                    <div class="flex items-start justify-between gap-3 w-full">
-                                        <!-- Left Side: Icon and Content -->
-                                        <div class="flex items-start space-x-3 min-w-0 flex-1">
-                                            <div class="w-10 h-10 rounded-2xl ${isOffice ? 'bg-amber-500/10 text-amber-600 dark:text-amber-400' : 'bg-indigo-500/10 text-indigo-600 dark:text-indigo-400'} flex items-center justify-center shrink-0 mt-0.5">
-                                                <i class="fa-solid ${isOffice ? 'fa-briefcase' : 'fa-clapperboard'}"></i>
+                                    <!-- Mobile-Safe Layout: Top Row for Title/Amount, Bottom for Meta -->
+                                    <div class="flex items-start space-x-3 w-full">
+                                        <!-- Icon Badge -->
+                                        <div class="w-10 h-10 rounded-2xl ${isOffice ? 'bg-amber-500/10 text-amber-600 dark:text-amber-400' : 'bg-indigo-500/10 text-indigo-600 dark:text-indigo-400'} flex items-center justify-center shrink-0 mt-0.5">
+                                            <i class="fa-solid ${isOffice ? 'fa-briefcase' : 'fa-clapperboard'}"></i>
+                                        </div>
+
+                                        <!-- Title and Amount Container -->
+                                        <div class="min-w-0 flex-1">
+                                            <div class="flex items-start justify-between gap-2 w-full">
+                                                <h4 class="font-semibold text-sm sm:text-base text-slate-900 dark:text-white leading-snug break-words flex-1 pr-1">${escapeHtml(exp.title)}</h4>
+                                                <span class="font-bold text-base sm:text-lg text-slate-900 dark:text-white whitespace-nowrap shrink-0">${formatCurrency(exp.amount)}</span>
                                             </div>
-                                            <div class="min-w-0 flex-1 pr-1">
-                                                <h4 class="font-semibold text-sm sm:text-base text-slate-900 dark:text-white leading-snug break-words">${escapeHtml(exp.title)}</h4>
 
-                                                <div class="flex items-center flex-wrap gap-1.5 text-xs text-slate-500 dark:text-slate-400 mt-1.5 w-full">
-                                                    <span><i class="fa-regular fa-calendar mr-1"></i>${formatDate(exp.date)}</span>
-                                                    <span>•</span>
-                                                    <span class="font-medium text-indigo-600 dark:text-indigo-400">${exp.category}</span>
-                                                    <span>•</span>
-                                                    <span class="italic text-slate-600 dark:text-slate-300 break-all">${escapeHtml(exp.userName)}</span>
+                                            <div class="flex items-center flex-wrap gap-1.5 text-xs text-slate-500 dark:text-slate-400 mt-2 w-full">
+                                                <span><i class="fa-regular fa-calendar mr-1"></i>${formatDate(exp.date)}</span>
+                                                <span>•</span>
+                                                <span class="font-medium text-indigo-600 dark:text-indigo-400">${exp.category}</span>
+                                                <span>•</span>
+                                                <span class="italic text-slate-600 dark:text-slate-300 break-all">${escapeHtml(exp.userName)}</span>
+                                            </div>
+
+                                            ${!isOffice && exp.clientNamePlace ? `
+                                                <div class="mt-1.5 text-xs font-medium text-violet-600 dark:text-violet-400 flex items-center space-x-1.5 min-w-0">
+                                                    <i class="fa-solid fa-location-dot shrink-0"></i>
+                                                    <span class="break-words">Client/Place: ${escapeHtml(exp.clientNamePlace)}</span>
                                                 </div>
+                                            ` : ''}
 
-                                                ${!isOffice && exp.clientNamePlace ? `
-                                                    <div class="mt-1.5 text-xs font-medium text-violet-600 dark:text-violet-400 flex items-center space-x-1.5 min-w-0">
-                                                        <i class="fa-solid fa-location-dot shrink-0"></i>
-                                                        <span class="break-words">Client/Place: ${escapeHtml(exp.clientNamePlace)}</span>
-                                                    </div>
-                                                ` : ''}
-
-                                                ${exp.notes ? `<p class="text-xs text-slate-600 dark:text-slate-400 mt-2.5 bg-slate-50 dark:bg-slate-800/50 p-3 rounded-2xl border border-slate-100 dark:border-slate-800/80 break-words">${escapeHtml(exp.notes)}</p>` : ''}
-                                                
-                                                <div class="mt-3">
+                                            ${exp.notes ? `<p class="text-xs text-slate-600 dark:text-slate-400 mt-2.5 bg-slate-50 dark:bg-slate-800/50 p-3 rounded-2xl border border-slate-100 dark:border-slate-800/80 break-words">${escapeHtml(exp.notes)}</p>` : ''}
+                                            
+                                            <div class="flex items-center justify-between mt-3 pt-2 border-t border-slate-100 dark:border-slate-800/60 w-full gap-2">
+                                                <div>
                                                     ${exp.billAttachment ? `
                                                         <button onclick="viewBillModal('${exp.id}')" class="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-xl bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 text-xs font-medium border border-indigo-200/60 dark:border-indigo-800/60 hover:bg-indigo-100 transition">
                                                             <i class="fa-solid fa-paperclip"></i>
@@ -718,21 +723,18 @@
                                                         </button>
                                                     ` : '<span class="text-[11px] text-slate-400 italic">No bill attached</span>'}
                                                 </div>
-                                            </div>
-                                        </div>
 
-                                        <!-- Right Side: Amount and Action Buttons Stacked -->
-                                        <div class="text-right shrink-0 flex flex-col items-end">
-                                            <span class="font-bold text-base sm:text-lg text-slate-900 dark:text-white whitespace-nowrap">${formatCurrency(exp.amount)}</span>${canEdit ? `
-                                                <div class="flex items-center space-x-1.5 mt-2.5">
-                                                    <button onclick="startEditExpense('${exp.id}')" class="w-8 h-8 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-indigo-50 hover:text-indigo-600 dark:hover:bg-indigo-950 dark:hover:text-indigo-400 transition flex items-center justify-center text-xs" title="Edit">
-                                                        <i class="fa-solid fa-pen"></i>
-                                                    </button>
-                                                    <button onclick="confirmDeleteExpense('${exp.id}')" class="w-8 h-8 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-rose-50 hover:text-rose-600 dark:hover:bg-rose-950 dark:hover:text-rose-400 transition flex items-center justify-center text-xs" title="Delete">
-                                                        <i class="fa-solid fa-trash"></i>
-                                                    </button>
-                                                </div>
-                                            ` : ''}
+                                                ${canEdit ? `
+                                                    <div class="flex items-center space-x-1.5 shrink-0">
+                                                        <button onclick="startEditExpense('${exp.id}')" class="w-8 h-8 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-indigo-50 hover:text-indigo-600 dark:hover:bg-indigo-950 dark:hover:text-indigo-400 transition flex items-center justify-center text-xs" title="Edit">
+                                                            <i class="fa-solid fa-pen"></i>
+                                                        </button>
+                                                        <button onclick="confirmDeleteExpense('${exp.id}')" class="w-8 h-8 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-rose-50 hover:text-rose-600 dark:hover:bg-rose-950 dark:hover:text-rose-400 transition flex items-center justify-center text-xs" title="Delete">
+                                                            <i class="fa-solid fa-trash"></i>
+                                                        </button>
+                                                    </div>
+                                                ` : ''}
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
