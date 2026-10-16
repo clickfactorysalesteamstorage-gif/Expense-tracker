@@ -2,14 +2,21 @@
 <html lang="en" class="h-full">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-Here is the updated code with the requested fix. Now, **admins can no longer edit user expenses**, and **only the respective user who created the expense can edit it**.
+
+```html
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Click Factory Expense Tracker - Cloud Edition</title>
     <!-- Tailwind CSS CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="[https://cdn.tailwindcss.com](https://cdn.tailwindcss.com)"></script>
     <!-- FontAwesome for Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="[https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css](https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css)">
     <!-- Google Fonts Inter -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="[https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap](https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap)" rel="stylesheet">
     <script>
         tailwind.config = {
             darkMode: 'class',
@@ -75,9 +82,9 @@
 
     <!-- Firebase SDK Modular Imports via ESM CDN -->
     <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getFirestore, collection, getDocs, setDoc, doc, deleteDoc, updateDoc, onSnapshot, query, orderBy } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-        import { getStorage, ref as storageRef, uploadString, getDownloadURL, deleteObject } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
+        import { initializeApp } from "[https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js](https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js)";
+        import { getFirestore, collection, getDocs, setDoc, doc, deleteDoc, updateDoc, onSnapshot, query, orderBy } from "[https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js](https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js)";
+        import { getStorage, ref as storageRef, uploadString, getDownloadURL, deleteObject } from "[https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js](https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js)";
 
         const firebaseConfig = {
             apiKey: "AIzaSyDguDaGIQ8dbwLoqbXKDD4ixfPg7y3VCpg",
@@ -241,7 +248,7 @@
                 <header class="sticky top-0 z-40 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 px-4 sm:px-6 pt-3 pb-3 flex items-center justify-between w-full shadow-sm">
                     <div class="flex items-center space-x-3 min-w-0 flex-1 pr-2">
                         <div class="w-10 h-10 rounded-2xl bg-white dark:bg-slate-800 p-1 flex items-center justify-center shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden shrink-0">
-                            <img src="https://clickfactoryphotography.com/wp-content/uploads/2022/04/crop-logo.gif" alt="Click Factory Logo" class="w-full h-full object-contain" onerror="this.src='https://placehold.co/40x40/4f46e5/ffffff?text=CF'">
+                            <img src="[https://clickfactoryphotography.com/wp-content/uploads/2022/04/crop-logo.gif](https://clickfactoryphotography.com/wp-content/uploads/2022/04/crop-logo.gif)" alt="Click Factory Logo" class="w-full h-full object-contain" onerror="this.src='[https://placehold.co/40x40/4f46e5/ffffff?text=CF](https://placehold.co/40x40/4f46e5/ffffff?text=CF)'">
                         </div>
                         <div class="min-w-0 flex-1">
                             <h1 class="font-bold text-sm sm:text-base leading-tight tracking-tight text-slate-900 dark:text-white truncate">Click Factory</h1>
@@ -313,7 +320,7 @@
                 <div class="flex-1 flex flex-col justify-center px-4 py-8 animate-fadeIn max-w-sm mx-auto w-full">
                     <div class="text-center mb-6">
                         <div class="w-20 h-20 bg-white dark:bg-slate-800 rounded-3xl p-3 flex items-center justify-center mx-auto mb-4 shadow-xl border border-slate-200 dark:border-slate-700 overflow-hidden">
-                            <img src="https://clickfactoryphotography.com/wp-content/uploads/2022/04/crop-logo.gif" alt="Click Factory Logo" class="w-full h-full object-contain" onerror="this.src='https://placehold.co/80x80/4f46e5/ffffff?text=CF'">
+                            <img src="[https://clickfactoryphotography.com/wp-content/uploads/2022/04/crop-logo.gif](https://clickfactoryphotography.com/wp-content/uploads/2022/04/crop-logo.gif)" alt="Click Factory Logo" class="w-full h-full object-contain" onerror="this.src='[https://placehold.co/80x80/4f46e5/ffffff?text=CF](https://placehold.co/80x80/4f46e5/ffffff?text=CF)'">
                         </div>
                         <h2 class="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">Click Factory</h2>
                         <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Cloud Expense Management Portal</p>
@@ -635,7 +642,8 @@
 
                         ${filtered.map(exp => {
                             const isOffice = exp.category === 'Office';
-                            const canEdit = isAdmin || exp.userId === state.currentUser.id;
+                            const canEdit = exp.userId === state.currentUser.id;
+                            const canDelete = isAdmin || exp.userId === state.currentUser.id;
                             return `
                                 <div class="bg-white dark:bg-slate-900 rounded-3xl p-4.5 sm:p-5 border border-slate-200 dark:border-slate-800 shadow-sm transition relative group w-full">
                                     <div class="flex items-start space-x-3 w-full">
@@ -674,12 +682,9 @@
                                                     ` : '<span class="text-[11px] text-slate-400 italic">No bill attached</span>'}
                                                 </div>
 
-                                                ${canEdit ? `
-                                                    <div class="flex items-center space-x-1.5 shrink-0">
-                                                        <button onclick="startEditExpense('${exp.id}')" class="w-8 h-8 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-indigo-50 hover:text-indigo-600 transition flex items-center justify-center text-xs" title="Edit"><i class="fa-solid fa-pen"></i></button>
-                                                        <button onclick="confirmDeleteExpense('${exp.id}', '${exp.billAttachment || ''}')" class="w-8 h-8 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-rose-50 hover:text-rose-600 transition flex items-center justify-center text-xs" title="Delete"><i class="fa-solid fa-trash"></i></button>
-                                                    </div>
-                                                ` : ''}
+                                                <div class="flex items-center space-x-1.5 shrink-0">
+                                                    ${canEdit ? `<button onclick="startEditExpense('${exp.id}')" class="w-8 h-8 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-indigo-50 hover:text-indigo-600 transition flex items-center justify-center text-xs" title="Edit"><i class="fa-solid fa-pen"></i></button>` : ''}
+                                                    ${canDelete ? `<button onclick="confirmDeleteExpense('${exp.id}', '${exp.billAttachment || ''}')" class="w-8 h-8 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-rose-50 hover:text-rose-600 transition flex items-center justify-center text-xs" title="Delete"><i class="fa-solid fa-trash"></i></button>` : ''}
                                             </div>
                                         </div>
                                     </div>
@@ -1213,7 +1218,7 @@
                     }).join('')}
                 </div>
             </div>
-        `;
+          `;
         }
 
         async function dismissRequest(reqId) {
@@ -1279,7 +1284,7 @@
                         </form>
                     </div>
                 </div>
-            `;
+          `;
         }
 
         async function handleAddNewUser(e) {
@@ -1370,7 +1375,7 @@
                 <div class="space-y-4 animate-fadeIn w-full max-w-full">
                     <div class="bg-white dark:bg-slate-900 rounded-3xl p-6 sm:p-7 border border-slate-200 dark:border-slate-800 shadow-sm text-center w-full">
                         <div class="w-20 h-20 bg-white dark:bg-slate-800 rounded-2xl p-2 flex items-center justify-center mx-auto mb-3 shadow-md border border-slate-200 dark:border-slate-700 overflow-hidden">
-                            <img src="https://clickfactoryphotography.com/wp-content/uploads/2022/04/crop-logo.gif" alt="Click Factory Logo" class="w-full h-full object-contain" onerror="this.src='https://placehold.co/80x80/4f46e5/ffffff?text=CF'">
+                            <img src="[https://clickfactoryphotography.com/wp-content/uploads/2022/04/crop-logo.gif](https://clickfactoryphotography.com/wp-content/uploads/2022/04/crop-logo.gif)" alt="Click Factory Logo" class="w-full h-full object-contain" onerror="this.src='[https://placehold.co/80x80/4f46e5/ffffff?text=CF](https://placehold.co/80x80/4f46e5/ffffff?text=CF)'">
                         </div>
                         <h2 class="font-bold text-lg text-slate-900 dark:text-white truncate">${state.currentUser.name}</h2>
                         <p class="text-xs text-slate-500 dark:text-slate-400 mb-2 truncate">@${state.currentUser.username}</p>
@@ -1393,7 +1398,7 @@
                     </div>
                 </div>
           `;
-      }
+        }
 
         function openChangePasswordModal() {
             const root = document.getElementById('modal-root');
@@ -1412,7 +1417,7 @@
                     </div>
                 </div>
           `;
-      }
+        }
 
         async function handlePasswordChange(e) {
             e.preventDefault();
@@ -1447,7 +1452,7 @@
                 if (state.filterCategory !== 'All' && exp.category !== state.filterCategory) return false;
                 if (state.filterMonth !== 'All' && !exp.date.startsWith(state.filterMonth)) return false;
                 return true;
-            });
+          });
             downloadCSV(filtered, 'filtered_expenses_report.csv');
         }
 
