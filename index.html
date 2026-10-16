@@ -1000,6 +1000,10 @@
             let billUrl = null;
 
             try {
+                const existingExpense = state.editingExpenseId ? state.expenses.find(e => e.id === expenseId) : null;
+                const targetUserId = existingExpense ? existingExpense.userId : state.currentUser.id;
+                const targetUserName = existingExpense ? existingExpense.userName : state.currentUser.name;
+
                 if (state.tempBillData !== null) {
                     if (state.tempBillData.startsWith('data:image')) {
                         try {
@@ -1014,14 +1018,13 @@
                         billUrl = state.tempBillData;
                     }
                 } else if (state.editingExpenseId) {
-                    const existing = state.expenses.find(e => e.id === expenseId);
-                    billUrl = existing ? existing.billAttachment : null;
+                    billUrl = existingExpense ? existingExpense.billAttachment : null;
                 }
 
                 const expenseData = {
                     id: expenseId,
-                    userId: state.currentUser.id,
-                    userName: state.currentUser.name,
+                    userId: targetUserId,
+                    userName: targetUserName,
                     title,
                     amount,
                     category,
@@ -1029,7 +1032,7 @@
                     clientNamePlace,
                     notes,
                     billAttachment: billUrl,
-                    createdAt: state.editingExpenseId ? (state.expenses.find(e => e.id === expenseId)?.createdAt || new Date().toISOString()) : new Date().toISOString()
+                    createdAt: existingExpense ? (existingExpense.createdAt || new Date().toISOString()) : new Date().toISOString()
                 };
 
                 await setDoc(doc(db, 'expenses', expenseId), expenseData);
@@ -1205,12 +1208,12 @@
                                         <span class="px-3 py-1 rounded-full text-xs font-semibold ${isPending ? 'bg-amber-500/10 text-amber-600' : 'bg-emerald-500/10 text-emerald-600'}">${isPending ? 'Pending' : 'Approved'}</span>
                                         ${isPending ? `<button onclick="dismissRequest('${req.id}')" class="w-8 h-8 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-400 hover:text-rose-600 flex items-center justify-center text-xs" title="Dismiss"><i class="fa-solid fa-xmark"></i></button>` : ''}
                                     </div>
-                                </div>
-                            `;
-                        }).join('')}
-                    </div>
+                            </div>
+                        `;
+                    }).join('')}
                 </div>
-            `;
+            </div>
+        `;
         }
 
         async function dismissRequest(reqId) {
@@ -1358,8 +1361,8 @@
                             </div>
                         `).join('')}
                     </div>
-                </div>
-            `;
+              </div>
+          `;
         }
 
         function renderProfileTab() {
@@ -1377,7 +1380,7 @@
                     </div>
 
                     ${state.currentUser.role === 'admin' ? `
-                    <div class="bg-white dark:bg-slate-900 rounded-3xl p-4.5 sm:p-5 border border-slate-200 dark:border-slate-800 shadow-sm space-y-3 w-full">
+                  <div class="bg-white dark:bg-slate-900 rounded-3xl p-4.5 sm:p-5 border border-slate-200 dark:border-slate-800 shadow-sm space-y-3 w-full">
                         <h3 class="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider px-1">Admin Security</h3>
                         <button onclick="openChangePasswordModal()" class="w-full py-3 px-4 rounded-2xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-700 dark:text-slate-300 text-xs font-semibold transition flex items-center justify-center space-x-2">
                             <i class="fa-solid fa-key"></i><span>Change Admin Password</span>
@@ -1389,8 +1392,8 @@
                         <p class="text-[11px] font-medium text-slate-400 dark:text-slate-500">Click Factory Expense Tracker • Developed by <span class="font-bold text-indigo-600">SK Techmedia</span></p>
                     </div>
                 </div>
-            `;
-        }
+          `;
+      }
 
         function openChangePasswordModal() {
             const root = document.getElementById('modal-root');
@@ -1408,8 +1411,8 @@
                         </form>
                     </div>
                 </div>
-            `;
-        }
+          `;
+      }
 
         async function handlePasswordChange(e) {
             e.preventDefault();
@@ -1482,10 +1485,10 @@
                         <div class="grid grid-cols-2 gap-3 pt-2">
                             <button onclick="closeModal()" class="py-3 px-4 rounded-2xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-semibold">Cancel</button>
                             <button id="modal-confirm-btn" class="py-3 px-4 rounded-2xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-semibold shadow-md">Confirm</button>
-                        </div>
-                    </div>
-                </div>
-            `;
+                      </div>
+                  </div>
+              </div>
+          `;
             document.getElementById('modal-confirm-btn').onclick = () => { closeModal(); onConfirm(); };
         }
 
