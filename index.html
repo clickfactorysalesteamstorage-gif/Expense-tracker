@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Click Factory Expense Tracker - Cloud Edition</title>
+    <!-- Web App Icon / Favicon -->
+    <link rel="icon" type="image/gif" href="https://clickfactoryphotography.com/wp-content/uploads/2022/04/crop-logo.gif">
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- FontAwesome for Icons -->
@@ -1092,8 +1094,6 @@
                     const exp = state.expenses.find(e => e.id === id);
                     if (exp) {
                         const recycleItem = { ...exp, deletedAt: new Date().toISOString(), deletedBy: state.currentUser.name };
-                        await setDoc(doc(db, 'recycleBin', id));
-                        // Save directly into recycleBin collection
                         await setDoc(doc(db, 'recycleBin', id), recycleItem);
                         await deleteDoc(doc(db, 'expenses', id));
                         showToast('Expense moved to Recycle Bin.', 'success');
