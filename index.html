@@ -635,7 +635,8 @@
 
                         ${filtered.map(exp => {
                             const isOffice = exp.category === 'Office';
-                            const canEdit = isAdmin || exp.userId === state.currentUser.id;
+                            // Admins cannot edit/delete user expenses; only the author can edit/delete their own expense
+                            const canEdit = exp.userId === state.currentUser.id;
                             return `
                                 <div class="bg-white dark:bg-slate-900 rounded-3xl p-4.5 sm:p-5 border border-slate-200 dark:border-slate-800 shadow-sm transition relative group w-full">
                                     <div class="flex items-start space-x-3 w-full">
