@@ -670,8 +670,8 @@
                             const isOffice = exp.category === 'Office';
                             const canEdit = exp.userId === state.currentUser.id;
                             return `
-                                <div class="bg-white dark:bg-slate-900 rounded-3xl py-4 sm:py-5 px-4.5 sm:px-5 border border-slate-200 dark:border-slate-800 shadow-sm transition relative group w-full mt-3">
-                                    <div class="flex items-start space-x-3 w-full">
+                                <div class="bg-white dark:bg-slate-900 rounded-3xl py-4.5 sm:py-5 px-5 sm:px-6 border border-slate-200 dark:border-slate-800 shadow-sm transition relative group w-full mt-3">
+                                    <div class="flex items-start space-x-3.5 w-full">
                                         <div class="w-10 h-10 rounded-2xl ${isOffice ? 'bg-amber-500/10 text-amber-600 dark:text-amber-400' : 'bg-indigo-500/10 text-indigo-600 dark:text-indigo-400'} flex items-center justify-center shrink-0 mt-0.5">
                                             <i class="fa-solid ${isOffice ? 'fa-briefcase' : 'fa-clapperboard'}"></i>
                                         </div>
@@ -701,7 +701,7 @@
                                             <div class="flex items-center justify-between mt-3 pt-2 border-t border-slate-100 dark:border-slate-800/60 w-full gap-2">
                                                 <div>
                                                     ${exp.billAttachment ? `
-                                                        <button onclick="viewBillModal('${exp.id}')" class="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-xl bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 text-xs font-medium border border-indigo-200/60 hover:bg-indigo-100 transition">
+                                                        <button onclick="viewBillModal('${exp.id}')" class="inline-flex items-center space-x-1.5 px-3.5 py-1.5 rounded-xl bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 text-xs font-medium border border-indigo-200/60 hover:bg-indigo-100 transition">
                                                             <i class="fa-solid fa-paperclip"></i><span>View Attached Bill</span>
                                                         </button>
                                                     ` : '<span class="text-[11px] text-slate-400 italic">No bill attached</span>'}
@@ -835,7 +835,7 @@
                                     </div>
                                 </div>
 
-                                <button type="button" onclick="openCameraCaptureModal()" class="border-2 border-dashed border-slate-200 dark:border-slate-700 rounded-2xl p-4 text-center bg-slate-50 dark:bg-slate-800/40 hover:border-indigo-500 transition flex flex-col items-center justify-center space-y-1">
+                                <button type="button" onclick="openCameraCaptureModal()" class="border-2 border-dashed border-slate-200 dark:border-slate-700 rounded-2xl p-4 text-center bg-slate-50 dark:bg-slate-800/40 hover:border-indigo-500 transition flex flex-col items-center justify-center space-x-1">
                                     <div class="w-10 h-10 rounded-2xl bg-violet-50 dark:bg-violet-950/60 text-violet-600 dark:text-violet-400 flex items-center justify-center text-xs"><i class="fa-solid fa-camera"></i></div>
                                     <p class="text-[11px] font-semibold text-slate-700 dark:text-slate-300">Capture Bill</p>
                                     <p class="text-[9px] text-slate-400">Use Camera</p>
@@ -1132,8 +1132,8 @@
                         ${state.recycleBin.map(exp => {
                             const isOffice = exp.category === 'Office';
                             return `
-                                <div class="bg-white dark:bg-slate-900 rounded-3xl py-4 sm:py-5 px-4.5 sm:px-5 border border-slate-200 dark:border-slate-800 shadow-sm transition relative group w-full mt-3">
-                                    <div class="flex items-start space-x-3 w-full">
+                                <div class="bg-white dark:bg-slate-900 rounded-3xl py-4.5 sm:py-5 px-5 sm:px-6 border border-slate-200 dark:border-slate-800 shadow-sm transition relative group w-full mt-3">
+                                    <div class="flex items-start space-x-3.5 w-full">
                                         <div class="w-10 h-10 rounded-2xl bg-amber-500/10 text-amber-600 flex items-center justify-center shrink-0 mt-0.5">
                                             <i class="fa-solid fa-trash-can"></i>
                                         </div>
@@ -1157,17 +1157,17 @@
 
                                             ${exp.billAttachment ? `
                                                 <div class="mt-2.5">
-                                                    <button onclick="viewBillModal('${exp.id}')" class="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-xl bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 text-xs font-medium border border-indigo-200/60 hover:bg-indigo-100 transition">
+                                                    <button onclick="viewBillModal('${exp.id}')" class="inline-flex items-center space-x-1.5 px-3.5 py-1.5 rounded-xl bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 text-xs font-medium border border-indigo-200/60 hover:bg-indigo-100 transition">
                                                         <i class="fa-solid fa-paperclip"></i><span>View Attached Bill</span>
                                                     </button>
                                                 </div>
                                             ` : ''}
 
                                             <div class="flex items-center justify-end mt-3 pt-2 border-t border-slate-100 dark:border-slate-800/60 w-full gap-2">
-                                                <button onclick="restoreFromRecycleBin('${exp.id}')" class="px-3 py-1.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 text-xs font-semibold border border-emerald-200 hover:bg-emerald-100 transition">
+                                                <button onclick="restoreFromRecycleBin('${exp.id}')" class="px-3.5 py-1.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 text-xs font-semibold border border-emerald-200 hover:bg-emerald-100 transition">
                                                     <i class="fa-solid fa-rotate-left mr-1"></i>Restore
                                                 </button>
-                                                <button onclick="permanentDelete('${exp.id}', '${exp.billAttachment || ''}')" class="px-3 py-1.5 rounded-xl bg-rose-50 dark:bg-rose-950/60 text-rose-600 dark:text-rose-400 text-xs font-semibold border border-rose-200 hover:bg-rose-100 transition">
+                                                <button onclick="permanentDelete('${exp.id}', '${exp.billAttachment || ''}')" class="px-3.5 py-1.5 rounded-xl bg-rose-50 dark:bg-rose-950/60 text-rose-600 dark:text-rose-400 text-xs font-semibold border border-rose-200 hover:bg-rose-100 transition">
                                                     <i class="fa-solid fa-xmark mr-1"></i>Delete Permanently
                                                 </button>
                                             </div>
@@ -1257,15 +1257,15 @@
                                 const userExpCount = state.expenses.filter(e => e.userId === u.id).length;
                                 const userTotal = state.expenses.filter(e => e.userId === u.id).reduce((s, e) => s + e.amount, 0);
                                 return `
-                                    <div class="flex items-center justify-between py-3.5 px-4 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-100 dark:border-slate-800 w-full gap-2 mt-2">
-                                        <div class="flex items-center space-x-3 min-w-0 flex-1">
+                                    <div class="flex items-center justify-between py-4 px-5 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-100 dark:border-slate-800 w-full gap-2 mt-2">
+                                        <div class="flex items-center space-x-3.5 min-w-0 flex-1">
                                             <div class="w-10 h-10 rounded-2xl bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 flex items-center justify-center font-bold text-sm shrink-0">${u.name.charAt(0)}</div>
                                             <div class="min-w-0 flex-1">
                                                 <h4 class="font-semibold text-sm text-slate-900 dark:text-white truncate">${u.name}</h4>
                                                 <p class="text-xs text-slate-500 truncate">${userExpCount} records • ${formatCurrency(userTotal)}</p>
                                             </div>
                                         </div>
-                                        <button onclick="exportUserCSV('${u.id}', '${u.name}')" class="px-3.5 py-2 bg-indigo-50 dark:bg-indigo-950/50 text-indigo-600 dark:text-indigo-400 text-xs font-semibold rounded-xl transition border border-indigo-200/50 flex items-center space-x-1 shrink-0">
+                                        <button onclick="exportUserCSV('${u.id}', '${u.name}')" class="px-4 py-2 bg-indigo-50 dark:bg-indigo-950/50 text-indigo-600 dark:text-indigo-400 text-xs font-semibold rounded-xl transition border border-indigo-200/50 flex items-center space-x-1 shrink-0">
                                             <i class="fa-solid fa-download"></i><span>CSV</span>
                                         </button>
                                     </div>
@@ -1287,7 +1287,7 @@
                                         </div>
                                         <span class="text-xs font-semibold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 px-3 py-1 rounded-full shrink-0">${data.count} Expenses</span>
                                     </div>
-                                    <div class="grid grid-cols-3 gap-2 pt-2 border-t border-slate-100 dark:border-slate-800">
+                                    <div class="grid grid-cols-3 gap-2.5 pt-2 border-t border-slate-100 dark:border-slate-800">
                                         <div class="bg-slate-50 dark:bg-slate-800/50 p-2.5 rounded-2xl text-center min-w-0"><span class="text-[10px] uppercase font-semibold text-slate-400 block mb-0.5 truncate">Office</span><span class="font-bold text-xs sm:text-sm text-slate-800 dark:text-slate-200 break-all block">${formatCurrency(data.office)}</span></div>
                                         <div class="bg-slate-50 dark:bg-slate-800/50 p-2.5 rounded-2xl text-center min-w-0"><span class="text-[10px] uppercase font-semibold text-slate-400 block mb-0.5 truncate">Shoot</span><span class="font-bold text-xs sm:text-sm text-slate-800 dark:text-slate-200 break-all block">${formatCurrency(data.shoot)}</span></div>
                                         <div class="bg-indigo-50 dark:bg-indigo-950/40 p-2.5 rounded-2xl text-center border border-indigo-100 dark:border-indigo-900/50 min-w-0"><span class="text-[10px] uppercase font-semibold text-indigo-600 dark:text-indigo-400 block mb-0.5 truncate">Total</span><span class="font-bold text-xs sm:text-sm text-indigo-600 dark:text-indigo-400 break-all block">${formatCurrency(data.total)}</span></div>
@@ -1322,7 +1322,7 @@
                         ${state.passwordRequests.map(req => {
                             const isPending = req.status === 'pending';
                             return `
-                                <div class="bg-white dark:bg-slate-900 rounded-2xl py-4 px-4.5 border border-slate-200 dark:border-slate-800 shadow-sm flex items-center justify-between gap-3 w-full mt-3">
+                                <div class="bg-white dark:bg-slate-900 rounded-2xl py-4.5 px-5 border border-slate-200 dark:border-slate-800 shadow-sm flex items-center justify-between gap-3 w-full mt-3">
                                     <div class="space-y-1 min-w-0 flex-1">
                                         <div class="flex items-center space-x-2 truncate">
                                             <h4 class="font-semibold text-sm text-slate-900 dark:text-white truncate">${escapeHtml(req.name)}</h4>
@@ -1369,8 +1369,8 @@
                             const expCount = state.expenses.filter(e => e.userId === u.id).length;
                             const isCurrent = u.id === state.currentUser.id;
                             return `
-                                <div class="bg-white dark:bg-slate-900 rounded-2xl py-4 px-4.5 border border-slate-200 dark:border-slate-800 shadow-sm flex items-center justify-between gap-3 w-full mt-3">
-                                    <div class="flex items-center space-x-3 min-w-0 flex-1">
+                                <div class="bg-white dark:bg-slate-900 rounded-2xl py-4.5 px-5 border border-slate-200 dark:border-slate-800 shadow-sm flex items-center justify-between gap-3 w-full mt-3">
+                                    <div class="flex items-center space-x-3.5 min-w-0 flex-1">
                                         <div class="w-10 h-10 rounded-2xl ${u.role === 'admin' ? 'bg-indigo-500/10 text-indigo-600 dark:text-indigo-400' : 'bg-slate-100 dark:bg-slate-800 text-slate-600'} flex items-center justify-center font-bold text-sm shrink-0">${u.name.charAt(0)}</div>
                                         <div class="min-w-0 flex-1">
                                             <div class="flex items-center space-x-2 truncate">
@@ -1478,7 +1478,7 @@
                             <button onclick="exportUserCSV('${state.currentUser.id}', '${state.currentUser.name}')" class="text-xs font-semibold text-indigo-600 dark:text-indigo-400 hover:underline flex items-center space-x-1 shrink-0"><i class="fa-solid fa-download"></i><span>Export CSV</span></button>
                         </div>
                         ${months.map(m => `
-                            <div class="bg-white dark:bg-slate-900 rounded-2xl p-4.5 border border-slate-200 dark:border-slate-800 shadow-sm space-y-2 w-full mt-3">
+                            <div class="bg-white dark:bg-slate-900 rounded-2xl p-4.5 sm:p-5 border border-slate-200 dark:border-slate-800 shadow-sm space-y-2 w-full mt-3">
                                 <div class="flex items-center justify-between">
                                     <span class="font-bold text-sm text-slate-900 dark:text-white truncate pr-2">${formatMonthName(m)}</span>
                                     <span class="font-bold text-sm text-indigo-600 dark:text-indigo-400 shrink-0">${formatCurrency(monthlyMap[m].total)}</span>
