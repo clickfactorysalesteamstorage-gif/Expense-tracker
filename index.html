@@ -670,7 +670,7 @@
                             const isOffice = exp.category === 'Office';
                             const canEdit = exp.userId === state.currentUser.id;
                             return `
-                                <div class="bg-white dark:bg-slate-900 rounded-3xl p-4 sm:p-5 border border-slate-200 dark:border-slate-800 shadow-sm transition relative group w-full mt-3">
+                                <div class="bg-white dark:bg-slate-900 rounded-3xl py-4 sm:py-5 px-4.5 sm:px-5 border border-slate-200 dark:border-slate-800 shadow-sm transition relative group w-full mt-3">
                                     <div class="flex items-start space-x-3 w-full">
                                         <div class="w-10 h-10 rounded-2xl ${isOffice ? 'bg-amber-500/10 text-amber-600 dark:text-amber-400' : 'bg-indigo-500/10 text-indigo-600 dark:text-indigo-400'} flex items-center justify-center shrink-0 mt-0.5">
                                             <i class="fa-solid ${isOffice ? 'fa-briefcase' : 'fa-clapperboard'}"></i>
@@ -768,7 +768,7 @@
                         ${isEditing ? `<button onclick="cancelEdit()" class="text-xs font-medium text-slate-500 hover:text-slate-700 shrink-0">Cancel Edit</button>` : ''}
                     </div>
 
-                    <form onsubmit="handleExpenseSubmit(event)" class="bg-white dark:bg-slate-900 rounded-3xl p-5 sm:p-7 border border-slate-200 dark:border-slate-800 shadow-sm space-y-6 w-full">
+                    <form onsubmit="handleExpenseSubmit(event)" class="bg-white dark:bg-slate-900 rounded-3xl p-5 sm:p-7 border border-slate-200 dark:border-slate-800 shadow-sm space-y-6 w-full mt-2">
                         <div class="w-full">
                             <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-2.5">Expense Type</label>
                             <div class="grid grid-cols-2 gap-3 w-full">
@@ -1132,7 +1132,7 @@
                         ${state.recycleBin.map(exp => {
                             const isOffice = exp.category === 'Office';
                             return `
-                                <div class="bg-white dark:bg-slate-900 rounded-3xl p-4.5 sm:p-5 border border-slate-200 dark:border-slate-800 shadow-sm transition relative group w-full mt-3">
+                                <div class="bg-white dark:bg-slate-900 rounded-3xl py-4 sm:py-5 px-4.5 sm:px-5 border border-slate-200 dark:border-slate-800 shadow-sm transition relative group w-full mt-3">
                                     <div class="flex items-start space-x-3 w-full">
                                         <div class="w-10 h-10 rounded-2xl bg-amber-500/10 text-amber-600 flex items-center justify-center shrink-0 mt-0.5">
                                             <i class="fa-solid fa-trash-can"></i>
@@ -1257,7 +1257,7 @@
                                 const userExpCount = state.expenses.filter(e => e.userId === u.id).length;
                                 const userTotal = state.expenses.filter(e => e.userId === u.id).reduce((s, e) => s + e.amount, 0);
                                 return `
-                                    <div class="flex items-center justify-between p-3.5 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-100 dark:border-slate-800 w-full gap-2 mt-2">
+                                    <div class="flex items-center justify-between py-3.5 px-4 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-100 dark:border-slate-800 w-full gap-2 mt-2">
                                         <div class="flex items-center space-x-3 min-w-0 flex-1">
                                             <div class="w-10 h-10 rounded-2xl bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 flex items-center justify-center font-bold text-sm shrink-0">${u.name.charAt(0)}</div>
                                             <div class="min-w-0 flex-1">
@@ -1279,7 +1279,7 @@
                         ${sortedMonths.map(monthKey => {
                             const data = monthlyMap[monthKey];
                             return `
-                                <div class="bg-white dark:bg-slate-900 rounded-3xl p-4.5 border border-slate-200 dark:border-slate-800 shadow-sm space-y-3 w-full mt-3">
+                                <div class="bg-white dark:bg-slate-900 rounded-3xl p-4.5 sm:p-5 border border-slate-200 dark:border-slate-800 shadow-sm space-y-3 w-full mt-3">
                                     <div class="flex items-center justify-between">
                                         <div class="flex items-center space-x-2 min-w-0 pr-2">
                                             <div class="w-8 h-8 rounded-xl bg-violet-500/10 text-violet-600 dark:text-violet-400 flex items-center justify-center text-xs font-bold shrink-0"><i class="fa-solid fa-calendar-days"></i></div>
@@ -1322,7 +1322,7 @@
                         ${state.passwordRequests.map(req => {
                             const isPending = req.status === 'pending';
                             return `
-                                <div class="bg-white dark:bg-slate-900 rounded-2xl p-4.5 border border-slate-200 dark:border-slate-800 shadow-sm flex items-center justify-between gap-3 w-full mt-3">
+                                <div class="bg-white dark:bg-slate-900 rounded-2xl py-4 px-4.5 border border-slate-200 dark:border-slate-800 shadow-sm flex items-center justify-between gap-3 w-full mt-3">
                                     <div class="space-y-1 min-w-0 flex-1">
                                         <div class="flex items-center space-x-2 truncate">
                                             <h4 class="font-semibold text-sm text-slate-900 dark:text-white truncate">${escapeHtml(req.name)}</h4>
@@ -1369,7 +1369,7 @@
                             const expCount = state.expenses.filter(e => e.userId === u.id).length;
                             const isCurrent = u.id === state.currentUser.id;
                             return `
-                                <div class="bg-white dark:bg-slate-900 rounded-2xl p-4.5 border border-slate-200 dark:border-slate-800 shadow-sm flex items-center justify-between gap-3 w-full mt-3">
+                                <div class="bg-white dark:bg-slate-900 rounded-2xl py-4 px-4.5 border border-slate-200 dark:border-slate-800 shadow-sm flex items-center justify-between gap-3 w-full mt-3">
                                     <div class="flex items-center space-x-3 min-w-0 flex-1">
                                         <div class="w-10 h-10 rounded-2xl ${u.role === 'admin' ? 'bg-indigo-500/10 text-indigo-600 dark:text-indigo-400' : 'bg-slate-100 dark:bg-slate-800 text-slate-600'} flex items-center justify-center font-bold text-sm shrink-0">${u.name.charAt(0)}</div>
                                         <div class="min-w-0 flex-1">
