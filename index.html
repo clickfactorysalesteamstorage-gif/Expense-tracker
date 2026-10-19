@@ -342,7 +342,7 @@
                             <img src="https://clickfactoryphotography.com/wp-content/uploads/2022/04/crop-logo.gif" alt="Click Factory Logo" class="w-full h-full object-contain" onerror="this.src='https://placehold.co/80x80/4f46e5/ffffff?text=CF'">
                         </div>
                         <h2 class="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">Click Factory</h2>
-                        <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Cloud Expense Management Portal</p>
+                        <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Expense Management Portal</p>
                     </div>
 
                     <div class="bg-white dark:bg-slate-900 py-8 px-6 shadow-xl rounded-3xl border border-slate-200 dark:border-slate-800 space-y-5 w-full">
@@ -849,7 +849,7 @@
 
                         <button type="submit" class="w-full py-4 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 text-white font-semibold rounded-2xl shadow-lg shadow-indigo-500/25 transition flex items-center justify-center space-x-2 mt-4">
                             <i class="fa-solid ${isEditing ? 'fa-floppy-disk' : 'fa-circle-plus'}"></i>
-                            <span>${isEditing ? 'Save Changes' : 'Submit to Cloud'}</span>
+                            <span>${isEditing ? 'Save Changes' : 'Submit'}</span>
                         </button>
                     </form>
                 </div>
@@ -1030,7 +1030,7 @@
                 return;
             }
 
-            showToast('Uploading bill and syncing with cloud...', 'info');
+            showToast('Uploading bill and syncing with Database...', 'info');
             const { db, storage, doc, setDoc, storageRef, uploadString, getDownloadURL } = window.FB;
 
             let expenseId = state.editingExpenseId || ('exp_' + Date.now());
@@ -1074,11 +1074,11 @@
                 state.editingExpenseId = null;
                 state.tempBillData = null;
                 state.tempFormCache = null;
-                showToast('Expense saved to cloud!', 'success');
+                showToast('Expense saved !', 'success');
                 switchTab('home');
             } catch (error) {
-                console.error("Cloud save failed:", error);
-                showToast('Failed to save to cloud. Please check connection.', 'error');
+                console.error("Failed:", error);
+                showToast('Failed to save. Please check connection.', 'error');
             }
         }
 
@@ -1233,7 +1233,7 @@
                         <div class="flex justify-between items-start mb-3 gap-2">
                             <div class="min-w-0 flex-1">
                                 <p class="text-indigo-300 text-xs font-semibold uppercase tracking-wider flex items-center truncate">
-                                    <i class="fa-solid fa-shield-halved mr-1.5 shrink-0"></i><span class="truncate">Admin Cloud Summary</span>
+                                    <i class="fa-solid fa-shield-halved mr-1.5 shrink-0"></i><span class="truncate">Admin Summary</span>
                                 </p>
                                 <h2 class="text-2xl sm:text-3xl font-bold tracking-tight mt-0.5 break-all">${formatCurrency(grandTotal)}</h2>
                             </div>
@@ -1310,7 +1310,7 @@
                     <div class="flex items-center justify-between">
                         <div class="min-w-0 pr-2">
                             <h2 class="text-lg font-bold text-slate-900 dark:text-white truncate">Password Recovery Requests</h2>
-                            <p class="text-xs text-slate-500 dark:text-slate-400 truncate">6-digit auth codes synced from cloud</p>
+                            <p class="text-xs text-slate-500 dark:text-slate-400 truncate">6-digit auth codes synced</p>
                         </div>
                     </div>
 
@@ -1361,7 +1361,7 @@
                     <div class="flex items-center justify-between">
                         <div class="min-w-0 pr-2">
                             <h2 class="text-lg font-bold text-slate-900 dark:text-white truncate">User Management</h2>
-                            <p class="text-xs text-slate-500 dark:text-slate-400 truncate">Manage cloud user accounts</p>
+                            <p class="text-xs text-slate-500 dark:text-slate-400 truncate">Manage user accounts</p>
                         </div>
                         <button onclick="openAddUserModal()" class="px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl text-xs font-semibold shadow-md transition flex items-center space-x-1.5 shrink-0">
                             <i class="fa-solid fa-user-plus"></i><span>Add User</span>
@@ -1400,7 +1400,7 @@
                 <div class="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-sm flex items-center justify-center p-4 animate-fadeIn">
                     <div class="bg-white dark:bg-slate-900 rounded-3xl p-6 max-w-sm w-full border border-slate-200 dark:border-slate-800 shadow-2xl space-y-4">
                         <div class="flex items-center justify-between">
-                            <h3 class="font-bold text-base text-slate-900 dark:text-white">Add Cloud User</h3>
+                            <h3 class="font-bold text-base text-slate-900 dark:text-white">Add User</h3>
                             <button onclick="closeModal()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark"></i></button>
                         </div>
                         <form onsubmit="handleAddNewUser(event)" class="space-y-3.5 w-full">
@@ -1408,7 +1408,7 @@
                             <div class="w-full"><label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Username</label><input type="text" id="new-user-username" required placeholder="user3" class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm text-slate-900 dark:text-white"></div>
                             <div class="w-full"><label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Password</label><input type="password" id="new-user-password" required placeholder="••••••••" class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm text-slate-900 dark:text-white"></div>
                             <div class="w-full"><label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Role</label><select id="new-user-role" class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm text-slate-900 dark:text-white"><option value="user">Regular User</option><option value="admin">Administrator</option></select></div>
-                            <div class="pt-2 w-full"><button type="submit" class="w-full py-3.5 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-2xl shadow-md transition text-sm">Create Cloud User</button></div>
+                            <div class="pt-2 w-full"><button type="submit" class="w-full py-3.5 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-2xl shadow-md transition text-sm">Create User</button></div>
                         </form>
                     </div>
                 </div>
