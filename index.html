@@ -169,6 +169,30 @@
             try { state.currentUser = JSON.parse(savedUser); } catch(e) {}
         }
 
+        // Swipe gesture state for back navigation
+        let touchStartX = 0;
+        let touchStartY = 0;
+
+        document.addEventListener('touchstart', (e) => {
+            touchStartX = e.changedTouches[0].screenX;
+            touchStartY = e.changedTouches[0].screenY;
+        }, false);
+
+        document.addEventListener('touchend', (e) => {
+            if (!state.currentUser) return;
+            const touchEndX = e.changedTouches[0].screenX;
+            const touchEndY = e.changedTouches[0].screenY;
+            const diffX = touchEndX - touchStartX;
+            const diffY = Math.abs(touchEndX - touchStartY);
+
+            // Swipe right from the left edge (swipe back) to return to profile from sub-tabs
+            if (touchStartX < 50 && diffX > 80 && diffY < 100) {
+                if (['recycle', 'requests'].includes(state.activeTab)) {
+                    switchTab('profile');
+                }
+            }
+        }, false);
+
         window.startAppListeners = function() {
             const { db, collection, onSnapshot } = window.FB;
 
@@ -278,17 +302,24 @@
 
             const isAdmin = state.currentUser.role === 'admin';
             const pendingRequestsCount = state.passwordRequests.filter(r => r.status === 'pending').length;
+            const isSubTab = ['recycle', 'requests'].includes(state.activeTab);
 
             app.innerHTML = `
                 <header class="sticky top-0 z-40 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 px-4 sm:px-6 pt-3 pb-3 flex items-center justify-between w-full shadow-sm">
                     <div class="flex items-center space-x-3 min-w-0 flex-1 pr-2">
-                        <div class="w-10 h-10 flex items-center justify-center overflow-hidden shrink-0 logo-container">
-                            <img src="https://clickfactoryphotography.com/wp-content/uploads/2022/04/crop-logo.gif" alt="Click Factory Logo" class="w-full h-full object-contain" onerror="this.src='https://placehold.co/40x40/4f46e5/ffffff?text=CF'">
-                        </div>
+                        ${isSubTab ? `
+                            <button onclick="switchTab('profile')" class="w-9 h-9 rounded-2xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-700 dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-700 transition shrink-0" title="Back to Profile">
+                                <i class="fa-solid fa-arrow-left text-sm"></i>
+                            </button>
+                        ` : `
+                            <div class="w-10 h-10 flex items-center justify-center overflow-hidden shrink-0 logo-container">
+                                <img src="https://clickfactoryphotography.com/wp-content/uploads/2022/04/crop-logo.gif" alt="Click Factory Logo" class="w-full h-full object-contain" onerror="this.src='https://placehold.co/40x40/4f46e5/ffffff?text=CF'">
+                            </div>
+                        `}
                         <div class="min-w-0 flex-1">
-                            <h1 class="font-bold text-sm sm:text-base leading-tight tracking-tight text-slate-900 dark:text-white truncate">Click Factory</h1>
+                            <h1 class="font-bold text-sm sm:text-base leading-tight tracking-tight text-slate-900 dark:text-white truncate">${isSubTab ? (state.activeTab === 'recycle' ? 'Recycle Bin' : 'Password Requests') : 'Click Factory'}</h1>
                             <p class="text-[11px] text-slate-500 dark:text-slate-400 font-medium truncate">
-                                ${isAdmin ? '<span class="text-indigo-600 dark:text-indigo-400 font-semibold"><i class="fa-solid fa-shield-halved mr-1"></i>Admin</span>' : 'Cloud Expense Tracker'}
+                                ${isSubTab ? 'Back to Profile' : (isAdmin ? '<span class="text-indigo-600 dark:text-indigo-400 font-semibold"><i class="fa-solid fa-shield-halved mr-1"></i>Admin</span>' : 'Cloud Expense Tracker')}
                             </p>
                         </div>
                     </div>
@@ -335,7 +366,7 @@
                     </button>
                     `}
 
-                    <button onclick="switchTab('profile')" class="flex flex-col items-center justify-center flex-1 py-1 transition relative ${state.activeTab === 'profile' ? 'text-indigo-600 dark:text-indigo-400 font-semibold' : 'text-slate-400 dark:text-slate-500 hover:text-slate-600'}">
+                    <button onclick="switchTab('profile')" class="flex flex-col items-center justify-center flex-1 py-1 transition relative ${state.activeTab === 'profile' || isSubTab ? 'text-indigo-600 dark:text-indigo-400 font-semibold' : 'text-slate-400 dark:text-slate-500 hover:text-slate-600'}">
                         <i class="fa-solid fa-user-circle text-base mb-1"></i>
                         <span class="text-[10px] tracking-tight">Profile</span>
                         ${isAdmin && (state.recycleBin.length > 0 || pendingRequestsCount > 0) ? `<span class="absolute top-1 right-3 w-2 h-2 rounded-full bg-rose-500"></span>` : ''}
@@ -1137,14 +1168,6 @@
         function renderRecycleBinTab() {
             return `
                 <div class="space-y-4 animate-fadeIn w-full max-w-full">
-                    <div class="flex items-center justify-between">
-                        <div class="min-w-0 pr-2">
-                            <h2 class="text-lg font-bold text-slate-900 dark:text-white truncate">Recycle Bin</h2>
-                            <p class="text-xs text-slate-500 dark:text-slate-400 truncate">Deleted records available to Admin</p>
-                        </div>
-                        <button onclick="switchTab('profile')" class="text-xs font-semibold text-indigo-600 dark:text-indigo-400 hover:underline flex items-center space-x-1 shrink-0"><i class="fa-solid fa-arrow-left"></i><span>Back to Profile</span></button>
-                    </div>
-
                     <div class="space-y-3.5 w-full">
                         ${state.recycleBin.length === 0 ? `
                             <div class="bg-white dark:bg-slate-900 rounded-3xl p-8 text-center border border-slate-200 dark:border-slate-800 shadow-sm w-full mt-3">
@@ -1177,7 +1200,7 @@
                                             </div>
 
                                             <div class="mt-1.5 text-[11px] text-rose-500 font-medium">
-                                                Deleted on ${formatDate(exp.deletedAt)} by${escapeHtml(exp.deletedBy || 'Admin')}
+                                                Deleted on ${formatDate(exp.deletedAt)} by ${escapeHtml(exp.deletedBy || 'Admin')}
                                             </div>
 
                                             ${exp.billAttachment ? `
@@ -1328,14 +1351,6 @@
         function renderPasswordRequestsTab() {
             return `
                 <div class="space-y-4 animate-fadeIn w-full max-w-full">
-                    <div class="flex items-center justify-between">
-                        <div class="min-w-0 pr-2">
-                            <h2 class="text-lg font-bold text-slate-900 dark:text-white truncate">Password Recovery Requests</h2>
-                            <p class="text-xs text-slate-500 dark:text-slate-400 truncate">6-digit auth codes synced</p>
-                        </div>
-                        <button onclick="switchTab('profile')" class="text-xs font-semibold text-indigo-600 dark:text-indigo-400 hover:underline flex items-center space-x-1 shrink-0"><i class="fa-solid fa-arrow-left"></i><span>Back to Profile</span></button>
-                    </div>
-
                     <div class="space-y-3 w-full">
                         ${state.passwordRequests.length === 0 ? `
                             <div class="bg-white dark:bg-slate-900 rounded-3xl p-8 text-center border border-slate-200 dark:border-slate-800 shadow-sm w-full mt-3">
@@ -1402,7 +1417,7 @@
                                             <div class="flex items-center space-x-2 truncate">
                                                 <h4 class="font-semibold text-sm text-slate-900 dark:text-white truncate">${escapeHtml(u.name)}</h4>${isCurrent ? '<span class="text-[10px] bg-emerald-500/10 text-emerald-600 font-semibold px-2 py-0.5 rounded-full shrink-0">Active</span>' : ''}
                                             </div>
-                                            <p class="text-xs text-slate-500 truncate">@${escapeHtml(u.username)} • <span class="capitalize font-medium text-indigo-600">${u.role}</span> •${expCount} expenses</p>
+                                            <p class="text-xs text-slate-500 truncate">@${escapeHtml(u.username)} • <span class="capitalize font-medium text-indigo-600">${u.role}</span> • ${expCount} expenses</p>
                                         </div>
                                     </div>
                                     <div class="flex items-center space-x-2 shrink-0">
