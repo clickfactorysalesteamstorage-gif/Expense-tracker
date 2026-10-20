@@ -71,19 +71,19 @@
             object-position: center;
         }
 
-        /* Smooth Tab Transition Animations */
-        @keyframes pageSlideIn {
+        /* Smooth Slide Transition Animations */
+        @keyframes slideInFromRight {
             from {
                 opacity: 0;
-                transform: translateY(10px) scale(0.99);
+                transform: translateX(30px);
             }
             to {
                 opacity: 1;
-                transform: translateY(0) scale(1);
+                transform: translateX(0);
             }
         }
         .animate-pageTransition {
-            animation: pageSlideIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+            animation: slideInFromRight 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
         }
     </style>
 </head>
