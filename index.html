@@ -70,6 +70,21 @@
             object-fit: contain;
             object-position: center;
         }
+
+        /* Smooth Tab Transition Animations */
+        @keyframes pageSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px) scale(0.99);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+        .animate-pageTransition {
+            animation: pageSlideIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
     </style>
 </head>
 <body class="bg-slate-900 text-slate-800 dark:text-slate-100 flex flex-col justify-center items-center h-full selection:bg-indigo-500 selection:text-white">
@@ -336,7 +351,7 @@
                     </div>
                 </header>
 
-                <main class="flex-1 overflow-y-auto pb-36 pt-4 px-4 sm:px-6 w-full max-w-full">
+                <main class="flex-1 overflow-y-auto pb-36 pt-4 px-4 sm:px-6 w-full max-w-full animate-pageTransition">
                     ${renderActiveTabContent()}
                 </main>
 
@@ -384,7 +399,7 @@
                 <div class="flex-1 flex flex-col justify-center px-4 py-8 animate-fadeIn max-w-sm mx-auto w-full">
                     <div class="text-center mb-6">
                         <div class="w-12 h-12 flex items-center justify-center mx-auto mb-2 logo-container">
-                            <img src="https://clickfactoryphotography.com/wp-content/uploads/2022/04/crop-logo.gif" alt="Click Factory Logo" class="w-full h-full object-contain" onerror="this.src='https://placehold.co/48x48/4f46e5/ffffff?text=CF'">
+                            <img src="https://clickfactoryphotography.com/wp-content/uploads/2022/04/crop-logo.gif" alt="Click Factory Logo" class="w-full h-full object-contain" onerror="this.src='https://placehold.co/40x40/4f46e5/ffffff?text=CF'">
                         </div>
                         <h2 class="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">Click Factory</h2>
                         <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Expense Management Portal</p>
@@ -1422,7 +1437,8 @@
                                             <p class="text-xs text-slate-500 truncate">@${escapeHtml(u.username)} • <span class="capitalize font-medium text-indigo-600">${u.role}</span> • ${expCount} expenses</p>
                                         </div>
                                     </div>
-                                    <div class="flex items-center space-x-2 shrink-0">
+                                    <div class="flex items-center space-x-1.5 shrink-0">
+                                        <button onclick="openEditUserModal('${u.id}')" class="w-9 h-9 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-500 hover:bg-indigo-50 hover:text-indigo-600 transition flex items-center justify-center text-xs" title="Edit User"><i class="fa-solid fa-pen"></i></button>
                                         ${state.users.length > 1 && !isCurrent ? `<button onclick="confirmRemoveUser('${u.id}', '${escapeHtml(u.name)}')" class="w-9 h-9 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-500 hover:bg-rose-50 hover:text-rose-600 transition flex items-center justify-center text-xs" title="Remove"><i class="fa-solid fa-trash"></i></button>` : ''}
                                     </div>
                                 </div>
@@ -1452,6 +1468,52 @@
                     </div>
                 </div>
             `;
+        }
+
+        function openEditUserModal(userId) {
+            const user = state.users.find(u => u.id === userId);
+            if (!user) return;
+
+            const root = document.getElementById('modal-root');
+            root.innerHTML = `
+                <div class="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-sm flex items-center justify-center p-4 animate-fadeIn">
+                    <div class="bg-white dark:bg-slate-900 rounded-3xl p-6 max-w-sm w-full border border-slate-200 dark:border-slate-800 shadow-2xl space-y-4">
+                        <div class="flex items-center justify-between">
+                            <h3 class="font-bold text-base text-slate-900 dark:text-white">Edit User</h3>
+                            <button onclick="closeModal()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark"></i></button>
+                        </div>
+                        <form onsubmit="handleEditUser(event, '${user.id}')" class="space-y-3.5 w-full">
+                            <div class="w-full"><label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Full Name</label><input type="text" id="edit-user-name" required value="${escapeHtml(user.name)}" class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm text-slate-900 dark:text-white"></div>
+                            <div class="w-full"><label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Role</label><select id="edit-user-role" class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm text-slate-900 dark:text-white"><option value="user" ${user.role === 'user' ? 'selected' : ''}>Regular User</option><option value="admin" ${user.role === 'admin' ? 'selected' : ''}>Administrator</option></select></div>
+                            <div class="pt-2 w-full"><button type="submit" class="w-full py-3.5 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-2xl shadow-md transition text-sm">Save Changes</button></div>
+                        </form>
+                    </div>
+                </div>
+            `;
+        }
+
+        async function handleEditUser(e, userId) {
+            e.preventDefault();
+            const name = document.getElementById('edit-user-name').value.trim();
+            const role = document.getElementById('edit-user-role').value;
+
+            const user = state.users.find(u => u.id === userId);
+            if (!user) return;
+
+            const { db, doc, updateDoc } = window.FB;
+            user.name = name;
+            user.role = role;
+
+            await updateDoc(doc(db, 'users', userId), { name, role });
+
+            if (state.currentUser.id === userId) {
+                state.currentUser.name = name;
+                state.currentUser.role = role;
+                localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(state.currentUser));
+            }
+
+            closeModal();
+            showToast('User updated successfully!', 'success');
         }
 
         async function handleAddNewUser(e) {
