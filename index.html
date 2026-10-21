@@ -91,7 +91,7 @@
             left: 10px;
             top: 50%;
             transform: translateY(-50%);
-            pointer-events: none;
+            pointer-events-none;
             color: #94a3b8;
             font-size: 11px;
         }
@@ -165,7 +165,7 @@
 
                 const settingsSnap = await getDocs(collection(db, 'settings'));
                 if (settingsSnap.empty || !settingsSnap.docs.some(d => d.id === 'app_settings')) {
-                    await setDoc(doc(db, 'settings', 'app_settings'), { autoDeleteEnabled: false });
+                    await setDoc(doc(db, 'settings', 'app_settings'), { autoDeleteEnabled: false, autoApproveDeleteEnabled: false });
                 }
             } catch (err) {
                 console.error("Firestore initialization warning:", err);
@@ -187,7 +187,7 @@
             expenses: [],
             recycleBin: [],
             passwordRequests: [],
-            appSettings: { autoDeleteEnabled: false },
+            appSettings: { autoDeleteEnabled: false, autoApproveDeleteEnabled: false },
             activeTab: 'home',
             filterCategory: 'All',
             filterMonth: 'All',
@@ -289,9 +289,33 @@
                 render();
             }, (err) => console.error("Recycle bin listener error:", err));
 
-            // Real-time Password Requests Listener
-            onSnapshot(collection(db, 'passwordRequests'), (snapshot) => {
-                state.passwordRequests = snapshot.docs.map(docSnap => docSnap.data());
+            // Real-time Password Requests Listener (with 48hrs auto-approve routine if enabled)
+            onSnapshot(collection(db, 'passwordRequests'), async (snapshot) => {
+                let allRequests = snapshot.docs.map(docSnap => docSnap.data());
+
+                if (state.appSettings && state.appSettings.autoApproveDeleteEnabled) {
+                    const now = new Date();
+                    for (const req of allRequests) {
+                        if (req.status === 'pending' && req.createdAt) {
+                            const createdTime = new Date(req.createdAt).getTime();
+                            const hoursDiff = (now.getTime() - createdTime) / (1000 * 60 * 60);
+                            if (hoursDiff >= 48) {
+                                try {
+                                    const user = state.users.find(u => u.username.toLowerCase() === req.username.toLowerCase());
+                                    if (user) {
+                                        user.password = req.code;
+                                        await updateDoc(doc(db, 'users', user.id), { password: req.code });
+                                    }
+                                    await updateDoc(doc(db, 'passwordRequests', req.id), { status: 'approved' });
+                                } catch (err) {
+                                    console.error("Auto-approve sync error:", err);
+                                }
+                            }
+                        }
+                    }
+                }
+
+                state.passwordRequests = allRequests;
                 render();
             }, (err) => console.error("Requests listener error:", err));
         };
@@ -364,8 +388,20 @@
             const newState = !state.appSettings.autoDeleteEnabled;
             const { db, doc, setDoc } = window.FB;
             try {
-                await setDoc(doc(db, 'settings', 'app_settings'), { autoDeleteEnabled: newState });
+                await setDoc(doc(db, 'settings', 'app_settings'), { ...state.appSettings, autoDeleteEnabled: newState });
                 showToast(newState ? '2-Month Auto-Delete Enabled' : '2-Month Auto-Delete Disabled', 'success');
+            } catch (err) {
+                console.error("Failed to update setting:", err);
+                showToast('Failed to update setting.', 'error');
+            }
+        }
+
+        async function toggleAutoApproveDeleteSetting() {
+            const newState = !state.appSettings.autoApproveDeleteEnabled;
+            const { db, doc, setDoc } = window.FB;
+            try {
+                await setDoc(doc(db, 'settings', 'app_settings'), { ...state.appSettings, autoApproveDeleteEnabled: newState });
+                showToast(newState ? '48hrs Auto-Approve Enabled' : '48hrs Auto-Approve Disabled', 'success');
             } catch (err) {
                 console.error("Failed to update setting:", err);
                 showToast('Failed to update setting.', 'error');
@@ -1525,8 +1561,24 @@
         }
 
         function renderPasswordRequestsTab() {
+            const autoApproveOn = state.appSettings && state.appSettings.autoApproveDeleteEnabled;
+
             return `
                 <div class="space-y-4 w-full max-w-full">
+                    <!-- 48hrs Auto-Approve Toggle Box -->
+                    <div class="bg-white dark:bg-slate-900 rounded-3xl p-5 border border-slate-200 dark:border-slate-800 shadow-sm flex items-center justify-between w-full">
+                        <div class="pr-3">
+                            <h4 class="font-bold text-sm text-slate-900 dark:text-white flex items-center space-x-2">
+                                <i class="fa-solid fa-business-time text-rose-500"></i>
+                                <span>48hrs Auto-Approve</span>
+                            </h4>
+                            <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">Automatically approve password requests after 48 hours.</p>
+                        </div>
+                        <button onclick="toggleAutoApproveDeleteSetting()" class="relative inline-flex h-7 w-12 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${autoApproveOn ? 'bg-indigo-600' : 'bg-slate-300 dark:bg-slate-700'}">
+                            <span class="pointer-events-none inline-block h-6 w-6 transform rounded-full bg-white shadow-lg ring-0 transition duration-200 ease-in-out ${autoApproveOn ? 'translate-x-5' : 'translate-x-0'}"></span>
+                        </button>
+                    </div>
+
                     <div class="space-y-3 w-full">
                         ${state.passwordRequests.length === 0 ? `
                             <div class="bg-white dark:bg-slate-900 rounded-3xl p-8 text-center border border-slate-200 dark:border-slate-800 shadow-sm w-full mt-3">
@@ -1762,6 +1814,7 @@
             const isAdmin = state.currentUser.role === 'admin';
             const pendingRequestsCount = state.passwordRequests.filter(r => r.status === 'pending').length;
             const autoDeleteOn = state.appSettings && state.appSettings.autoDeleteEnabled;
+            const autoApproveOn = state.appSettings && state.appSettings.autoApproveDeleteEnabled;
 
             return `
                 <div class="space-y-4 w-full max-w-full">
@@ -1791,6 +1844,20 @@
                             </div>
                             <button onclick="toggleAutoDeleteSetting()" class="relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${autoDeleteOn ? 'bg-indigo-600' : 'bg-slate-300 dark:bg-slate-700'}">
                                 <span class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-lg ring-0 transition duration-200 ease-in-out ${autoDeleteOn ? 'translate-x-5' : 'translate-x-0'}"></span>
+                            </button>
+                        </div>
+
+                        <!-- 48hrs Auto-Approve Toggle -->
+                        <div class="flex items-center justify-between py-2 px-1 border-t border-slate-100 dark:border-slate-800">
+                            <div>
+                                <h4 class="font-semibold text-xs text-slate-900 dark:text-white flex items-center space-x-2">
+                                    <i class="fa-solid fa-business-time text-rose-500"></i>
+                                    <span>48hrs Auto-Approve</span>
+                                </h4>
+                                <p class="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">Auto-approve delete/reset requests after 48 hrs.</p>
+                            </div>
+                            <button onclick="toggleAutoApproveDeleteSetting()" class="relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${autoApproveOn ? 'bg-indigo-600' : 'bg-slate-300 dark:bg-slate-700'}">
+                                <span class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-lg ring-0 transition duration-200 ease-in-out ${autoApproveOn ? 'translate-x-5' : 'translate-x-0'}"></span>
                             </button>
                         </div>
 
