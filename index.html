@@ -165,7 +165,7 @@
 
                 const settingsSnap = await getDocs(collection(db, 'settings'));
                 if (settingsSnap.empty || !settingsSnap.docs.some(d => d.id === 'app_settings')) {
-                    await setDoc(doc(db, 'settings', 'app_settings'), { autoDeleteEnabled: false, autoApproveDeleteEnabled: false });
+                    await setDoc(doc(db, 'settings', 'app_settings'), { autoDeleteEnabled: false });
                 }
             } catch (err) {
                 console.error("Firestore initialization warning:", err);
@@ -186,8 +186,9 @@
             users: [],
             expenses: [],
             recycleBin: [],
+            userRecycleBin: [],
             passwordRequests: [],
-            appSettings: { autoDeleteEnabled: false, autoApproveDeleteEnabled: false },
+            appSettings: { autoDeleteEnabled: false },
             activeTab: 'home',
             filterCategory: 'All',
             filterMonth: 'All',
@@ -226,7 +227,7 @@
             const diffY = Math.abs(touchEndX - touchStartY);
 
             if (touchStartX < 50 && diffX > 80 && diffY < 100) {
-                if (['recycle', 'requests'].includes(state.activeTab)) {
+                if (['recycle', 'requests', 'userRecycle'].includes(state.activeTab)) {
                     switchTab('profile');
                 }
             }
@@ -289,33 +290,41 @@
                 render();
             }, (err) => console.error("Recycle bin listener error:", err));
 
-            // Real-time Password Requests Listener (with 48hrs auto-approve routine if enabled)
-            onSnapshot(collection(db, 'passwordRequests'), async (snapshot) => {
-                let allRequests = snapshot.docs.map(docSnap => docSnap.data());
+            // Real-time User Recycle Bin Listener (with 48-hour permanent deletion routine)
+            onSnapshot(collection(db, 'userRecycleBin'), async (snapshot) => {
+                let deletedUsers = snapshot.docs.map(docSnap => docSnap.data());
+                const now = new Date();
 
-                if (state.appSettings && state.appSettings.autoApproveDeleteEnabled) {
-                    const now = new Date();
-                    for (const req of allRequests) {
-                        if (req.status === 'pending' && req.createdAt) {
-                            const createdTime = new Date(req.createdAt).getTime();
-                            const hoursDiff = (now.getTime() - createdTime) / (1000 * 60 * 60);
-                            if (hoursDiff >= 48) {
-                                try {
-                                    const user = state.users.find(u => u.username.toLowerCase() === req.username.toLowerCase());
-                                    if (user) {
-                                        user.password = req.code;
-                                        await updateDoc(doc(db, 'users', user.id), { password: req.code });
-                                    }
-                                    await updateDoc(doc(db, 'passwordRequests', req.id), { status: 'approved' });
-                                } catch (err) {
-                                    console.error("Auto-approve sync error:", err);
+                for (const item of deletedUsers) {
+                    if (item.deletedAt) {
+                        const deletedTime = new Date(item.deletedAt).getTime();
+                        const hoursDiff = (now.getTime() - deletedTime) / (1000 * 60 * 60);
+                        if (hoursDiff >= 48) {
+                            // 48 hours passed -> permanently delete user and their expenses
+                            try {
+                                await deleteDoc(doc(db, 'userRecycleBin', item.userId));
+                                // Delete user record
+                                await deleteDoc(doc(db, 'users', item.userId));
+                                // Delete associated expenses
+                                const userExps = state.expenses.filter(e => e.userId === item.userId);
+                                for (const ue of userExps) {
+                                    await deleteDoc(doc(db, 'expenses', ue.id));
                                 }
+                            } catch(e) {
+                                console.error("Failed 48hr permanent user delete:", e);
                             }
+                            return;
                         }
                     }
                 }
 
-                state.passwordRequests = allRequests;
+                state.userRecycleBin = deletedUsers;
+                render();
+            }, (err) => console.error("User recycle bin listener error:", err));
+
+            // Real-time Password Requests Listener
+            onSnapshot(collection(db, 'passwordRequests'), (snapshot) => {
+                state.passwordRequests = snapshot.docs.map(docSnap => docSnap.data());
                 render();
             }, (err) => console.error("Requests listener error:", err));
         };
@@ -396,18 +405,6 @@
             }
         }
 
-        async function toggleAutoApproveDeleteSetting() {
-            const newState = !state.appSettings.autoApproveDeleteEnabled;
-            const { db, doc, setDoc } = window.FB;
-            try {
-                await setDoc(doc(db, 'settings', 'app_settings'), { ...state.appSettings, autoApproveDeleteEnabled: newState });
-                showToast(newState ? '48hrs Auto-Approve Enabled' : '48hrs Auto-Approve Disabled', 'success');
-            } catch (err) {
-                console.error("Failed to update setting:", err);
-                showToast('Failed to update setting.', 'error');
-            }
-        }
-
         function confirmEmptyRecycleBin() {
             if (state.recycleBin.length === 0) {
                 showToast('Recycle bin is already empty.', 'info');
@@ -448,7 +445,11 @@
 
             const isAdmin = state.currentUser.role === 'admin';
             const pendingRequestsCount = state.passwordRequests.filter(r => r.status === 'pending').length;
-            const isSubTab = ['recycle', 'requests'].includes(state.activeTab);
+            const isSubTab = ['recycle', 'requests', 'userRecycle'].includes(state.activeTab);
+
+            let subTabTitle = 'Recycle Bin';
+            if (state.activeTab === 'requests') subTabTitle = 'Password Requests';
+            if (state.activeTab === 'userRecycle') subTabTitle = 'Deleted Users';
 
             app.innerHTML = `
                 <header class="sticky top-0 z-40 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 px-4 sm:px-6 pt-3 pb-3 flex items-center justify-between w-full shadow-sm">
@@ -463,7 +464,7 @@
                             </div>
                         `}
                         <div class="min-w-0 flex-1">
-                            <h1 class="font-bold text-sm sm:text-base leading-tight tracking-tight text-slate-900 dark:text-white truncate">${isSubTab ? (state.activeTab === 'recycle' ? 'Recycle Bin' : 'Password Requests') : 'Click Factory'}</h1>
+                            <h1 class="font-bold text-sm sm:text-base leading-tight tracking-tight text-slate-900 dark:text-white truncate">${isSubTab ? subTabTitle : 'Click Factory'}</h1>
                             <p class="text-[11px] text-slate-500 dark:text-slate-400 font-medium truncate">
                                 ${isSubTab ? 'Back to Profile' : (isAdmin ? '<span class="text-indigo-600 dark:text-indigo-400 font-semibold"><i class="fa-solid fa-shield-halved mr-1"></i>Admin</span>' : 'Cloud Expense Tracker')}
                             </p>
@@ -515,7 +516,7 @@
                     <button onclick="switchTab('profile')" class="flex flex-col items-center justify-center flex-1 py-1 transition relative ${state.activeTab === 'profile' || isSubTab ? 'text-indigo-600 dark:text-indigo-400 font-semibold' : 'text-slate-400 dark:text-slate-500 hover:text-slate-600'}">
                         <i class="fa-solid fa-user-circle text-base mb-1"></i>
                         <span class="text-[10px] tracking-tight">Profile</span>
-                        ${isAdmin && (state.recycleBin.length > 0 || pendingRequestsCount > 0) ? `<span class="absolute top-1 right-3 w-2 h-2 rounded-full bg-rose-500"></span>` : ''}
+                        ${isAdmin && (state.recycleBin.length > 0 || pendingRequestsCount > 0 || state.userRecycleBin.length > 0) ? `<span class="absolute top-1 right-3 w-2 h-2 rounded-full bg-rose-500"></span>` : ''}
                     </button>
                 </nav>
 
@@ -735,6 +736,7 @@
                 case 'add': return renderAddEditTab();
                 case 'admin': return state.currentUser.role === 'admin' ? renderAdminTab() : renderHomeTab();
                 case 'recycle': return state.currentUser.role === 'admin' ? renderRecycleBinTab() : renderHomeTab();
+                case 'userRecycle': return state.currentUser.role === 'admin' ? renderUserRecycleBinTab() : renderHomeTab();
                 case 'requests': return state.currentUser.role === 'admin' ? renderPasswordRequestsTab() : renderHomeTab();
                 case 'users': return state.currentUser.role === 'admin' ? renderUserManagementTab() : renderHomeTab();
                 case 'analytics': return renderUserAnalyticsTab();
@@ -1467,6 +1469,53 @@
             );
         }
 
+        function renderUserRecycleBinTab() {
+            return `
+                <div class="space-y-4 w-full max-w-full">
+                    <div class="space-y-3.5 w-full">
+                        ${state.userRecycleBin.length === 0 ? `
+                            <div class="bg-white dark:bg-slate-900 rounded-3xl p-8 text-center border border-slate-200 dark:border-slate-800 shadow-sm w-full mt-3">
+                                <div class="w-14 h-14 bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 rounded-2xl flex items-center justify-center mx-auto mb-3 text-xl"><i class="fa-solid fa-user-slash"></i></div>
+                                <h4 class="font-semibold text-slate-700 dark:text-slate-300 mb-1">No Pending Deleted Users</h4>
+                                <p class="text-xs text-slate-500">Users scheduled for deletion within 48 hours will appear here for recovery.</p>
+                            </div>
+                        ` : ''}
+
+                        ${state.userRecycleBin.map(item => `
+                            <div class="bg-white dark:bg-slate-900 rounded-2xl py-5 px-5 sm:px-6 border border-slate-200 dark:border-slate-800 shadow-sm flex items-center justify-between gap-3 w-full mt-3">
+                                <div class="space-y-1 min-w-0 flex-1">
+                                    <h4 class="font-semibold text-sm text-slate-900 dark:text-white truncate">${escapeHtml(item.name)} (@${escapeHtml(item.username)})</h4>
+                                    <p class="text-[11px] text-rose-500 font-medium">Deleted on ${formatDate(item.deletedAt)}. Permanent wipe in 48 hrs.</p>
+                                </div>
+                                <button onclick="undoDeleteUser('${item.userId}')" class="px-3.5 py-1.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 text-xs font-semibold border border-emerald-200 hover:bg-emerald-100 transition shrink-0">
+                                    <i class="fa-solid fa-rotate-left mr-1"></i>Undo Delete
+                                </button>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
+        async function undoDeleteUser(userId) {
+            const { db, doc, deleteDoc, setDoc } = window.FB;
+            const item = state.userRecycleBin.find(i => i.userId === userId);
+            if (item) {
+                const { deletedAt, userId: uid, name, username, password, role, email, expenses } = item;
+                // Restore user
+                await setDoc(doc(db, 'users', uid), { id: uid, name, username, password, role, email });
+                // Restore user expenses
+                if (expenses && expenses.length > 0) {
+                    for (const exp of expenses) {
+                        await setDoc(doc(db, 'expenses', exp.id), exp);
+                    }
+                }
+                // Remove from user recycle bin
+                await deleteDoc(doc(db, 'userRecycleBin', userId));
+                showToast(`User ${name} restored successfully!`, 'success');
+            }
+        }
+
         function renderAdminTab() {
             const monthlyMap = {};
             state.expenses.forEach(exp => {
@@ -1561,24 +1610,8 @@
         }
 
         function renderPasswordRequestsTab() {
-            const autoApproveOn = state.appSettings && state.appSettings.autoApproveDeleteEnabled;
-
             return `
                 <div class="space-y-4 w-full max-w-full">
-                    <!-- 48hrs Auto-Approve Toggle Box -->
-                    <div class="bg-white dark:bg-slate-900 rounded-3xl p-5 border border-slate-200 dark:border-slate-800 shadow-sm flex items-center justify-between w-full">
-                        <div class="pr-3">
-                            <h4 class="font-bold text-sm text-slate-900 dark:text-white flex items-center space-x-2">
-                                <i class="fa-solid fa-business-time text-rose-500"></i>
-                                <span>48hrs Auto-Approve</span>
-                            </h4>
-                            <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">Automatically approve password requests after 48 hours.</p>
-                        </div>
-                        <button onclick="toggleAutoApproveDeleteSetting()" class="relative inline-flex h-7 w-12 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${autoApproveOn ? 'bg-indigo-600' : 'bg-slate-300 dark:bg-slate-700'}">
-                            <span class="pointer-events-none inline-block h-6 w-6 transform rounded-full bg-white shadow-lg ring-0 transition duration-200 ease-in-out ${autoApproveOn ? 'translate-x-5' : 'translate-x-0'}"></span>
-                        </button>
-                    </div>
-
                     <div class="space-y-3 w-full">
                         ${state.passwordRequests.length === 0 ? `
                             <div class="bg-white dark:bg-slate-900 rounded-3xl p-8 text-center border border-slate-200 dark:border-slate-800 shadow-sm w-full mt-3">
@@ -1752,11 +1785,30 @@
         function confirmRemoveUser(userId, userName) {
             showConfirmModal(
                 'Remove User',
-                `Remove user "${userName}" from cloud?`,
+                `Move user "${userName}" and their expenses to Deleted Users Bin? They will be permanently wiped after 48 hours unless restored.`,
                 async () => {
-                    const { db, doc, deleteDoc } = window.FB;
-                    await deleteDoc(doc(db, 'users', userId));
-                    showToast(`User ${userName} removed.`, 'success');
+                    const { db, doc, deleteDoc, setDoc } = window.FB;
+                    const userToRemove = state.users.find(u => u.id === userId);
+                    if (userToRemove) {
+                        const userExps = state.expenses.filter(e => e.userId === userId);
+                        const userRecycleItem = {
+                            userId: userToRemove.id,
+                            name: userToRemove.name,
+                            username: userToRemove.username,
+                            password: userToRemove.password,
+                            role: userToRemove.role,
+                            email: userToRemove.email,
+                            expenses: userExps,
+                            deletedAt: new Date().toISOString()
+                        };
+
+                        await setDoc(doc(db, 'userRecycleBin', userId), userRecycleItem);
+                        await deleteDoc(doc(db, 'users', userId));
+                        for (const ue of userExps) {
+                            await deleteDoc(doc(db, 'expenses', ue.id));
+                        }
+                        showToast(`User ${userName} moved to Deleted Users Bin.`, 'success');
+                    }
                 }
             );
         }
@@ -1814,7 +1866,6 @@
             const isAdmin = state.currentUser.role === 'admin';
             const pendingRequestsCount = state.passwordRequests.filter(r => r.status === 'pending').length;
             const autoDeleteOn = state.appSettings && state.appSettings.autoDeleteEnabled;
-            const autoApproveOn = state.appSettings && state.appSettings.autoApproveDeleteEnabled;
 
             return `
                 <div class="space-y-4 w-full max-w-full">
@@ -1847,27 +1898,17 @@
                             </button>
                         </div>
 
-                        <!-- 48hrs Auto-Approve Toggle -->
-                        <div class="flex items-center justify-between py-2 px-1 border-t border-slate-100 dark:border-slate-800">
-                            <div>
-                                <h4 class="font-semibold text-xs text-slate-900 dark:text-white flex items-center space-x-2">
-                                    <i class="fa-solid fa-business-time text-rose-500"></i>
-                                    <span>48hrs Auto-Approve</span>
-                                </h4>
-                                <p class="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">Auto-approve delete/reset requests after 48 hrs.</p>
-                            </div>
-                            <button onclick="toggleAutoApproveDeleteSetting()" class="relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${autoApproveOn ? 'bg-indigo-600' : 'bg-slate-300 dark:bg-slate-700'}">
-                                <span class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-lg ring-0 transition duration-200 ease-in-out ${autoApproveOn ? 'translate-x-5' : 'translate-x-0'}"></span>
-                            </button>
-                        </div>
-
                         <div class="space-y-2.5 pt-1 border-t border-slate-100 dark:border-slate-800">
                             <button onclick="switchTab('recycle')" class="w-full py-3 px-4 rounded-2xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-700 dark:text-slate-300 text-xs font-semibold transition flex items-center justify-between">
                                 <span class="flex items-center space-x-2"><i class="fa-solid fa-trash-can text-amber-500"></i><span>Recycle Bin</span></span>
                                 ${state.recycleBin.length > 0 ? `<span class="px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-600 text-[10px] font-bold">${state.recycleBin.length}</span>` : '<i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i>'}
                             </button>
+                            <button onclick="switchTab('userRecycle')" class="w-full py-3 px-4 rounded-2xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-700 dark:text-slate-300 text-xs font-semibold transition flex items-center justify-between">
+                                <span class="flex items-center space-x-2"><i class="fa-solid fa-user-slash text-rose-500"></i><span>Deleted Users Bin</span></span>
+                                ${state.userRecycleBin.length > 0 ? `<span class="px-2 py-0.5 rounded-full bg-rose-500/20 text-rose-600 text-[10px] font-bold">${state.userRecycleBin.length}</span>` : '<i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i>'}
+                            </button>
                             <button onclick="switchTab('requests')" class="w-full py-3 px-4 rounded-2xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-700 dark:text-slate-300 text-xs font-semibold transition flex items-center justify-between">
-                                <span class="flex items-center space-x-2"><i class="fa-solid fa-key text-rose-500"></i><span>Password Requests</span></span>
+                                <span class="flex items-center space-x-2"><i class="fa-solid fa-key text-amber-500"></i><span>Password Requests</span></span>
                                 ${pendingRequestsCount > 0 ? `<span class="px-2 py-0.5 rounded-full bg-rose-500/20 text-rose-600 text-[10px] font-bold">${pendingRequestsCount} Pending</span>` : '<i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i>'}
                             </button>
                             <button onclick="openChangePasswordModal()" class="w-full py-3 px-4 rounded-2xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-700 dark:text-slate-300 text-xs font-semibold transition flex items-center justify-between">
