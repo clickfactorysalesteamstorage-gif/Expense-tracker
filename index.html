@@ -162,6 +162,12 @@
                     }
                     await setDoc(doc(db, 'settings', 'admin_pass'), { password: 'adminpassword' });
                 }
+
+                // Check and initialize settings (including auto-delete config)
+                const settingsSnap = await getDocs(collection(db, 'settings'));
+                if (settingsSnap.empty || !settingsSnap.docs.some(d => d.id === 'app_settings')) {
+                    await setDoc(doc(db, 'settings', 'app_settings'), { autoDeleteEnabled: false });
+                }
             } catch (err) {
                 console.error("Firestore initialization warning:", err);
             }
@@ -182,6 +188,7 @@
             expenses: [],
             recycleBin: [],
             passwordRequests: [],
+            appSettings: { autoDeleteEnabled: false },
             activeTab: 'home',
             filterCategory: 'All',
             filterMonth: 'All',
@@ -228,7 +235,7 @@
         }, false);
 
         window.startAppListeners = function() {
-            const { db, collection, onSnapshot } = window.FB;
+            const { db, collection, onSnapshot, doc, getDoc, setDoc, deleteDoc } = window.FB;
 
             // Real-time Users Listener
             onSnapshot(collection(db, 'users'), (snapshot) => {
@@ -236,9 +243,46 @@
                 render();
             }, (err) => console.error("Users listener error:", err));
 
-            // Real-time Expenses Listener
-            onSnapshot(collection(db, 'expenses'), (snapshot) => {
-                state.expenses = snapshot.docs.map(docSnap => docSnap.data());
+            // Real-time Settings Listener
+            onSnapshot(collection(db, 'settings'), (snapshot) => {
+                snapshot.docs.forEach(docSnap => {
+                    if (docSnap.id === 'app_settings') {
+                        state.appSettings = docSnap.data();
+                    }
+                });
+                render();
+            }, (err) => console.error("Settings listener error:", err));
+
+            // Real-time Expenses Listener (with 2-month auto-delete routine if enabled)
+            onSnapshot(collection(db, 'expenses'), async (snapshot) => {
+                let allExpenses = snapshot.docs.map(docSnap => docSnap.data());
+                
+                if (state.appSettings && state.appSettings.autoDeleteEnabled) {
+                    const now = new Date();
+                    // Calculate cutoff date exactly 2 months ago from today
+                    const cutoffDate = new Date(now.getFullYear(), now.getMonth() - 2, now.getDate());
+                    
+                    let expiredExpenses = allExpenses.filter(exp => {
+                        if (!exp.date) return false;
+                        const expDate = new Date(exp.date);
+                        return expDate < cutoffDate;
+                    });
+
+                    if (expiredExpenses.length > 0) {
+                        for (const exp of expiredExpenses) {
+                            try {
+                                const recycleItem = { ...exp, deletedAt: new Date().toISOString(), deletedBy: 'Auto-Delete System (2-Month Limit)' };
+                                await setDoc(doc(db, 'recycleBin', exp.id), recycleItem);
+                                await deleteDoc(doc(db, 'expenses', exp.id));
+                            } catch(err) {
+                                console.error("Auto-delete sync error:", err);
+                            }
+                        }
+                        return; // Snapshot will re-trigger with remaining items
+                    }
+                }
+
+                state.expenses = allExpenses;
                 render();
             }, (err) => console.error("Expenses listener error:", err));
 
@@ -317,6 +361,18 @@
                 date: dateInput ? dateInput.value : new Date().toISOString().split('T')[0],
                 notes: notesInput ? notesInput.value : ''
             };
+        }
+
+        async function toggleAutoDeleteSetting() {
+            const newState = !state.appSettings.autoDeleteEnabled;
+            const { db, doc, setDoc } = window.FB;
+            try {
+                await setDoc(doc(db, 'settings', 'app_settings'), { autoDeleteEnabled: newState });
+                showToast(newState ? '2-Month Auto-Delete Enabled' : '2-Month Auto-Delete Disabled', 'success');
+            } catch (err) {
+                console.error("Failed to update setting:", err);
+                showToast('Failed to update setting.', 'error');
+            }
         }
 
         function render() {
@@ -794,8 +850,9 @@
                         ` : ''}
 
                         ${filtered.map(exp => {
+                            const isAdminUser = state.currentUser.role === 'admin';
                             const isOffice = exp.category === 'Office';
-                            const canEdit = exp.userId === state.currentUser.id;
+                            const canEdit = isAdminUser || exp.userId === state.currentUser.id;
                             return `
                                 <div class="bg-white dark:bg-slate-900 rounded-3xl py-5 sm:py-6 px-5 sm:px-6 border border-slate-200 dark:border-slate-800 shadow-sm transition relative group w-full mt-3">
                                     <div class="flex items-start space-x-3.5 w-full">
@@ -1364,6 +1421,7 @@
             const grandTotal = state.expenses.reduce((s, e) => s + e.amount, 0);
             const totalOffice = state.expenses.filter(e => e.category === 'Office').reduce((s, e) => s + e.amount, 0);
             const totalShoot = state.expenses.filter(e => e.category === 'Shoot').reduce((s, e) => s + e.amount, 0);
+            const autoDeleteOn = state.appSettings && state.appSettings.autoDeleteEnabled;
 
             return `
                 <div class="space-y-4 w-full max-w-full">
@@ -1390,6 +1448,20 @@
                                 <p class="font-bold text-sm sm:text-base text-indigo-400 break-all">${formatCurrency(totalShoot)}</p>
                             </div>
                         </div>
+                    </div>
+
+                    <!-- Auto-Delete 2-Month Setting Box -->
+                    <div class="bg-white dark:bg-slate-900 rounded-3xl p-5 border border-slate-200 dark:border-slate-800 shadow-sm flex items-center justify-between w-full">
+                        <div class="pr-3">
+                            <h4 class="font-bold text-sm text-slate-900 dark:text-white flex items-center space-x-2">
+                                <i class="fa-solid fa-clock-rotate-left text-indigo-500"></i>
+                                <span>2-Month Auto-Delete</span>
+                            </h4>
+                            <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">Automatically moves expenses older than 2 months to Recycle Bin.</p>
+                        </div>
+                        <button onclick="toggleAutoDeleteSetting()" class="relative inline-flex h-7 w-12 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${autoDeleteOn ? 'bg-indigo-600' : 'bg-slate-300 dark:bg-slate-700'}">
+                            <span class="pointer-events-none inline-block h-6 w-6 transform rounded-full bg-white shadow-lg ring-0 transition duration-200 ease-in-out ${autoDeleteOn ? 'translate-x-5' : 'translate-x-0'}"></span>
+                        </button>
                     </div>
 
                     <div class="bg-white dark:bg-slate-900 rounded-3xl p-4 sm:p-5 border border-slate-200 dark:border-slate-800 shadow-sm w-full mt-3">
