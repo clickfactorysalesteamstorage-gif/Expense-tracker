@@ -485,20 +485,27 @@
             showToast(`Successfully processed ${formatCurrency(amountToAdd)} for ${user.name}!`, 'success');
         }
 
-        function confirmResetUserWalletAndExpenses(userId, userName) {
+        function confirmResetUserWallet(userId, userName) {
             showConfirmModal(
-                'Reset User Wallet & Expenses',
-                `Are you sure you want to reset wallet, excess spent, and delete all expense records for ${userName}? This action cannot be undone.`,
+                'Reset Wallet',
+                `Are you sure you want to reset the wallet balance and excess spent due to ₹0 for ${userName}?`,
                 async () => {
-                    const { db, doc, updateDoc, deleteDoc } = window.FB;
-                    
-                    // Reset wallet and excessSpent in users collection
+                    const { db, doc, updateDoc } = window.FB;
                     await updateDoc(doc(db, 'users', userId), {
                         wallet: 0,
                         excessSpent: 0
                     });
+                    showToast(`Successfully reset wallet for ${userName}!`, 'success');
+                }
+            );
+        }
 
-                    // Delete all expenses belonging to this user
+        function confirmClearUserExpenses(userId, userName) {
+            showConfirmModal(
+                'Clear Expenses',
+                `Are you sure you want to delete all expense records for ${userName}? This action cannot be undone.`,
+                async () => {
+                    const { db, doc, deleteDoc } = window.FB;
                     const userExpenses = state.expenses.filter(e => e.userId === userId);
                     for (const exp of userExpenses) {
                         try {
@@ -507,8 +514,7 @@
                             console.error("Failed to delete user expense:", err);
                         }
                     }
-
-                    showToast(`Successfully reset wallet & expenses for ${userName}!`, 'success');
+                    showToast(`Successfully cleared all expenses for ${userName}!`, 'success');
                 }
             );
         }
@@ -1784,7 +1790,7 @@
                             return `
                                 <div class="bg-white dark:bg-slate-900 rounded-3xl p-5 border border-slate-200 dark:border-slate-800 shadow-sm space-y-4 w-full mt-3">
                                     <div class="flex items-center justify-between gap-2">
-                                        <div class="flex items-center space-x-3 min-w-0 flex-1">
+                                        <div class="flex items-center space-x-3.5 min-w-0 flex-1">
                                             <div class="w-10 h-10 rounded-2xl ${u.role === 'admin' ? 'bg-indigo-500/10 text-indigo-600 dark:text-indigo-400' : 'bg-slate-100 dark:bg-slate-800 text-slate-600'} flex items-center justify-center font-bold text-sm shrink-0">${u.name.charAt(0)}</div>
                                             <div class="min-w-0 flex-1">
                                                 <div class="flex items-center space-x-2 truncate">
@@ -1813,16 +1819,21 @@
                                         </div>
                                     </div>
 
-                                    <div class="grid grid-cols-2 gap-2 pt-1 w-full">
-                                        <button onclick="confirmResetUserWalletAndExpenses('${u.id}', '${escapeHtml(u.name)}')" class="py-2.5 px-3 rounded-2xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-600 dark:text-amber-400 text-xs font-bold border border-amber-500/20 transition flex items-center justify-center space-x-1.5">
-                                            <i class="fa-solid fa-rotate-right"></i>
-                                            <span>Reset Wallet & Expenses</span>
+                                    <div class="grid grid-cols-3 gap-2 pt-1 w-full">
+                                        <button onclick="confirmResetUserWallet('${u.id}', '${escapeHtml(u.name)}')" class="py-2.5 px-2 rounded-2xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-600 dark:text-amber-400 text-[11px] font-bold border border-amber-500/20 transition flex items-center justify-center space-x-1 truncate" title="Reset Wallet">
+                                            <i class="fa-solid fa-rotate-right shrink-0"></i>
+                                            <span class="truncate">Reset Wallet</span>
                                         </button>
                                         
+                                        <button onclick="confirmClearUserExpenses('${u.id}', '${escapeHtml(u.name)}')" class="py-2.5 px-2 rounded-2xl bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-600 dark:text-indigo-400 text-[11px] font-bold border border-indigo-500/20 transition flex items-center justify-center space-x-1 truncate" title="Clear Expenses">
+                                            <i class="fa-solid fa-receipt shrink-0"></i>
+                                            <span class="truncate">Clear Expenses</span>
+                                        </button>
+
                                         ${state.users.length > 1 && !isCurrent ? `
-                                            <button onclick="confirmRemoveUser('${u.id}', '${escapeHtml(u.name)}')" class="py-2.5 px-3 rounded-2xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-600 dark:text-rose-400 text-xs font-bold border border-rose-500/20 transition flex items-center justify-center space-x-1.5">
-                                                <i class="fa-solid fa-trash"></i>
-                                                <span>Delete User</span>
+                                            <button onclick="confirmRemoveUser('${u.id}', '${escapeHtml(u.name)}')" class="py-2.5 px-2 rounded-2xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-600 dark:text-rose-400 text-[11px] font-bold border border-rose-500/20 transition flex items-center justify-center space-x-1 truncate" title="Delete User">
+                                                <i class="fa-solid fa-trash shrink-0"></i>
+                                                <span class="truncate">Delete User</span>
                                             </button>
                                         ` : '<div class="hidden"></div>'}
                                     </div>
