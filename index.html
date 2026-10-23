@@ -93,7 +93,7 @@
 <body class="bg-slate-900 text-slate-800 dark:text-slate-100 flex flex-col justify-center items-center h-full selection:bg-indigo-500 selection:text-white">
 
     <div id="app" class="app-container w-full flex flex-col relative dark:bg-slate-950 transition-colors duration-200">
-        <!-- Loader during Firebase initialization with brand logo -->
+        <!-- Loader during initialization with brand logo -->
         <div class="flex-1 flex flex-col items-center justify-center p-6 text-center animate-fadeIn">
             <div class="relative w-14 h-14 flex items-center justify-center mx-auto mb-6 logo-container">
                 <div class="absolute inset-0 rounded-2xl bg-indigo-500/20 dark:bg-indigo-500/10 animate-ping"></div>
@@ -114,7 +114,7 @@
     <!-- Notification Toast Container -->
     <div id="toast-container" class="fixed top-12 left-1/2 transform -translate-x-1/2 z-50 flex flex-col gap-2 pointer-events-none w-11/12 max-w-sm"></div>
 
-    <!-- Firebase SDK Modular Imports via ESM CDN -->
+    <!-- SDK Modular Imports via ESM CDN -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getFirestore, collection, getDocs, setDoc, doc, deleteDoc, updateDoc, onSnapshot, query, orderBy } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
@@ -129,15 +129,15 @@
             appId: "1:789003178398:web:1579e411ad728268c6468f"
         };
 
-        const firebaseApp = initializeApp(firebaseConfig);
-        const db = getFirestore(firebaseApp);
-        const storage = getStorage(firebaseApp);
+        const appInstance = initializeApp(firebaseConfig);
+        const db = getFirestore(appInstance);
+        const storage = getStorage(appInstance);
 
-        // Expose Firebase tools globally for app execution
+        // Expose tools globally for app execution
         window.FB = { db, storage, collection, getDocs, setDoc, doc, deleteDoc, updateDoc, onSnapshot, query, orderBy, storageRef, uploadString, getDownloadURL, deleteObject };
 
-        // Seed Default Data if Firestore is empty on boot
-        async function initializeFirestoreData() {
+        // Seed Default Data if empty on boot
+        async function initializeData() {
             try {
                 const usersSnap = await getDocs(collection(db, 'users'));
                 if (usersSnap.empty) {
@@ -157,11 +157,11 @@
                     await setDoc(doc(db, 'settings', 'app_settings'), { autoDeleteEnabled: false, currentVersion: '1.1.2' });
                 }
             } catch (err) {
-                console.error("Firestore initialization warning:", err);
+                console.error("Initialization warning:", err);
             }
         }
 
-        initializeFirestoreData().then(() => {
+        initializeData().then(() => {
             window.startAppListeners();
         });
     </script>
@@ -490,7 +490,7 @@
                             <div class="pt-2 border-t border-slate-200 dark:border-slate-700">
                                 <span class="text-[10px] text-rose-500 uppercase font-semibold block">Excess Spent Due</span>
                                 <span class="font-bold text-base text-rose-600 dark:text-rose-400">${formatCurrency(userExcessSpent)}</span>
-                                <p class="text-[10px] text-slate-400 mt-1">Pending admin top-up settlement.</p>
+                                <p class="text-[10px] text-slate-400 mt-1">Pending top-up settlement.</p>
                             </div>
                             ` : ''}
                         </div>
@@ -2312,7 +2312,7 @@
                         <div class="space-y-3 pt-2 border-t border-slate-100 dark:border-slate-800 text-xs text-slate-600 dark:text-slate-300">
                             <div class="flex items-start space-x-2">
                                 <i class="fa-solid fa-circle-check text-emerald-500 mt-0.5"></i>
-                                <span><strong>Fully Automated App Updates:</strong> Streamlined version syncing directly with Firebase cloud settings without manual admin broadcast inputs.</span>
+                                <span><strong>Fully Automated App Updates:</strong> Streamlined version syncing directly with cloud settings without manual admin broadcast inputs.</span>
                             </div>
                             <div class="flex items-start space-x-2">
                                 <i class="fa-solid fa-circle-check text-emerald-500 mt-0.5"></i>
