@@ -154,7 +154,7 @@
 
                 const settingsSnap = await getDocs(collection(db, 'settings'));
                 if (settingsSnap.empty || !settingsSnap.docs.some(d => d.id === 'app_settings')) {
-                    await setDoc(doc(db, 'settings', 'app_settings'), { autoDeleteEnabled: false });
+                    await setDoc(doc(db, 'settings', 'app_settings'), { autoDeleteEnabled: false, currentVersion: '1.0.0' });
                 }
             } catch (err) {
                 console.error("Firestore initialization warning:", err);
@@ -168,16 +168,18 @@
 
     <script>
         const LOCAL_STORAGE_KEY = 'click_factory_current_user_v23';
+        const CURRENT_CLIENT_APP_VERSION = '1.0.0';
 
         let state = {
             currentUser: null,
             adminPassword: 'adminpassword',
             users: [],
             expenses: [],
+            walletTransactions: [],
             recycleBin: [],
             userRecycleBin: [],
             passwordRequests: [],
-            appSettings: { autoDeleteEnabled: false },
+            appSettings: { autoDeleteEnabled: false, currentVersion: '1.0.0' },
             activeTab: 'home',
             filterCategory: 'All',
             filterMonth: 'All',
@@ -190,7 +192,9 @@
             editingExpenseId: null,
             tempBillData: null,
             tempFormCache: null,
-            authView: 'login'
+            authView: 'login',
+            lastClearedExpensesCache: null,
+            showUpdateModalFlag: false
         };
 
         // Restore active user session from local storage
@@ -238,15 +242,29 @@
                 render();
             }, (err) => console.error("Users listener error:", err));
 
-            // Real-time Settings Listener
+            // Real-time Settings Listener & Version Update Check
             onSnapshot(collection(db, 'settings'), (snapshot) => {
                 snapshot.docs.forEach(docSnap => {
                     if (docSnap.id === 'app_settings') {
-                        state.appSettings = docSnap.data();
+                        const data = docSnap.data();
+                        state.appSettings = data;
+                        if (data.currentVersion && data.currentVersion !== CURRENT_CLIENT_APP_VERSION) {
+                            // Trigger update notification modal if server version differs from client version
+                            const dismissedVersion = localStorage.getItem('click_factory_dismissed_version');
+                            if (dismissedVersion !== data.currentVersion) {
+                                state.showUpdateModalFlag = true;
+                            }
+                        }
                     }
                 });
                 render();
             }, (err) => console.error("Settings listener error:", err));
+
+            // Real-time Wallet Transactions Listener
+            onSnapshot(collection(db, 'walletTransactions'), (snapshot) => {
+                state.walletTransactions = snapshot.docs.map(docSnap => docSnap.data());
+                render();
+            }, (err) => console.error("Transactions listener error:", err));
 
             // Real-time Expenses Listener (with 2-month auto-delete routine if enabled)
             onSnapshot(collection(db, 'expenses'), async (snapshot) => {
@@ -322,22 +340,40 @@
             }, (err) => console.error("Requests listener error:", err));
         };
 
-        function showToast(message, type = 'success') {
+        function showToast(message, type = 'success', undoCallback = null) {
             const container = document.getElementById('toast-container');
             if (!container) return;
             const toast = document.createElement('div');
             const bgClass = type === 'success' ? 'bg-emerald-600 text-white' : type === 'error' ? 'bg-rose-600 text-white' : 'bg-slate-800 text-white';
             const icon = type === 'success' ? 'fa-circle-check' : type === 'error' ? 'fa-circle-exclamation' : 'fa-circle-info';
             
-            toast.className = `${bgClass} px-4 py-3 rounded-2xl shadow-xl flex items-center space-x-3 text-sm font-medium transform transition-all duration-300 translate-y-[-20px] opacity-0 pointer-events-auto`;
-            toast.innerHTML = `<i class="fa-solid ${icon} text-lg shrink-0"></i><span class="flex-1 break-words">${message}</span>`;
+            toast.className = `${bgClass} px-4 py-3 rounded-2xl shadow-xl flex items-center justify-between text-sm font-medium transform transition-all duration-300 translate-y-[-20px] opacity-0 pointer-events-auto gap-3`;
+            
+            let undoBtnHtml = '';
+            if (undoCallback) {
+                undoBtnHtml = `<button id="toast-undo-btn" class="px-2.5 py-1 bg-white text-slate-900 rounded-xl font-bold text-xs hover:bg-slate-100 transition shrink-0">Undo</button>`;
+            }
+
+            toast.innerHTML = `<div class="flex items-center space-x-2.5 min-w-0 flex-1"><i class="fa-solid ${icon} text-lg shrink-0"></i><span class="flex-1 break-words">${message}</span></div>${undoBtnHtml}`;
             
             container.appendChild(toast);
             setTimeout(() => toast.classList.remove('translate-y-[-20px]', 'opacity-0'), 10);
+
+            if (undoCallback) {
+                const undoBtn = document.getElementById('toast-undo-btn');
+                if (undoBtn) {
+                    undoBtn.onclick = () => {
+                        undoCallback();
+                        toast.classList.add('translate-y-[-20px]', 'opacity-0');
+                        setTimeout(() => toast.remove(), 300);
+                    };
+                }
+            }
+
             setTimeout(() => {
                 toast.classList.add('translate-y-[-20px]', 'opacity-0');
                 setTimeout(() => toast.remove(), 300);
-            }, 3500);
+            }, 6000);
         }
 
         function formatCurrency(amount) {
@@ -347,6 +383,12 @@
         function formatDate(dateString) {
             if (!dateString) return '';
             return new Date(dateString).toLocaleDateString('en-IN', { year: 'numeric', month: 'short', day: 'numeric' });
+        }
+
+        function formatTimestamp(isoString) {
+            if (!isoString) return '';
+            const d = new Date(isoString);
+            return d.toLocaleDateString('en-IN', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
         }
 
         function formatMonthName(yearMonth) {
@@ -421,26 +463,106 @@
             );
         }
 
-        function openAddWalletModal(userId, userName) {
-            const user = state.users.find(u => u.id === userId);
+        function openUserWalletModal() {
+            const user = state.currentUser;
+            const userWallet = Number(user.wallet || 0);
+            const userExcessSpent = Number(user.excessSpent || 0);
+            const userTxns = state.walletTransactions
+                .filter(t => t.userId === user.id)
+                .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
 
             const root = document.getElementById('modal-root');
             root.innerHTML = `
                 <div class="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-sm flex items-center justify-center p-4 animate-fadeIn">
-                    <div class="bg-white dark:bg-slate-900 rounded-3xl p-6 max-w-sm w-full border border-slate-200 dark:border-slate-800 shadow-2xl space-y-4">
-                        <div class="flex items-center justify-between">
-                            <h3 class="font-bold text-base text-slate-900 dark:text-white">Manage User Wallet</h3>
+                    <div class="bg-white dark:bg-slate-900 rounded-3xl p-6 max-w-sm w-full border border-slate-200 dark:border-slate-800 shadow-2xl space-y-4 max-h-[90vh] flex flex-col">
+                        <div class="flex items-center justify-between shrink-0">
+                            <h3 class="font-bold text-base text-slate-900 dark:text-white flex items-center space-x-2">
+                                <i class="fa-solid fa-wallet text-emerald-500"></i><span>Wallet & History</span>
+                            </h3>
                             <button onclick="closeModal()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark"></i></button>
                         </div>
-                        <p class="text-xs text-slate-500">User: <span class="font-bold text-indigo-600">${escapeHtml(userName)}</span></p>
                         
-                        <form onsubmit="handleWalletAdd(event, '${userId}')" class="space-y-3.5 w-full">
-                            <div class="w-full">
-                                <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Add Wallet Funds (₹)</label>
-                                <input type="number" id="wallet-add-amount" required min="1" step="any" placeholder="0.00" class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm text-slate-900 dark:text-white font-semibold">
+                        <div class="bg-slate-50 dark:bg-slate-800/50 p-4 rounded-2xl border border-slate-100 dark:border-slate-800 space-y-2 shrink-0">
+                            <div>
+                                <span class="text-[10px] text-slate-400 uppercase font-semibold block">Wallet Balance</span>
+                                <span class="font-bold text-xl text-emerald-600 dark:text-emerald-400">${formatCurrency(userWallet)}</span>
                             </div>
-                            <div class="pt-2 w-full"><button type="submit" class="w-full py-3.5 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-2xl shadow-md transition text-sm">Add Funds</button></div>
+                            ${userExcessSpent > 0 ? `
+                            <div class="pt-2 border-t border-slate-200 dark:border-slate-700">
+                                <span class="text-[10px] text-rose-500 uppercase font-semibold block">Excess Spent Due</span>
+                                <span class="font-bold text-base text-rose-600 dark:text-rose-400">${formatCurrency(userExcessSpent)}</span>
+                                <p class="text-[10px] text-slate-400 mt-1">Pending admin top-up settlement.</p>
+                            </div>
+                            ` : ''}
+                        </div>
+
+                        <div class="space-y-2 flex-1 overflow-y-auto pr-1">
+                            <h4 class="text-xs font-semibold text-slate-500 uppercase tracking-wider px-1">Added Wallet & Excess/Shortage History</h4>
+                            ${userTxns.length === 0 ? `
+                                <div class="text-center py-6 text-xs text-slate-400">No transaction history yet.</div>
+                            ` : userTxns.map(t => `
+                                <div class="bg-slate-50 dark:bg-slate-800/40 p-3 rounded-2xl border border-slate-100 dark:border-slate-800/80 space-y-1">
+                                    <div class="flex items-center justify-between text-xs">
+                                        <span class="font-semibold text-slate-800 dark:text-slate-200">${escapeHtml(t.title)}</span>
+                                        <span class="font-bold text-emerald-600 dark:text-emerald-400">+${formatCurrency(t.amount)}</span>
+                                    </div>
+                                    <div class="flex items-center justify-between text-[10px] text-slate-400">
+                                        <span>${formatTimestamp(t.timestamp)}</span>
+                                        <span class="italic">By ${escapeHtml(t.performedBy)}</span>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+
+                        <button onclick="closeModal()" class="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-2xl shadow-md transition text-xs shrink-0">Close</button>
+                    </div>
+                </div>
+            `;
+        }
+
+        function openAddWalletModal(userId, userName) {
+            const userTxns = state.walletTransactions
+                .filter(t => t.userId === userId)
+                .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+
+            const root = document.getElementById('modal-root');
+            root.innerHTML = `
+                <div class="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-sm flex items-center justify-center p-4 animate-fadeIn">
+                    <div class="bg-white dark:bg-slate-900 rounded-3xl p-6 max-w-sm w-full border border-slate-200 dark:border-slate-800 shadow-2xl space-y-4 max-h-[90vh] flex flex-col">
+                        <div class="flex items-center justify-between shrink-0">
+                            <h3 class="font-bold text-base text-slate-900 dark:text-white">Manage Wallet</h3>
+                            <button onclick="closeModal()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark"></i></button>
+                        </div>
+                        <p class="text-xs text-slate-500 shrink-0">User: <span class="font-bold text-indigo-600">${escapeHtml(userName)}</span></p>
+                        
+                        <form onsubmit="handleWalletAdd(event, '${userId}')" class="space-y-3 shrink-0">
+                            <div class="w-full">
+                                <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Add Wallet Funds / Adjust Shortage (₹)</label>
+                                <input type="number" id="wallet-add-amount" required step="any" placeholder="0.00" class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm text-slate-900 dark:text-white font-semibold">
+                            </div>
+                            <button type="submit" class="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-2xl shadow-md transition text-xs">Process Funds / Shortage</button>
                         </form>
+
+                        <div class="space-y-2 flex-1 overflow-y-auto pr-1 pt-2 border-t border-slate-100 dark:border-slate-800">
+                            <div class="flex items-center justify-between px-1">
+                                <h4 class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Added History</h4>
+                                ${userTxns.length > 0 ? `<button type="button" onclick="confirmClearUserHistory('${userId}', '${escapeHtml(userName)}')" class="text-[11px] text-rose-600 hover:underline font-semibold"><i class="fa-solid fa-trash-can mr-1"></i>Clear History</button>` : ''}
+                            </div>
+                            ${userTxns.length === 0 ? `
+                                <div class="text-center py-4 text-xs text-slate-400">No wallet history yet.</div>
+                            ` : userTxns.map(t => `
+                                <div class="bg-slate-50 dark:bg-slate-800/40 p-2.5 rounded-2xl border border-slate-100 dark:border-slate-800/80 space-y-1 text-xs">
+                                    <div class="flex items-center justify-between">
+                                        <span class="font-semibold text-slate-800 dark:text-slate-200">${escapeHtml(t.title)}</span>
+                                        <span class="font-bold text-emerald-600 dark:text-emerald-400">+${formatCurrency(t.amount)}</span>
+                                    </div>
+                                    <div class="flex items-center justify-between text-[10px] text-slate-400">
+                                        <span>${formatTimestamp(t.timestamp)}</span>
+                                        <span class="italic">By ${escapeHtml(t.performedBy)}</span>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
                     </div>
                 </div>
             `;
@@ -449,7 +571,7 @@
         async function handleWalletAdd(e, userId) {
             e.preventDefault();
             const amountToAdd = parseFloat(document.getElementById('wallet-add-amount').value);
-            if (isNaN(amountToAdd) || amountToAdd <= 0) {
+            if (isNaN(amountToAdd) || amountToAdd === 0) {
                 showToast('Please enter a valid amount.', 'error');
                 return;
             }
@@ -460,32 +582,78 @@
             let currentWallet = Number(user.wallet || 0);
             let currentExcess = Number(user.excessSpent || 0);
             let remainingFunds = amountToAdd;
+            let excessCleared = 0;
 
-            // Automatically adjust excess spent first if any exists
-            if (currentExcess > 0) {
-                if (remainingFunds >= currentExcess) {
-                    remainingFunds -= currentExcess;
-                    currentExcess = 0; // Excess completely cleared
-                } else {
-                    currentExcess -= remainingFunds;
-                    remainingFunds = 0; // All added funds used to partially clear excess
+            if (amountToAdd > 0) {
+                if (currentExcess > 0) {
+                    if (remainingFunds >= currentExcess) {
+                        excessCleared = currentExcess;
+                        remainingFunds -= currentExcess;
+                        currentExcess = 0;
+                    } else {
+                        excessCleared = remainingFunds;
+                        currentExcess -= remainingFunds;
+                        remainingFunds = 0;
+                    }
+                }
+                currentWallet += remainingFunds;
+            } else {
+                currentWallet += amountToAdd;
+                if (currentWallet < 0) {
+                    currentExcess += Math.abs(currentWallet);
+                    currentWallet = 0;
                 }
             }
 
-            // Add any remaining funds to the wallet balance
-            currentWallet += remainingFunds;
-
-            const { db, doc, updateDoc } = window.FB;
+            const { db, doc, updateDoc, setDoc } = window.FB;
             await updateDoc(doc(db, 'users', userId), { 
                 wallet: currentWallet,
                 excessSpent: currentExcess 
             });
 
+            const txnId = 'txn_' + Date.now();
+            let txnTitle = amountToAdd >= 0 ? `Added Wallet Funds` : `Shortage Money Adjustment`;
+            if (amountToAdd >= 0 && excessCleared > 0 && remainingFunds > 0) {
+                txnTitle = `Cleared Excess (₹${excessCleared}) & Added Wallet (₹${remainingFunds})`;
+            } else if (amountToAdd >= 0 && excessCleared > 0) {
+                txnTitle = `Cleared Excess Spent Due`;
+            }
+
+            const txnData = {
+                id: txnId,
+                userId: userId,
+                title: txnTitle,
+                amount: Math.abs(amountToAdd),
+                timestamp: new Date().toISOString(),
+                performedBy: state.currentUser.name
+            };
+            await setDoc(doc(db, 'walletTransactions', txnId), txnData);
+
             closeModal();
             showToast(`Successfully processed ${formatCurrency(amountToAdd)} for ${user.name}!`, 'success');
         }
 
-        function confirmResetUserWallet(userId, userName) {
+        function confirmClearUserHistory(userId, userName) {
+            showConfirmModal(
+                'Clear Transaction History',
+                `Are you sure you want to clear all wallet history records for ${userName}?`,
+                async () => {
+                    const { db, doc, deleteDoc } = window.FB;
+                    const userTxns = state.walletTransactions.filter(t => t.userId === userId);
+                    for (const t of userTxns) {
+                        try {
+                            await deleteDoc(doc(db, 'walletTransactions', t.id));
+                        } catch(err) {
+                            console.error("Failed to delete txn:", err);
+                        }
+                    }
+                    closeModal();
+                    showToast(`Successfully cleared wallet history for ${userName}!`, 'success');
+                }
+            );
+        }
+
+        async function confirmResetUserWallet(userId, userName) {
             showConfirmModal(
                 'Reset Wallet',
                 `Are you sure you want to reset the wallet balance and excess spent due to ₹0 for ${userName}?`,
@@ -503,10 +671,18 @@
         function confirmClearUserExpenses(userId, userName) {
             showConfirmModal(
                 'Clear Expenses',
-                `Are you sure you want to delete all expense records for ${userName}? This action cannot be undone.`,
+                `Are you sure you want to delete all expense records for ${userName}?`,
                 async () => {
-                    const { db, doc, deleteDoc } = window.FB;
+                    const { db, doc, deleteDoc, setDoc } = window.FB;
                     const userExpenses = state.expenses.filter(e => e.userId === userId);
+                    
+                    if (userExpenses.length === 0) {
+                        showToast('No expenses found for this user.', 'info');
+                        return;
+                    }
+
+                    state.lastClearedExpensesCache = { userId, expenses: userExpenses };
+
                     for (const exp of userExpenses) {
                         try {
                             await deleteDoc(doc(db, 'expenses', exp.id));
@@ -514,9 +690,30 @@
                             console.error("Failed to delete user expense:", err);
                         }
                     }
-                    showToast(`Successfully cleared all expenses for ${userName}!`, 'success');
+
+                    showToast(`Cleared expenses for ${userName}.`, 'success', async () => {
+                        if (state.lastClearedExpensesCache && state.lastClearedExpensesCache.userId === userId) {
+                            for (const exp of state.lastClearedExpensesCache.expenses) {
+                                await setDoc(doc(db, 'expenses', exp.id), exp);
+                            }
+                            state.lastClearedExpensesCache = null;
+                            showToast(`Restored all expenses for ${userName}!`, 'success');
+                        }
+                    });
                 }
             );
+        }
+
+        function dismissUpdateModal() {
+            state.showUpdateModalFlag = false;
+            if (state.appSettings.currentVersion) {
+                localStorage.setItem('click_factory_dismissed_version', state.appSettings.currentVersion);
+            }
+            render();
+        }
+
+        function executeAppUpdate() {
+            window.location.reload();
         }
 
         function render() {
@@ -563,6 +760,11 @@
                     </div>
                     
                     <div class="flex items-center space-x-2 shrink-0">
+                        ${!isAdmin ? `
+                        <button onclick="openUserWalletModal()" class="w-10 h-10 rounded-2xl bg-emerald-50 dark:bg-emerald-950/50 flex items-center justify-center text-emerald-600 dark:text-emerald-400 hover:bg-emerald-100 transition border border-emerald-200/50 dark:border-emerald-800/50" title="My Wallet">
+                            <i class="fa-solid fa-wallet text-sm"></i>
+                        </button>
+                        ` : ''}
                         <button onclick="toggleDarkMode()" class="w-10 h-10 rounded-2xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition">
                             <i class="fa-solid ${state.darkMode ? 'fa-sun text-amber-400' : 'fa-moon text-slate-600'} text-sm"></i>
                         </button>
@@ -610,6 +812,22 @@
                         ${isAdmin && (state.recycleBin.length > 0 || pendingRequestsCount > 0 || state.userRecycleBin.length > 0) ? `<span class="absolute top-1 right-3 w-2 h-2 rounded-full bg-rose-500"></span>` : ''}
                     </button>
                 </nav>
+
+                ${state.showUpdateModalFlag ? `
+                <div class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 animate-fadeIn">
+                    <div class="bg-white dark:bg-slate-900 rounded-3xl p-6 max-w-sm w-full border border-slate-200 dark:border-slate-800 shadow-2xl text-center space-y-4">
+                        <div class="w-14 h-14 bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 rounded-2xl flex items-center justify-center text-2xl mx-auto"><i class="fa-solid fa-rocket"></i></div>
+                        <div>
+                            <h3 class="font-bold text-lg text-slate-900 dark:text-white">New App Update Available!</h3>
+                            <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">A newer version (v${state.appSettings.currentVersion}) of Click Factory Expense Tracker is ready. Please update to enjoy the latest improvements.</p>
+                        </div>
+                        <div class="grid grid-cols-2 gap-2 pt-2">
+                            <button onclick="dismissUpdateModal()" class="py-3 px-4 rounded-2xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-semibold">Later</button>
+                            <button onclick="executeAppUpdate()" class="py-3 px-4 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold shadow-md">Update Now</button>
+                        </div>
+                    </div>
+                </div>
+                ` : ''}
 
                 <div id="modal-root"></div>
             `;
@@ -887,21 +1105,8 @@
             const availableMonths = Array.from(monthsSet).filter(Boolean).sort().reverse();
             const hasDateFilterActive = state.filterStartDate || state.filterEndDate;
 
-            const userWallet = Number(state.currentUser.wallet || 0);
-            const userExcessSpent = Number(state.currentUser.excessSpent || 0);
-
             return `
                 <div class="space-y-4 w-full max-w-full">
-                    ${!isAdmin ? `
-                    <div class="bg-gradient-to-br from-emerald-600 to-teal-700 rounded-3xl p-5 text-white shadow-xl shadow-emerald-500/20 w-full mb-4">
-                        <div class="flex justify-between items-center mb-1">
-                            <span class="text-emerald-100 text-xs font-semibold uppercase tracking-wider">My Wallet Balance</span>
-                            <i class="fa-solid fa-wallet text-emerald-200 text-lg"></i>
-                        </div>
-                        <h2 class="text-2xl sm:text-3xl font-bold tracking-tight">${formatCurrency(userWallet)}</h2>${userExcessSpent > 0 ? `<p class="text-[11px] text-rose-200 mt-2 font-medium"><i class="fa-solid fa-circle-exclamation mr-1"></i>Excess spent pending admin top-up: ${formatCurrency(userExcessSpent)}</p>` : ''}
-                    </div>
-                    ` : ''}
-
                     <div class="bg-gradient-to-br from-indigo-600 to-violet-700 rounded-3xl p-5 sm:p-6 text-white shadow-xl shadow-indigo-500/20 relative overflow-hidden w-full">
                         <div class="flex justify-between items-start mb-3 gap-2">
                             <div class="min-w-0 flex-1">
@@ -1983,20 +2188,8 @@
             });
             const months = Object.keys(monthlyMap).sort().reverse();
 
-            const userWallet = Number(state.currentUser.wallet || 0);
-            const userExcessSpent = Number(state.currentUser.excessSpent || 0);
-
             return `
                 <div class="space-y-4 w-full max-w-full">
-                    <div class="bg-gradient-to-br from-emerald-600 to-teal-700 rounded-3xl p-5 text-white shadow-xl shadow-emerald-500/20 w-full">
-                        <div class="flex justify-between items-center mb-1">
-                            <span class="text-emerald-100 text-xs font-semibold uppercase tracking-wider">My Wallet Balance</span>
-                            <i class="fa-solid fa-wallet text-emerald-200 text-lg"></i>
-                        </div>
-                        <h2 class="text-2xl sm:text-3xl font-bold tracking-tight">${formatCurrency(userWallet)}</h2>
-                        ${userExcessSpent > 0 ? `<p class="text-[11px] text-rose-200 mt-2 font-medium"><i class="fa-solid fa-circle-exclamation mr-1"></i>Excess spent pending admin top-up: ${formatCurrency(userExcessSpent)}</p>` : ''}
-                    </div>
-
                     <div class="bg-gradient-to-br from-violet-600 to-indigo-700 rounded-3xl p-5 sm:p-6 text-white shadow-xl w-full">
                         <p class="text-violet-200 text-xs font-semibold uppercase tracking-wider">My Expense Summary</p>
                         <h2 class="text-2xl sm:text-3xl font-bold tracking-tight mt-0.5 break-all">${formatCurrency(total)}</h2>
