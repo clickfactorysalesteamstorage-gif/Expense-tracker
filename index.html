@@ -2239,3 +2239,213 @@
                 </div>
             `;
         }
+
+        function renderProfileTab() {
+            const isAdmin = state.currentUser.role === 'admin';
+            const pendingRequestsCount = state.passwordRequests.filter(r => r.status === 'pending').length;
+            const autoDeleteOn = state.appSettings && state.appSettings.autoDeleteEnabled;
+
+            return `
+                <div class="space-y-4 w-full max-w-full">
+                    <div class="bg-white dark:bg-slate-900 rounded-3xl p-6 sm:p-7 border border-slate-200 dark:border-slate-800 shadow-sm text-center w-full">
+                        <div class="w-16 h-16 bg-white dark:bg-slate-800 rounded-2xl p-2 flex items-center justify-center mx-auto mb-3 shadow-md border border-slate-200 dark:border-slate-700 overflow-hidden logo-container">
+                            <img src="https://clickfactoryphotography.com/wp-content/uploads/2022/04/crop-logo.gif" alt="Click Factory Logo" class="w-full h-full object-contain" onerror="this.src='https://placehold.co/64x64/4f46e5/ffffff?text=CF'">
+                        </div>
+                        <h2 class="font-bold text-lg text-slate-900 dark:text-white truncate">${state.currentUser.name}</h2>
+                        <p class="text-xs text-slate-500 dark:text-slate-400 mb-2 truncate">@${state.currentUser.username}</p>
+                        <span class="inline-block px-3.5 py-1 rounded-full text-xs font-semibold ${isAdmin ? 'bg-indigo-50 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-400 border border-indigo-200' : 'bg-emerald-50 text-emerald-600 border border-emerald-200'}">
+                            ${isAdmin ? 'Administrator' : 'Regular User'}
+                        </span>
+                    </div>
+
+                    ${isAdmin ? `
+                    <div class="bg-white dark:bg-slate-900 rounded-3xl p-5 sm:p-6 border border-slate-200 dark:border-slate-800 shadow-sm space-y-4 w-full mt-3">
+                        <h3 class="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider px-1">Admin Management</h3>
+                        
+                        <div class="flex items-center justify-between py-2 px-1">
+                            <div>
+                                <h4 class="font-semibold text-xs text-slate-900 dark:text-white flex items-center space-x-2">
+                                    <i class="fa-solid fa-clock-rotate-left text-indigo-500"></i>
+                                    <span>2-Month Auto-Delete</span>
+                                </h4>
+                                <p class="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">Auto-delete expenses older than 2 months.</p>
+                            </div>
+                            <button onclick="toggleAutoDeleteSetting()" class="relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${autoDeleteOn ? 'bg-indigo-600' : 'bg-slate-300 dark:bg-slate-700'}">
+                                <span class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-lg ring-0 transition duration-200 ease-in-out ${autoDeleteOn ? 'translate-x-5' : 'translate-x-0'}"></span>
+                            </button>
+                        </div>
+
+                        <!-- App Update Section in Profile -->
+                        <div class="pt-3 border-t border-slate-100 dark:border-slate-800 space-y-2">
+                            <h4 class="font-semibold text-xs text-slate-900 dark:text-white flex items-center space-x-2">
+                                <i class="fa-solid fa-bullhorn text-indigo-500"></i>
+                                <span>App Update Broadcast</span>
+                            </h4>
+                            <p class="text-[10px] text-slate-500 dark:text-slate-400">Current Client: v${CURRENT_CLIENT_APP_VERSION}</p>
+                            <form onsubmit="handleBroadcastUpdate(event)" class="space-y-2 pt-1">
+                                <input type="text" id="broadcast-version-input" required placeholder="e.g., 1.1.0" value="${escapeHtml(state.appSettings.currentVersion || '1.0.0')}" class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs text-slate-900 dark:text-white font-semibold">
+                                <button type="submit" class="w-full py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-xl transition text-xs">
+                                    Broadcast Update
+                                </button>
+                            </form>
+                        </div>
+
+                        <div class="space-y-2.5 pt-1 border-t border-slate-100 dark:border-slate-800">
+                            <button onclick="switchTab('recycle')" class="w-full py-3 px-4 rounded-2xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-700 dark:text-slate-300 text-xs font-semibold transition flex items-center justify-between">
+                                <span class="flex items-center space-x-2"><i class="fa-solid fa-trash-can text-amber-500"></i><span>Recycle Bin</span></span>
+                                ${state.recycleBin.length > 0 ? `<span class="px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-600 text-[10px] font-bold">${state.recycleBin.length}</span>` : '<i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i>'}
+                            </button>
+                            <button onclick="switchTab('userRecycle')" class="w-full py-3 px-4 rounded-2xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-700 dark:text-slate-300 text-xs font-semibold transition flex items-center justify-between">
+                                <span class="flex items-center space-x-2"><i class="fa-solid fa-user-slash text-rose-500"></i><span>Deleted Users Bin</span></span>
+                                ${state.userRecycleBin.length > 0 ? `<span class="px-2 py-0.5 rounded-full bg-rose-500/20 text-rose-600 text-[10px] font-bold">${state.userRecycleBin.length}</span>` : '<i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i>'}
+                            </button>
+                            <button onclick="switchTab('requests')" class="w-full py-3 px-4 rounded-2xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-700 dark:text-slate-300 text-xs font-semibold transition flex items-center justify-between">
+                                <span class="flex items-center space-x-2"><i class="fa-solid fa-key text-amber-500"></i><span>Password Requests</span></span>
+                                ${pendingRequestsCount > 0 ? `<span class="px-2 py-0.5 rounded-full bg-rose-500/20 text-rose-600 text-[10px] font-bold">${pendingRequestsCount} Pending</span>` : '<i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i>'}
+                            </button>
+                            <button onclick="openChangePasswordModal()" class="w-full py-3 px-4 rounded-2xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-700 dark:text-slate-300 text-xs font-semibold transition flex items-center justify-between">
+                                <span class="flex items-center space-x-2"><i class="fa-solid fa-shield-halved text-indigo-500"></i><span>Change Admin Password</span></span>
+                                <i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i>
+                            </button>
+                        </div>
+                    </div>
+                    ` : ''}
+
+                    <div class="text-center py-2 w-full">
+                        <p class="text-[11px] font-medium text-slate-400 dark:text-slate-500">Click Factory Expense Tracker • Developed by <span class="font-bold text-indigo-600">SK Techmedia</span></p>
+                    </div>
+                </div>
+            `;
+        }
+
+        function openChangePasswordModal() {
+            const root = document.getElementById('modal-root');
+            root.innerHTML = `
+                <div class="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-sm flex items-center justify-center p-4">
+                    <div class="bg-white dark:bg-slate-900 rounded-3xl p-6 max-w-sm w-full border border-slate-200 dark:border-slate-800 shadow-2xl space-y-4">
+                        <div class="flex items-center justify-between">
+                            <h3 class="font-bold text-base text-slate-900 dark:text-white">Change Admin Password</h3>
+                            <button onclick="closeModal()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark"></i></button>
+                        </div>
+                        <form onsubmit="handlePasswordChange(event)" class="space-y-3.5 w-full">
+                            <div class="w-full">
+                                <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Current Password</label>
+                                <div class="relative w-full">
+                                    <input type="password" id="current-pass" required class="w-full px-4 pr-12 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm text-slate-900 dark:text-white">
+                                    <button type="button" onclick="togglePasswordVisibility('current-pass', 'toggle-curr-pass-icon')" class="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 focus:outline-none">
+                                        <i id="toggle-curr-pass-icon" class="fa-solid fa-eye text-sm"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="w-full">
+                                <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">New Password</label>
+                                <div class="relative w-full">
+                                    <input type="password" id="new-pass" required class="w-full px-4 pr-12 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm text-slate-900 dark:text-white">
+                                    <button type="button" onclick="togglePasswordVisibility('new-pass', 'toggle-new-pass-icon')" class="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 focus:outline-none">
+                                        <i id="toggle-new-pass-icon" class="fa-solid fa-eye text-sm"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="pt-2 w-full"><button type="submit" class="w-full py-3.5 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-2xl shadow-md transition text-sm">Update Password</button></div>
+                        </form>
+                    </div>
+                </div>
+            `;
+        }
+
+        async function handlePasswordChange(e) {
+            e.preventDefault();
+            const current = document.getElementById('current-pass').value;
+            const newPass = document.getElementById('new-pass').value;
+
+            const adminUser = state.users.find(u => u.role === 'admin');
+            if (!adminUser || current !== adminUser.password) {
+                showToast('Current password incorrect.', 'error');
+                return;
+            }
+
+            if (!newPass || newPass.length < 4) {
+                showToast('Password must be at least 4 characters.', 'error');
+                return;
+            }
+
+            const { db, doc, updateDoc } = window.FB;
+            adminUser.password = newPass;
+            await updateDoc(doc(db, 'users', adminUser.id), { password: newPass });
+            closeModal();
+            showToast('Admin password updated successfully!', 'success');
+        }
+
+        function exportUserCSV(userId, userName) {
+            downloadCSV(state.expenses.filter(e => e.userId === userId), `${userName.replace(/\s+/g, '_')}_expenses.csv`);
+        }
+
+        function exportFilteredCSV() {
+            let filtered = state.expenses.filter(exp => {
+                if (state.filterUser !== 'All' && exp.userId !== state.filterUser) return false;
+                if (state.filterCategory !== 'All' && exp.category !== state.filterCategory) return false;
+                if (state.filterMonth !== 'All' && !exp.date.startsWith(state.filterMonth)) return false;
+                if (state.filterStartDate && exp.date < state.filterStartDate) return false;
+                if (state.filterEndDate && exp.date > state.filterEndDate) return false;
+                return true;
+            });
+            downloadCSV(filtered, 'filtered_expenses_report.csv');
+        }
+
+        function exportAllCSV() {
+            downloadCSV(state.expenses, 'all_company_expenses.csv');
+        }
+
+        function downloadCSV(dataArray, filename) {
+            if (dataArray.length === 0) {
+                showToast('No records available to export.', 'error');
+                return;
+            }
+            const headers = ['ID', 'User', 'Title', 'Category', 'Client & Place', 'Amount (INR)', 'Date', 'Notes', 'Has Bill'];
+            const rows = dataArray.map(e => [
+                e.id, `"${e.userName || ''}"`, `"${(e.title || '').replace(/"/g, '""')}"`, e.category,
+                `"${(e.clientNamePlace || '').replace(/"/g, '""')}"`, e.amount, e.date, `"${(e.notes || '').replace(/"/g, '""')}"`, e.billAttachment ? 'Yes' : 'No'
+            ]);
+            const csvContent = 'data:text/csv;charset=utf-8,' + [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
+            const link = document.createElement('a');
+            link.setAttribute('href', encodeURI(csvContent));
+            link.setAttribute('download', filename);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            showToast(`Exported ${dataArray.length} records!`, 'success');
+        }
+
+        function showConfirmModal(title, message, onConfirm) {
+            const root = document.getElementById('modal-root');
+            root.innerHTML = `
+                <div class="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-sm flex items-center justify-center p-4">
+                    <div class="bg-white dark:bg-slate-900 rounded-3xl p-6 max-w-sm w-full border border-slate-200 dark:border-slate-800 shadow-sm shadow-2xl space-y-4">
+                        <div class="w-12 h-12 rounded-2xl bg-rose-500/10 text-rose-600 flex items-center justify-center text-xl mx-auto"><i class="fa-solid fa-triangle-exclamation"></i></div>
+                        <div class="text-center"><h3 class="font-bold text-base text-slate-900 dark:text-white mb-1">${escapeHtml(title)}</h3><p class="text-xs text-slate-500 dark:text-slate-400">${escapeHtml(message)}</p></div>
+                        <div class="grid grid-cols-2 gap-3 pt-2">
+                            <button onclick="closeModal()" class="py-3 px-4 rounded-2xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-semibold">Cancel</button>
+                            <button id="modal-confirm-btn" class="py-3 px-4 rounded-2xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-semibold shadow-md">Confirm</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.getElementById('modal-confirm-btn').onclick = () => { closeModal(); onConfirm(); };
+        }
+
+        function closeModal() {
+            if (window.activeCameraStream) {
+                window.activeCameraStream.getTracks().forEach(track => track.stop());
+                window.activeCameraStream = null;
+            }
+            const root = document.getElementById('modal-root');
+            if (root) root.innerHTML = '';
+        }
+
+        function escapeHtml(str) {
+            if (!str) return '';
+            return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+        }
+    </script>
+</body>
+</html>
