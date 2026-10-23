@@ -154,7 +154,7 @@
 
                 const settingsSnap = await getDocs(collection(db, 'settings'));
                 if (settingsSnap.empty || !settingsSnap.docs.some(d => d.id === 'app_settings')) {
-                    await setDoc(doc(db, 'settings', 'app_settings'), { autoDeleteEnabled: false, currentVersion: '1.0.0' });
+                    await setDoc(doc(db, 'settings', 'app_settings'), { autoDeleteEnabled: false, currentVersion: '1.1.0' });
                 }
             } catch (err) {
                 console.error("Firestore initialization warning:", err);
@@ -168,7 +168,7 @@
 
     <script>
         const LOCAL_STORAGE_KEY = 'click_factory_current_user_v23';
-        const CURRENT_CLIENT_APP_VERSION = '1.0.0';
+        const CURRENT_CLIENT_APP_VERSION = '1.1.0';
 
         let state = {
             currentUser: null,
@@ -179,7 +179,7 @@
             recycleBin: [],
             userRecycleBin: [],
             passwordRequests: [],
-            appSettings: { autoDeleteEnabled: false, currentVersion: '1.0.0' },
+            appSettings: { autoDeleteEnabled: false, currentVersion: '1.1.0' },
             activeTab: 'home',
             filterCategory: 'All',
             filterMonth: 'All',
@@ -242,7 +242,7 @@
                 render();
             }, (err) => console.error("Users listener error:", err));
 
-            // Real-time Settings Listener & Version Update Check
+            // Real-time Settings Listener & Automated Version Check
             onSnapshot(collection(db, 'settings'), (snapshot) => {
                 snapshot.docs.forEach(docSnap => {
                     if (docSnap.id === 'app_settings') {
@@ -436,26 +436,6 @@
             } catch (err) {
                 console.error("Failed to update setting:", err);
                 showToast('Failed to update setting.', 'error');
-            }
-        }
-
-        async function handleBroadcastUpdate(e) {
-            e.preventDefault();
-            const newVersionInput = document.getElementById('broadcast-version-input');
-            const newVersion = newVersionInput ? newVersionInput.value.trim() : '';
-            if (!newVersion) {
-                showToast('Please enter a valid version number.', 'error');
-                return;
-            }
-
-            const { db, doc, setDoc } = window.FB;
-            try {
-                await setDoc(doc(db, 'settings', 'app_settings'), { ...state.appSettings, currentVersion: newVersion }, { merge: true });
-                localStorage.removeItem('click_factory_dismissed_version');
-                showToast(`App update v${newVersion} broadcasted successfully!`, 'success');
-            } catch (err) {
-                console.error("Broadcast update error:", err);
-                showToast('Failed to broadcast update.', 'error');
             }
         }
 
@@ -2275,19 +2255,12 @@
                             </button>
                         </div>
 
-                        <!-- App Update Section in Profile -->
-                        <div class="pt-3 border-t border-slate-100 dark:border-slate-800 space-y-2">
+                        <div class="pt-3 border-t border-slate-100 dark:border-slate-800 space-y-1">
                             <h4 class="font-semibold text-xs text-slate-900 dark:text-white flex items-center space-x-2">
-                                <i class="fa-solid fa-bullhorn text-indigo-500"></i>
-                                <span>App Update Broadcast</span>
+                                <i class="fa-solid fa-circle-info text-indigo-500"></i>
+                                <span>System Version</span>
                             </h4>
-                            <p class="text-[10px] text-slate-500 dark:text-slate-400">Current Client: v${CURRENT_CLIENT_APP_VERSION}</p>
-                            <form onsubmit="handleBroadcastUpdate(event)" class="space-y-2 pt-1">
-                                <input type="text" id="broadcast-version-input" required placeholder="e.g., 1.1.0" value="${escapeHtml(state.appSettings.currentVersion || '1.0.0')}" class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs text-slate-900 dark:text-white font-semibold">
-                                <button type="submit" class="w-full py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-xl transition text-xs">
-                                    Broadcast Update
-                                </button>
-                            </form>
+                            <p class="text-[10px] text-slate-500 dark:text-slate-400">Running v${CURRENT_CLIENT_APP_VERSION} (Auto-syncs with cloud)</p>
                         </div>
 
                         <div class="space-y-2.5 pt-1 border-t border-slate-100 dark:border-slate-800">
