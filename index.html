@@ -249,7 +249,6 @@
                         const data = docSnap.data();
                         state.appSettings = data;
                         if (data.currentVersion && data.currentVersion !== CURRENT_CLIENT_APP_VERSION) {
-                            // Trigger update notification modal if server version differs from client version
                             const dismissedVersion = localStorage.getItem('click_factory_dismissed_version');
                             if (dismissedVersion !== data.currentVersion) {
                                 state.showUpdateModalFlag = true;
@@ -432,7 +431,7 @@
             const newState = !state.appSettings.autoDeleteEnabled;
             const { db, doc, setDoc } = window.FB;
             try {
-                await setDoc(doc(db, 'settings', 'app_settings'), { ...state.appSettings, autoDeleteEnabled: newState });
+                await setDoc(doc(db, 'settings', 'app_settings'), { ...state.appSettings, autoDeleteEnabled: newState }, { merge: true });
                 showToast(newState ? '2-Month Auto-Delete Enabled' : '2-Month Auto-Delete Disabled', 'success');
             } catch (err) {
                 console.error("Failed to update setting:", err);
