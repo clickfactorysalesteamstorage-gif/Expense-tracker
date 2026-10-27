@@ -1215,9 +1215,8 @@
                         ` : ''}
 
                         ${filtered.map(exp => {
-                            const isAdminUser = state.currentUser.role === 'admin';
                             const isOffice = exp.category === 'Office';
-                            const canEdit = !isAdminUser && exp.userId === state.currentUser.id;
+                            const canEdit = exp.userId === state.currentUser.id;
                             return `
                                 <div class="bg-white dark:bg-slate-900 rounded-3xl py-5 sm:py-6 px-5 sm:px-6 border border-slate-200 dark:border-slate-800 shadow-sm transition relative group w-full mt-3">
                                     <div class="flex items-start space-x-3.5 w-full">
@@ -2317,7 +2316,7 @@
                             </div>
                             <div class="flex items-start space-x-2">
                                 <i class="fa-solid fa-circle-check text-emerald-500 mt-0.5"></i>
-                                <span><strong>Restricted Admin Permissions:</strong> Admins can view and bulk-clear user expenses, but cannot individually edit or delete single expense records.</span>
+                                <span><strong>User Permissions:</strong> Regular users can edit and delete their own expense entries seamlessly.</span>
                             </div>
                             <div class="flex items-start space-x-2">
                                 <i class="fa-solid fa-circle-check text-emerald-500 mt-0.5"></i>
