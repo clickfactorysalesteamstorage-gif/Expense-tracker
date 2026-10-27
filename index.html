@@ -193,8 +193,7 @@
             tempBillData: null,
             tempFormCache: null,
             authView: 'login',
-            lastClearedExpensesCache: null,
-            showUpdateModalFlag: false
+            lastClearedExpensesCache: null
         };
 
         // Restore active user session from local storage
@@ -220,7 +219,7 @@
             const diffY = Math.abs(touchEndX - touchStartY);
 
             if (touchStartX < 50 && diffX > 80 && diffY < 100) {
-                if (['recycle', 'requests', 'userRecycle', 'updateInfo'].includes(state.activeTab)) {
+                if (['recycle', 'requests', 'userRecycle'].includes(state.activeTab)) {
                     switchTab('profile');
                 }
             }
@@ -242,18 +241,11 @@
                 render();
             }, (err) => console.error("Users listener error:", err));
 
-            // Real-time Settings Listener & Automated Version Check
+            // Real-time Settings Listener
             onSnapshot(collection(db, 'settings'), (snapshot) => {
                 snapshot.docs.forEach(docSnap => {
                     if (docSnap.id === 'app_settings') {
-                        const data = docSnap.data();
-                        state.appSettings = data;
-                        if (data.currentVersion && data.currentVersion !== CURRENT_CLIENT_APP_VERSION) {
-                            const dismissedVersion = localStorage.getItem('click_factory_dismissed_version');
-                            if (dismissedVersion !== data.currentVersion) {
-                                state.showUpdateModalFlag = true;
-                            }
-                        }
+                        state.appSettings = docSnap.data();
                     }
                 });
                 render();
@@ -703,18 +695,6 @@
             );
         }
 
-        function dismissUpdateModal() {
-            state.showUpdateModalFlag = false;
-            if (state.appSettings.currentVersion) {
-                localStorage.setItem('click_factory_dismissed_version', state.appSettings.currentVersion);
-            }
-            render();
-        }
-
-        function executeAppUpdate() {
-            window.location.reload();
-        }
-
         function render() {
             const app = document.getElementById('app');
             if (!app) return;
@@ -732,12 +712,11 @@
 
             const isAdmin = state.currentUser.role === 'admin';
             const pendingRequestsCount = state.passwordRequests.filter(r => r.status === 'pending').length;
-            const isSubTab = ['recycle', 'requests', 'userRecycle', 'updateInfo'].includes(state.activeTab);
+            const isSubTab = ['recycle', 'requests', 'userRecycle'].includes(state.activeTab);
 
             let subTabTitle = 'Recycle Bin';
             if (state.activeTab === 'requests') subTabTitle = 'Password Requests';
             if (state.activeTab === 'userRecycle') subTabTitle = 'Deleted Users';
-            if (state.activeTab === 'updateInfo') subTabTitle = 'Update Info (v1.1.2)';
 
             app.innerHTML = `
                 <header class="sticky top-0 z-40 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 px-4 sm:px-6 pt-3 pb-3 flex items-center justify-between w-full shadow-sm">
@@ -812,22 +791,6 @@
                         ${isAdmin && (state.recycleBin.length > 0 || pendingRequestsCount > 0 || state.userRecycleBin.length > 0) ? `<span class="absolute top-1 right-3 w-2 h-2 rounded-full bg-rose-500"></span>` : ''}
                     </button>
                 </nav>
-
-                ${state.showUpdateModalFlag ? `
-                <div class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 animate-fadeIn">
-                    <div class="bg-white dark:bg-slate-900 rounded-3xl p-6 max-w-sm w-full border border-slate-200 dark:border-slate-800 shadow-2xl text-center space-y-4">
-                        <div class="w-14 h-14 bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 rounded-2xl flex items-center justify-center text-2xl mx-auto"><i class="fa-solid fa-rocket"></i></div>
-                        <div>
-                            <h3 class="font-bold text-lg text-slate-900 dark:text-white">New App Update Available!</h3>
-                            <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Version v${state.appSettings.currentVersion} is now ready. Check out the Update Info tab for latest improvements.</p>
-                        </div>
-                        <div class="grid grid-cols-2 gap-2 pt-2">
-                            <button onclick="dismissUpdateModal()" class="py-3 px-4 rounded-2xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-semibold">Later</button>
-                            <button onclick="executeAppUpdate()" class="py-3 px-4 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold shadow-md">Update Now</button>
-                        </div>
-                    </div>
-                </div>
-                ` : ''}
 
                 <div id="modal-root"></div>
             `;
@@ -1050,7 +1013,6 @@
                 case 'users': return state.currentUser.role === 'admin' ? renderUserManagementTab() : renderHomeTab();
                 case 'analytics': return renderUserAnalyticsTab();
                 case 'profile': return renderProfileTab();
-                case 'updateInfo': return renderUpdateInfoTab();
                 default: return renderHomeTab();
             }
         }
@@ -2265,10 +2227,6 @@
                         </div>
 
                         <div class="space-y-2.5 pt-1 border-t border-slate-100 dark:border-slate-800">
-                            <button onclick="switchTab('updateInfo')" class="w-full py-3 px-4 rounded-2xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-700 dark:text-slate-300 text-xs font-semibold transition flex items-center justify-between">
-                                <span class="flex items-center space-x-2"><i class="fa-solid fa-rocket text-indigo-500"></i><span>Update Info (v1.1.2)</span></span>
-                                <i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i>
-                            </button>
                             <button onclick="switchTab('recycle')" class="w-full py-3 px-4 rounded-2xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-700 dark:text-slate-300 text-xs font-semibold transition flex items-center justify-between">
                                 <span class="flex items-center space-x-2"><i class="fa-solid fa-trash-can text-amber-500"></i><span>Recycle Bin</span></span>
                                 ${state.recycleBin.length > 0 ? `<span class="px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-600 text-[10px] font-bold">${state.recycleBin.length}</span>` : '<i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i>'}
@@ -2292,37 +2250,6 @@
                     <div class="text-center py-2 w-full space-y-1">
                         <p class="text-[11px] font-medium text-slate-400 dark:text-slate-500">Click Factory Expense Tracker</p>
                         <p class="text-[11px] font-medium text-slate-400 dark:text-slate-500">Software Developer & Owner: <span class="font-bold text-indigo-600">SATISH KUMAR</span></p>
-                    </div>
-                </div>
-            `;
-        }
-
-        function renderUpdateInfoTab() {
-            return `
-                <div class="space-y-4 w-full max-w-full">
-                    <div class="bg-white dark:bg-slate-900 rounded-3xl p-6 border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
-                        <div class="flex items-center space-x-3">
-                            <div class="w-12 h-12 rounded-2xl bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 flex items-center justify-center text-xl shrink-0"><i class="fa-solid fa-rocket"></i></div>
-                            <div>
-                                <h3 class="font-bold text-base text-slate-900 dark:text-white">Version v1.1.2 Update Info</h3>
-                                <p class="text-xs text-slate-500">Released October 2026</p>
-                            </div>
-                        </div>
-
-                        <div class="space-y-3 pt-2 border-t border-slate-100 dark:border-slate-800 text-xs text-slate-600 dark:text-slate-300">
-                            <div class="flex items-start space-x-2">
-                                <i class="fa-solid fa-circle-check text-emerald-500 mt-0.5"></i>
-                                <span><strong>Fully Automated App Updates:</strong> Streamlined version syncing directly with cloud settings without manual admin broadcast inputs.</span>
-                            </div>
-                            <div class="flex items-start space-x-2">
-                                <i class="fa-solid fa-circle-check text-emerald-500 mt-0.5"></i>
-                                <span><strong>User Permissions:</strong> Regular users can edit and delete their own expense entries seamlessly.</span>
-                            </div>
-                            <div class="flex items-start space-x-2">
-                                <i class="fa-solid fa-circle-check text-emerald-500 mt-0.5"></i>
-                                <span><strong>Ownership Attribution:</strong> Officially updated developer branding and software ownership under <strong>SATISH KUMAR</strong>.</span>
-                            </div>
-                        </div>
                     </div>
                 </div>
             `;
