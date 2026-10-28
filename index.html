@@ -90,18 +90,18 @@
         }
         /* Transparent Frosted Glass Navbar Effect */
         .liquid-glass-pill {
-            background: rgba(255, 255, 255, 0.15);
-            backdrop-blur: 24px;
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(24px);
             -webkit-backdrop-filter: blur(24px);
-            border: 1px solid rgba(255, 255, 255, 0.25);
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2), inset 0 1px 1px rgba(255, 255, 255, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 12px 32px rgba(0, 0, 0, 0.25), inset 0 1px 1px rgba(255, 255, 255, 0.5);
         }
         .dark .liquid-glass-pill {
-            background: rgba(15, 23, 42, 0.35);
-            backdrop-blur: 24px;
+            background: rgba(15, 23, 42, 0.4);
+            backdrop-filter: blur(24px);
             -webkit-backdrop-filter: blur(24px);
-            border: 1px solid rgba(255, 255, 255, 0.12);
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45), inset 0 1px 1px rgba(255, 255, 255, 0.25);
         }
     </style>
 </head>
@@ -768,34 +768,34 @@
                 </button>
                 ` : ''}
 
-                <!-- Reduced Apple Liquid Glass Floating Capsule Navigation Bar with Smooth Sliding Transition -->
+                <!-- Transparent Frosted Glass Floating Capsule Navigation Bar with Smooth Sliding Transition -->
                 <nav class="fixed sm:absolute bottom-5 left-1/2 -translate-x-1/2 z-40 w-[88%] max-w-[360px] liquid-glass-pill rounded-full p-1.5 flex items-center justify-between shadow-2xl transition-all duration-300">
-                    <button onclick="switchTab('home')" class="relative flex flex-col items-center justify-center flex-1 py-2 transition rounded-full ${state.activeTab === 'home' ? 'text-white font-semibold' : 'text-slate-400 hover:text-slate-200'}">
+                    <button onclick="switchTab('home')" class="relative flex flex-col items-center justify-center flex-1 py-2 transition rounded-full ${state.activeTab === 'home' ? 'text-white font-semibold' : 'text-slate-400 dark:text-slate-400 hover:text-slate-200'}">
                         ${state.activeTab === 'home' ? '<div class="absolute inset-0 bg-indigo-600 rounded-full border border-white/25 shadow-md transition-all duration-300 ease-out"></div>' : ''}
                         <i class="fa-solid fa-house text-xs sm:text-sm mb-0.5 relative z-10"></i>
                         <span class="text-[9px] tracking-tight relative z-10">Expenses</span>
                     </button>
 
                     ${isAdmin ? `
-                    <button onclick="switchTab('admin')" class="relative flex flex-col items-center justify-center flex-1 py-2 transition rounded-full ${state.activeTab === 'admin' ? 'text-white font-semibold' : 'text-slate-400 hover:text-slate-200'}">
+                    <button onclick="switchTab('admin')" class="relative flex flex-col items-center justify-center flex-1 py-2 transition rounded-full ${state.activeTab === 'admin' ? 'text-white font-semibold' : 'text-slate-400 dark:text-slate-400 hover:text-slate-200'}">
                         ${state.activeTab === 'admin' ? '<div class="absolute inset-0 bg-indigo-600 rounded-full border border-white/25 shadow-md transition-all duration-300 ease-out"></div>' : ''}
                         <i class="fa-solid fa-chart-pie text-xs sm:text-sm mb-0.5 relative z-10"></i>
                         <span class="text-[9px] tracking-tight relative z-10">Summary</span>
                     </button>
-                    <button onclick="switchTab('users')" class="relative flex flex-col items-center justify-center flex-1 py-2 transition rounded-full ${state.activeTab === 'users' ? 'text-white font-semibold' : 'text-slate-400 hover:text-slate-200'}">
+                    <button onclick="switchTab('users')" class="relative flex flex-col items-center justify-center flex-1 py-2 transition rounded-full ${state.activeTab === 'users' ? 'text-white font-semibold' : 'text-slate-400 dark:text-slate-400 hover:text-slate-200'}">
                         ${state.activeTab === 'users' ? '<div class="absolute inset-0 bg-indigo-600 rounded-full border border-white/25 shadow-md transition-all duration-300 ease-out"></div>' : ''}
                         <i class="fa-solid fa-users text-xs sm:text-sm mb-0.5 relative z-10"></i>
                         <span class="text-[9px] tracking-tight relative z-10">Users</span>
                     </button>
                     ` : `
-                    <button onclick="switchTab('analytics')" class="relative flex flex-col items-center justify-center flex-1 py-2 transition rounded-full ${state.activeTab === 'analytics' ? 'text-white font-semibold' : 'text-slate-400 hover:text-slate-200'}">
+                    <button onclick="switchTab('analytics')" class="relative flex flex-col items-center justify-center flex-1 py-2 transition rounded-full ${state.activeTab === 'analytics' ? 'text-white font-semibold' : 'text-slate-400 dark:text-slate-400 hover:text-slate-200'}">
                         ${state.activeTab === 'analytics' ? '<div class="absolute inset-0 bg-indigo-600 rounded-full border border-white/25 shadow-md transition-all duration-300 ease-out"></div>' : ''}
                         <i class="fa-solid fa-chart-column text-xs sm:text-sm mb-0.5 relative z-10"></i>
                         <span class="text-[9px] tracking-tight relative z-10">Summary</span>
                     </button>
                     `}
 
-                    <button onclick="switchTab('profile')" class="relative flex flex-col items-center justify-center flex-1 py-2 transition rounded-full ${state.activeTab === 'profile' || isSubTab ? 'text-white font-semibold' : 'text-slate-400 hover:text-slate-200'}">
+                    <button onclick="switchTab('profile')" class="relative flex flex-col items-center justify-center flex-1 py-2 transition rounded-full ${state.activeTab === 'profile' || isSubTab ? 'text-white font-semibold' : 'text-slate-400 dark:text-slate-400 hover:text-slate-200'}">
                         ${state.activeTab === 'profile' || isSubTab ? '<div class="absolute inset-0 bg-indigo-600 rounded-full border border-white/25 shadow-md transition-all duration-300 ease-out"></div>' : ''}
                         <i class="fa-solid fa-user-circle text-xs sm:text-sm mb-0.5 relative z-10"></i>
                         <span class="text-[9px] tracking-tight relative z-10">Profile</span>
