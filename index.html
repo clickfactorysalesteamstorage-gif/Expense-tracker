@@ -1148,7 +1148,7 @@
                             <button onclick="setFilterCategory('Shoot')" class="px-4 py-2 rounded-2xl text-xs font-medium whitespace-nowrap transition shrink-0 ${state.filterCategory === 'Shoot' ? 'bg-indigo-600 text-white shadow-md' : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-800'}">Shoot Expense</button>
                         </div>
 
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 w-full">
+                        <div class="grid grid-cols-${isAdmin ? '2' : '1'} gap-2.5 w-full">
                             <div class="relative w-full">
                                 <select onchange="setFilterMonth(this.value)" class="w-full appearance-none bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl px-3.5 py-3 text-xs font-medium text-slate-700 dark:text-slate-300">
                                     <option value="All" ${state.filterMonth === 'All' && !state.filterStartDate && !state.filterEndDate ? 'selected' : ''}>All Months</option>
