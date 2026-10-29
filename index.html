@@ -1604,39 +1604,41 @@
                 let currentWallet = Number(currentUser.wallet || 0);
                 let currentExcess = Number(currentUser.excessSpent || 0);
 
-                if (!state.editingExpenseId) {
-                    if (currentWallet >= amount) {
-                        currentWallet -= amount;
-                    } else {
-                        const excess = amount - currentWallet;
-                        currentWallet = 0;
-                        currentExcess += excess;
-                    }
-                } else {
-                    const oldExp = state.expenses.find(e => e.id === expenseId);
-                    const oldAmount = oldExp ? Number(oldExp.amount) : 0;
-                    const diff = amount - oldAmount;
-                    if (diff > 0) {
-                        if (currentWallet >= diff) {
-                            currentWallet -= diff;
+                if (currentUser.role !== 'admin') {
+                    if (!state.editingExpenseId) {
+                        if (currentWallet >= amount) {
+                            currentWallet -= amount;
                         } else {
-                            const excess = diff - currentWallet;
+                            const excess = amount - currentWallet;
                             currentWallet = 0;
                             currentExcess += excess;
                         }
-                    } else if (diff < 0) {
-                        currentWallet += Math.abs(diff);
+                    } else {
+                        const oldExp = state.expenses.find(e => e.id === expenseId);
+                        const oldAmount = oldExp ? Number(oldExp.amount) : 0;
+                        const diff = amount - oldAmount;
+                        if (diff > 0) {
+                            if (currentWallet >= diff) {
+                                currentWallet -= diff;
+                            } else {
+                                const excess = diff - currentWallet;
+                                currentWallet = 0;
+                                currentExcess += excess;
+                            }
+                        } else if (diff < 0) {
+                            currentWallet += Math.abs(diff);
+                        }
                     }
+
+                    await updateDoc(doc(db, 'users', currentUser.id), {
+                        wallet: currentWallet,
+                        excessSpent: currentExcess
+                    });
+
+                    state.currentUser.wallet = currentWallet;
+                    state.currentUser.excessSpent = currentExcess;
+                    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(state.currentUser));
                 }
-
-                await updateDoc(doc(db, 'users', currentUser.id), {
-                    wallet: currentWallet,
-                    excessSpent: currentExcess
-                });
-
-                state.currentUser.wallet = currentWallet;
-                state.currentUser.excessSpent = currentExcess;
-                localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(state.currentUser));
 
                 const expenseData = {
                     id: expenseId,
@@ -1657,7 +1659,7 @@
                 state.editingExpenseId = null;
                 state.tempBillData = null;
                 state.tempFormCache = null;
-                showToast('Expense saved & wallet updated!', 'success');
+                showToast('Expense saved successfully!', 'success');
                 switchTab('home');
             } catch (error) {
                 console.error("Failed:", error);
@@ -1966,6 +1968,7 @@
                         ${state.users.map(u => {
                             const expCount = state.expenses.filter(e => e.userId === u.id).length;
                             const isCurrent = u.id === state.currentUser.id;
+                            const isUserAdmin = u.role === 'admin';
                             const uWallet = Number(u.wallet || 0);
                             const uExcess = Number(u.excessSpent || 0);
                             const userTotalSpent = state.expenses.filter(e => e.userId === u.id).reduce((s, e) => s + e.amount, 0);
@@ -1974,7 +1977,7 @@
                                 <div class="bg-white dark:bg-slate-900 rounded-3xl p-5 border border-slate-200 dark:border-slate-800 shadow-sm space-y-4 w-full mt-3">
                                     <div class="flex items-center justify-between gap-2">
                                         <div class="flex items-center space-x-3.5 min-w-0 flex-1">
-                                            <div class="w-10 h-10 rounded-2xl ${u.role === 'admin' ? 'bg-indigo-500/10 text-indigo-600 dark:text-indigo-400' : 'bg-slate-100 dark:bg-slate-800 text-slate-600'} flex items-center justify-center font-bold text-sm shrink-0">${u.name.charAt(0)}</div>
+                                            <div class="w-10 h-10 rounded-2xl ${isUserAdmin ? 'bg-indigo-500/10 text-indigo-600 dark:text-indigo-400' : 'bg-slate-100 dark:bg-slate-800 text-slate-600'} flex items-center justify-center font-bold text-sm shrink-0">${u.name.charAt(0)}</div>
                                             <div class="min-w-0 flex-1">
                                                 <div class="flex items-center space-x-2 truncate">
                                                     <h4 class="font-semibold text-sm text-slate-900 dark:text-white truncate">${escapeHtml(u.name)}</h4>${isCurrent ? '<span class="text-[10px] bg-emerald-500/10 text-emerald-600 font-semibold px-2 py-0.5 rounded-full shrink-0">Active</span>' : ''}
@@ -1983,14 +1986,17 @@
                                             </div>
                                         </div>
                                         <div class="flex items-center space-x-1.5 shrink-0">
+                                            ${!isUserAdmin ? `
                                             <button onclick="openAddWalletModal('${u.id}', '${escapeHtml(u.name)}')" class="px-3.5 py-2 rounded-2xl bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-xs font-bold border border-emerald-500/20 transition flex items-center space-x-1.5" title="Wallet">
                                                 <i class="fa-solid fa-wallet text-sm"></i>
                                                 <span>Wallet</span>
                                             </button>
+                                            ` : ''}
                                             <button onclick="openEditUserModal('${u.id}')" class="w-9 h-9 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-500 hover:bg-indigo-50 hover:text-indigo-600 transition flex items-center justify-center text-xs" title="Edit User"><i class="fa-solid fa-pen"></i></button>
                                         </div>
                                     </div>
 
+                                    ${!isUserAdmin ? `
                                     <div class="grid grid-cols-2 gap-3 pt-3 border-t border-slate-100 dark:border-slate-800 text-xs">
                                         <div class="bg-slate-50 dark:bg-slate-800/40 p-3 rounded-2xl">
                                             <span class="text-slate-400 block text-[10px] uppercase font-semibold mb-0.5">Wallet Balance</span>
@@ -2001,12 +2007,15 @@
                                             <span class="font-bold text-sm text-rose-600 dark:text-rose-400">${formatCurrency(uExcess)}</span>
                                         </div>
                                     </div>
+                                    ` : ''}
 
-                                    <div class="grid grid-cols-3 gap-2 pt-1 w-full">
+                                    <div class="grid grid-cols-${!isUserAdmin ? '3' : '2'} gap-2 pt-1 w-full">
+                                        ${!isUserAdmin ? `
                                         <button onclick="confirmResetUserWallet('${u.id}', '${escapeHtml(u.name)}')" class="py-2.5 px-2 rounded-2xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-600 dark:text-amber-400 text-[11px] font-bold border border-amber-500/20 transition flex items-center justify-center space-x-1 truncate" title="Reset Wallet">
                                             <i class="fa-solid fa-rotate-right shrink-0"></i>
                                             <span class="truncate">Reset Wallet</span>
                                         </button>
+                                        ` : ''}
                                         
                                         <button onclick="confirmClearUserExpenses('${u.id}', '${escapeHtml(u.name)}')" class="py-2.5 px-2 rounded-2xl bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-600 dark:text-indigo-400 text-[11px] font-bold border border-indigo-500/20 transition flex items-center justify-center space-x-1 truncate" title="Clear Expenses">
                                             <i class="fa-solid fa-receipt shrink-0"></i>
