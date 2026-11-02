@@ -95,25 +95,50 @@
         .custom-date-wrapper input[type="date"]:valid + .custom-date-placeholder {
             display: none;
         }
-        .liquid-glass-pill {
-            background: rgba(255, 255, 255, 0.22);
-            backdrop-filter: blur(28px);
-            -webkit-backdrop-filter: blur(28px);
-            border: 2px solid rgba(255, 255, 255, 0.6);
-            box-shadow: 0 16px 36px rgba(0, 0, 0, 0.25), inset 0 1px 1px rgba(255, 255, 255, 0.8);
+
+        /* Liquid Glass Navbar Styling */
+        .liquid-nav {
+            background: rgba(255, 255, 255, 0.45);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.7);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08), 
+                        inset 0 1px 2px rgba(255, 255, 255, 0.9),
+                        inset 0 -1px 2px rgba(0, 0, 0, 0.05);
         }
-        .dark .liquid-glass-pill {
-            background: rgba(15, 23, 42, 0.45);
-            backdrop-filter: blur(28px);
-            -webkit-backdrop-filter: blur(28px);
-            border: 2px solid rgba(255, 255, 255, 0.4);
-            box-shadow: 0 16px 36px rgba(0, 0, 0, 0.45), inset 0 1px 1px rgba(255, 255, 255, 0.4);
+        .dark .liquid-nav {
+            background: rgba(15, 23, 42, 0.65);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4), 
+                        inset 0 1px 2px rgba(255, 255, 255, 0.2),
+                        inset 0 -1px 2px rgba(0, 0, 0, 0.2);
         }
-        .liquid-glass-pill button {
-            transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+
+        /* Liquid Sliding Pill Indicator */
+        .liquid-pill {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(238, 242, 255, 0.7) 100%);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.9);
+            box-shadow: 0 8px 20px rgba(59, 130, 246, 0.15),
+                        inset 0 1px 2px rgba(255, 255, 255, 1),
+                        inset 0 -2px 4px rgba(59, 130, 246, 0.05);
+            transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
-        .liquid-glass-pill button:active {
-            transform: scale(0.88);
+        .dark .liquid-pill {
+            background: linear-gradient(135deg, rgba(79, 70, 229, 0.9) 0%, rgba(99, 102, 241, 0.8) 100%);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3),
+                        inset 0 1px 2px rgba(255, 255, 255, 0.4);
+        }
+
+        .nav-item {
+            transition: transform 0.2s ease;
+        }
+        .nav-item:active {
+            transform: scale(0.92);
         }
     </style>
 </head>
@@ -731,6 +756,18 @@
             if (state.activeTab === 'requests') subTabTitle = 'Password Requests';
             if (state.activeTab === 'userRecycle') subTabTitle = 'Deleted Users';
 
+            // Active nav index identification for Liquid Pill
+            let activeNavIndex = 0;
+            if (state.activeTab === 'home') activeNavIndex = 0;
+            else if (isAdmin && (state.activeTab === 'admin' || state.activeTab === 'analytics')) activeNavIndex = 1;
+            else if (isAdmin && state.activeTab === 'users') activeNavIndex = 2;
+            else if (!isAdmin && state.activeTab === 'analytics') activeNavIndex = 1;
+            else if (state.activeTab === 'profile' || isSubTab) activeNavIndex = isAdmin ? 3 : 2;
+
+            const totalNavItems = isAdmin ? 4 : 3;
+            const pillWidthPercentage = 100 / totalNavItems;
+            const pillLeftOffset = activeNavIndex * pillWidthPercentage;
+
             app.innerHTML = `
                 <header class="sticky top-0 z-40 bg-white/40 dark:bg-slate-900/40 backdrop-blur-xl border-b-2 border-white/40 dark:border-slate-600/60 px-4 sm:px-6 pt-3 pb-3 flex items-center justify-between w-full shadow-[0_8px_32px_0_rgba(0,0,0,0.1)] transition-colors duration-300">
                     <div class="flex items-center space-x-3 min-w-0 flex-1 pr-2">
@@ -776,39 +813,49 @@
                 </button>
                 ` : ''}
 
-                <nav class="fixed sm:absolute bottom-5 left-1/2 -translate-x-1/2 z-40 w-[88%] max-w-[360px] liquid-glass-pill rounded-full p-1.5 flex items-center justify-between shadow-2xl transition-all duration-300">
-                    <button onclick="switchTab('home')" class="relative flex flex-col items-center justify-center flex-1 py-2 transition rounded-full ${state.activeTab === 'home' ? 'text-white font-semibold' : 'text-slate-400 dark:text-slate-400 hover:text-slate-200'}">
-                        ${state.activeTab === 'home' ? '<div class="absolute inset-0 bg-indigo-600 rounded-full border border-white/25 shadow-md transition-all duration-300 ease-out"></div>' : ''}
-                        <i class="fa-solid fa-house text-xs sm:text-sm mb-0.5 relative z-10"></i>
-                        <span class="text-[9px] tracking-tight relative z-10">Expenses</span>
-                    </button>
+                <!-- Floating Liquid Glass Navigation Bar -->
+                <div class="fixed sm:absolute bottom-6 left-0 right-0 z-45 flex justify-center px-4 pointer-events-none">
+                    <nav class="liquid-nav relative rounded-full p-2 flex items-center justify-between max-w-md w-full select-none pointer-events-auto" id="bottom-nav">
+                        
+                        <!-- Sliding Liquid Pill Indicator Background -->
+                        <div id="sliding-pill" class="absolute top-1.5 bottom-1.5 rounded-full liquid-pill z-0 pointer-events-none" style="width: ${pillWidthPercentage}%; left: ${pillLeftOffset}%;"></div>
 
-                    ${isAdmin ? `
-                    <button onclick="switchTab('admin')" class="relative flex flex-col items-center justify-center flex-1 py-2 transition rounded-full ${state.activeTab === 'admin' ? 'text-white font-semibold' : 'text-slate-400 dark:text-slate-400 hover:text-slate-200'}">
-                        ${state.activeTab === 'admin' ? '<div class="absolute inset-0 bg-indigo-600 rounded-full border border-white/25 shadow-md transition-all duration-300 ease-out"></div>' : ''}
-                        <i class="fa-solid fa-chart-pie text-xs sm:text-sm mb-0.5 relative z-10"></i>
-                        <span class="text-[9px] tracking-tight relative z-10">Summary</span>
-                    </button>
-                    <button onclick="switchTab('users')" class="relative flex flex-col items-center justify-center flex-1 py-2 transition rounded-full ${state.activeTab === 'users' ? 'text-white font-semibold' : 'text-slate-400 dark:text-slate-400 hover:text-slate-200'}">
-                        ${state.activeTab === 'users' ? '<div class="absolute inset-0 bg-indigo-600 rounded-full border border-white/25 shadow-md transition-all duration-300 ease-out"></div>' : ''}
-                        <i class="fa-solid fa-users text-xs sm:text-sm mb-0.5 relative z-10"></i>
-                        <span class="text-[9px] tracking-tight relative z-10">Users</span>
-                    </button>
-                    ` : `
-                    <button onclick="switchTab('analytics')" class="relative flex flex-col items-center justify-center flex-1 py-2 transition rounded-full ${state.activeTab === 'analytics' ? 'text-white font-semibold' : 'text-slate-400 dark:text-slate-400 hover:text-slate-200'}">
-                        ${state.activeTab === 'analytics' ? '<div class="absolute inset-0 bg-indigo-600 rounded-full border border-white/25 shadow-md transition-all duration-300 ease-out"></div>' : ''}
-                        <i class="fa-solid fa-chart-column text-xs sm:text-sm mb-0.5 relative z-10"></i>
-                        <span class="text-[9px] tracking-tight relative z-10">Summary</span>
-                    </button>
-                    `}
+                        <!-- Tab 1: Home / Expenses -->
+                        <button onclick="switchTab('home')" class="nav-item relative z-10 flex-1 flex flex-col items-center justify-center py-1.5 group cursor-pointer" data-index="0">
+                            <i class="fa-solid fa-house text-base ${state.activeTab === 'home' ? 'text-blue-600 dark:text-indigo-400 font-bold' : 'text-gray-500 group-hover:text-gray-700'} transition-colors duration-300"></i>
+                            <span class="text-[11px] ${state.activeTab === 'home' ? 'text-blue-600 dark:text-indigo-400 font-semibold' : 'text-gray-500 group-hover:text-gray-700 font-medium'} mt-0.5 transition-colors duration-300">Expenses</span>
+                        </button>
 
-                    <button onclick="switchTab('profile')" class="relative flex flex-col items-center justify-center flex-1 py-2 transition rounded-full ${state.activeTab === 'profile' || isSubTab ? 'text-white font-semibold' : 'text-slate-400 dark:text-slate-400 hover:text-slate-200'}">
-                        ${state.activeTab === 'profile' || isSubTab ? '<div class="absolute inset-0 bg-indigo-600 rounded-full border border-white/25 shadow-md transition-all duration-300 ease-out"></div>' : ''}
-                        <i class="fa-solid fa-user-circle text-xs sm:text-sm mb-0.5 relative z-10"></i>
-                        <span class="text-[9px] tracking-tight relative z-10">Profile</span>
-                        ${isAdmin && (state.recycleBin.length > 0 || pendingRequestsCount > 0 || state.userRecycleBin.length > 0) ? `<span class="absolute top-1 right-3.5 w-2 h-2 rounded-full bg-rose-500 z-20"></span>` : ''}
-                    </button>
-                </nav>
+                        ${isAdmin ? `
+                        <!-- Admin Tab 2: Summary -->
+                        <button onclick="switchTab('admin')" class="nav-item relative z-10 flex-1 flex flex-col items-center justify-center py-1.5 group cursor-pointer" data-index="1">
+                            <i class="fa-solid fa-chart-pie text-base ${state.activeTab === 'admin' ? 'text-blue-600 dark:text-indigo-400 font-bold' : 'text-gray-500 group-hover:text-gray-700'} transition-colors duration-300"></i>
+                            <span class="text-[11px] ${state.activeTab === 'admin' ? 'text-blue-600 dark:text-indigo-400 font-semibold' : 'text-gray-500 group-hover:text-gray-700 font-medium'} mt-0.5 transition-colors duration-300">Summary</span>
+                        </button>
+                        <!-- Admin Tab 3: Users -->
+                        <button onclick="switchTab('users')" class="nav-item relative z-10 flex-1 flex flex-col items-center justify-center py-1.5 group cursor-pointer" data-index="2">
+                            <i class="fa-solid fa-users text-base ${state.activeTab === 'users' ? 'text-blue-600 dark:text-indigo-400 font-bold' : 'text-gray-500 group-hover:text-gray-700'} transition-colors duration-300"></i>
+                            <span class="text-[11px] ${state.activeTab === 'users' ? 'text-blue-600 dark:text-indigo-400 font-semibold' : 'text-gray-500 group-hover:text-gray-700 font-medium'} mt-0.5 transition-colors duration-300">Users</span>
+                        </button>
+                        ` : `
+                        <!-- User Tab 2: Summary -->
+                        <button onclick="switchTab('analytics')" class="nav-item relative z-10 flex-1 flex flex-col items-center justify-center py-1.5 group cursor-pointer" data-index="1">
+                            <i class="fa-solid fa-chart-column text-base ${state.activeTab === 'analytics' ? 'text-blue-600 dark:text-indigo-400 font-bold' : 'text-gray-500 group-hover:text-gray-700'} transition-colors duration-300"></i>
+                            <span class="text-[11px] ${state.activeTab === 'analytics' ? 'text-blue-600 dark:text-indigo-400 font-semibold' : 'text-gray-500 group-hover:text-gray-700 font-medium'} mt-0.5 transition-colors duration-300">Summary</span>
+                        </button>
+                        `}
+
+                        <!-- Profile Tab -->
+                        <button onclick="switchTab('profile')" class="nav-item relative z-10 flex-1 flex flex-col items-center justify-center py-1.5 group cursor-pointer" data-index="${isAdmin ? '3' : '2'}">
+                            <div class="relative">
+                                <i class="fa-solid fa-user-circle text-base ${state.activeTab === 'profile' || isSubTab ? 'text-blue-600 dark:text-indigo-400 font-bold' : 'text-gray-500 group-hover:text-gray-700'} transition-colors duration-300"></i>
+                                ${isAdmin && (state.recycleBin.length > 0 || pendingRequestsCount > 0 || state.userRecycleBin.length > 0) ? `<span class="absolute -top-1 -right-1.5 w-2 h-2 rounded-full bg-rose-500 z-20"></span>` : ''}
+                            </div>
+                            <span class="text-[11px] ${state.activeTab === 'profile' || isSubTab ? 'text-blue-600 dark:text-indigo-400 font-semibold' : 'text-gray-500 group-hover:text-gray-700 font-medium'} mt-0.5 transition-colors duration-300">Profile</span>
+                        </button>
+
+                    </nav>
+                </div>
 
                 <div id="modal-root"></div>
             `;
