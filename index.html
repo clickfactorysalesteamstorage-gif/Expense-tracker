@@ -295,8 +295,8 @@
         </div>
     </div>
 
-    <!-- Persistent Floating Liquid Glass Navigation Bar -->
-    <div id="persistent-nav-wrapper" class="liquid-nav-container hidden">
+    <!-- Persistent Floating Liquid Glass Navigation Bar (Hidden by default during boot) -->
+    <div id="persistent-nav-wrapper" class="liquid-nav-container hidden" style="display: none;">
         <nav id="liquid-nav" class="liquid-dock">
             <div id="liquid-bubble" class="liquid-bubble"></div>
 
@@ -909,11 +909,18 @@
         /* Continuous Fluid Slider Positioning Engine */
         function syncPersistentNavbar() {
             const navWrapper = document.getElementById('persistent-nav-wrapper');
+            if (!navWrapper) return;
+
+            // Strictly suppress during unauthenticated or loading states
             if (!state.currentUser) {
-                if (navWrapper) navWrapper.classList.add('hidden');
+                navWrapper.classList.add('hidden');
+                navWrapper.style.display = 'none';
                 return;
             }
-            if (navWrapper) navWrapper.classList.remove('hidden');
+
+            // Reveal only with an active session
+            navWrapper.classList.remove('hidden');
+            navWrapper.style.display = 'flex';
 
             const isAdmin = state.currentUser.role === 'admin';
             const pendingRequestsCount = state.passwordRequests.filter(r => r.status === 'pending').length;
@@ -991,7 +998,11 @@
             }
 
             if (!state.currentUser) {
-                document.getElementById('persistent-nav-wrapper').classList.add('hidden');
+                const navWrapper = document.getElementById('persistent-nav-wrapper');
+                if (navWrapper) {
+                    navWrapper.classList.add('hidden');
+                    navWrapper.style.display = 'none';
+                }
                 app.innerHTML = state.authView === 'forgot' ? renderForgotPasswordPage() : renderLoginPage();
                 return;
             }
