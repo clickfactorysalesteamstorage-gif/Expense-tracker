@@ -96,49 +96,182 @@
             display: none;
         }
 
-        /* Liquid Glass Navbar Styling */
-        .liquid-nav {
-            background: rgba(255, 255, 255, 0.45);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.7);
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08), 
-                        inset 0 1px 2px rgba(255, 255, 255, 0.9),
-                        inset 0 -1px 2px rgba(0, 0, 0, 0.05);
-        }
-        .dark .liquid-nav {
-            background: rgba(15, 23, 42, 0.65);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4), 
-                        inset 0 1px 2px rgba(255, 255, 255, 0.2),
-                        inset 0 -1px 2px rgba(0, 0, 0, 0.2);
+        /* ========================================================
+           PERSISTENT LIQUID GLASS NAVBAR STYLES
+           ======================================================== */
+        .liquid-nav-container {
+            position: fixed;
+            bottom: max(env(safe-area-inset-bottom, 14px), 18px);
+            left: 0;
+            right: 0;
+            display: flex;
+            justify-content: center;
+            padding: 0 16px;
+            z-index: 50;
+            pointer-events: none;
         }
 
-        /* Liquid Sliding Pill Indicator */
-        .liquid-pill {
-            background: linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(238, 242, 255, 0.7) 100%);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.9);
-            box-shadow: 0 8px 20px rgba(59, 130, 246, 0.15),
-                        inset 0 1px 2px rgba(255, 255, 255, 1),
-                        inset 0 -2px 4px rgba(59, 130, 246, 0.05);
-            transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-        }
-        .dark .liquid-pill {
-            background: linear-gradient(135deg, rgba(79, 70, 229, 0.9) 0%, rgba(99, 102, 241, 0.8) 100%);
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3),
-                        inset 0 1px 2px rgba(255, 255, 255, 0.4);
+        .liquid-dock {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: space-around;
+            width: 100%;
+            max-width: 440px;
+            height: 68px;
+            padding: 6px 8px;
+            border-radius: 9999px;
+            pointer-events: auto;
+            user-select: none;
+            -webkit-user-select: none;
+
+            background: rgba(255, 255, 255, 0.72);
+            backdrop-filter: blur(28px) saturate(180%);
+            -webkit-backdrop-filter: blur(28px) saturate(180%);
+            border: 1px solid rgba(255, 255, 255, 0.85);
+            box-shadow: 
+                0 20px 40px -10px rgba(0, 0, 0, 0.12),
+                0 6px 16px -4px rgba(0, 0, 0, 0.06),
+                inset 0 1.5px 2px rgba(255, 255, 255, 1),
+                inset 0 -1.5px 2px rgba(0, 0, 0, 0.04);
+            transition: background 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
         }
 
-        .nav-item {
-            transition: transform 0.2s ease;
+        .dark .liquid-dock {
+            background: rgba(15, 23, 42, 0.75);
+            backdrop-filter: blur(28px) saturate(180%);
+            -webkit-backdrop-filter: blur(28px) saturate(180%);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            box-shadow: 
+                0 24px 44px -8px rgba(0, 0, 0, 0.55),
+                0 8px 18px -4px rgba(0, 0, 0, 0.35),
+                inset 0 1.5px 2px rgba(255, 255, 255, 0.18),
+                inset 0 -1px 2px rgba(0, 0, 0, 0.45);
         }
-        .nav-item:active {
+
+        /* Continuous Bidirectional Sliding Liquid Pill */
+        .liquid-bubble {
+            position: absolute;
+            top: 5px;
+            bottom: 5px;
+            left: 0;
+            border-radius: 9999px;
+            z-index: 1;
+            pointer-events: none;
+            will-change: transform, width;
+            transform: translateX(0);
+
+            background: linear-gradient(135deg, rgba(230, 237, 255, 0.8) 0%, rgba(215, 226, 255, 0.6) 100%);
+            border: 1px solid rgba(255, 255, 255, 0.95);
+            box-shadow: 
+                0 6px 16px -2px rgba(26, 98, 255, 0.14),
+                inset 0 1px 2px rgba(255, 255, 255, 0.95),
+                inset 0 -2px 4px rgba(26, 98, 255, 0.08);
+            transition: 
+                transform 0.4s cubic-bezier(0.25, 1, 0.35, 1),
+                width 0.35s cubic-bezier(0.25, 1, 0.35, 1);
+        }
+
+        .dark .liquid-bubble {
+            background: linear-gradient(135deg, rgba(79, 70, 229, 0.4) 0%, rgba(99, 102, 241, 0.25) 100%);
+            border: 1px solid rgba(129, 140, 248, 0.45);
+            box-shadow: 
+                0 6px 16px -2px rgba(0, 0, 0, 0.35),
+                inset 0 1px 2px rgba(255, 255, 255, 0.25),
+                inset 0 -1px 3px rgba(79, 70, 229, 0.2);
+        }
+
+        .liquid-nav-btn {
+            position: relative;
+            z-index: 2;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            flex: 1;
+            height: 100%;
+            padding: 2px 0;
+            background: transparent;
+            border: none;
+            outline: none;
+            cursor: pointer;
+            transition: transform 0.15s ease;
+        }
+
+        .liquid-nav-btn:active {
             transform: scale(0.92);
+        }
+
+        .liquid-icon-wrap {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 26px;
+            font-size: 20px;
+            color: #475569;
+            transition: color 0.3s ease, transform 0.3s cubic-bezier(0.34, 1.5, 0.64, 1);
+        }
+
+        .dark .liquid-icon-wrap {
+            color: #94a3b8;
+        }
+
+        .liquid-label {
+            font-size: 11px;
+            font-weight: 500;
+            letter-spacing: -0.01em;
+            margin-top: 3px;
+            color: #64748b;
+            transition: color 0.3s ease, font-weight 0.2s ease;
+        }
+
+        .dark .liquid-label {
+            color: #94a3b8;
+        }
+
+        /* Active State */
+        .liquid-nav-btn.is-active .liquid-icon-wrap {
+            color: #1a62ff !important;
+            transform: translateY(-1.5px) scale(1.08);
+        }
+
+        .dark .liquid-nav-btn.is-active .liquid-icon-wrap {
+            color: #818cf8 !important;
+        }
+
+        .liquid-nav-btn.is-active .liquid-label {
+            color: #1a62ff !important;
+            font-weight: 700;
+        }
+
+        .dark .liquid-nav-btn.is-active .liquid-label {
+            color: #a5b4fc !important;
+        }
+
+        .liquid-badge {
+            position: absolute;
+            top: -2px;
+            right: -8px;
+            min-width: 17px;
+            height: 17px;
+            padding: 0 4px;
+            border-radius: 9999px;
+            background-color: #ef4444;
+            color: #ffffff;
+            font-size: 10px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid #ffffff;
+            box-shadow: 0 2px 5px rgba(239, 68, 68, 0.4);
+            line-height: 1;
+            z-index: 3;
+        }
+
+        .dark .liquid-badge {
+            border-color: #0f172a;
         }
     </style>
 </head>
@@ -160,6 +293,46 @@
             <h2 class="font-bold text-base text-slate-800 dark:text-white tracking-tight">Click Factory</h2>
             <p class="text-xs font-medium text-slate-500 dark:text-slate-400 mt-1">Loading Expense Tracker...</p>
         </div>
+    </div>
+
+    <!-- Persistent Floating Liquid Glass Navigation Bar -->
+    <div id="persistent-nav-wrapper" class="liquid-nav-container hidden">
+        <nav id="liquid-nav" class="liquid-dock">
+            <div id="liquid-bubble" class="liquid-bubble"></div>
+
+            <!-- Home Tab -->
+            <button id="nav-btn-home" onclick="switchTab('home')" class="liquid-nav-btn is-active">
+                <div class="liquid-icon-wrap">
+                    <i class="fa-solid fa-house"></i>
+                </div>
+                <span class="liquid-label">Home</span>
+            </button>
+
+            <!-- Summary Tab -->
+            <button id="nav-btn-summary" onclick="switchTab('summary')" class="liquid-nav-btn">
+                <div class="liquid-icon-wrap">
+                    <i class="fa-solid fa-chart-pie"></i>
+                </div>
+                <span class="liquid-label">Summary</span>
+            </button>
+
+            <!-- Users Tab (Admin) or Wallet Tab (User) -->
+            <button id="nav-btn-users" onclick="switchTab('users')" class="liquid-nav-btn">
+                <div class="liquid-icon-wrap">
+                    <i id="nav-users-icon" class="fa-solid fa-users"></i>
+                </div>
+                <span id="nav-users-label" class="liquid-label">Users</span>
+            </button>
+
+            <!-- Account Tab -->
+            <button id="nav-btn-profile" onclick="switchTab('profile')" class="liquid-nav-btn">
+                <div class="liquid-icon-wrap">
+                    <i class="fa-solid fa-circle-user"></i>
+                    <span id="nav-badge" class="liquid-badge hidden">0</span>
+                </div>
+                <span class="liquid-label">Account</span>
+            </button>
+        </nav>
     </div>
 
     <div id="toast-container" class="fixed top-12 left-1/2 transform -translate-x-1/2 z-50 flex flex-col gap-2 pointer-events-none w-11/12 max-w-sm"></div>
@@ -636,7 +809,7 @@
 
             const { db, doc, updateDoc, setDoc } = window.FB;
             await updateDoc(doc(db, 'users', userId), { 
-                wallet: currentWallet,
+                wallet: currentWallet, 
                 excessSpent: currentExcess 
             });
 
@@ -733,6 +906,80 @@
             );
         }
 
+        /* Continuous Fluid Slider Positioning Engine */
+        function syncPersistentNavbar() {
+            const navWrapper = document.getElementById('persistent-nav-wrapper');
+            if (!state.currentUser) {
+                if (navWrapper) navWrapper.classList.add('hidden');
+                return;
+            }
+            if (navWrapper) navWrapper.classList.remove('hidden');
+
+            const isAdmin = state.currentUser.role === 'admin';
+            const pendingRequestsCount = state.passwordRequests.filter(r => r.status === 'pending').length;
+            const totalBadges = state.recycleBin.length + pendingRequestsCount + state.userRecycleBin.length;
+
+            // Configure Users vs Wallet Tab item
+            const usersBtn = document.getElementById('nav-btn-users');
+            const usersIcon = document.getElementById('nav-users-icon');
+            const usersLabel = document.getElementById('nav-users-label');
+            if (isAdmin) {
+                usersBtn.onclick = () => switchTab('users');
+                usersIcon.className = 'fa-solid fa-users';
+                usersLabel.textContent = 'Users';
+            } else {
+                usersBtn.onclick = () => openUserWalletModal();
+                usersIcon.className = 'fa-solid fa-wallet';
+                usersLabel.textContent = 'Wallet';
+            }
+
+            // Configure Badges
+            const badgeEl = document.getElementById('nav-badge');
+            if (isAdmin && totalBadges > 0) {
+                badgeEl.textContent = totalBadges;
+                badgeEl.classList.remove('hidden');
+            } else {
+                badgeEl.classList.add('hidden');
+            }
+
+            // Determine active button target
+            let activeTargetId = 'nav-btn-home';
+            if (state.activeTab === 'home') activeTargetId = 'nav-btn-home';
+            else if (state.activeTab === 'admin' || state.activeTab === 'analytics') activeTargetId = 'nav-btn-summary';
+            else if (state.activeTab === 'users' && isAdmin) activeTargetId = 'nav-btn-users';
+            else if (state.activeTab === 'profile' || ['recycle', 'requests', 'userRecycle'].includes(state.activeTab)) activeTargetId = 'nav-btn-profile';
+
+            const nav = document.getElementById('liquid-nav');
+            const bubble = document.getElementById('liquid-bubble');
+            if (!nav || !bubble) return;
+
+            nav.querySelectorAll('.liquid-nav-btn').forEach(btn => {
+                if (btn.id === activeTargetId) {
+                    btn.classList.add('is-active');
+                    const leftOffset = btn.offsetLeft;
+                    const width = btn.offsetWidth;
+                    bubble.style.width = `${width}px`;
+                    bubble.style.transform = `translateX(${leftOffset}px)`;
+                } else {
+                    btn.classList.remove('is-active');
+                }
+            });
+        }
+
+        function switchTab(tab) {
+            if (tab === 'summary') {
+                state.activeTab = (state.currentUser && state.currentUser.role === 'admin') ? 'admin' : 'analytics';
+            } else {
+                state.activeTab = tab;
+            }
+            state.editingExpenseId = null;
+            state.tempBillData = null;
+            state.tempFormCache = null;
+
+            syncPersistentNavbar();
+            renderMainContentOnly();
+        }
+
         function render() {
             const app = document.getElementById('app');
             if (!app) return;
@@ -744,29 +991,17 @@
             }
 
             if (!state.currentUser) {
+                document.getElementById('persistent-nav-wrapper').classList.add('hidden');
                 app.innerHTML = state.authView === 'forgot' ? renderForgotPasswordPage() : renderLoginPage();
                 return;
             }
 
             const isAdmin = state.currentUser.role === 'admin';
-            const pendingRequestsCount = state.passwordRequests.filter(r => r.status === 'pending').length;
             const isSubTab = ['recycle', 'requests', 'userRecycle'].includes(state.activeTab);
 
             let subTabTitle = 'Recycle Bin';
             if (state.activeTab === 'requests') subTabTitle = 'Password Requests';
             if (state.activeTab === 'userRecycle') subTabTitle = 'Deleted Users';
-
-            // Active nav index identification for Liquid Pill
-            let activeNavIndex = 0;
-            if (state.activeTab === 'home') activeNavIndex = 0;
-            else if (isAdmin && (state.activeTab === 'admin' || state.activeTab === 'analytics')) activeNavIndex = 1;
-            else if (isAdmin && state.activeTab === 'users') activeNavIndex = 2;
-            else if (!isAdmin && state.activeTab === 'analytics') activeNavIndex = 1;
-            else if (state.activeTab === 'profile' || isSubTab) activeNavIndex = isAdmin ? 3 : 2;
-
-            const totalNavItems = isAdmin ? 4 : 3;
-            const pillWidthPercentage = 100 / totalNavItems;
-            const pillLeftOffset = activeNavIndex * pillWidthPercentage;
 
             app.innerHTML = `
                 <header class="sticky top-0 z-40 bg-white/40 dark:bg-slate-900/40 backdrop-blur-xl border-b-2 border-white/40 dark:border-slate-600/60 px-4 sm:px-6 pt-3 pb-3 flex items-center justify-between w-full shadow-[0_8px_32px_0_rgba(0,0,0,0.1)] transition-colors duration-300">
@@ -803,62 +1038,40 @@
                     </div>
                 </header>
 
-                <main class="flex-1 overflow-y-auto pb-32 pt-4 px-4 sm:px-6 w-full max-w-full">
+                <main id="main-content" class="flex-1 overflow-y-auto pb-32 pt-4 px-4 sm:px-6 w-full max-w-full">
                     ${renderActiveTabContent()}
                 </main>
 
-                ${state.activeTab !== 'add' ? `
-                <button onclick="switchTab('add')" class="fixed sm:absolute bottom-24 right-5 z-40 w-14 h-14 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 text-white rounded-full shadow-2xl flex items-center justify-center text-xl transition transform hover:scale-105 active:scale-95 border border-white/20" title="Add New Expense">
-                    <i class="fa-solid fa-plus"></i>
-                </button>
-                ` : ''}
-
-                <!-- Floating Liquid Glass Navigation Bar -->
-                <div class="fixed sm:absolute bottom-6 left-0 right-0 z-45 flex justify-center px-4 pointer-events-none">
-                    <nav class="liquid-nav relative rounded-full p-2 flex items-center justify-between max-w-md w-full select-none pointer-events-auto" id="bottom-nav">
-                        
-                        <!-- Sliding Liquid Pill Indicator Background -->
-                        <div id="sliding-pill" class="absolute top-1.5 bottom-1.5 rounded-full liquid-pill z-0 pointer-events-none" style="width: ${pillWidthPercentage}%; left: ${pillLeftOffset}%;"></div>
-
-                        <!-- Tab 1: Home / Expenses -->
-                        <button onclick="switchTab('home')" class="nav-item relative z-10 flex-1 flex flex-col items-center justify-center py-1.5 group cursor-pointer" data-index="0">
-                            <i class="fa-solid fa-house text-base ${state.activeTab === 'home' ? 'text-blue-600 dark:text-indigo-400 font-bold' : 'text-gray-500 group-hover:text-gray-700'} transition-colors duration-300"></i>
-                            <span class="text-[11px] ${state.activeTab === 'home' ? 'text-blue-600 dark:text-indigo-400 font-semibold' : 'text-gray-500 group-hover:text-gray-700 font-medium'} mt-0.5 transition-colors duration-300">Expenses</span>
-                        </button>
-
-                        ${isAdmin ? `
-                        <!-- Admin Tab 2: Summary -->
-                        <button onclick="switchTab('admin')" class="nav-item relative z-10 flex-1 flex flex-col items-center justify-center py-1.5 group cursor-pointer" data-index="1">
-                            <i class="fa-solid fa-chart-pie text-base ${state.activeTab === 'admin' ? 'text-blue-600 dark:text-indigo-400 font-bold' : 'text-gray-500 group-hover:text-gray-700'} transition-colors duration-300"></i>
-                            <span class="text-[11px] ${state.activeTab === 'admin' ? 'text-blue-600 dark:text-indigo-400 font-semibold' : 'text-gray-500 group-hover:text-gray-700 font-medium'} mt-0.5 transition-colors duration-300">Summary</span>
-                        </button>
-                        <!-- Admin Tab 3: Users -->
-                        <button onclick="switchTab('users')" class="nav-item relative z-10 flex-1 flex flex-col items-center justify-center py-1.5 group cursor-pointer" data-index="2">
-                            <i class="fa-solid fa-users text-base ${state.activeTab === 'users' ? 'text-blue-600 dark:text-indigo-400 font-bold' : 'text-gray-500 group-hover:text-gray-700'} transition-colors duration-300"></i>
-                            <span class="text-[11px] ${state.activeTab === 'users' ? 'text-blue-600 dark:text-indigo-400 font-semibold' : 'text-gray-500 group-hover:text-gray-700 font-medium'} mt-0.5 transition-colors duration-300">Users</span>
-                        </button>
-                        ` : `
-                        <!-- User Tab 2: Summary -->
-                        <button onclick="switchTab('analytics')" class="nav-item relative z-10 flex-1 flex flex-col items-center justify-center py-1.5 group cursor-pointer" data-index="1">
-                            <i class="fa-solid fa-chart-column text-base ${state.activeTab === 'analytics' ? 'text-blue-600 dark:text-indigo-400 font-bold' : 'text-gray-500 group-hover:text-gray-700'} transition-colors duration-300"></i>
-                            <span class="text-[11px] ${state.activeTab === 'analytics' ? 'text-blue-600 dark:text-indigo-400 font-semibold' : 'text-gray-500 group-hover:text-gray-700 font-medium'} mt-0.5 transition-colors duration-300">Summary</span>
-                        </button>
-                        `}
-
-                        <!-- Profile Tab -->
-                        <button onclick="switchTab('profile')" class="nav-item relative z-10 flex-1 flex flex-col items-center justify-center py-1.5 group cursor-pointer" data-index="${isAdmin ? '3' : '2'}">
-                            <div class="relative">
-                                <i class="fa-solid fa-user-circle text-base ${state.activeTab === 'profile' || isSubTab ? 'text-blue-600 dark:text-indigo-400 font-bold' : 'text-gray-500 group-hover:text-gray-700'} transition-colors duration-300"></i>
-                                ${isAdmin && (state.recycleBin.length > 0 || pendingRequestsCount > 0 || state.userRecycleBin.length > 0) ? `<span class="absolute -top-1 -right-1.5 w-2 h-2 rounded-full bg-rose-500 z-20"></span>` : ''}
-                            </div>
-                            <span class="text-[11px] ${state.activeTab === 'profile' || isSubTab ? 'text-blue-600 dark:text-indigo-400 font-semibold' : 'text-gray-500 group-hover:text-gray-700 font-medium'} mt-0.5 transition-colors duration-300">Profile</span>
-                        </button>
-
-                    </nav>
+                <div id="add-fab-container">
+                    ${state.activeTab !== 'add' ? `
+                    <button onclick="switchTab('add')" class="fixed sm:absolute bottom-28 right-5 z-40 w-14 h-14 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 text-white rounded-full shadow-2xl flex items-center justify-center text-xl transition transform hover:scale-105 active:scale-95 border border-white/20" title="Add New Expense">
+                        <i class="fa-solid fa-plus"></i>
+                    </button>
+                    ` : ''}
                 </div>
 
                 <div id="modal-root"></div>
             `;
+
+            syncPersistentNavbar();
+        }
+
+        function renderMainContentOnly() {
+            const main = document.getElementById('main-content');
+            if (!main) {
+                render();
+                return;
+            }
+            main.innerHTML = renderActiveTabContent();
+            
+            const fab = document.getElementById('add-fab-container');
+            if (fab) {
+                fab.innerHTML = state.activeTab !== 'add' ? `
+                    <button onclick="switchTab('add')" class="fixed sm:absolute bottom-28 right-5 z-40 w-14 h-14 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 text-white rounded-full shadow-2xl flex items-center justify-center text-xl transition transform hover:scale-105 active:scale-95 border border-white/20" title="Add New Expense">
+                        <i class="fa-solid fa-plus"></i>
+                    </button>
+                ` : '';
+            }
         }
 
         function renderLoginPage() {
@@ -1082,14 +1295,6 @@
             }
         }
 
-        function switchTab(tab) {
-            state.activeTab = tab;
-            state.editingExpenseId = null;
-            state.tempBillData = null;
-            state.tempFormCache = null;
-            render();
-        }
-
         function toggleDarkMode() {
             state.darkMode = !state.darkMode;
             render();
@@ -1097,7 +1302,7 @@
 
         function toggleDateFilter() {
             state.showDateFilter = !state.showDateFilter;
-            render();
+            renderMainContentOnly();
         }
 
         function renderHomeTab() {
@@ -1323,7 +1528,7 @@
             state.searchQuery = e.target.value;
             const input = document.getElementById('search-input');
             const cursorPos = input ? input.selectionStart : 0;
-            render();
+            renderMainContentOnly();
             const newInput = document.getElementById('search-input');
             if (newInput) {
                 newInput.focus();
@@ -1333,33 +1538,33 @@
 
         function clearSearch() {
             state.searchQuery = '';
-            render();
+            renderMainContentOnly();
         }
 
-        function setFilterCategory(cat) { state.filterCategory = cat; render(); }
+        function setFilterCategory(cat) { state.filterCategory = cat; renderMainContentOnly(); }
         function setFilterMonth(month) { 
             state.filterMonth = month; 
             if (month !== 'All') {
                 state.filterStartDate = '';
                 state.filterEndDate = '';
             }
-            render(); 
+            renderMainContentOnly(); 
         }
-        function setFilterUser(userId) { state.filterUser = userId; render(); }
+        function setFilterUser(userId) { state.filterUser = userId; renderMainContentOnly(); }
         function setFilterStartDate(date) { 
             state.filterStartDate = date; 
             state.filterMonth = 'All';
-            render(); 
+            renderMainContentOnly(); 
         }
         function setFilterEndDate(date) { 
             state.filterEndDate = date; 
             state.filterMonth = 'All';
-            render(); 
+            renderMainContentOnly(); 
         }
         function clearDateRange() {
             state.filterStartDate = '';
             state.filterEndDate = '';
-            render();
+            renderMainContentOnly();
         }
 
         function renderAddEditTab() {
@@ -1497,7 +1702,7 @@
 
                     state.tempBillData = canvas.toDataURL('image/jpeg', 0.8);
                     showToast('Bill attached successfully!', 'success');
-                    render();
+                    renderMainContentOnly();
                 };
                 img.src = uploadEvent.target.result;
             };
@@ -1565,7 +1770,7 @@
             }
             closeModal();
             showToast('Bill captured!', 'success');
-            render();
+            renderMainContentOnly();
         }
 
         function removeBillAttachment(event) {
@@ -1576,7 +1781,7 @@
                 if (found) found.billAttachment = null;
             }
             showToast('Bill removed.', 'info');
-            render();
+            renderMainContentOnly();
         }
 
         function previewCurrentTempBill() {
@@ -1738,8 +1943,7 @@
             state.editingExpenseId = id;
             state.tempBillData = null;
             state.tempFormCache = null;
-            state.activeTab = 'add';
-            render();
+            switchTab('add');
         }
 
         function cancelEdit() {
@@ -2475,6 +2679,9 @@
             if (!str) return '';
             return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
         }
+
+        window.addEventListener('resize', syncPersistentNavbar);
+        window.addEventListener('orientationchange', () => setTimeout(syncPersistentNavbar, 100));
     </script>
 </body>
 </html>
