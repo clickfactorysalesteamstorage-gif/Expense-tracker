@@ -420,6 +420,7 @@
             users: [],
             expenses: [],
             walletTransactions: [],
+            notifications: [],
             recycleBin: [],
             userRecycleBin: [],
             passwordRequests: [],
@@ -440,6 +441,9 @@
             authView: 'login',
             lastClearedExpensesCache: null
         };
+
+        let knownNotificationIds = new Set();
+        let initialNotificationsLoaded = false;
 
         // Evaluate and apply Light / Dark / System theme
         function applyTheme() {
@@ -519,11 +523,60 @@
             const diffY = Math.abs(touchEndY - touchStartY);
 
             if (touchStartX < 50 && diffX > 80 && diffY < 100) {
-                if (['recycle', 'requests', 'userRecycle'].includes(state.activeTab)) {
-                    switchTab('profile');
+                if (['recycle', 'requests', 'userRecycle', 'notifications'].includes(state.activeTab)) {
+                    switchTab(state.activeTab === 'notifications' ? 'home' : 'profile');
                 }
             }
         }, false);
+
+        // Helper to filter notifications belonging to the logged-in user or admin
+        function getMyNotifications() {
+            if (!state.currentUser) return [];
+            const isAdmin = state.currentUser.role === 'admin';
+            return state.notifications
+                .filter(n => {
+                    if (isAdmin && n.recipientRole === 'admin') return true;
+                    if (n.recipientId === state.currentUser.id) return true;
+                    return false;
+                })
+                .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+        }
+
+        // Trigger Browser/System Notification if permitted
+        function sendBrowserNotification(title, body) {
+            if ('Notification' in window && Notification.permission === 'granted') {
+                try {
+                    new Notification(title, {
+                        body: body,
+                        icon: 'https://clickfactoryphotography.com/wp-content/uploads/2022/04/crop-logo.gif'
+                    });
+                } catch (e) {}
+            }
+        }
+
+        // Create and save notification to Firestore
+        async function createAppNotification({ recipientId = null, recipientRole = null, type, title, message, amount = 0, triggeredBy = '' }) {
+            if (!window.FB) return;
+            const { db, doc, setDoc } = window.FB;
+            const notifId = 'notif_' + Date.now() + '_' + Math.random().toString(36).substring(2, 6);
+            const notifData = {
+                id: notifId,
+                recipientId,
+                recipientRole,
+                type, // 'wallet_credit' | 'wallet_debit' | 'excess_spent'
+                title,
+                message,
+                amount: Number(amount || 0),
+                read: false,
+                timestamp: new Date().toISOString(),
+                triggeredBy
+            };
+            try {
+                await setDoc(doc(db, 'notifications', notifId), notifData);
+            } catch (err) {
+                console.error("Failed to create notification:", err);
+            }
+        }
 
         window.startAppListeners = function() {
             if (!window.FB) return;
@@ -563,6 +616,30 @@
                 state.walletTransactions = snapshot.docs.map(docSnap => docSnap.data());
                 if (!state.isDbLoading) render();
             }, (err) => console.warn("Transactions listener notice:", err));
+
+            // Real-Time Notifications Listener
+            onSnapshot(collection(db, 'notifications'), (snapshot) => {
+                const allNotifs = snapshot.docs.map(docSnap => docSnap.data());
+                
+                if (initialNotificationsLoaded && state.currentUser) {
+                    const isAdmin = state.currentUser.role === 'admin';
+                    allNotifs.forEach(n => {
+                        if (!knownNotificationIds.has(n.id)) {
+                            const isForMe = (isAdmin && n.recipientRole === 'admin') || (n.recipientId === state.currentUser.id);
+                            if (isForMe && !n.read) {
+                                const toastType = n.type === 'excess_spent' ? 'error' : 'success';
+                                showToast(`${n.title}: ${n.message}`, toastType);
+                                sendBrowserNotification(n.title, n.message);
+                            }
+                        }
+                    });
+                }
+
+                knownNotificationIds = new Set(allNotifs.map(n => n.id));
+                initialNotificationsLoaded = true;
+                state.notifications = allNotifs;
+                if (!state.isDbLoading) render();
+            }, (err) => console.warn("Notifications listener notice:", err));
 
             onSnapshot(collection(db, 'expenses'), async (snapshot) => {
                 let allExpenses = snapshot.docs.map(docSnap => docSnap.data());
@@ -778,6 +855,124 @@
             );
         }
 
+        // Full-Size Notifications Tab (For both Users & Admin)
+        function renderNotificationsTab() {
+            const myNotifs = getMyNotifications();
+            const unreadCount = myNotifs.filter(n => !n.read).length;
+
+            return `
+                <div class="space-y-4 w-full max-w-full">
+                    <div class="flex items-center justify-between px-1">
+                        <div>
+                            <h2 class="text-base font-bold text-slate-900 dark:text-white">Activity & Alerts</h2>
+                            <p class="text-xs text-slate-500 dark:text-slate-400">${unreadCount} unread notification(s)</p>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            ${unreadCount > 0 ? `
+                                <button onclick="markAllNotificationsRead()" class="px-3 py-1.5 bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 text-xs font-semibold rounded-xl border border-indigo-200 dark:border-indigo-800 hover:bg-indigo-100 transition">
+                                    <i class="fa-solid fa-check-double mr-1"></i>Mark Read
+                                </button>
+                            ` : ''}
+                            ${myNotifs.length > 0 ? `
+                                <button onclick="confirmClearMyNotifications()" class="px-3 py-1.5 bg-rose-50 dark:bg-rose-950/60 text-rose-600 dark:text-rose-400 text-xs font-semibold rounded-xl border border-rose-200 dark:border-rose-800 hover:bg-rose-100 transition">
+                                    <i class="fa-solid fa-trash-can mr-1"></i>Clear All
+                                </button>
+                            ` : ''}
+                        </div>
+                    </div>
+
+                    <div class="space-y-3 w-full">
+                        ${myNotifs.length === 0 ? `
+                            <div class="bg-white dark:bg-slate-900 rounded-3xl p-8 text-center border border-slate-200 dark:border-slate-800 shadow-sm w-full mt-3">
+                                <div class="w-14 h-14 bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 rounded-2xl flex items-center justify-center mx-auto mb-3 text-xl">
+                                    <i class="fa-solid fa-bell-slash"></i>
+                                </div>
+                                <h4 class="font-semibold text-slate-700 dark:text-slate-300 mb-1">No Notifications</h4>
+                                <p class="text-xs text-slate-500">Wallet top-up alerts and excess spending updates will appear here.</p>
+                            </div>
+                        ` : myNotifs.map(n => {
+                            const isExcess = n.type === 'excess_spent';
+                            const isDebit = n.type === 'wallet_debit';
+                            const iconClass = isExcess
+                                ? 'bg-rose-500/10 text-rose-600 dark:text-rose-400 fa-triangle-exclamation'
+                                : (isDebit ? 'bg-amber-500/10 text-amber-600 dark:text-amber-400 fa-wallet' : 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 fa-wallet');
+
+                            return `
+                                <div onclick="markNotificationRead('${n.id}')" class="cursor-pointer bg-white dark:bg-slate-900 rounded-3xl p-5 border ${!n.read ? 'border-indigo-500/60 dark:border-indigo-500/60 ring-1 ring-indigo-500/20' : 'border-slate-200 dark:border-slate-800'} shadow-sm transition relative w-full flex items-start space-x-3.5">
+                                    <div class="w-10 h-10 rounded-2xl ${iconClass.split(' ').slice(0, 3).join(' ')} flex items-center justify-center shrink-0 mt-0.5">
+                                        <i class="fa-solid ${iconClass.split(' ').pop()}"></i>
+                                    </div>
+                                    <div class="min-w-0 flex-1">
+                                        <div class="flex items-start justify-between gap-2">
+                                            <h4 class="font-semibold text-sm text-slate-900 dark:text-white leading-snug break-words flex items-center gap-2">
+                                                <span>${escapeHtml(n.title)}</span>
+                                                ${!n.read ? '<span class="inline-block w-2 h-2 rounded-full bg-indigo-600 shrink-0"></span>' : ''}
+                                            </h4>
+                                            <button onclick="deleteSingleNotification(event, '${n.id}')" class="text-slate-400 hover:text-rose-500 text-xs px-1" title="Delete">
+                                                <i class="fa-solid fa-xmark"></i>
+                                            </button>
+                                        </div>
+                                        <p class="text-xs text-slate-600 dark:text-slate-300 mt-1 break-words">${escapeHtml(n.message)}</p>
+                                        <div class="flex items-center justify-between text-[10px] text-slate-400 mt-2.5 pt-2 border-t border-slate-100 dark:border-slate-800/60">
+                                            <span><i class="fa-regular fa-clock mr-1"></i>${formatTimestamp(n.timestamp)}</span>
+                                            ${n.triggeredBy ? `<span class="italic">From: ${escapeHtml(n.triggeredBy)}</span>` : ''}
+                                        </div>
+                                    </div>
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
+        async function markNotificationRead(notifId) {
+            const notif = state.notifications.find(n => n.id === notifId);
+            if (!notif || notif.read) return;
+            const { db, doc, updateDoc } = window.FB;
+            try {
+                await updateDoc(doc(db, 'notifications', notifId), { read: true });
+            } catch (e) {}
+        }
+
+        async function markAllNotificationsRead() {
+            const myUnread = getMyNotifications().filter(n => !n.read);
+            if (myUnread.length === 0) return;
+            const { db, doc, updateDoc } = window.FB;
+            for (const n of myUnread) {
+                try {
+                    await updateDoc(doc(db, 'notifications', n.id), { read: true });
+                } catch (e) {}
+            }
+            showToast('All notifications marked as read.', 'info');
+        }
+
+        async function deleteSingleNotification(e, notifId) {
+            if (e) e.stopPropagation();
+            const { db, doc, deleteDoc } = window.FB;
+            try {
+                await deleteDoc(doc(db, 'notifications', notifId));
+            } catch (err) {}
+        }
+
+        function confirmClearMyNotifications() {
+            const myNotifs = getMyNotifications();
+            if (myNotifs.length === 0) return;
+            showConfirmModal(
+                'Clear Notifications',
+                'Are you sure you want to delete all your notifications?',
+                async () => {
+                    const { db, doc, deleteDoc } = window.FB;
+                    for (const n of myNotifs) {
+                        try {
+                            await deleteDoc(doc(db, 'notifications', n.id));
+                        } catch (e) {}
+                    }
+                    showToast('Notifications cleared.', 'success');
+                }
+            );
+        }
+
         // Full-Size User Wallet Page
         function renderUserWalletTab() {
             const user = state.currentUser;
@@ -983,6 +1178,26 @@
             };
             await setDoc(doc(db, 'walletTransactions', txnId), txnData);
 
+            // Send Notification to the User when Admin adds or adjusts wallet funds
+            const notifTitle = amountToAdd > 0 ? 'Wallet Credited!' : 'Wallet Balance Adjusted';
+            let notifMessage = amountToAdd > 0
+                ? `${state.currentUser.name} added ${formatCurrency(amountToAdd)} to your wallet. Available Balance: ${formatCurrency(currentWallet)}.`
+                : `${state.currentUser.name} adjusted your wallet by ${formatCurrency(amountToAdd)}. Available Balance: ${formatCurrency(currentWallet)}.`;
+
+            if (amountToAdd > 0 && excessCleared > 0) {
+                notifMessage = `${state.currentUser.name} added ${formatCurrency(amountToAdd)} (${formatCurrency(excessCleared)} settled excess due). New Balance: ${formatCurrency(currentWallet)}.`;
+            }
+
+            await createAppNotification({
+                recipientId: userId,
+                recipientRole: 'user',
+                type: amountToAdd > 0 ? 'wallet_credit' : 'wallet_debit',
+                title: notifTitle,
+                message: notifMessage,
+                amount: Math.abs(amountToAdd),
+                triggeredBy: state.currentUser.name
+            });
+
             closeModal();
             showToast(`Successfully processed ${formatCurrency(amountToAdd)} for ${user.name}!`, 'success');
         }
@@ -1097,7 +1312,7 @@
             }
 
             let activeTargetId = 'nav-btn-home';
-            if (state.activeTab === 'home') activeTargetId = 'nav-btn-home';
+            if (state.activeTab === 'home' || state.activeTab === 'notifications') activeTargetId = 'nav-btn-home';
             else if (state.activeTab === 'admin' || state.activeTab === 'analytics') activeTargetId = 'nav-btn-summary';
             else if ((state.activeTab === 'users' && isAdmin) || (state.activeTab === 'wallet' && !isAdmin)) activeTargetId = 'nav-btn-users';
             else if (state.activeTab === 'profile' || ['recycle', 'requests', 'userRecycle'].includes(state.activeTab)) activeTargetId = 'nav-btn-profile';
@@ -1132,7 +1347,7 @@
             state.tempFormCache = null;
 
             syncPersistentNavbar();
-            renderMainContentOnly();
+            render();
         }
 
         function render() {
@@ -1163,17 +1378,21 @@
             }
 
             const isAdmin = state.currentUser.role === 'admin';
-            const isSubTab = ['recycle', 'requests', 'userRecycle'].includes(state.activeTab);
+            const isSubTab = ['recycle', 'requests', 'userRecycle', 'notifications'].includes(state.activeTab);
+            const unreadNotifCount = getMyNotifications().filter(n => !n.read).length;
 
             let subTabTitle = 'Recycle Bin';
             if (state.activeTab === 'requests') subTabTitle = 'Password Requests';
             if (state.activeTab === 'userRecycle') subTabTitle = 'Deleted Users';
+            if (state.activeTab === 'notifications') subTabTitle = 'Notifications';
+
+            const backTargetTab = state.activeTab === 'notifications' ? 'home' : 'profile';
 
             app.innerHTML = `
                 <header class="sticky top-0 z-40 bg-white/75 dark:bg-slate-900/75 backdrop-blur-xl border-b border-slate-200/80 dark:border-slate-800 px-4 sm:px-6 pt-3 pb-3 flex items-center justify-between w-full shadow-sm transition-colors duration-300">
                     <div class="flex items-center space-x-3 min-w-0 flex-1 pr-2">
                         ${isSubTab ? `
-                            <button onclick="switchTab('profile')" class="w-9 h-9 rounded-2xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-700 dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-700 transition border border-slate-200/60 dark:border-slate-700 shrink-0" title="Back to Profile">
+                            <button onclick="switchTab('${backTargetTab}')" class="w-9 h-9 rounded-2xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-700 dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-700 transition border border-slate-200/60 dark:border-slate-700 shrink-0" title="Back">
                                 <i class="fa-solid fa-arrow-left text-sm"></i>
                             </button>
                         ` : `
@@ -1184,12 +1403,16 @@
                         <div class="min-w-0 flex-1">
                             <h1 class="font-semibold text-sm sm:text-base leading-tight tracking-tight text-slate-900 dark:text-white truncate">${isSubTab ? subTabTitle : 'Click Factory'}</h1>
                             <p class="text-[11px] text-slate-500 dark:text-slate-400 font-medium truncate">
-                                ${isSubTab ? 'Back to Profile' : (isAdmin ? '<span class="text-indigo-600 dark:text-indigo-400 font-semibold"><i class="fa-solid fa-shield-halved mr-1"></i>Admin</span>' : 'Expense Tracker')}
+                                ${isSubTab ? (state.activeTab === 'notifications' ? 'Activity & Alerts' : 'Back to Profile') : (isAdmin ? '<span class="text-indigo-600 dark:text-indigo-400 font-semibold"><i class="fa-solid fa-shield-halved mr-1"></i>Admin</span>' : 'Expense Tracker')}
                             </p>
                         </div>
                     </div>
                     
                     <div class="flex items-center space-x-2 shrink-0">
+                        <button onclick="switchTab('notifications')" class="relative w-10 h-10 rounded-2xl ${state.activeTab === 'notifications' ? 'bg-indigo-600 text-white' : 'bg-slate-100 dark:bg-slate-800/80 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'} flex items-center justify-center transition border border-slate-200/70 dark:border-slate-700/60 shadow-sm" title="Notifications">
+                            <i class="fa-solid fa-bell text-sm ${unreadNotifCount > 0 && state.activeTab !== 'notifications' ? 'animate-bounce text-indigo-600 dark:text-indigo-400' : ''}"></i>
+                            ${unreadNotifCount > 0 ? `<span class="liquid-badge">${unreadNotifCount > 99 ? '99+' : unreadNotifCount}</span>` : ''}
+                        </button>
                         <button onclick="confirmLogout()" class="w-10 h-10 rounded-2xl bg-rose-500/10 dark:bg-rose-950/40 flex items-center justify-center text-rose-600 dark:text-rose-400 hover:bg-rose-500/20 transition border border-rose-500/20 shadow-sm" title="Logout">
                             <i class="fa-solid fa-arrow-right-from-bracket text-sm"></i>
                         </button>
@@ -1415,6 +1638,9 @@
                 state.currentUser = foundUser;
                 state.activeTab = 'home';
                 localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(foundUser));
+                if ('Notification' in window && Notification.permission === 'default') {
+                    Notification.requestPermission().catch(() => {});
+                }
                 showToast(`Welcome back, ${foundUser.name}!`, 'success');
                 render();
             } else {
@@ -1444,6 +1670,7 @@
             switch(state.activeTab) {
                 case 'home': return renderHomeTab();
                 case 'add': return renderAddEditTab();
+                case 'notifications': return renderNotificationsTab();
                 case 'admin': return state.currentUser.role === 'admin' ? renderAdminTab() : renderHomeTab();
                 case 'recycle': return state.currentUser.role === 'admin' ? renderRecycleBinTab() : renderHomeTab();
                 case 'userRecycle': return state.currentUser.role === 'admin' ? renderUserRecycleBinTab() : renderHomeTab();
@@ -2031,6 +2258,7 @@
                 const currentUser = state.currentUser;
                 let currentWallet = Number(currentUser.wallet || 0);
                 let currentExcess = Number(currentUser.excessSpent || 0);
+                let newlyAddedExcess = 0;
 
                 if (currentUser.role !== 'admin') {
                     if (!state.editingExpenseId) {
@@ -2038,6 +2266,7 @@
                             currentWallet -= amount;
                         } else {
                             const excess = amount - currentWallet;
+                            newlyAddedExcess = excess;
                             currentWallet = 0;
                             currentExcess += excess;
                         }
@@ -2050,6 +2279,7 @@
                                 currentWallet -= diff;
                             } else {
                                 const excess = diff - currentWallet;
+                                newlyAddedExcess = excess;
                                 currentWallet = 0;
                                 currentExcess += excess;
                             }
@@ -2083,6 +2313,19 @@
                 };
 
                 await setDoc(doc(db, 'expenses', expenseId), expenseData);
+
+                // Notify Admin when a User spends in excess of their wallet balance
+                if (currentUser.role !== 'admin' && newlyAddedExcess > 0) {
+                    await createAppNotification({
+                        recipientId: null,
+                        recipientRole: 'admin',
+                        type: 'excess_spent',
+                        title: `Excess Spent Alert: ${currentUser.name}`,
+                        message: `${currentUser.name} spent ${formatCurrency(newlyAddedExcess)} over wallet balance on "${title}" (${category}). Total Excess Due: ${formatCurrency(currentExcess)}.`,
+                        amount: newlyAddedExcess,
+                        triggeredBy: currentUser.name
+                    });
+                }
 
                 state.editingExpenseId = null;
                 state.tempBillData = null;
