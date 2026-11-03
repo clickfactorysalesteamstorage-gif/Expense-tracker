@@ -96,9 +96,7 @@
             display: none;
         }
 
-        /* ========================================================
-           PERSISTENT LIQUID GLASS NAVBAR STYLES
-           ======================================================== */
+        /* Persistent Liquid Dock Styles */
         .liquid-nav-container {
             position: fixed;
             bottom: max(env(safe-area-inset-bottom, 14px), 18px);
@@ -125,7 +123,7 @@
             user-select: none;
             -webkit-user-select: none;
 
-            background: rgba(255, 255, 255, 0.72);
+            background: rgba(255, 255, 255, 0.82);
             backdrop-filter: blur(28px) saturate(180%);
             -webkit-backdrop-filter: blur(28px) saturate(180%);
             border: 1px solid rgba(255, 255, 255, 0.85);
@@ -138,7 +136,7 @@
         }
 
         .dark .liquid-dock {
-            background: rgba(15, 23, 42, 0.75);
+            background: rgba(15, 23, 42, 0.85);
             backdrop-filter: blur(28px) saturate(180%);
             -webkit-backdrop-filter: blur(28px) saturate(180%);
             border: 1px solid rgba(255, 255, 255, 0.12);
@@ -149,7 +147,6 @@
                 inset 0 -1px 2px rgba(0, 0, 0, 0.45);
         }
 
-        /* Continuous Bidirectional Sliding Liquid Pill */
         .liquid-bubble {
             position: absolute;
             top: 5px;
@@ -230,7 +227,6 @@
             color: #94a3b8;
         }
 
-        /* Active State */
         .liquid-nav-btn.is-active .liquid-icon-wrap {
             color: #1a62ff !important;
             transform: translateY(-1.5px) scale(1.08);
@@ -295,12 +291,11 @@
         </div>
     </div>
 
-    <!-- Persistent Floating Liquid Glass Navigation Bar (Hidden by default during boot) -->
+    <!-- Persistent Liquid Glass Navigation Bar -->
     <div id="persistent-nav-wrapper" class="liquid-nav-container hidden" style="display: none;">
         <nav id="liquid-nav" class="liquid-dock">
             <div id="liquid-bubble" class="liquid-bubble"></div>
 
-            <!-- Home Tab -->
             <button id="nav-btn-home" onclick="switchTab('home')" class="liquid-nav-btn is-active">
                 <div class="liquid-icon-wrap">
                     <i class="fa-solid fa-house"></i>
@@ -308,7 +303,6 @@
                 <span class="liquid-label">Home</span>
             </button>
 
-            <!-- Summary Tab -->
             <button id="nav-btn-summary" onclick="switchTab('summary')" class="liquid-nav-btn">
                 <div class="liquid-icon-wrap">
                     <i class="fa-solid fa-chart-pie"></i>
@@ -316,7 +310,6 @@
                 <span class="liquid-label">Summary</span>
             </button>
 
-            <!-- Users Tab (Admin) or Wallet Tab (User) -->
             <button id="nav-btn-users" onclick="switchTab('users')" class="liquid-nav-btn">
                 <div class="liquid-icon-wrap">
                     <i id="nav-users-icon" class="fa-solid fa-users"></i>
@@ -324,7 +317,6 @@
                 <span id="nav-users-label" class="liquid-label">Users</span>
             </button>
 
-            <!-- Account Tab -->
             <button id="nav-btn-profile" onclick="switchTab('profile')" class="liquid-nav-btn">
                 <div class="liquid-icon-wrap">
                     <i class="fa-solid fa-circle-user"></i>
@@ -377,12 +369,18 @@
                     await setDoc(doc(db, 'settings', 'app_settings'), { autoDeleteEnabled: false, currentVersion: '1.1.2' });
                 }
             } catch (err) {
-                console.error("Initialization warning:", err);
+                console.warn("Database initialization skipped or offline:", err);
             }
         }
 
-        initializeData().then(() => {
-            window.startAppListeners();
+        // Start listeners & trigger immediate UI render
+        initializeData().finally(() => {
+            if (typeof window.startAppListeners === 'function') {
+                window.startAppListeners();
+            }
+            if (typeof window.renderApp === 'function') {
+                window.renderApp();
+            }
         });
     </script>
 
@@ -444,6 +442,7 @@
         }, false);
 
         window.startAppListeners = function() {
+            if (!window.FB) return;
             const { db, collection, onSnapshot, doc, setDoc, deleteDoc } = window.FB;
 
             onSnapshot(collection(db, 'users'), (snapshot) => {
@@ -456,7 +455,7 @@
                     }
                 }
                 render();
-            }, (err) => console.error("Users listener error:", err));
+            }, (err) => console.warn("Users listener notice:", err));
 
             onSnapshot(collection(db, 'settings'), (snapshot) => {
                 snapshot.docs.forEach(docSnap => {
@@ -465,12 +464,12 @@
                     }
                 });
                 render();
-            }, (err) => console.error("Settings listener error:", err));
+            }, (err) => console.warn("Settings listener notice:", err));
 
             onSnapshot(collection(db, 'walletTransactions'), (snapshot) => {
                 state.walletTransactions = snapshot.docs.map(docSnap => docSnap.data());
                 render();
-            }, (err) => console.error("Transactions listener error:", err));
+            }, (err) => console.warn("Transactions listener notice:", err));
 
             onSnapshot(collection(db, 'expenses'), async (snapshot) => {
                 let allExpenses = snapshot.docs.map(docSnap => docSnap.data());
@@ -501,12 +500,12 @@
 
                 state.expenses = allExpenses;
                 render();
-            }, (err) => console.error("Expenses listener error:", err));
+            }, (err) => console.warn("Expenses listener notice:", err));
 
             onSnapshot(collection(db, 'recycleBin'), (snapshot) => {
                 state.recycleBin = snapshot.docs.map(docSnap => docSnap.data());
                 render();
-            }, (err) => console.error("Recycle bin listener error:", err));
+            }, (err) => console.warn("Recycle bin listener notice:", err));
 
             onSnapshot(collection(db, 'userRecycleBin'), async (snapshot) => {
                 let deletedUsers = snapshot.docs.map(docSnap => docSnap.data());
@@ -525,7 +524,7 @@
                                     await deleteDoc(doc(db, 'expenses', ue.id));
                                 }
                             } catch(e) {
-                                console.error("Failed 48hr permanent user delete:", e);
+                                console.error("Permanent wipe error:", e);
                             }
                             return;
                         }
@@ -534,12 +533,12 @@
 
                 state.userRecycleBin = deletedUsers;
                 render();
-            }, (err) => console.error("User recycle bin listener error:", err));
+            }, (err) => console.warn("User recycle bin listener notice:", err));
 
             onSnapshot(collection(db, 'passwordRequests'), (snapshot) => {
                 state.passwordRequests = snapshot.docs.map(docSnap => docSnap.data());
                 render();
-            }, (err) => console.error("Requests listener error:", err));
+            }, (err) => console.warn("Requests listener notice:", err));
         };
 
         function showToast(message, type = 'success', undoCallback = null) {
@@ -699,7 +698,7 @@
                         </div>
 
                         <div class="space-y-2 flex-1 overflow-y-auto pr-1">
-                            <h4 class="text-xs font-semibold text-slate-500 uppercase tracking-wider px-1">Added Wallet & Excess/Shortage History</h4>
+                            <h4 class="text-xs font-semibold text-slate-500 uppercase tracking-wider px-1">History</h4>
                             ${userTxns.length === 0 ? `
                                 <div class="text-center py-6 text-xs text-slate-400">No transaction history yet.</div>
                             ` : userTxns.map(t => `
@@ -906,19 +905,16 @@
             );
         }
 
-        /* Continuous Fluid Slider Positioning Engine */
         function syncPersistentNavbar() {
             const navWrapper = document.getElementById('persistent-nav-wrapper');
             if (!navWrapper) return;
 
-            // Strictly suppress during unauthenticated or loading states
             if (!state.currentUser) {
                 navWrapper.classList.add('hidden');
                 navWrapper.style.display = 'none';
                 return;
             }
 
-            // Reveal only with an active session
             navWrapper.classList.remove('hidden');
             navWrapper.style.display = 'flex';
 
@@ -926,7 +922,6 @@
             const pendingRequestsCount = state.passwordRequests.filter(r => r.status === 'pending').length;
             const totalBadges = state.recycleBin.length + pendingRequestsCount + state.userRecycleBin.length;
 
-            // Configure Users vs Wallet Tab item
             const usersBtn = document.getElementById('nav-btn-users');
             const usersIcon = document.getElementById('nav-users-icon');
             const usersLabel = document.getElementById('nav-users-label');
@@ -940,7 +935,6 @@
                 usersLabel.textContent = 'Wallet';
             }
 
-            // Configure Badges
             const badgeEl = document.getElementById('nav-badge');
             if (isAdmin && totalBadges > 0) {
                 badgeEl.textContent = totalBadges;
@@ -949,7 +943,6 @@
                 badgeEl.classList.add('hidden');
             }
 
-            // Determine active button target
             let activeTargetId = 'nav-btn-home';
             if (state.activeTab === 'home') activeTargetId = 'nav-btn-home';
             else if (state.activeTab === 'admin' || state.activeTab === 'analytics') activeTargetId = 'nav-btn-summary';
@@ -960,16 +953,18 @@
             const bubble = document.getElementById('liquid-bubble');
             if (!nav || !bubble) return;
 
-            nav.querySelectorAll('.liquid-nav-btn').forEach(btn => {
-                if (btn.id === activeTargetId) {
-                    btn.classList.add('is-active');
-                    const leftOffset = btn.offsetLeft;
-                    const width = btn.offsetWidth;
-                    bubble.style.width = `${width}px`;
-                    bubble.style.transform = `translateX(${leftOffset}px)`;
-                } else {
-                    btn.classList.remove('is-active');
-                }
+            requestAnimationFrame(() => {
+                nav.querySelectorAll('.liquid-nav-btn').forEach(btn => {
+                    if (btn.id === activeTargetId) {
+                        btn.classList.add('is-active');
+                        const leftOffset = btn.offsetLeft;
+                        const width = btn.offsetWidth;
+                        bubble.style.width = `${width}px`;
+                        bubble.style.transform = `translateX(${leftOffset}px)`;
+                    } else {
+                        btn.classList.remove('is-active');
+                    }
+                });
             });
         }
 
@@ -1066,6 +1061,8 @@
 
             syncPersistentNavbar();
         }
+
+        window.renderApp = render;
 
         function renderMainContentOnly() {
             const main = document.getElementById('main-content');
@@ -2693,6 +2690,11 @@
 
         window.addEventListener('resize', syncPersistentNavbar);
         window.addEventListener('orientationchange', () => setTimeout(syncPersistentNavbar, 100));
+        
+        // Initial render execution on DOM load
+        document.addEventListener('DOMContentLoaded', () => {
+            render();
+        });
     </script>
 </body>
 </html>
