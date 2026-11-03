@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="theme-color" id="meta-theme-color" content="#f8fafc">
     <title>Click Factory Expense Tracker</title>
     <!-- Web App Manifest & Home Screen Icons -->
     <link rel="icon" type="image/gif" href="https://clickfactoryphotography.com/wp-content/uploads/2022/04/crop-logo.gif">
@@ -33,7 +34,21 @@
                     }
                 }
             }
-        }
+        };
+
+        // Pre-apply theme before body renders to prevent flash of unstyled content
+        (function() {
+            const savedTheme = localStorage.getItem('click_factory_theme_v1') || 'system';
+            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            const isDark = savedTheme === 'dark' || (savedTheme === 'system' && prefersDark);
+            if (isDark) {
+                document.documentElement.classList.add('dark');
+                document.getElementById('meta-theme-color')?.setAttribute('content', '#020617');
+            } else {
+                document.documentElement.classList.remove('dark');
+                document.getElementById('meta-theme-color')?.setAttribute('content', '#f8fafc');
+            }
+        })();
     </script>
     <style>
         *, ::before, ::after { box-sizing: border-box; }
@@ -46,7 +61,11 @@
             -webkit-tap-highlight-color: transparent;
             margin: 0; padding: 0; width: 100vw;
             overflow-x: hidden; word-wrap: break-word; overflow-wrap: break-word;
-            background-color: #0f172a;
+            background-color: #f8fafc;
+            transition: background-color 0.25s ease, color 0.25s ease;
+        }
+        .dark body {
+            background-color: #020617;
         }
         input[type="date"], select { appearance: none; -webkit-appearance: none; }
         
@@ -54,7 +73,10 @@
             width: 100%; max-width: 100%; min-height: 100vh;
             background-color: #f8fafc; display: flex; flex-direction: column;
             padding-top: max(env(safe-area-inset-top), 12px);
-            transition: all 0.3s ease;
+            transition: background-color 0.25s ease, color 0.25s ease;
+        }
+        .dark .app-container {
+            background-color: #020617;
         }
 
         @media (min-width: 640px) or (orientation: landscape) {
@@ -283,10 +305,10 @@
         }
     </style>
 </head>
-<body class="bg-slate-900 text-slate-800 dark:text-slate-100 flex flex-col justify-center items-center h-full selection:bg-indigo-500 selection:text-white">
+<body class="bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-100 flex flex-col justify-center items-center h-full selection:bg-indigo-500 selection:text-white">
 
     <!-- Initial App Container with Simple Loading Screen -->
-    <div id="app" class="app-container w-full flex flex-col relative dark:bg-slate-950 transition-colors duration-200">
+    <div id="app" class="app-container w-full flex flex-col relative transition-colors duration-200">
         <div class="flex-1 flex flex-col items-center justify-center p-6 text-center select-none">
             <div class="relative w-16 h-16 flex items-center justify-center mx-auto mb-4">
                 <div class="absolute inset-0 simple-spinner"></div>
@@ -388,6 +410,7 @@
 
     <script>
         const LOCAL_STORAGE_KEY = 'click_factory_current_user_v23';
+        const THEME_STORAGE_KEY = 'click_factory_theme_v1';
         const CURRENT_CLIENT_APP_VERSION = '1.1.2';
 
         let state = {
@@ -409,6 +432,7 @@
             filterEndDate: '',
             showDateFilter: false,
             searchQuery: '',
+            themeMode: localStorage.getItem(THEME_STORAGE_KEY) || 'system', // 'light' | 'dark' | 'system'
             darkMode: false,
             editingExpenseId: null,
             tempBillData: null,
@@ -416,6 +440,62 @@
             authView: 'login',
             lastClearedExpensesCache: null
         };
+
+        // Evaluate and apply Light / Dark / System theme
+        function applyTheme() {
+            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            const isDark = state.themeMode === 'dark' || (state.themeMode === 'system' && prefersDark);
+            state.darkMode = isDark;
+
+            const metaThemeColor = document.getElementById('meta-theme-color');
+            if (isDark) {
+                document.documentElement.classList.add('dark');
+                if (metaThemeColor) metaThemeColor.setAttribute('content', '#020617');
+            } else {
+                document.documentElement.classList.remove('dark');
+                if (metaThemeColor) metaThemeColor.setAttribute('content', '#f8fafc');
+            }
+        }
+
+        // Set specific theme mode ('light', 'dark', 'system')
+        function setThemeMode(mode) {
+            state.themeMode = mode;
+            localStorage.setItem(THEME_STORAGE_KEY, mode);
+            applyTheme();
+            render();
+            const label = mode === 'system' ? 'System Auto' : (mode === 'dark' ? 'Dark Mode' : 'Light Mode');
+            showToast(`Theme set to ${label}`, 'info');
+        }
+
+        // Cycle through Light -> Dark -> System when tapping the header icon
+        function cycleThemeMode() {
+            const order = ['light', 'dark', 'system'];
+            const nextIndex = (order.indexOf(state.themeMode) + 1) % order.length;
+            setThemeMode(order[nextIndex]);
+        }
+
+        function getThemeButtonIcon() {
+            if (state.themeMode === 'system') return 'fa-circle-half-stroke text-indigo-500 dark:text-indigo-400';
+            if (state.themeMode === 'dark') return 'fa-moon text-indigo-400';
+            return 'fa-sun text-amber-500';
+        }
+
+        function getThemeButtonTitle() {
+            if (state.themeMode === 'system') return 'Theme: System Auto (Click to switch)';
+            if (state.themeMode === 'dark') return 'Theme: Dark Mode (Click to switch)';
+            return 'Theme: Light Mode (Click to switch)';
+        }
+
+        // Listen for OS-level dark/light mode changes in real time when in 'system' mode
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
+            if (state.themeMode === 'system') {
+                applyTheme();
+                render();
+            }
+        });
+
+        // Initialize theme state immediately
+        applyTheme();
 
         let initialSyncFlags = {
             users: false,
@@ -717,58 +797,97 @@
             );
         }
 
-        function openUserWalletModal() {
+        // Full-Size User Wallet Page
+        function renderUserWalletTab() {
             const user = state.currentUser;
             const userWallet = Number(user.wallet || 0);
             const userExcessSpent = Number(user.excessSpent || 0);
+            const userExpensesTotal = state.expenses
+                .filter(e => e.userId === user.id)
+                .reduce((sum, e) => sum + Number(e.amount || 0), 0);
+
             const userTxns = state.walletTransactions
                 .filter(t => t.userId === user.id)
                 .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
 
-            const root = document.getElementById('modal-root');
-            root.innerHTML = `
-                <div class="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-sm flex items-center justify-center p-4 animate-fadeIn">
-                    <div class="bg-white dark:bg-slate-900 rounded-3xl p-6 max-w-sm w-full border border-slate-200 dark:border-slate-800 shadow-2xl space-y-4 max-h-[90vh] flex flex-col">
-                        <div class="flex items-center justify-between shrink-0">
-                            <h3 class="font-bold text-base text-slate-900 dark:text-white flex items-center space-x-2">
-                                <i class="fa-solid fa-wallet text-emerald-500"></i><span>Wallet & History</span>
-                            </h3>
-                            <button onclick="closeModal()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark"></i></button>
-                        </div>
-                        
-                        <div class="bg-slate-50 dark:bg-slate-800/50 p-4 rounded-2xl border border-slate-100 dark:border-slate-800 space-y-2 shrink-0">
-                            <div>
-                                <span class="text-[10px] text-slate-400 uppercase font-semibold block">Wallet Balance</span>
-                                <span class="font-bold text-xl text-emerald-600 dark:text-emerald-400">${formatCurrency(userWallet)}</span>
+            return `
+                <div class="space-y-4 w-full max-w-full">
+                    <div class="bg-gradient-to-br from-emerald-600 to-teal-700 rounded-3xl p-5 sm:p-6 text-white shadow-xl shadow-emerald-500/20 relative overflow-hidden w-full">
+                        <div class="flex justify-between items-start mb-3 gap-2">
+                            <div class="min-w-0 flex-1">
+                                <p class="text-emerald-100 text-xs font-semibold uppercase tracking-wider flex items-center gap-1.5">
+                                    <i class="fa-solid fa-wallet"></i>
+                                    <span>Available Wallet Balance</span>
+                                </p>
+                                <h2 class="text-2xl sm:text-3xl font-bold tracking-tight mt-1 break-all">${formatCurrency(userWallet)}</h2>
                             </div>
-                            ${userExcessSpent > 0 ? `
-                            <div class="pt-2 border-t border-slate-200 dark:border-slate-700">
-                                <span class="text-[10px] text-rose-500 uppercase font-semibold block">Excess Spent Due</span>
-                                <span class="font-bold text-base text-rose-600 dark:text-rose-400">${formatCurrency(userExcessSpent)}</span>
-                                <p class="text-[10px] text-slate-400 mt-1">Pending top-up settlement.</p>
-                            </div>
-                            ` : ''}
+                            <span class="bg-white/20 backdrop-blur-md text-white text-xs font-semibold px-3 py-1 rounded-full shrink-0">
+                                ${userTxns.length} Top-ups
+                            </span>
                         </div>
 
-                        <div class="space-y-2 flex-1 overflow-y-auto pr-1">
-                            <h4 class="text-xs font-semibold text-slate-500 uppercase tracking-wider px-1">History</h4>
-                            ${userTxns.length === 0 ? `
-                                <div class="text-center py-6 text-xs text-slate-400">No transaction history yet.</div>
-                            ` : userTxns.map(t => `
-                                <div class="bg-slate-50 dark:bg-slate-800/40 p-3 rounded-2xl border border-slate-100 dark:border-slate-800/80 space-y-1">
-                                    <div class="flex items-center justify-between text-xs">
-                                        <span class="font-semibold text-slate-800 dark:text-slate-200">${escapeHtml(t.title)}</span>
-                                        <span class="font-bold text-emerald-600 dark:text-emerald-400">+${formatCurrency(t.amount)}</span>
+                        <div class="grid grid-cols-2 gap-3 mt-4 pt-4 border-t border-white/15">
+                            <div class="bg-black/10 backdrop-blur-sm rounded-2xl p-3 min-w-0">
+                                <div class="flex items-center space-x-1.5 text-emerald-100 text-xs mb-1 min-w-0">
+                                    <i class="fa-solid fa-receipt shrink-0"></i>
+                                    <span class="truncate">Total Spent</span>
+                                </div>
+                                <p class="font-bold text-sm sm:text-base break-all">${formatCurrency(userExpensesTotal)}</p>
+                            </div>
+                            <div class="bg-black/10 backdrop-blur-sm rounded-2xl p-3 min-w-0">
+                                <div class="flex items-center space-x-1.5 text-emerald-100 text-xs mb-1 min-w-0">
+                                    <i class="fa-solid fa-circle-exclamation shrink-0"></i>
+                                    <span class="truncate">Excess Due</span>
+                                </div>
+                                <p class="font-bold text-sm sm:text-base break-all ${userExcessSpent > 0 ? 'text-amber-300' : 'text-white'}">${formatCurrency(userExcessSpent)}</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    ${userExcessSpent > 0 ? `
+                        <div class="bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900/60 rounded-3xl p-4 flex items-start space-x-3 w-full">
+                            <div class="w-9 h-9 rounded-2xl bg-rose-500/15 text-rose-600 dark:text-rose-400 flex items-center justify-center shrink-0 mt-0.5">
+                                <i class="fa-solid fa-triangle-exclamation text-sm"></i>
+                            </div>
+                            <div class="min-w-0 flex-1">
+                                <h4 class="text-xs font-bold text-rose-700 dark:text-rose-300 uppercase tracking-wider">Excess Spent Due: ${formatCurrency(userExcessSpent)}</h4>
+                                <p class="text-xs text-rose-600/80 dark:text-rose-400/80 mt-0.5">Your expenses exceeded your wallet balance. This amount will be automatically settled on your next wallet top-up from Admin.</p>
+                            </div>
+                        </div>
+                    ` : ''}
+
+                    <div class="space-y-3 mt-4 w-full">
+                        <div class="flex items-center justify-between px-1 pt-2">
+                            <h3 class="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Wallet Transaction History</h3>
+                            <span class="text-xs text-slate-400">${userTxns.length} Records</span>
+                        </div>
+
+                        ${userTxns.length === 0 ? `
+                            <div class="bg-white dark:bg-slate-900 rounded-3xl p-8 text-center border border-slate-200 dark:border-slate-800 shadow-sm w-full">
+                                <div class="w-14 h-14 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 rounded-2xl flex items-center justify-center mx-auto mb-3 text-xl">
+                                    <i class="fa-solid fa-wallet"></i>
+                                </div>
+                                <h4 class="font-semibold text-slate-700 dark:text-slate-300 mb-1">No Wallet History Yet</h4>
+                                <p class="text-xs text-slate-500">Top-ups and balance adjustments added by Admin will appear here.</p>
+                            </div>
+                        ` : userTxns.map(t => `
+                            <div class="bg-white dark:bg-slate-900 rounded-3xl p-5 border border-slate-200 dark:border-slate-800 shadow-sm flex items-center justify-between gap-3 w-full">
+                                <div class="flex items-start space-x-3.5 min-w-0 flex-1">
+                                    <div class="w-10 h-10 rounded-2xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0 mt-0.5">
+                                        <i class="fa-solid fa-arrow-down-long rotate-45"></i>
                                     </div>
-                                    <div class="flex items-center justify-between text-[10px] text-slate-400">
-                                        <span>${formatTimestamp(t.timestamp)}</span>
-                                        <span class="italic">By ${escapeHtml(t.performedBy)}</span>
+                                    <div class="min-w-0 flex-1">
+                                        <h4 class="font-semibold text-sm sm:text-base text-slate-900 dark:text-white break-words">${escapeHtml(t.title)}</h4>
+                                        <div class="flex items-center flex-wrap gap-1.5 text-xs text-slate-500 dark:text-slate-400 mt-1">
+                                            <span><i class="fa-regular fa-clock mr-1"></i>${formatTimestamp(t.timestamp)}</span>
+                                            <span>•</span>
+                                            <span class="italic">By ${escapeHtml(t.performedBy)}</span>
+                                        </div>
                                     </div>
                                 </div>
-                            `).join('')}
-                        </div>
-
-                        <button onclick="closeModal()" class="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-2xl shadow-md transition text-xs shrink-0">Close</button>
+                                <span class="font-bold text-base sm:text-lg text-emerald-600 dark:text-emerald-400 whitespace-nowrap shrink-0">+${formatCurrency(t.amount)}</span>
+                            </div>
+                        `).join('')}
                     </div>
                 </div>
             `;
@@ -983,7 +1102,7 @@
                 usersIcon.className = 'fa-solid fa-users';
                 usersLabel.textContent = 'Users';
             } else {
-                usersBtn.onclick = () => openUserWalletModal();
+                usersBtn.onclick = () => switchTab('wallet');
                 usersIcon.className = 'fa-solid fa-wallet';
                 usersLabel.textContent = 'Wallet';
             }
@@ -999,7 +1118,7 @@
             let activeTargetId = 'nav-btn-home';
             if (state.activeTab === 'home') activeTargetId = 'nav-btn-home';
             else if (state.activeTab === 'admin' || state.activeTab === 'analytics') activeTargetId = 'nav-btn-summary';
-            else if (state.activeTab === 'users' && isAdmin) activeTargetId = 'nav-btn-users';
+            else if ((state.activeTab === 'users' && isAdmin) || (state.activeTab === 'wallet' && !isAdmin)) activeTargetId = 'nav-btn-users';
             else if (state.activeTab === 'profile' || ['recycle', 'requests', 'userRecycle'].includes(state.activeTab)) activeTargetId = 'nav-btn-profile';
 
             const nav = document.getElementById('liquid-nav');
@@ -1039,11 +1158,7 @@
             const app = document.getElementById('app');
             if (!app) return;
             
-            if (state.darkMode) {
-                document.documentElement.classList.add('dark');
-            } else {
-                document.documentElement.classList.remove('dark');
-            }
+            applyTheme();
 
             // Show Simple Database Loading Screen while initial Firebase snapshot is loading
             if (state.isDbLoading) {
@@ -1074,10 +1189,10 @@
             if (state.activeTab === 'userRecycle') subTabTitle = 'Deleted Users';
 
             app.innerHTML = `
-                <header class="sticky top-0 z-40 bg-white/40 dark:bg-slate-900/40 backdrop-blur-xl border-b-2 border-white/40 dark:border-slate-600/60 px-4 sm:px-6 pt-3 pb-3 flex items-center justify-between w-full shadow-[0_8px_32px_0_rgba(0,0,0,0.1)] transition-colors duration-300">
+                <header class="sticky top-0 z-40 bg-white/75 dark:bg-slate-900/75 backdrop-blur-xl border-b border-slate-200/80 dark:border-slate-800 px-4 sm:px-6 pt-3 pb-3 flex items-center justify-between w-full shadow-sm transition-colors duration-300">
                     <div class="flex items-center space-x-3 min-w-0 flex-1 pr-2">
                         ${isSubTab ? `
-                            <button onclick="switchTab('profile')" class="w-9 h-9 rounded-2xl bg-white/30 dark:bg-slate-800/40 backdrop-blur-md flex items-center justify-center text-slate-700 dark:text-slate-200 hover:bg-white/50 dark:hover:bg-slate-700/60 transition border border-white/20 dark:border-slate-700/40 shrink-0" title="Back to Profile">
+                            <button onclick="switchTab('profile')" class="w-9 h-9 rounded-2xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-700 dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-700 transition border border-slate-200/60 dark:border-slate-700 shrink-0" title="Back to Profile">
                                 <i class="fa-solid fa-arrow-left text-sm"></i>
                             </button>
                         ` : `
@@ -1094,15 +1209,10 @@
                     </div>
                     
                     <div class="flex items-center space-x-2 shrink-0">
-                        ${!isAdmin ? `
-                        <button onclick="openUserWalletModal()" class="w-10 h-10 rounded-2xl bg-emerald-500/10 dark:bg-emerald-950/30 backdrop-blur-md flex items-center justify-center text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/20 transition border border-emerald-500/20 shadow-sm" title="My Wallet">
-                            <i class="fa-solid fa-wallet text-sm"></i>
+                        <button onclick="cycleThemeMode()" class="w-10 h-10 rounded-2xl bg-slate-100 dark:bg-slate-800/80 flex items-center justify-center text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition border border-slate-200/70 dark:border-slate-700/60 shadow-sm" title="${getThemeButtonTitle()}">
+                            <i class="fa-solid ${getThemeButtonIcon()} text-sm"></i>
                         </button>
-                        ` : ''}
-                        <button onclick="toggleDarkMode()" class="w-10 h-10 rounded-2xl bg-white/30 dark:bg-slate-800/40 backdrop-blur-md flex items-center justify-center text-slate-600 dark:text-slate-300 hover:bg-white/50 dark:hover:bg-slate-700/60 transition border border-white/20 dark:border-slate-700/40 shadow-sm">
-                            <i class="fa-solid ${state.darkMode ? 'fa-sun text-amber-400' : 'fa-moon text-slate-600'} text-sm"></i>
-                        </button>
-                        <button onclick="confirmLogout()" class="w-10 h-10 rounded-2xl bg-rose-500/10 dark:bg-rose-950/30 backdrop-blur-md flex items-center justify-center text-rose-600 dark:text-rose-400 hover:bg-rose-500/20 transition border border-rose-500/20 shadow-sm" title="Logout">
+                        <button onclick="confirmLogout()" class="w-10 h-10 rounded-2xl bg-rose-500/10 dark:bg-rose-950/40 flex items-center justify-center text-rose-600 dark:text-rose-400 hover:bg-rose-500/20 transition border border-rose-500/20 shadow-sm" title="Logout">
                             <i class="fa-solid fa-arrow-right-from-bracket text-sm"></i>
                         </button>
                     </div>
@@ -1148,7 +1258,13 @@
 
         function renderLoginPage() {
             return `
-                <div class="flex-1 flex flex-col justify-center px-4 py-8 max-w-sm mx-auto w-full">
+                <div class="flex-1 flex flex-col justify-center px-4 py-8 max-w-sm mx-auto w-full relative">
+                    <div class="absolute top-4 right-4">
+                        <button type="button" onclick="cycleThemeMode()" class="w-10 h-10 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm flex items-center justify-center text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition" title="${getThemeButtonTitle()}">
+                            <i class="fa-solid ${getThemeButtonIcon()} text-sm"></i>
+                        </button>
+                    </div>
+
                     <div class="text-center mb-6">
                         <div class="w-12 h-12 flex items-center justify-center mx-auto mb-2 logo-container">
                             <img src="https://clickfactoryphotography.com/wp-content/uploads/2022/04/crop-logo.gif" alt="Click Factory Logo" class="w-full h-full object-contain" onerror="this.src='https://placehold.co/40x40/4f46e5/ffffff?text=CF'">
@@ -1157,7 +1273,7 @@
                         <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Expense Management Portal</p>
                     </div>
 
-                    <div class="bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl py-8 px-6 shadow-2xl rounded-3xl border border-white/20 dark:border-slate-800 space-y-5 w-full">
+                    <div class="bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl py-8 px-6 shadow-2xl rounded-3xl border border-slate-200/80 dark:border-slate-800 space-y-5 w-full">
                         <form onsubmit="handleLoginSubmit(event)" class="space-y-4">
                             <div class="w-full">
                                 <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">Username</label>
@@ -1165,7 +1281,7 @@
                                     <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
                                         <i class="fa-solid fa-user text-sm"></i>
                                     </span>
-                                    <input type="text" id="login-username" required placeholder="Enter username" class="w-full pl-10 pr-4 py-3.5 bg-slate-50/50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 text-slate-900 dark:text-white">
+                                    <input type="text" id="login-username" required placeholder="Enter username" class="w-full pl-10 pr-4 py-3.5 bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 text-slate-900 dark:text-white">
                                 </div>
                             </div>
 
@@ -1178,7 +1294,7 @@
                                     <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
                                         <i class="fa-solid fa-lock text-sm"></i>
                                     </span>
-                                    <input type="password" id="login-password" required placeholder="••••••••" class="w-full pl-10 pr-12 py-3.5 bg-slate-50/50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 text-slate-900 dark:text-white">
+                                    <input type="password" id="login-password" required placeholder="••••••••" class="w-full pl-10 pr-12 py-3.5 bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 text-slate-900 dark:text-white">
                                     <button type="button" onclick="togglePasswordVisibility('login-password', 'toggle-login-pass-icon')" class="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 focus:outline-none">
                                         <i id="toggle-login-pass-icon" class="fa-solid fa-eye text-sm"></i>
                                     </button>
@@ -1206,22 +1322,22 @@
                         <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Request a recovery code from Admin</p>
                     </div>
 
-                    <div class="bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl py-8 px-6 shadow-2xl rounded-3xl border border-white/20 dark:border-slate-800 space-y-4 w-full">
+                    <div class="bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl py-8 px-6 shadow-2xl rounded-3xl border border-slate-200/80 dark:border-slate-800 space-y-4 w-full">
                         <form onsubmit="handleForgotPasswordSubmit(event)" class="space-y-4">
                             <div class="w-full">
                                 <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">Username</label>
-                                <input type="text" id="forgot-username" required placeholder="Enter your username" class="w-full px-4 py-3.5 bg-slate-50/50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 text-slate-900 dark:text-white">
+                                <input type="text" id="forgot-username" required placeholder="Enter your username" class="w-full px-4 py-3.5 bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 text-slate-900 dark:text-white">
                             </div>
 
                             <div class="w-full">
                                 <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">Admin Auth Code (6-digit)</label>
-                                <input type="text" id="forgot-auth-code" maxlength="6" placeholder="Enter code provided by Admin" class="w-full px-4 py-3.5 bg-slate-50/50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm tracking-widest text-center font-bold focus:outline-none focus:ring-2 focus:ring-indigo-500 text-slate-900 dark:text-white">
+                                <input type="text" id="forgot-auth-code" maxlength="6" placeholder="Enter code provided by Admin" class="w-full px-4 py-3.5 bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm tracking-widest text-center font-bold focus:outline-none focus:ring-2 focus:ring-indigo-500 text-slate-900 dark:text-white">
                             </div>
 
                             <div class="w-full">
                                 <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">New Password</label>
                                 <div class="relative w-full">
-                                    <input type="password" id="forgot-new-password" required placeholder="Enter new password" class="w-full pl-4 pr-12 py-3.5 bg-slate-50/50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 text-slate-900 dark:text-white">
+                                    <input type="password" id="forgot-new-password" required placeholder="Enter new password" class="w-full pl-4 pr-12 py-3.5 bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 text-slate-900 dark:text-white">
                                     <button type="button" onclick="togglePasswordVisibility('forgot-new-password', 'toggle-forgot-pass-icon')" class="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 focus:outline-none">
                                         <i id="toggle-forgot-pass-icon" class="fa-solid fa-eye text-sm"></i>
                                     </button>
@@ -1360,16 +1476,12 @@
                 case 'recycle': return state.currentUser.role === 'admin' ? renderRecycleBinTab() : renderHomeTab();
                 case 'userRecycle': return state.currentUser.role === 'admin' ? renderUserRecycleBinTab() : renderHomeTab();
                 case 'requests': return state.currentUser.role === 'admin' ? renderPasswordRequestsTab() : renderHomeTab();
-                case 'users': return state.currentUser.role === 'admin' ? renderUserManagementTab() : renderHomeTab();
+                case 'users': return state.currentUser.role === 'admin' ? renderUserManagementTab() : renderUserWalletTab();
+                case 'wallet': return renderUserWalletTab();
                 case 'analytics': return renderUserAnalyticsTab();
                 case 'profile': return renderProfileTab();
                 default: return renderHomeTab();
             }
-        }
-
-        function toggleDarkMode() {
-            state.darkMode = !state.darkMode;
-            render();
         }
 
         function toggleDateFilter() {
@@ -2564,9 +2676,34 @@
                         </div>
                         <h2 class="font-bold text-lg text-slate-900 dark:text-white truncate">${state.currentUser.name}</h2>
                         <p class="text-xs text-slate-500 dark:text-slate-400 mb-2 truncate">@${state.currentUser.username}</p>
-                        <span class="inline-block px-3.5 py-1 rounded-full text-xs font-semibold ${isAdmin ? 'bg-indigo-50 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-400 border border-indigo-200' : 'bg-emerald-50 text-emerald-600 border border-emerald-200'}">
+                        <span class="inline-block px-3.5 py-1 rounded-full text-xs font-semibold ${isAdmin ? 'bg-indigo-50 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-800' : 'bg-emerald-50 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800'}">
                             ${isAdmin ? 'Administrator' : 'Regular User'}
                         </span>
+                    </div>
+
+                    <!-- Appearance / Theme Mode Selector Card -->
+                    <div class="bg-white dark:bg-slate-900 rounded-3xl p-5 sm:p-6 border border-slate-200 dark:border-slate-800 shadow-sm space-y-3 w-full">
+                        <div class="flex items-center justify-between px-1">
+                            <div>
+                                <h3 class="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Appearance</h3>
+                                <p class="text-[11px] text-slate-400 dark:text-slate-500 mt-0.5">Choose Light, Dark, or match device settings</p>
+                            </div>
+                            <span class="text-[11px] font-semibold text-indigo-600 dark:text-indigo-400 capitalize">${state.themeMode === 'system' ? `System (${state.darkMode ? 'Dark' : 'Light'})` : state.themeMode}</span>
+                        </div>
+                        <div class="grid grid-cols-3 gap-2 bg-slate-100 dark:bg-slate-800/80 p-1.5 rounded-2xl">
+                            <button type="button" onclick="setThemeMode('light')" class="py-2.5 px-3 rounded-xl text-xs font-semibold flex items-center justify-center space-x-1.5 transition ${state.themeMode === 'light' ? 'bg-white dark:bg-slate-900 text-amber-600 shadow-sm' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'}">
+                                <i class="fa-solid fa-sun"></i>
+                                <span>Light</span>
+                            </button>
+                            <button type="button" onclick="setThemeMode('dark')" class="py-2.5 px-3 rounded-xl text-xs font-semibold flex items-center justify-center space-x-1.5 transition ${state.themeMode === 'dark' ? 'bg-white dark:bg-slate-900 text-indigo-500 dark:text-indigo-400 shadow-sm' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'}">
+                                <i class="fa-solid fa-moon"></i>
+                                <span>Dark</span>
+                            </button>
+                            <button type="button" onclick="setThemeMode('system')" class="py-2.5 px-3 rounded-xl text-xs font-semibold flex items-center justify-center space-x-1.5 transition ${state.themeMode === 'system' ? 'bg-white dark:bg-slate-900 text-indigo-600 dark:text-indigo-400 shadow-sm' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'}">
+                                <i class="fa-solid fa-circle-half-stroke"></i>
+                                <span>System</span>
+                            </button>
+                        </div>
                     </div>
 
                     ${isAdmin ? `
