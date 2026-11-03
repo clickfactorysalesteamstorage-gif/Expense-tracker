@@ -412,6 +412,7 @@
         const LOCAL_STORAGE_KEY = 'click_factory_current_user_v23';
         const THEME_STORAGE_KEY = 'click_factory_theme_v1';
         const SOUND_STORAGE_KEY = 'click_factory_sound_v1';
+        const SOUND_VOL_STORAGE_KEY = 'click_factory_sound_vol_v1';
         const CURRENT_CLIENT_APP_VERSION = '1.1.2';
 
         let state = {
@@ -436,6 +437,7 @@
             searchQuery: '',
             themeMode: localStorage.getItem(THEME_STORAGE_KEY) || 'system', // 'light' | 'dark' | 'system'
             soundEnabled: localStorage.getItem(SOUND_STORAGE_KEY) !== 'false',
+            soundVolume: parseInt(localStorage.getItem(SOUND_VOL_STORAGE_KEY) || '80', 10),
             darkMode: false,
             editingExpenseId: null,
             tempBillData: null,
@@ -447,8 +449,35 @@
         let knownNotificationIds = new Set();
         let initialNotificationsLoaded = false;
         let sharedAudioCtx = null;
+        let swRegistration = null;
 
-        // Unlock Web Audio API context on first user interaction (required by mobile browsers)
+        // Register Inline Service Worker so system notifications use OS Ringer/Notification Volume
+        (function registerNotificationServiceWorker() {
+            if ('serviceWorker' in navigator) {
+                const swCode = `
+                    self.addEventListener('install', () => self.skipWaiting());
+                    self.addEventListener('activate', (e) => e.waitUntil(clients.claim()));
+                    self.addEventListener('notificationclick', (e) => {
+                        e.notification.close();
+                        e.waitUntil(
+                            clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
+                                if (clientList.length > 0) return clientList[0].focus();
+                                return clients.openWindow('.');
+                            })
+                        );
+                    });
+                `;
+                try {
+                    const blob = new Blob([swCode], { type: 'application/javascript' });
+                    const swUrl = URL.createObjectURL(blob);
+                    navigator.serviceWorker.register(swUrl).then(reg => {
+                        swRegistration = reg;
+                    }).catch(() => {});
+                } catch (e) {}
+            }
+        })();
+
+        // Unlock Web Audio API context on first user interaction
         function unlockAudioContext() {
             try {
                 const AudioCtx = window.AudioContext || window.webkitAudioContext;
@@ -465,9 +494,21 @@
         document.addEventListener('click', unlockAudioContext, { once: true });
         document.addEventListener('touchstart', unlockAudioContext, { once: true });
 
-        // Synthesize a subtle chime sound effect using the Web Audio API
-        function playNotificationChime(type = 'wallet_credit') {
-            if (!state.soundEnabled) return;
+        // Trigger OS Ringer/Vibrate & Web Audio Chime
+        function playNotificationChime(type = 'wallet_credit', forcePreview = false) {
+            if (!state.soundEnabled && !forcePreview) return;
+
+            // 1. Trigger Native Device Vibration (respects phone Ringer/Vibrate mode)
+            if ('vibrate' in navigator) {
+                try {
+                    navigator.vibrate(type === 'excess_spent' ? [180, 90, 220] : [120, 60, 120]);
+                } catch (e) {}
+            }
+
+            // 2. Play Web Audio Chime scaled by user's selected Chime Volume (0-100%)
+            const volRatio = Math.max(0, Math.min(100, Number(state.soundVolume || 80))) / 100;
+            if (volRatio <= 0.01) return;
+
             try {
                 const AudioCtx = window.AudioContext || window.webkitAudioContext;
                 if (!AudioCtx) return;
@@ -479,6 +520,7 @@
                 }
 
                 const now = sharedAudioCtx.currentTime;
+                const peakGain = 0.28 * volRatio;
 
                 if (type === 'excess_spent') {
                     // Alert two-tone chime (E5 -> C5) for excess spending
@@ -491,7 +533,7 @@
                         osc.frequency.setValueAtTime(freq, startTime);
 
                         gain.gain.setValueAtTime(0.0001, startTime);
-                        gain.gain.exponentialRampToValueAtTime(0.16, startTime + 0.02);
+                        gain.gain.exponentialRampToValueAtTime(peakGain, startTime + 0.02);
                         gain.gain.exponentialRampToValueAtTime(0.0001, startTime + 0.36);
 
                         osc.connect(gain);
@@ -510,7 +552,7 @@
                         osc.frequency.setValueAtTime(freq, startTime);
 
                         gain.gain.setValueAtTime(0.0001, startTime);
-                        gain.gain.exponentialRampToValueAtTime(0.15, startTime + 0.02);
+                        gain.gain.exponentialRampToValueAtTime(peakGain, startTime + 0.02);
                         gain.gain.exponentialRampToValueAtTime(0.0001, startTime + 0.45);
 
                         osc.connect(gain);
@@ -528,10 +570,40 @@
             state.soundEnabled = !state.soundEnabled;
             localStorage.setItem(SOUND_STORAGE_KEY, String(state.soundEnabled));
             if (state.soundEnabled) {
-                playNotificationChime('wallet_credit');
-                showToast('Notification chime enabled', 'success');
+                if ('Notification' in window && Notification.permission === 'default') {
+                    Notification.requestPermission().catch(() => {});
+                }
+                playNotificationChime('wallet_credit', true);
+                showToast('Ringer & Chime alerts enabled', 'success');
             } else {
-                showToast('Notification chime muted', 'info');
+                showToast('Notification alerts muted', 'info');
+            }
+            render();
+        }
+
+        function handleSoundVolumeChange(val) {
+            const numVal = parseInt(val, 10);
+            state.soundVolume = isNaN(numVal) ? 80 : numVal;
+            localStorage.setItem(SOUND_VOL_STORAGE_KEY, String(state.soundVolume));
+            const labelEl = document.getElementById('sound-vol-label');
+            if (labelEl) labelEl.textContent = `${state.soundVolume}%`;
+        }
+
+        function previewSoundVolume() {
+            playNotificationChime('wallet_credit', true);
+        }
+
+        async function requestSystemRingerPermission() {
+            if (!('Notification' in window)) {
+                showToast('System notifications are not supported on this browser.', 'error');
+                return;
+            }
+            const perm = await Notification.requestPermission();
+            if (perm === 'granted') {
+                sendBrowserNotification('Click Factory Alerts Active', 'Notifications will now use your device Ringer Volume.', 'wallet_credit');
+                showToast('Device Ringer notifications enabled!', 'success');
+            } else {
+                showToast('Permission denied in browser settings.', 'error');
             }
             render();
         }
@@ -633,15 +705,27 @@
                 .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
         }
 
-        // Trigger Browser/System Notification if permitted
-        function sendBrowserNotification(title, body) {
+        // Trigger Native OS Notification (Uses Phone's RINGER / NOTIFICATION VOLUME & Vibrate)
+        function sendBrowserNotification(title, body, type = 'wallet_credit') {
+            if (!state.soundEnabled) return;
+            const options = {
+                body: body,
+                icon: 'https://clickfactoryphotography.com/wp-content/uploads/2022/04/crop-logo.gif',
+                badge: 'https://clickfactoryphotography.com/wp-content/uploads/2022/04/crop-logo.gif',
+                vibrate: type === 'excess_spent' ? [200, 100, 250] : [150, 80, 150],
+                silent: false, // Explicitly instructs Android/iOS to play default system ringer/notification tone
+                renotify: true,
+                tag: 'cf-notif-' + Date.now()
+            };
+
             if ('Notification' in window && Notification.permission === 'granted') {
-                try {
-                    new Notification(title, {
-                        body: body,
-                        icon: 'https://clickfactoryphotography.com/wp-content/uploads/2022/04/crop-logo.gif'
+                if (swRegistration && typeof swRegistration.showNotification === 'function') {
+                    swRegistration.showNotification(title, options).catch(() => {
+                        try { new Notification(title, options); } catch (e) {}
                     });
-                } catch (e) {}
+                } else {
+                    try { new Notification(title, options); } catch (e) {}
+                }
             }
         }
 
@@ -708,7 +792,7 @@
                 if (!state.isDbLoading) render();
             }, (err) => console.warn("Transactions listener notice:", err));
 
-            // Real-Time Notifications Listener with Web Audio Chime
+            // Real-Time Notifications Listener with System Ringer Notification & Chime
             onSnapshot(collection(db, 'notifications'), (snapshot) => {
                 const allNotifs = snapshot.docs.map(docSnap => docSnap.data());
                 
@@ -719,9 +803,10 @@
                             const isForMe = (isAdmin && n.recipientRole === 'admin') || (n.recipientId === state.currentUser.id);
                             if (isForMe && !n.read) {
                                 const toastType = n.type === 'excess_spent' ? 'error' : 'success';
+                                // Trigger OS System Notification (uses Ringer Volume) + In-app Chime
+                                sendBrowserNotification(n.title, n.message, n.type);
                                 playNotificationChime(n.type);
                                 showToast(`${n.title}: ${n.message}`, toastType);
-                                sendBrowserNotification(n.title, n.message);
                             }
                         }
                     });
@@ -2975,6 +3060,7 @@
             const isAdmin = state.currentUser.role === 'admin';
             const pendingRequestsCount = state.passwordRequests.filter(r => r.status === 'pending').length;
             const autoDeleteOn = state.appSettings && state.appSettings.autoDeleteEnabled;
+            const notifPermission = ('Notification' in window) ? Notification.permission : 'unsupported';
 
             return `
                 <div class="space-y-4 w-full max-w-full">
@@ -2989,7 +3075,7 @@
                         </span>
                     </div>
 
-                    <!-- Appearance & Sound Settings Card -->
+                    <!-- Appearance & Ringer Sound Settings Card -->
                     <div class="bg-white dark:bg-slate-900 rounded-3xl p-5 sm:p-6 border border-slate-200 dark:border-slate-800 shadow-sm space-y-4 w-full">
                         <div class="space-y-3">
                             <div class="flex items-center justify-between px-1">
@@ -3015,17 +3101,46 @@
                             </div>
                         </div>
 
-                        <div class="flex items-center justify-between pt-3 border-t border-slate-100 dark:border-slate-800 px-1">
-                            <div>
-                                <h4 class="font-semibold text-xs text-slate-900 dark:text-white flex items-center space-x-2">
-                                    <i class="fa-solid ${state.soundEnabled ? 'fa-volume-high text-indigo-500' : 'fa-volume-xmark text-slate-400'}"></i>
-                                    <span>Notification Chime Sound</span>
-                                </h4>
-                                <p class="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">Play a subtle chime when a new notification arrives</p>
+                        <div class="pt-3 border-t border-slate-100 dark:border-slate-800 space-y-3 px-1">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <h4 class="font-semibold text-xs text-slate-900 dark:text-white flex items-center space-x-2">
+                                        <i class="fa-solid ${state.soundEnabled ? 'fa-bell text-indigo-500' : 'fa-bell-slash text-slate-400'}"></i>
+                                        <span>Ringer & Notification Sound</span>
+                                    </h4>
+                                    <p class="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">Uses system notification ringer, vibration & chime</p>
+                                </div>
+                                <button type="button" onclick="toggleNotificationSound()" class="relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${state.soundEnabled ? 'bg-indigo-600' : 'bg-slate-300 dark:bg-slate-700'}">
+                                    <span class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-lg ring-0 transition duration-200 ease-in-out ${state.soundEnabled ? 'translate-x-5' : 'translate-x-0'}"></span>
+                                </button>
                             </div>
-                            <button type="button" onclick="toggleNotificationSound()" class="relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${state.soundEnabled ? 'bg-indigo-600' : 'bg-slate-300 dark:bg-slate-700'}">
-                                <span class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-lg ring-0 transition duration-200 ease-in-out ${state.soundEnabled ? 'translate-x-5' : 'translate-x-0'}"></span>
-                            </button>
+
+                            ${state.soundEnabled ? `
+                                <div class="bg-slate-50 dark:bg-slate-800/60 p-3 rounded-2xl space-y-2.5">
+                                    <div class="flex items-center justify-between text-xs">
+                                        <span class="font-medium text-slate-600 dark:text-slate-300 flex items-center gap-1.5">
+                                            <i class="fa-solid fa-volume-high text-indigo-500"></i>
+                                            <span>Chime Level</span>
+                                        </span>
+                                        <span id="sound-vol-label" class="font-bold text-indigo-600 dark:text-indigo-400">${state.soundVolume}%</span>
+                                    </div>
+                                    <div class="flex items-center space-x-3">
+                                        <input type="range" min="10" max="100" step="5" value="${state.soundVolume}" oninput="handleSoundVolumeChange(this.value)" onchange="previewSoundVolume()" class="w-full accent-indigo-600 cursor-pointer h-1.5 bg-slate-200 dark:bg-slate-700 rounded-lg">
+                                        <button type="button" onclick="previewSoundVolume()" class="px-2.5 py-1 bg-indigo-50 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-400 rounded-xl text-[10px] font-semibold border border-indigo-200 dark:border-indigo-800 shrink-0">Test</button>
+                                    </div>
+                                    ${notifPermission !== 'granted' && notifPermission !== 'unsupported' ? `
+                                        <button type="button" onclick="requestSystemRingerPermission()" class="w-full py-2 px-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-[11px] font-semibold transition flex items-center justify-center space-x-1.5 shadow-sm">
+                                            <i class="fa-solid fa-mobile-screen-button"></i>
+                                            <span>Enable OS Ringer Channel Permission</span>
+                                        </button>
+                                    ` : `
+                                        <p class="text-[10px] text-emerald-600 dark:text-emerald-400 font-medium flex items-center gap-1">
+                                            <i class="fa-solid fa-circle-check"></i>
+                                            <span>OS Ringer & Vibration channel active</span>
+                                        </p>
+                                    `}
+                                </div>
+                            ` : ''}
                         </div>
                     </div>
 
