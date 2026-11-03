@@ -96,6 +96,16 @@
             display: none;
         }
 
+        /* Database Loading Progress Bar Animation */
+        @keyframes loadingBar {
+            0% { transform: translateX(-100%); }
+            50% { transform: translateX(0%); }
+            100% { transform: translateX(100%); }
+        }
+        .animate-loading-bar {
+            animation: loadingBar 1.6s infinite ease-in-out;
+        }
+
         /* Persistent Liquid Dock Styles */
         .liquid-nav-container {
             position: fixed;
@@ -273,21 +283,33 @@
 </head>
 <body class="bg-slate-900 text-slate-800 dark:text-slate-100 flex flex-col justify-center items-center h-full selection:bg-indigo-500 selection:text-white">
 
+    <!-- Initial App Container with Database Loading Screen -->
     <div id="app" class="app-container w-full flex flex-col relative dark:bg-slate-950 transition-colors duration-200">
-        <div class="flex-1 flex flex-col items-center justify-center p-6 text-center animate-fadeIn">
-            <div class="relative w-14 h-14 flex items-center justify-center mx-auto mb-6 logo-container">
-                <div class="absolute inset-0 rounded-2xl bg-indigo-500/20 dark:bg-indigo-500/10 animate-ping"></div>
-                <img src="https://clickfactoryphotography.com/wp-content/uploads/2022/04/crop-logo.gif" alt="Click Factory Logo" class="relative w-10 h-10 object-contain drop-shadow-md animate-pulse" onerror="this.src='https://placehold.co/40x40/4f46e5/ffffff?text=CF'">
+        <div class="flex-1 flex flex-col items-center justify-center p-6 text-center select-none">
+            <div class="relative w-20 h-20 flex items-center justify-center mx-auto mb-6 logo-container">
+                <div class="absolute inset-0 rounded-3xl bg-indigo-500/20 dark:bg-indigo-500/10 animate-ping"></div>
+                <div class="relative w-16 h-16 rounded-2xl bg-white dark:bg-slate-900 shadow-xl border border-slate-200/80 dark:border-slate-800 flex items-center justify-center p-2.5">
+                    <img src="https://clickfactoryphotography.com/wp-content/uploads/2022/04/crop-logo.gif" alt="Click Factory Logo" class="w-full h-full object-contain" onerror="this.src='https://placehold.co/40x40/4f46e5/ffffff?text=CF'">
+                </div>
             </div>
             
-            <div class="flex items-center space-x-2 mb-3">
-                <div class="w-2 h-2 rounded-full bg-indigo-600 animate-bounce [animation-delay:-0.3s]"></div>
-                <div class="w-2 h-2 rounded-full bg-indigo-600 animate-bounce [animation-delay:-0.15s]"></div>
-                <div class="w-2 h-2 rounded-full bg-indigo-600 animate-bounce"></div>
-            </div>
+            <h2 class="font-bold text-lg text-slate-900 dark:text-white tracking-tight">Click Factory</h2>
+            <p class="text-xs font-medium text-indigo-600 dark:text-indigo-400 mt-0.5">Expense Management System</p>
 
-            <h2 class="font-bold text-base text-slate-800 dark:text-white tracking-tight">Click Factory</h2>
-            <p class="text-xs font-medium text-slate-500 dark:text-slate-400 mt-1">Loading Expense Tracker...</p>
+            <!-- Database Sync Progress Card -->
+            <div class="mt-8 w-full max-w-xs bg-white dark:bg-slate-900/90 border border-slate-200/80 dark:border-slate-800 rounded-2xl p-4 shadow-sm">
+                <div class="flex items-center justify-between text-xs mb-2.5">
+                    <span class="font-semibold text-slate-700 dark:text-slate-200 flex items-center gap-2">
+                        <i class="fa-solid fa-database text-indigo-500 animate-bounce"></i>
+                        <span id="db-loading-status">Connecting to database...</span>
+                    </span>
+                    <i class="fa-solid fa-circle-notch fa-spin text-indigo-600 dark:text-indigo-400 text-xs"></i>
+                </div>
+                <div class="w-full h-1.5 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+                    <div class="w-full h-full bg-gradient-to-r from-indigo-500 via-violet-500 to-indigo-500 rounded-full animate-loading-bar"></div>
+                </div>
+                <p id="db-loading-subtext" class="text-[10px] text-slate-400 dark:text-slate-500 mt-2 text-left">Verifying cloud collections & user wallets</p>
+            </div>
         </div>
     </div>
 
@@ -351,6 +373,9 @@
 
         async function initializeData() {
             try {
+                if (typeof window.updateDbLoadingStatus === 'function') {
+                    window.updateDbLoadingStatus('Checking user accounts...', 'Initializing cloud database records');
+                }
                 const usersSnap = await getDocs(collection(db, 'users'));
                 if (usersSnap.empty) {
                     const defaultUsers = [
@@ -373,13 +398,13 @@
             }
         }
 
-        // Start listeners & trigger immediate UI render
+        // Start listeners & wait for initial database snapshot before dismissing loading screen
         initializeData().finally(() => {
+            if (typeof window.updateDbLoadingStatus === 'function') {
+                window.updateDbLoadingStatus('Syncing expense records...', 'Fetching latest transactions from cloud');
+            }
             if (typeof window.startAppListeners === 'function') {
                 window.startAppListeners();
-            }
-            if (typeof window.renderApp === 'function') {
-                window.renderApp();
             }
         });
     </script>
@@ -389,6 +414,9 @@
         const CURRENT_CLIENT_APP_VERSION = '1.1.2';
 
         let state = {
+            isDbLoading: true,
+            dbLoadingText: 'Connecting to database...',
+            dbLoadingSubtext: 'Verifying cloud collections & user wallets',
             currentUser: null,
             adminPassword: 'adminpassword',
             users: [],
@@ -414,6 +442,35 @@
             lastClearedExpensesCache: null
         };
 
+        let initialSyncFlags = {
+            users: false,
+            expenses: false
+        };
+
+        window.updateDbLoadingStatus = function(mainText, subText) {
+            state.dbLoadingText = mainText;
+            if (subText) state.dbLoadingSubtext = subText;
+            const statusEl = document.getElementById('db-loading-status');
+            const subEl = document.getElementById('db-loading-subtext');
+            if (statusEl) statusEl.textContent = mainText;
+            if (subEl && subText) subEl.textContent = subText;
+        };
+
+        function checkInitialSyncComplete() {
+            if (state.isDbLoading && initialSyncFlags.users && initialSyncFlags.expenses) {
+                state.isDbLoading = false;
+                render();
+            }
+        }
+
+        // Safety fallback: if offline or slow network (>6 seconds), proceed to app
+        setTimeout(() => {
+            if (state.isDbLoading) {
+                state.isDbLoading = false;
+                render();
+            }
+        }, 6000);
+
         const savedUser = localStorage.getItem(LOCAL_STORAGE_KEY);
         if (savedUser) {
             try { state.currentUser = JSON.parse(savedUser); } catch(e) {}
@@ -428,11 +485,11 @@
         }, false);
 
         document.addEventListener('touchend', (e) => {
-            if (!state.currentUser) return;
+            if (!state.currentUser || state.isDbLoading) return;
             const touchEndX = e.changedTouches[0].screenX;
             const touchEndY = e.changedTouches[0].screenY;
             const diffX = touchEndX - touchStartX;
-            const diffY = Math.abs(touchEndX - touchStartY);
+            const diffY = Math.abs(touchEndY - touchStartY);
 
             if (touchStartX < 50 && diffX > 80 && diffY < 100) {
                 if (['recycle', 'requests', 'userRecycle'].includes(state.activeTab)) {
@@ -454,8 +511,17 @@
                         localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(freshUser));
                     }
                 }
-                render();
-            }, (err) => console.warn("Users listener notice:", err));
+                initialSyncFlags.users = true;
+                if (state.isDbLoading) {
+                    checkInitialSyncComplete();
+                } else {
+                    render();
+                }
+            }, (err) => {
+                console.warn("Users listener notice:", err);
+                initialSyncFlags.users = true;
+                checkInitialSyncComplete();
+            });
 
             onSnapshot(collection(db, 'settings'), (snapshot) => {
                 snapshot.docs.forEach(docSnap => {
@@ -463,12 +529,12 @@
                         state.appSettings = docSnap.data();
                     }
                 });
-                render();
+                if (!state.isDbLoading) render();
             }, (err) => console.warn("Settings listener notice:", err));
 
             onSnapshot(collection(db, 'walletTransactions'), (snapshot) => {
                 state.walletTransactions = snapshot.docs.map(docSnap => docSnap.data());
-                render();
+                if (!state.isDbLoading) render();
             }, (err) => console.warn("Transactions listener notice:", err));
 
             onSnapshot(collection(db, 'expenses'), async (snapshot) => {
@@ -499,12 +565,21 @@
                 }
 
                 state.expenses = allExpenses;
-                render();
-            }, (err) => console.warn("Expenses listener notice:", err));
+                initialSyncFlags.expenses = true;
+                if (state.isDbLoading) {
+                    checkInitialSyncComplete();
+                } else {
+                    render();
+                }
+            }, (err) => {
+                console.warn("Expenses listener notice:", err);
+                initialSyncFlags.expenses = true;
+                checkInitialSyncComplete();
+            });
 
             onSnapshot(collection(db, 'recycleBin'), (snapshot) => {
                 state.recycleBin = snapshot.docs.map(docSnap => docSnap.data());
-                render();
+                if (!state.isDbLoading) render();
             }, (err) => console.warn("Recycle bin listener notice:", err));
 
             onSnapshot(collection(db, 'userRecycleBin'), async (snapshot) => {
@@ -532,14 +607,44 @@
                 }
 
                 state.userRecycleBin = deletedUsers;
-                render();
+                if (!state.isDbLoading) render();
             }, (err) => console.warn("User recycle bin listener notice:", err));
 
             onSnapshot(collection(db, 'passwordRequests'), (snapshot) => {
                 state.passwordRequests = snapshot.docs.map(docSnap => docSnap.data());
-                render();
+                if (!state.isDbLoading) render();
             }, (err) => console.warn("Requests listener notice:", err));
         };
+
+        function renderDatabaseLoadingScreen() {
+            return `
+                <div class="flex-1 flex flex-col items-center justify-center p-6 text-center select-none">
+                    <div class="relative w-20 h-20 flex items-center justify-center mx-auto mb-6 logo-container">
+                        <div class="absolute inset-0 rounded-3xl bg-indigo-500/20 dark:bg-indigo-500/10 animate-ping"></div>
+                        <div class="relative w-16 h-16 rounded-2xl bg-white dark:bg-slate-900 shadow-xl border border-slate-200/80 dark:border-slate-800 flex items-center justify-center p-2.5">
+                            <img src="https://clickfactoryphotography.com/wp-content/uploads/2022/04/crop-logo.gif" alt="Click Factory Logo" class="w-full h-full object-contain" onerror="this.src='https://placehold.co/40x40/4f46e5/ffffff?text=CF'">
+                        </div>
+                    </div>
+                    
+                    <h2 class="font-bold text-lg text-slate-900 dark:text-white tracking-tight">Click Factory</h2>
+                    <p class="text-xs font-medium text-indigo-600 dark:text-indigo-400 mt-0.5">Expense Management System</p>
+
+                    <div class="mt-8 w-full max-w-xs bg-white dark:bg-slate-900/90 border border-slate-200/80 dark:border-slate-800 rounded-2xl p-4 shadow-sm">
+                        <div class="flex items-center justify-between text-xs mb-2.5">
+                            <span class="font-semibold text-slate-700 dark:text-slate-200 flex items-center gap-2">
+                                <i class="fa-solid fa-database text-indigo-500 animate-bounce"></i>
+                                <span id="db-loading-status">${escapeHtml(state.dbLoadingText)}</span>
+                            </span>
+                            <i class="fa-solid fa-circle-notch fa-spin text-indigo-600 dark:text-indigo-400 text-xs"></i>
+                        </div>
+                        <div class="w-full h-1.5 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+                            <div class="w-full h-full bg-gradient-to-r from-indigo-500 via-violet-500 to-indigo-500 rounded-full animate-loading-bar"></div>
+                        </div>
+                        <p id="db-loading-subtext" class="text-[10px] text-slate-400 dark:text-slate-500 mt-2 text-left">${escapeHtml(state.dbLoadingSubtext)}</p>
+                    </div>
+                </div>
+            `;
+        }
 
         function showToast(message, type = 'success', undoCallback = null) {
             const container = document.getElementById('toast-container');
@@ -909,7 +1014,7 @@
             const navWrapper = document.getElementById('persistent-nav-wrapper');
             if (!navWrapper) return;
 
-            if (!state.currentUser) {
+            if (!state.currentUser || state.isDbLoading) {
                 navWrapper.classList.add('hidden');
                 navWrapper.style.display = 'none';
                 return;
@@ -990,6 +1095,17 @@
                 document.documentElement.classList.add('dark');
             } else {
                 document.documentElement.classList.remove('dark');
+            }
+
+            // Show Database Loading Screen while initial Firebase snapshot is loading
+            if (state.isDbLoading) {
+                const navWrapper = document.getElementById('persistent-nav-wrapper');
+                if (navWrapper) {
+                    navWrapper.classList.add('hidden');
+                    navWrapper.style.display = 'none';
+                }
+                app.innerHTML = renderDatabaseLoadingScreen();
+                return;
             }
 
             if (!state.currentUser) {
@@ -2691,7 +2807,7 @@
         window.addEventListener('resize', syncPersistentNavbar);
         window.addEventListener('orientationchange', () => setTimeout(syncPersistentNavbar, 100));
         
-        // Initial render execution on DOM load
+        // Initial render execution on DOM load (keeps Database Loading Screen active until Firebase responds)
         document.addEventListener('DOMContentLoaded', () => {
             render();
         });
