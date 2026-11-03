@@ -96,14 +96,16 @@
             display: none;
         }
 
-        /* Database Loading Progress Bar Animation */
-        @keyframes loadingBar {
-            0% { transform: translateX(-100%); }
-            50% { transform: translateX(0%); }
-            100% { transform: translateX(100%); }
+        /* Simple Clean Spinner Animation */
+        @keyframes simple-spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
-        .animate-loading-bar {
-            animation: loadingBar 1.6s infinite ease-in-out;
+        .simple-spinner {
+            border: 3px solid rgba(99, 102, 241, 0.15);
+            border-top-color: #4f46e5;
+            border-radius: 50%;
+            animation: simple-spin 0.8s linear infinite;
         }
 
         /* Persistent Liquid Dock Styles */
@@ -283,33 +285,14 @@
 </head>
 <body class="bg-slate-900 text-slate-800 dark:text-slate-100 flex flex-col justify-center items-center h-full selection:bg-indigo-500 selection:text-white">
 
-    <!-- Initial App Container with Database Loading Screen -->
+    <!-- Initial App Container with Simple Loading Screen -->
     <div id="app" class="app-container w-full flex flex-col relative dark:bg-slate-950 transition-colors duration-200">
         <div class="flex-1 flex flex-col items-center justify-center p-6 text-center select-none">
-            <div class="relative w-20 h-20 flex items-center justify-center mx-auto mb-6 logo-container">
-                <div class="absolute inset-0 rounded-3xl bg-indigo-500/20 dark:bg-indigo-500/10 animate-ping"></div>
-                <div class="relative w-16 h-16 rounded-2xl bg-white dark:bg-slate-900 shadow-xl border border-slate-200/80 dark:border-slate-800 flex items-center justify-center p-2.5">
-                    <img src="https://clickfactoryphotography.com/wp-content/uploads/2022/04/crop-logo.gif" alt="Click Factory Logo" class="w-full h-full object-contain" onerror="this.src='https://placehold.co/40x40/4f46e5/ffffff?text=CF'">
-                </div>
+            <div class="relative w-16 h-16 flex items-center justify-center mx-auto mb-4">
+                <div class="absolute inset-0 simple-spinner"></div>
+                <img src="https://clickfactoryphotography.com/wp-content/uploads/2022/04/crop-logo.gif" alt="Click Factory Logo" class="w-9 h-9 object-contain" onerror="this.src='https://placehold.co/40x40/4f46e5/ffffff?text=CF'">
             </div>
-            
-            <h2 class="font-bold text-lg text-slate-900 dark:text-white tracking-tight">Click Factory</h2>
-            <p class="text-xs font-medium text-indigo-600 dark:text-indigo-400 mt-0.5">Expense Management System</p>
-
-            <!-- Database Sync Progress Card -->
-            <div class="mt-8 w-full max-w-xs bg-white dark:bg-slate-900/90 border border-slate-200/80 dark:border-slate-800 rounded-2xl p-4 shadow-sm">
-                <div class="flex items-center justify-between text-xs mb-2.5">
-                    <span class="font-semibold text-slate-700 dark:text-slate-200 flex items-center gap-2">
-                        <i class="fa-solid fa-database text-indigo-500 animate-bounce"></i>
-                        <span id="db-loading-status">Connecting to database...</span>
-                    </span>
-                    <i class="fa-solid fa-circle-notch fa-spin text-indigo-600 dark:text-indigo-400 text-xs"></i>
-                </div>
-                <div class="w-full h-1.5 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
-                    <div class="w-full h-full bg-gradient-to-r from-indigo-500 via-violet-500 to-indigo-500 rounded-full animate-loading-bar"></div>
-                </div>
-                <p id="db-loading-subtext" class="text-[10px] text-slate-400 dark:text-slate-500 mt-2 text-left">Verifying cloud collections & user wallets</p>
-            </div>
+            <p class="text-sm font-semibold text-slate-600 dark:text-slate-300 tracking-tight">Loading Expense...</p>
         </div>
     </div>
 
@@ -373,9 +356,6 @@
 
         async function initializeData() {
             try {
-                if (typeof window.updateDbLoadingStatus === 'function') {
-                    window.updateDbLoadingStatus('Checking user accounts...', 'Initializing cloud database records');
-                }
                 const usersSnap = await getDocs(collection(db, 'users'));
                 if (usersSnap.empty) {
                     const defaultUsers = [
@@ -400,9 +380,6 @@
 
         // Start listeners & wait for initial database snapshot before dismissing loading screen
         initializeData().finally(() => {
-            if (typeof window.updateDbLoadingStatus === 'function') {
-                window.updateDbLoadingStatus('Syncing expense records...', 'Fetching latest transactions from cloud');
-            }
             if (typeof window.startAppListeners === 'function') {
                 window.startAppListeners();
             }
@@ -415,8 +392,6 @@
 
         let state = {
             isDbLoading: true,
-            dbLoadingText: 'Connecting to database...',
-            dbLoadingSubtext: 'Verifying cloud collections & user wallets',
             currentUser: null,
             adminPassword: 'adminpassword',
             users: [],
@@ -445,15 +420,6 @@
         let initialSyncFlags = {
             users: false,
             expenses: false
-        };
-
-        window.updateDbLoadingStatus = function(mainText, subText) {
-            state.dbLoadingText = mainText;
-            if (subText) state.dbLoadingSubtext = subText;
-            const statusEl = document.getElementById('db-loading-status');
-            const subEl = document.getElementById('db-loading-subtext');
-            if (statusEl) statusEl.textContent = mainText;
-            if (subEl && subText) subEl.textContent = subText;
         };
 
         function checkInitialSyncComplete() {
@@ -619,29 +585,11 @@
         function renderDatabaseLoadingScreen() {
             return `
                 <div class="flex-1 flex flex-col items-center justify-center p-6 text-center select-none">
-                    <div class="relative w-20 h-20 flex items-center justify-center mx-auto mb-6 logo-container">
-                        <div class="absolute inset-0 rounded-3xl bg-indigo-500/20 dark:bg-indigo-500/10 animate-ping"></div>
-                        <div class="relative w-16 h-16 rounded-2xl bg-white dark:bg-slate-900 shadow-xl border border-slate-200/80 dark:border-slate-800 flex items-center justify-center p-2.5">
-                            <img src="https://clickfactoryphotography.com/wp-content/uploads/2022/04/crop-logo.gif" alt="Click Factory Logo" class="w-full h-full object-contain" onerror="this.src='https://placehold.co/40x40/4f46e5/ffffff?text=CF'">
-                        </div>
+                    <div class="relative w-16 h-16 flex items-center justify-center mx-auto mb-4">
+                        <div class="absolute inset-0 simple-spinner"></div>
+                        <img src="https://clickfactoryphotography.com/wp-content/uploads/2022/04/crop-logo.gif" alt="Click Factory Logo" class="w-9 h-9 object-contain" onerror="this.src='https://placehold.co/40x40/4f46e5/ffffff?text=CF'">
                     </div>
-                    
-                    <h2 class="font-bold text-lg text-slate-900 dark:text-white tracking-tight">Click Factory</h2>
-                    <p class="text-xs font-medium text-indigo-600 dark:text-indigo-400 mt-0.5">Expense Management System</p>
-
-                    <div class="mt-8 w-full max-w-xs bg-white dark:bg-slate-900/90 border border-slate-200/80 dark:border-slate-800 rounded-2xl p-4 shadow-sm">
-                        <div class="flex items-center justify-between text-xs mb-2.5">
-                            <span class="font-semibold text-slate-700 dark:text-slate-200 flex items-center gap-2">
-                                <i class="fa-solid fa-database text-indigo-500 animate-bounce"></i>
-                                <span id="db-loading-status">${escapeHtml(state.dbLoadingText)}</span>
-                            </span>
-                            <i class="fa-solid fa-circle-notch fa-spin text-indigo-600 dark:text-indigo-400 text-xs"></i>
-                        </div>
-                        <div class="w-full h-1.5 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
-                            <div class="w-full h-full bg-gradient-to-r from-indigo-500 via-violet-500 to-indigo-500 rounded-full animate-loading-bar"></div>
-                        </div>
-                        <p id="db-loading-subtext" class="text-[10px] text-slate-400 dark:text-slate-500 mt-2 text-left">${escapeHtml(state.dbLoadingSubtext)}</p>
-                    </div>
+                    <p class="text-sm font-semibold text-slate-600 dark:text-slate-300 tracking-tight">Loading Expense...</p>
                 </div>
             `;
         }
@@ -1097,7 +1045,7 @@
                 document.documentElement.classList.remove('dark');
             }
 
-            // Show Database Loading Screen while initial Firebase snapshot is loading
+            // Show Simple Database Loading Screen while initial Firebase snapshot is loading
             if (state.isDbLoading) {
                 const navWrapper = document.getElementById('persistent-nav-wrapper');
                 if (navWrapper) {
