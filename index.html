@@ -457,7 +457,7 @@
             }
         }
 
-        // Set specific theme mode ('light', 'dark', 'system')
+        // Set specific theme mode ('light', 'dark', 'system') from Account section
         function setThemeMode(mode) {
             state.themeMode = mode;
             localStorage.setItem(THEME_STORAGE_KEY, mode);
@@ -465,25 +465,6 @@
             render();
             const label = mode === 'system' ? 'System Auto' : (mode === 'dark' ? 'Dark Mode' : 'Light Mode');
             showToast(`Theme set to ${label}`, 'info');
-        }
-
-        // Cycle through Light -> Dark -> System when tapping the header icon
-        function cycleThemeMode() {
-            const order = ['light', 'dark', 'system'];
-            const nextIndex = (order.indexOf(state.themeMode) + 1) % order.length;
-            setThemeMode(order[nextIndex]);
-        }
-
-        function getThemeButtonIcon() {
-            if (state.themeMode === 'system') return 'fa-circle-half-stroke text-indigo-500 dark:text-indigo-400';
-            if (state.themeMode === 'dark') return 'fa-moon text-indigo-400';
-            return 'fa-sun text-amber-500';
-        }
-
-        function getThemeButtonTitle() {
-            if (state.themeMode === 'system') return 'Theme: System Auto (Click to switch)';
-            if (state.themeMode === 'dark') return 'Theme: Dark Mode (Click to switch)';
-            return 'Theme: Light Mode (Click to switch)';
         }
 
         // Listen for OS-level dark/light mode changes in real time when in 'system' mode
@@ -1209,9 +1190,6 @@
                     </div>
                     
                     <div class="flex items-center space-x-2 shrink-0">
-                        <button onclick="cycleThemeMode()" class="w-10 h-10 rounded-2xl bg-slate-100 dark:bg-slate-800/80 flex items-center justify-center text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition border border-slate-200/70 dark:border-slate-700/60 shadow-sm" title="${getThemeButtonTitle()}">
-                            <i class="fa-solid ${getThemeButtonIcon()} text-sm"></i>
-                        </button>
                         <button onclick="confirmLogout()" class="w-10 h-10 rounded-2xl bg-rose-500/10 dark:bg-rose-950/40 flex items-center justify-center text-rose-600 dark:text-rose-400 hover:bg-rose-500/20 transition border border-rose-500/20 shadow-sm" title="Logout">
                             <i class="fa-solid fa-arrow-right-from-bracket text-sm"></i>
                         </button>
@@ -1259,12 +1237,6 @@
         function renderLoginPage() {
             return `
                 <div class="flex-1 flex flex-col justify-center px-4 py-8 max-w-sm mx-auto w-full relative">
-                    <div class="absolute top-4 right-4">
-                        <button type="button" onclick="cycleThemeMode()" class="w-10 h-10 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm flex items-center justify-center text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition" title="${getThemeButtonTitle()}">
-                            <i class="fa-solid ${getThemeButtonIcon()} text-sm"></i>
-                        </button>
-                    </div>
-
                     <div class="text-center mb-6">
                         <div class="w-12 h-12 flex items-center justify-center mx-auto mb-2 logo-container">
                             <img src="https://clickfactoryphotography.com/wp-content/uploads/2022/04/crop-logo.gif" alt="Click Factory Logo" class="w-full h-full object-contain" onerror="this.src='https://placehold.co/40x40/4f46e5/ffffff?text=CF'">
