@@ -36,7 +36,6 @@
             }
         };
 
-        // Pre-apply theme before body renders to prevent flash of unstyled content
         (function() {
             const savedTheme = localStorage.getItem('click_factory_theme_v1') || 'system';
             const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
@@ -400,7 +399,6 @@
             }
         }
 
-        // Start listeners & wait for initial database snapshot before dismissing loading screen
         initializeData().finally(() => {
             if (typeof window.startAppListeners === 'function') {
                 window.startAppListeners();
@@ -435,7 +433,7 @@
             filterEndDate: '',
             showDateFilter: false,
             searchQuery: '',
-            themeMode: localStorage.getItem(THEME_STORAGE_KEY) || 'system', // 'light' | 'dark' | 'system'
+            themeMode: localStorage.getItem(THEME_STORAGE_KEY) || 'system',
             soundEnabled: localStorage.getItem(SOUND_STORAGE_KEY) !== 'false',
             soundVolume: parseInt(localStorage.getItem(SOUND_VOL_STORAGE_KEY) || '80', 10),
             darkMode: false,
@@ -477,7 +475,6 @@
             }
         })();
 
-        // Unlock Web Audio API context on first user interaction
         function unlockAudioContext() {
             try {
                 const AudioCtx = window.AudioContext || window.webkitAudioContext;
@@ -494,18 +491,15 @@
         document.addEventListener('click', unlockAudioContext, { once: true });
         document.addEventListener('touchstart', unlockAudioContext, { once: true });
 
-        // Trigger OS Ringer/Vibrate & Web Audio Chime
         function playNotificationChime(type = 'wallet_credit', forcePreview = false) {
             if (!state.soundEnabled && !forcePreview) return;
 
-            // 1. Trigger Native Device Vibration (respects phone Ringer/Vibrate mode)
             if ('vibrate' in navigator) {
                 try {
                     navigator.vibrate(type === 'excess_spent' ? [180, 90, 220] : [120, 60, 120]);
                 } catch (e) {}
             }
 
-            // 2. Play Web Audio Chime scaled by user's selected Chime Volume (0-100%)
             const volRatio = Math.max(0, Math.min(100, Number(state.soundVolume || 80))) / 100;
             if (volRatio <= 0.01) return;
 
@@ -523,7 +517,6 @@
                 const peakGain = 0.28 * volRatio;
 
                 if (type === 'excess_spent') {
-                    // Alert two-tone chime (E5 -> C5) for excess spending
                     const notes = [659.25, 523.25];
                     notes.forEach((freq, idx) => {
                         const osc = sharedAudioCtx.createOscillator();
@@ -542,7 +535,6 @@
                         osc.stop(startTime + 0.38);
                     });
                 } else {
-                    // Pleasant uplifting harmonic chime (C5 -> G5) for wallet credit
                     const notes = [523.25, 783.99];
                     notes.forEach((freq, idx) => {
                         const osc = sharedAudioCtx.createOscillator();
@@ -608,7 +600,65 @@
             render();
         }
 
-        // Evaluate and apply Light / Dark / System theme
+        // Helper: Refund an expense amount back to a user's wallet when Undo Expense is clicked
+        async function refundExpenseToUserWallet(userId, amountToRefund, reasonTitle = 'Expense Undo Refund') {
+            const refundAmt = Number(amountToRefund || 0);
+            if (!userId || isNaN(refundAmt) || refundAmt <= 0) return;
+
+            const targetUser = state.users.find(u => u.id === userId);
+            if (!targetUser || targetUser.role === 'admin') return;
+
+            let currentWallet = Number(targetUser.wallet || 0);
+            let currentExcess = Number(targetUser.excessSpent || 0);
+            let remainingRefund = refundAmt;
+            let excessReduced = 0;
+
+            if (currentExcess > 0) {
+                if (remainingRefund >= currentExcess) {
+                    excessReduced = currentExcess;
+                    remainingRefund -= currentExcess;
+                    currentExcess = 0;
+                } else {
+                    excessReduced = remainingRefund;
+                    currentExcess -= remainingRefund;
+                    remainingRefund = 0;
+                }
+            }
+            currentWallet += remainingRefund;
+
+            const { db, doc, updateDoc, setDoc } = window.FB;
+            await updateDoc(doc(db, 'users', userId), {
+                wallet: currentWallet,
+                excessSpent: currentExcess
+            });
+
+            targetUser.wallet = currentWallet;
+            targetUser.excessSpent = currentExcess;
+            if (state.currentUser && state.currentUser.id === userId) {
+                state.currentUser.wallet = currentWallet;
+                state.currentUser.excessSpent = currentExcess;
+                localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(state.currentUser));
+            }
+
+            // Record the undo refund in Wallet History
+            const txnId = 'txn_' + Date.now() + '_' + Math.random().toString(36).substring(2, 5);
+            let txnTitle = `Undo Expense Refund: ${reasonTitle}`;
+            if (excessReduced > 0 && remainingRefund > 0) {
+                txnTitle = `Undo Refund: ${reasonTitle} (Cleared ₹${excessReduced} Excess + ₹${remainingRefund} Wallet)`;
+            } else if (excessReduced > 0 && remainingRefund === 0) {
+                txnTitle = `Undo Refund: ${reasonTitle} (Reduced Excess Due)`;
+            }
+
+            await setDoc(doc(db, 'walletTransactions', txnId), {
+                id: txnId,
+                userId: userId,
+                title: txnTitle,
+                amount: refundAmt,
+                timestamp: new Date().toISOString(),
+                performedBy: state.currentUser ? state.currentUser.name : 'User'
+            });
+        }
+
         function applyTheme() {
             const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
             const isDark = state.themeMode === 'dark' || (state.themeMode === 'system' && prefersDark);
@@ -624,7 +674,6 @@
             }
         }
 
-        // Set specific theme mode ('light', 'dark', 'system') from Account section
         function setThemeMode(mode) {
             state.themeMode = mode;
             localStorage.setItem(THEME_STORAGE_KEY, mode);
@@ -634,7 +683,6 @@
             showToast(`Theme set to ${label}`, 'info');
         }
 
-        // Listen for OS-level dark/light mode changes in real time when in 'system' mode
         window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
             if (state.themeMode === 'system') {
                 applyTheme();
@@ -642,7 +690,6 @@
             }
         });
 
-        // Initialize theme state immediately
         applyTheme();
 
         let initialSyncFlags = {
@@ -657,7 +704,6 @@
             }
         }
 
-        // Safety fallback: if offline or slow network (>6 seconds), proceed to app
         setTimeout(() => {
             if (state.isDbLoading) {
                 state.isDbLoading = false;
@@ -692,7 +738,6 @@
             }
         }, false);
 
-        // Helper to filter notifications belonging to the logged-in user or admin
         function getMyNotifications() {
             if (!state.currentUser) return [];
             const isAdmin = state.currentUser.role === 'admin';
@@ -705,7 +750,6 @@
                 .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
         }
 
-        // Trigger Native OS Notification (Uses Phone's RINGER / NOTIFICATION VOLUME & Vibrate)
         function sendBrowserNotification(title, body, type = 'wallet_credit') {
             if (!state.soundEnabled) return;
             const options = {
@@ -713,7 +757,7 @@
                 icon: 'https://clickfactoryphotography.com/wp-content/uploads/2022/04/crop-logo.gif',
                 badge: 'https://clickfactoryphotography.com/wp-content/uploads/2022/04/crop-logo.gif',
                 vibrate: type === 'excess_spent' ? [200, 100, 250] : [150, 80, 150],
-                silent: false, // Explicitly instructs Android/iOS to play default system ringer/notification tone
+                silent: false,
                 renotify: true,
                 tag: 'cf-notif-' + Date.now()
             };
@@ -729,7 +773,6 @@
             }
         }
 
-        // Create and save notification to Firestore
         async function createAppNotification({ recipientId = null, recipientRole = null, type, title, message, amount = 0, triggeredBy = '' }) {
             if (!window.FB) return;
             const { db, doc, setDoc } = window.FB;
@@ -738,7 +781,7 @@
                 id: notifId,
                 recipientId,
                 recipientRole,
-                type, // 'wallet_credit' | 'wallet_debit' | 'excess_spent'
+                type,
                 title,
                 message,
                 amount: Number(amount || 0),
@@ -792,7 +835,6 @@
                 if (!state.isDbLoading) render();
             }, (err) => console.warn("Transactions listener notice:", err));
 
-            // Real-Time Notifications Listener with System Ringer Notification & Chime
             onSnapshot(collection(db, 'notifications'), (snapshot) => {
                 const allNotifs = snapshot.docs.map(docSnap => docSnap.data());
                 
@@ -803,7 +845,6 @@
                             const isForMe = (isAdmin && n.recipientRole === 'admin') || (n.recipientId === state.currentUser.id);
                             if (isForMe && !n.read) {
                                 const toastType = n.type === 'excess_spent' ? 'error' : 'success';
-                                // Trigger OS System Notification (uses Ringer Volume) + In-app Chime
                                 sendBrowserNotification(n.title, n.message, n.type);
                                 playNotificationChime(n.type);
                                 showToast(`${n.title}: ${n.message}`, toastType);
@@ -1032,7 +1073,6 @@
             );
         }
 
-        // Full-Size Notifications Tab (For both Users & Admin)
         function renderNotificationsTab() {
             const myNotifs = getMyNotifications();
             const unreadCount = myNotifs.filter(n => !n.read).length;
@@ -1150,7 +1190,6 @@
             );
         }
 
-        // Full-Size User Wallet Page
         function renderUserWalletTab() {
             const user = state.currentUser;
             const userWallet = Number(user.wallet || 0);
@@ -1175,7 +1214,7 @@
                                 <h2 class="text-2xl sm:text-3xl font-bold tracking-tight mt-1 break-all">${formatCurrency(userWallet)}</h2>
                             </div>
                             <span class="bg-white/20 backdrop-blur-md text-white text-xs font-semibold px-3 py-1 rounded-full shrink-0">
-                                ${userTxns.length} Top-ups
+                                ${userTxns.length} Records
                             </span>
                         </div>
 
@@ -1221,7 +1260,7 @@
                                     <i class="fa-solid fa-wallet"></i>
                                 </div>
                                 <h4 class="font-semibold text-slate-700 dark:text-slate-300 mb-1">No Wallet History Yet</h4>
-                                <p class="text-xs text-slate-500">Top-ups and balance adjustments added by Admin will appear here.</p>
+                                <p class="text-xs text-slate-500">Top-ups, undo refunds, and balance adjustments will appear here.</p>
                             </div>
                         ` : userTxns.map(t => `
                             <div class="bg-white dark:bg-slate-900 rounded-3xl p-5 border border-slate-200 dark:border-slate-800 shadow-sm flex items-center justify-between gap-3 w-full">
@@ -1355,7 +1394,6 @@
             };
             await setDoc(doc(db, 'walletTransactions', txnId), txnData);
 
-            // Send Notification to the User when Admin adds or adjusts wallet funds
             const notifTitle = amountToAdd > 0 ? 'Wallet Credited!' : 'Wallet Balance Adjusted';
             let notifMessage = amountToAdd > 0
                 ? `${state.currentUser.name} added ${formatCurrency(amountToAdd)} to your wallet. Available Balance: ${formatCurrency(currentWallet)}.`
@@ -1533,7 +1571,6 @@
             
             applyTheme();
 
-            // Show Simple Database Loading Screen while initial Firebase snapshot is loading
             if (state.isDbLoading) {
                 const navWrapper = document.getElementById('persistent-nav-wrapper');
                 if (navWrapper) {
@@ -2028,7 +2065,7 @@
                                     <h4 class="text-xs font-bold text-slate-400 dark:text-slate-400 uppercase tracking-wider px-1">${formattedDateHeader}</h4>
                                     ${dayExpenses.map(exp => {
                                         const isOffice = exp.category === 'Office';
-                                        const canEdit = exp.userId === state.currentUser.id;
+                                        const canEdit = exp.userId === state.currentUser.id || isAdmin;
                                         return `
                                             <div class="bg-white dark:bg-slate-900 rounded-3xl py-5 sm:py-6 px-5 sm:px-6 border border-slate-200 dark:border-slate-800 shadow-sm transition relative group w-full mt-3">
                                                 <div class="flex items-start space-x-3.5 w-full">
@@ -2067,6 +2104,10 @@
 
                                                             ${canEdit ? `
                                                                 <div class="flex items-center space-x-1.5 shrink-0">
+                                                                    <button onclick="confirmUndoExpense('${exp.id}')" class="px-2.5 h-8 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/20 border border-emerald-500/20 transition flex items-center justify-center space-x-1 text-xs font-semibold" title="Undo Expense & Refund to Wallet">
+                                                                        <i class="fa-solid fa-rotate-left"></i>
+                                                                        <span>Undo</span>
+                                                                    </button>
                                                                     <button onclick="startEditExpense('${exp.id}')" class="w-8 h-8 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-indigo-50 hover:text-indigo-600 transition flex items-center justify-center text-xs" title="Edit"><i class="fa-solid fa-pen"></i></button>
                                                                     <button onclick="confirmDeleteExpense('${exp.id}', '${exp.billAttachment || ''}')" class="w-8 h-8 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-rose-50 hover:text-rose-600 transition flex items-center justify-center text-xs" title="Delete"><i class="fa-solid fa-trash"></i></button>
                                                                 </div>
@@ -2433,12 +2474,16 @@
                     billUrl = existing ? existing.billAttachment : null;
                 }
 
-                const currentUser = state.currentUser;
-                let currentWallet = Number(currentUser.wallet || 0);
-                let currentExcess = Number(currentUser.excessSpent || 0);
+                const existingExp = state.editingExpenseId ? state.expenses.find(e => e.id === expenseId) : null;
+                const expenseOwnerId = existingExp ? existingExp.userId : state.currentUser.id;
+                const expenseOwnerName = existingExp ? existingExp.userName : state.currentUser.name;
+                const ownerUser = state.users.find(u => u.id === expenseOwnerId) || state.currentUser;
+
+                let currentWallet = Number(ownerUser.wallet || 0);
+                let currentExcess = Number(ownerUser.excessSpent || 0);
                 let newlyAddedExcess = 0;
 
-                if (currentUser.role !== 'admin') {
+                if (ownerUser.role !== 'admin') {
                     if (!state.editingExpenseId) {
                         if (currentWallet >= amount) {
                             currentWallet -= amount;
@@ -2449,8 +2494,7 @@
                             currentExcess += excess;
                         }
                     } else {
-                        const oldExp = state.expenses.find(e => e.id === expenseId);
-                        const oldAmount = oldExp ? Number(oldExp.amount) : 0;
+                        const oldAmount = existingExp ? Number(existingExp.amount) : 0;
                         const diff = amount - oldAmount;
                         if (diff > 0) {
                             if (currentWallet >= diff) {
@@ -2462,24 +2506,38 @@
                                 currentExcess += excess;
                             }
                         } else if (diff < 0) {
-                            currentWallet += Math.abs(diff);
+                            let refundDiff = Math.abs(diff);
+                            if (currentExcess > 0) {
+                                if (refundDiff >= currentExcess) {
+                                    refundDiff -= currentExcess;
+                                    currentExcess = 0;
+                                } else {
+                                    currentExcess -= refundDiff;
+                                    refundDiff = 0;
+                                }
+                            }
+                            currentWallet += refundDiff;
                         }
                     }
 
-                    await updateDoc(doc(db, 'users', currentUser.id), {
+                    await updateDoc(doc(db, 'users', ownerUser.id), {
                         wallet: currentWallet,
                         excessSpent: currentExcess
                     });
 
-                    state.currentUser.wallet = currentWallet;
-                    state.currentUser.excessSpent = currentExcess;
-                    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(state.currentUser));
+                    ownerUser.wallet = currentWallet;
+                    ownerUser.excessSpent = currentExcess;
+                    if (state.currentUser.id === ownerUser.id) {
+                        state.currentUser.wallet = currentWallet;
+                        state.currentUser.excessSpent = currentExcess;
+                        localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(state.currentUser));
+                    }
                 }
 
                 const expenseData = {
                     id: expenseId,
-                    userId: currentUser.id,
-                    userName: currentUser.name,
+                    userId: expenseOwnerId,
+                    userName: expenseOwnerName,
                     title,
                     amount,
                     category,
@@ -2487,21 +2545,20 @@
                     clientNamePlace,
                     notes,
                     billAttachment: billUrl,
-                    createdAt: state.editingExpenseId ? (state.expenses.find(e => e.id === expenseId)?.createdAt || new Date().toISOString()) : new Date().toISOString()
+                    createdAt: existingExp ? existingExp.createdAt : new Date().toISOString()
                 };
 
                 await setDoc(doc(db, 'expenses', expenseId), expenseData);
 
-                // Notify Admin when a User spends in excess of their wallet balance
-                if (currentUser.role !== 'admin' && newlyAddedExcess > 0) {
+                if (ownerUser.role !== 'admin' && newlyAddedExcess > 0) {
                     await createAppNotification({
                         recipientId: null,
                         recipientRole: 'admin',
                         type: 'excess_spent',
-                        title: `Excess Spent Alert: ${currentUser.name}`,
-                        message: `${currentUser.name} spent ${formatCurrency(newlyAddedExcess)} over wallet balance on "${title}" (${category}). Total Excess Due: ${formatCurrency(currentExcess)}.`,
+                        title: `Excess Spent Alert: ${ownerUser.name}`,
+                        message: `${ownerUser.name} spent ${formatCurrency(newlyAddedExcess)} over wallet balance on "${title}" (${category}). Total Excess Due: ${formatCurrency(currentExcess)}.`,
                         amount: newlyAddedExcess,
-                        triggeredBy: currentUser.name
+                        triggeredBy: ownerUser.name
                     });
                 }
 
@@ -2530,6 +2587,35 @@
             switchTab('home');
         }
 
+        // NEW: Undo Expense button handler (refunds amount back to user's wallet & moves expense to Recycle Bin)
+        function confirmUndoExpense(id) {
+            const exp = state.expenses.find(e => e.id === id);
+            if (!exp) return;
+
+            showConfirmModal(
+                'Undo Expense & Refund Wallet',
+                `Undo "${exp.title}" and refund ${formatCurrency(exp.amount)} back to ${exp.userName}'s wallet?`,
+                async () => {
+                    const { db, doc, deleteDoc, setDoc } = window.FB;
+                    try {
+                        await refundExpenseToUserWallet(exp.userId, exp.amount, exp.title);
+                        const recycleItem = {
+                            ...exp,
+                            deletedAt: new Date().toISOString(),
+                            deletedBy: `${state.currentUser.name} (Undo & Refunded)`
+                        };
+                        await setDoc(doc(db, 'recycleBin', id), recycleItem);
+                        await deleteDoc(doc(db, 'expenses', id));
+                        showToast(`Expense undone! ${formatCurrency(exp.amount)} refunded to wallet.`, 'success');
+                    } catch (err) {
+                        console.error("Undo expense error:", err);
+                        showToast('Failed to undo expense.', 'error');
+                    }
+                }
+            );
+        }
+
+        // OLD Delete Expense behavior (moves to Recycle Bin without changing wallet balance)
         function confirmDeleteExpense(id, billUrl) {
             showConfirmModal(
                 'Delete Expense',
@@ -2565,7 +2651,6 @@
                         ` : ''}
 
                         ${state.recycleBin.map(exp => {
-                            const isOffice = exp.category === 'Office';
                             return `
                                 <div class="bg-white dark:bg-slate-900 rounded-3xl py-5 sm:py-6 px-5 sm:px-6 border border-slate-200 dark:border-slate-800 shadow-sm transition relative group w-full mt-3">
                                     <div class="flex items-start space-x-3.5 w-full">
@@ -3330,7 +3415,6 @@
         window.addEventListener('resize', syncPersistentNavbar);
         window.addEventListener('orientationchange', () => setTimeout(syncPersistentNavbar, 100));
         
-        // Initial render execution on DOM load (keeps Database Loading Screen active until Firebase responds)
         document.addEventListener('DOMContentLoaded', () => {
             render();
         });
