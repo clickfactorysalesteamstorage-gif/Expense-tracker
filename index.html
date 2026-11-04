@@ -129,6 +129,15 @@
             animation: simple-spin 0.8s linear infinite;
         }
 
+        @keyframes pulse-ring {
+            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(79, 70, 229, 0.7); }
+            70% { transform: scale(1); box-shadow: 0 0 0 8px rgba(79, 70, 229, 0); }
+            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(79, 70, 229, 0); }
+        }
+        .volume-pulse-badge {
+            animation: pulse-ring 1.2s infinite;
+        }
+
         /* Persistent Liquid Dock Styles */
         .liquid-nav-container {
             position: fixed;
@@ -437,6 +446,8 @@
             soundEnabled: localStorage.getItem(SOUND_STORAGE_KEY) !== 'false',
             soundVolume: parseInt(localStorage.getItem(SOUND_VOL_STORAGE_KEY) || '80', 10),
             showSoundPanel: false,
+            isSoundTesting: false,
+            userFilterTab: 'all',
             darkMode: false,
             editingExpenseId: null,
             tempBillData: null,
@@ -592,6 +603,12 @@
 
         function previewSoundVolume() {
             playNotificationChime('wallet_credit', true);
+            state.isSoundTesting = true;
+            syncPersistentNavbar();
+            setTimeout(() => {
+                state.isSoundTesting = false;
+                syncPersistentNavbar();
+            }, 2000);
         }
 
         async function requestSystemRingerPermission() {
@@ -1552,11 +1569,18 @@
             }
 
             const badgeEl = document.getElementById('nav-badge');
-            if (isAdmin && totalBadges > 0) {
-                badgeEl.textContent = totalBadges;
-                badgeEl.classList.remove('hidden');
-            } else {
-                badgeEl.classList.add('hidden');
+            if (badgeEl) {
+                if (state.isSoundTesting) {
+                    badgeEl.textContent = '🔊';
+                    badgeEl.className = 'liquid-badge bg-indigo-600 text-white volume-pulse-badge';
+                    badgeEl.classList.remove('hidden');
+                } else if (isAdmin && totalBadges > 0) {
+                    badgeEl.textContent = totalBadges;
+                    badgeEl.className = 'liquid-badge';
+                    badgeEl.classList.remove('hidden');
+                } else {
+                    badgeEl.classList.add('hidden');
+                }
             }
 
             let activeTargetId = 'nav-btn-home';
@@ -2957,87 +2981,140 @@
             showToast('Request dismissed.', 'info');
         }
 
+        function setUserFilterTab(tab) {
+            state.userFilterTab = tab;
+            renderMainContentOnly();
+        }
+
         function renderUserManagementTab() {
+            const filter = state.userFilterTab;
+            const adminUsers = state.users.filter(u => u.role === 'admin');
+            const regularUsers = state.users.filter(u => u.role !== 'admin');
+
+            const showAdmins = filter === 'all' || filter === 'admin';
+            const showRegular = filter === 'all' || filter === 'user';
+
             return `
-                <div class="space-y-4 w-full max-w-full">
+                <div class="space-y-6 w-full max-w-full">
                     <div class="flex items-center justify-between">
                         <div class="min-w-0 pr-2">
                             <h2 class="text-lg font-bold text-slate-900 dark:text-white truncate">User Management</h2>
-                            <p class="text-xs text-slate-500 dark:text-slate-400 truncate">Manage user accounts & wallets</p>
+                            <p class="text-xs text-slate-500 dark:text-slate-400 truncate">Manage administrator and regular user accounts & wallets</p>
                         </div>
                         <button onclick="openAddUserModal()" class="px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl text-xs font-semibold shadow-md transition flex items-center space-x-1.5 shrink-0">
                             <i class="fa-solid fa-user-plus"></i><span>Add User</span>
                         </button>
                     </div>
 
-                    <div class="space-y-3.5 w-full">
-                        ${state.users.map(u => {
-                            const expCount = state.expenses.filter(e => e.userId === u.id).length;
-                            const isCurrent = u.id === state.currentUser.id;
-                            const isUserAdmin = u.role === 'admin';
-                            const uWallet = Number(u.wallet || 0);
-                            const uExcess = Number(u.excessSpent || 0);
-                            const userTotalSpent = state.expenses.filter(e => e.userId === u.id).reduce((s, e) => s + e.amount, 0);
+                    <!-- Filter Pills -->
+                    <div class="flex items-center space-x-2 bg-slate-100 dark:bg-slate-800/80 p-1.5 rounded-2xl w-full">
+                        <button onclick="setUserFilterTab('all')" class="flex-1 py-2 px-3 rounded-xl text-xs font-semibold transition ${filter === 'all' ? 'bg-white dark:bg-slate-900 text-indigo-600 dark:text-indigo-400 shadow-sm' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'}">
+                            All (${state.users.length})
+                        </button>
+                        <button onclick="setUserFilterTab('admin')" class="flex-1 py-2 px-3 rounded-xl text-xs font-semibold transition ${filter === 'admin' ? 'bg-white dark:bg-slate-900 text-indigo-600 dark:text-indigo-400 shadow-sm' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'}">
+                            Admins (${adminUsers.length})
+                        </button>
+                        <button onclick="setUserFilterTab('user')" class="flex-1 py-2 px-3 rounded-xl text-xs font-semibold transition ${filter === 'user' ? 'bg-white dark:bg-slate-900 text-indigo-600 dark:text-indigo-400 shadow-sm' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'}">
+                            Users (${regularUsers.length})
+                        </button>
+                    </div>
 
-                            return `
-                                <div class="bg-white dark:bg-slate-900 rounded-3xl p-5 border border-slate-200 dark:border-slate-800 shadow-sm space-y-4 w-full mt-3">
-                                    <div class="flex items-center justify-between gap-2">
-                                        <div class="flex items-center space-x-3.5 min-w-0 flex-1">
-                                            <div class="w-10 h-10 rounded-2xl ${isUserAdmin ? 'bg-indigo-500/10 text-indigo-600 dark:text-indigo-400' : 'bg-slate-100 dark:bg-slate-800 text-slate-600'} flex items-center justify-center font-bold text-sm shrink-0">${u.name.charAt(0)}</div>
-                                            <div class="min-w-0 flex-1">
-                                                <div class="flex items-center space-x-2 truncate">
-                                                    <h4 class="font-semibold text-sm text-slate-900 dark:text-white truncate">${escapeHtml(u.name)}</h4>${isCurrent ? '<span class="text-[10px] bg-emerald-500/10 text-emerald-600 font-semibold px-2 py-0.5 rounded-full shrink-0">Active</span>' : ''}
-                                                </div>
-                                                <p class="text-xs text-slate-500 truncate">@${escapeHtml(u.username)} • <span class="capitalize font-medium text-indigo-600">${u.role}</span> • ${expCount} expenses (${formatCurrency(userTotalSpent)})</p>
-                                            </div>
-                                        </div>
-                                        <div class="flex items-center space-x-1.5 shrink-0">
-                                            ${!isUserAdmin ? `
-                                            <button onclick="openAddWalletModal('${u.id}', '${escapeHtml(u.name)}')" class="px-3.5 py-2 rounded-2xl bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-xs font-bold border border-emerald-500/20 transition flex items-center space-x-1.5" title="Wallet">
-                                                <i class="fa-solid fa-wallet text-sm"></i>
-                                                <span>Wallet</span>
-                                            </button>
-                                            ` : ''}
-                                            <button onclick="openEditUserModal('${u.id}')" class="w-9 h-9 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-500 hover:bg-indigo-50 hover:text-indigo-600 transition flex items-center justify-center text-xs" title="Edit User"><i class="fa-solid fa-pen"></i></button>
-                                        </div>
-                                    </div>
+                    <!-- Administrators Section -->
+                    ${showAdmins ? `
+                        <div class="space-y-3 w-full">
+                            <div class="flex items-center justify-between px-1">
+                                <h3 class="text-xs font-semibold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
+                                    <i class="fa-solid fa-shield-halved text-indigo-500"></i>
+                                    <span>Administrators (${adminUsers.length})</span>
+                                </h3>
+                            </div>
+                            ${adminUsers.length === 0 ? `<div class="bg-white dark:bg-slate-900 rounded-3xl p-6 text-center border border-slate-200 dark:border-slate-800 shadow-sm text-xs text-slate-400">No admins found.</div>` : adminUsers.map(u => renderUserCard(u)).join('')}
+                        </div>
+                    ` : ''}
 
-                                    ${!isUserAdmin ? `
-                                    <div class="grid grid-cols-2 gap-3 pt-3 border-t border-slate-100 dark:border-slate-800 text-xs">
-                                        <div class="bg-slate-50 dark:bg-slate-800/40 p-3 rounded-2xl">
-                                            <span class="text-slate-400 block text-[10px] uppercase font-semibold mb-0.5">Wallet Balance</span>
-                                            <span class="font-bold text-sm text-emerald-600 dark:text-emerald-400">${formatCurrency(uWallet)}</span>
-                                        </div>
-                                        <div class="bg-slate-50 dark:bg-slate-800/40 p-3 rounded-2xl">
-                                            <span class="text-slate-400 block text-[10px] uppercase font-semibold mb-0.5">Excess Spent Due</span>
-                                            <span class="font-bold text-sm text-rose-600 dark:text-rose-400">${formatCurrency(uExcess)}</span>
-                                        </div>
-                                    </div>
-                                    ` : ''}
-
-                                    <div class="grid grid-cols-${!isUserAdmin ? '3' : '2'} gap-2 pt-1 w-full">
-                                        ${!isUserAdmin ? `
-                                        <button onclick="confirmResetUserWallet('${u.id}', '${escapeHtml(u.name)}')" class="py-2.5 px-2 rounded-2xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-600 dark:text-amber-400 text-[11px] font-bold border border-amber-500/20 transition flex items-center justify-center space-x-1 truncate" title="Reset Wallet">
-                                            <i class="fa-solid fa-rotate-right shrink-0"></i>
-                                            <span class="truncate">Reset Wallet</span>
-                                        </button>
-                                        ` : ''}
-                                        
-                                        <button onclick="confirmClearUserExpenses('${u.id}', '${escapeHtml(u.name)}')" class="py-2.5 px-2 rounded-2xl bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-600 dark:text-indigo-400 text-[11px] font-bold border border-indigo-500/20 transition flex items-center justify-center space-x-1 truncate" title="Clear Expenses">
-                                            <i class="fa-solid fa-receipt shrink-0"></i>
-                                            <span class="truncate">Clear Expenses</span>
-                                        </button>
-
-                                        ${state.users.length > 1 && !isCurrent ? `
-                                            <button onclick="confirmRemoveUser('${u.id}', '${escapeHtml(u.name)}')" class="py-2.5 px-2 rounded-2xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-600 dark:text-rose-400 text-[11px] font-bold border border-rose-500/20 transition flex items-center justify-center space-x-1 truncate" title="Delete User">
-                                                <i class="fa-solid fa-trash shrink-0"></i>
-                                                <span class="truncate">Delete User</span>
-                                            </button>
-                                        ` : '<div class="hidden"></div>'}
-                                    </div>
+                    <!-- Regular Users Section -->
+                    ${showRegular ? `
+                        <div class="space-y-3 w-full pt-2">
+                            <div class="flex items-center justify-between px-1">
+                                <h3 class="text-xs font-semibold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
+                                    <i class="fa-solid fa-users text-emerald-500"></i>
+                                    <span>Regular Users (${regularUsers.length})</span>
+                                </h3>
+                            </div>
+                            ${regularUsers.length === 0 ? `
+                                <div class="bg-white dark:bg-slate-900 rounded-3xl p-6 text-center border border-slate-200 dark:border-slate-800 shadow-sm text-xs text-slate-400">
+                                    No regular users found.
                                 </div>
-                            `;
-                        }).join('')}
+                            ` : regularUsers.map(u => renderUserCard(u)).join('')}
+                        </div>
+                    ` : ''}
+                </div>
+            `;
+        }
+
+        function renderUserCard(u) {
+            const expCount = state.expenses.filter(e => e.userId === u.id).length;
+            const isCurrent = u.id === state.currentUser.id;
+            const isUserAdmin = u.role === 'admin';
+            const uWallet = Number(u.wallet || 0);
+            const uExcess = Number(u.excessSpent || 0);
+            const userTotalSpent = state.expenses.filter(e => e.userId === u.id).reduce((s, e) => s + e.amount, 0);
+
+            return `
+                <div class="bg-white dark:bg-slate-900 rounded-3xl p-5 border border-slate-200 dark:border-slate-800 shadow-sm space-y-4 w-full mt-3">
+                    <div class="flex items-center justify-between gap-2">
+                        <div class="flex items-center space-x-3.5 min-w-0 flex-1">
+                            <div class="w-10 h-10 rounded-2xl ${isUserAdmin ? 'bg-indigo-500/10 text-indigo-600 dark:text-indigo-400' : 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400'} flex items-center justify-center font-bold text-sm shrink-0">${u.name.charAt(0)}</div>
+                            <div class="min-w-0 flex-1">
+                                <div class="flex items-center space-x-2 truncate">
+                                    <h4 class="font-semibold text-sm text-slate-900 dark:text-white truncate">${escapeHtml(u.name)}</h4>${isCurrent ? '<span class="text-[10px] bg-emerald-500/10 text-emerald-600 font-semibold px-2 py-0.5 rounded-full shrink-0">Active</span>' : ''}
+                                </div>
+                                <p class="text-xs text-slate-500 truncate">@${escapeHtml(u.username)} • <span class="capitalize font-medium text-indigo-600">${u.role}</span> • ${expCount} expenses (${formatCurrency(userTotalSpent)})</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center space-x-1.5 shrink-0">
+                            ${!isUserAdmin ? `
+                            <button onclick="openAddWalletModal('${u.id}', '${escapeHtml(u.name)}')" class="px-3.5 py-2 rounded-2xl bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-xs font-bold border border-emerald-500/20 transition flex items-center space-x-1.5" title="Wallet">
+                                <i class="fa-solid fa-wallet text-sm"></i>
+                                <span>Wallet</span>
+                            </button>
+                            ` : ''}
+                            <button onclick="openEditUserModal('${u.id}')" class="w-9 h-9 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-500 hover:bg-indigo-50 hover:text-indigo-600 transition flex items-center justify-center text-xs" title="Edit User"><i class="fa-solid fa-pen"></i></button>
+                        </div>
+                    </div>
+
+                    ${!isUserAdmin ? `
+                    <div class="grid grid-cols-2 gap-3 pt-3 border-t border-slate-100 dark:border-slate-800 text-xs">
+                        <div class="bg-slate-50 dark:bg-slate-800/40 p-3 rounded-2xl">
+                            <span class="text-slate-400 block text-[10px] uppercase font-semibold mb-0.5">Wallet Balance</span>
+                            <span class="font-bold text-sm text-emerald-600 dark:text-emerald-400">${formatCurrency(uWallet)}</span>
+                        </div>
+                        <div class="bg-slate-50 dark:bg-slate-800/40 p-3 rounded-2xl">
+                            <span class="text-slate-400 block text-[10px] uppercase font-semibold mb-0.5">Excess Spent Due</span>
+                            <span class="font-bold text-sm text-rose-600 dark:text-rose-400">${formatCurrency(uExcess)}</span>
+                        </div>
+                    </div>
+                    ` : ''}
+
+                    <div class="grid grid-cols-${!isUserAdmin ? '3' : '2'} gap-2 pt-1 w-full">
+                        ${!isUserAdmin ? `
+                        <button onclick="confirmResetUserWallet('${u.id}', '${escapeHtml(u.name)}')" class="py-2.5 px-2 rounded-2xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-600 dark:text-amber-400 text-[11px] font-bold border border-amber-500/20 transition flex items-center justify-center space-x-1 truncate" title="Reset Wallet">
+                            <i class="fa-solid fa-rotate-right shrink-0"></i>
+                            <span class="truncate">Reset Wallet</span>
+                        </button>
+                        ` : ''}
+                        
+                        <button onclick="confirmClearUserExpenses('${u.id}', '${escapeHtml(u.name)}')" class="py-2.5 px-2 rounded-2xl bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-600 dark:text-indigo-400 text-[11px] font-bold border border-indigo-500/20 transition flex items-center justify-center space-x-1 truncate" title="Clear Expenses">
+                            <i class="fa-solid fa-receipt shrink-0"></i>
+                            <span class="truncate">Clear Expenses</span>
+                        </button>
+
+                        ${state.users.length > 1 && !isCurrent ? `
+                            <button onclick="confirmRemoveUser('${u.id}', '${escapeHtml(u.name)}')" class="py-2.5 px-2 rounded-2xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-600 dark:text-rose-400 text-[11px] font-bold border border-rose-500/20 transition flex items-center justify-center space-x-1 truncate" title="Delete User">
+                                <i class="fa-solid fa-trash shrink-0"></i>
+                                <span class="truncate">Delete User</span>
+                            </button>
+                        ` : '<div class="hidden"></div>'}
                     </div>
                 </div>
             `;
