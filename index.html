@@ -1575,15 +1575,24 @@
             });
         }
 
-        function switchTab(tab) {
+        function openNewExpenseTab() {
+            state.editingExpenseId = null;
+            state.tempBillData = null;
+            state.tempFormCache = null;
+            switchTab('add');
+        }
+
+        function switchTab(tab, keepEditState = false) {
             if (tab === 'summary') {
                 state.activeTab = (state.currentUser && state.currentUser.role === 'admin') ? 'admin' : 'analytics';
             } else {
                 state.activeTab = tab;
             }
-            state.editingExpenseId = null;
-            state.tempBillData = null;
-            state.tempFormCache = null;
+            if (!keepEditState) {
+                state.editingExpenseId = null;
+                state.tempBillData = null;
+                state.tempFormCache = null;
+            }
 
             syncPersistentNavbar();
             render();
@@ -1663,7 +1672,7 @@
 
                 <div id="add-fab-container">
                     ${state.activeTab !== 'add' ? `
-                    <button onclick="switchTab('add')" class="fixed sm:absolute bottom-28 right-5 z-40 w-14 h-14 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 text-white rounded-full shadow-2xl flex items-center justify-center text-xl transition transform hover:scale-105 active:scale-95 border border-white/20" title="Add New Expense">
+                    <button onclick="openNewExpenseTab()" class="fixed sm:absolute bottom-28 right-5 z-40 w-14 h-14 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 text-white rounded-full shadow-2xl flex items-center justify-center text-xl transition transform hover:scale-105 active:scale-95 border border-white/20" title="Add New Expense">
                         <i class="fa-solid fa-plus"></i>
                     </button>
                     ` : ''}
@@ -1688,7 +1697,7 @@
             const fab = document.getElementById('add-fab-container');
             if (fab) {
                 fab.innerHTML = state.activeTab !== 'add' ? `
-                    <button onclick="switchTab('add')" class="fixed sm:absolute bottom-28 right-5 z-40 w-14 h-14 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 text-white rounded-full shadow-2xl flex items-center justify-center text-xl transition transform hover:scale-105 active:scale-95 border border-white/20" title="Add New Expense">
+                    <button onclick="openNewExpenseTab()" class="fixed sm:absolute bottom-28 right-5 z-40 w-14 h-14 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 text-white rounded-full shadow-2xl flex items-center justify-center text-xl transition transform hover:scale-105 active:scale-95 border border-white/20" title="Add New Expense">
                         <i class="fa-solid fa-plus"></i>
                     </button>
                 ` : '';
@@ -2072,7 +2081,7 @@
                                 <div class="w-14 h-14 bg-slate-100 dark:bg-slate-800 text-slate-400 rounded-2xl flex items-center justify-center mx-auto mb-3 text-xl"><i class="fa-solid fa-receipt"></i></div>
                                 <h4 class="font-semibold text-slate-700 dark:text-slate-300 mb-1">No expenses found</h4>
                                 <p class="text-xs text-slate-500 mb-4">Try changing filters or add a new expense record.</p>
-                                <button onclick="switchTab('add')" class="px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl text-xs font-medium shadow-md transition"><i class="fa-solid fa-plus mr-1.5"></i>Add Expense</button>
+                                <button onclick="openNewExpenseTab()" class="px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl text-xs font-medium shadow-md transition"><i class="fa-solid fa-plus mr-1.5"></i>Add Expense</button>
                             </div>
                         ` : ''}
 
@@ -2089,7 +2098,6 @@
                                     <h4 class="text-xs font-bold text-slate-400 dark:text-slate-400 uppercase tracking-wider px-1">${formattedDateHeader}</h4>
                                     ${dayExpenses.map(exp => {
                                         const isOffice = exp.category === 'Office';
-                                        // Only the individual who created the expense can Undo, Edit, or Delete it
                                         const isOwner = exp.userId === state.currentUser.id;
                                         return `
                                             <div class="bg-white dark:bg-slate-900 rounded-3xl py-5 sm:py-6 px-5 sm:px-6 border border-slate-200 dark:border-slate-800 shadow-sm transition relative group w-full mt-3">
@@ -2196,16 +2204,27 @@
 
         function renderAddEditTab() {
             const isEditing = Boolean(state.editingExpenseId);
-            let expense = { title: '', amount: '', category: 'Office', date: new Date().toISOString().split('T')[0], clientNamePlace: '', notes: '', billAttachment: null };
+            let expense = {
+                title: '',
+                amount: '',
+                category: 'Office',
+                date: new Date().toISOString().split('T')[0],
+                clientNamePlace: '',
+                notes: '',
+                billAttachment: null
+            };
 
             if (isEditing) {
                 const found = state.expenses.find(e => e.id === state.editingExpenseId);
-                if (found) expense = found;
-            } else if (state.tempFormCache) {
+                if (found) expense = { ...found };
+            }
+            if (state.tempFormCache) {
                 expense = { ...expense, ...state.tempFormCache };
             }
 
-            const currentBill = state.tempBillData !== null ? state.tempBillData : expense.billAttachment;
+            const currentBill = (state.tempBillData !== null && state.tempBillData !== undefined)
+                ? state.tempBillData
+                : expense.billAttachment;
 
             return `
                 <div class="space-y-4 w-full max-w-full pb-8 pt-2">
@@ -2213,7 +2232,7 @@
                         <div class="min-w-0 pr-2">
                             <h2 class="text-lg font-bold text-slate-900 dark:text-white truncate">${isEditing ? 'Edit Expense' : 'Add New Expense'}</h2>
                         </div>
-                        ${isEditing ? `<button onclick="cancelEdit()" class="text-xs font-medium text-slate-500 hover:text-slate-700 shrink-0">Cancel Edit</button>` : ''}
+                        ${isEditing ? `<button type="button" onclick="cancelEdit()" class="text-xs font-medium text-slate-500 hover:text-slate-700 shrink-0">Cancel Edit</button>` : ''}
                     </div>
 
                     <form onsubmit="handleExpenseSubmit(event)" class="bg-white dark:bg-slate-900 rounded-3xl p-5 sm:p-7 border border-slate-200 dark:border-slate-800 shadow-sm space-y-6 w-full mt-2">
@@ -2264,7 +2283,7 @@
                                 <div class="bg-indigo-50 dark:bg-indigo-950/60 p-4 rounded-2xl border border-indigo-200 dark:border-indigo-800 flex items-center justify-between mb-3 w-full gap-2">
                                     <div class="flex items-center space-x-2 text-indigo-600 dark:text-indigo-400 text-xs font-semibold min-w-0 flex-1">
                                         <i class="fa-solid fa-file-image text-base shrink-0"></i>
-                                        <span class="truncate">Bill attached successfully</span>
+                                        <span class="truncate">Bill attached</span>
                                     </div>
                                     <div class="flex items-center space-x-2 shrink-0">
                                         <button type="button" onclick="previewCurrentTempBill()" class="px-3 py-1.5 bg-indigo-600 text-white rounded-xl text-xs font-medium">Preview</button>
@@ -2402,18 +2421,20 @@
 
         function removeBillAttachment(event) {
             if (event) event.stopPropagation();
-            state.tempBillData = null;
-            if (state.editingExpenseId) {
-                const found = state.expenses.find(e => e.id === state.editingExpenseId);
-                if (found) found.billAttachment = null;
-            }
+            updateFormCache();
+            state.tempBillData = ''; // Explicitly mark bill as removed
             showToast('Bill removed.', 'info');
             renderMainContentOnly();
         }
 
         function previewCurrentTempBill() {
-            if (!state.tempBillData) return;
-            openBillPreviewModal(state.tempBillData, 'Attached Bill Preview');
+            let billToPreview = state.tempBillData;
+            if ((billToPreview === null || billToPreview === undefined) && state.editingExpenseId) {
+                const found = state.expenses.find(e => e.id === state.editingExpenseId);
+                if (found) billToPreview = found.billAttachment;
+            }
+            if (!billToPreview) return;
+            openBillPreviewModal(billToPreview, 'Attached Bill Preview');
         }
 
         function viewBillModal(expenseId) {
@@ -2481,7 +2502,9 @@
             let billUrl = null;
 
             try {
-                if (state.tempBillData !== null) {
+                if (state.tempBillData === '') {
+                    billUrl = null;
+                } else if (state.tempBillData !== null && state.tempBillData !== undefined) {
                     if (state.tempBillData.startsWith('data:image')) {
                         try {
                             const fileRef = storageRef(storage, `bills/${expenseId}.jpg`);
@@ -2587,10 +2610,11 @@
                     });
                 }
 
+                const wasEditing = Boolean(state.editingExpenseId);
                 state.editingExpenseId = null;
                 state.tempBillData = null;
                 state.tempFormCache = null;
-                showToast('Expense saved successfully!', 'success');
+                showToast(wasEditing ? 'Expense updated successfully!' : 'Expense saved successfully!', 'success');
                 switchTab('home');
             } catch (error) {
                 console.error("Failed:", error);
@@ -2599,10 +2623,20 @@
         }
 
         function startEditExpense(id) {
+            const exp = state.expenses.find(e => e.id === id);
+            if (!exp) return;
+
             state.editingExpenseId = id;
-            state.tempBillData = null;
-            state.tempFormCache = null;
-            switchTab('add');
+            state.tempBillData = exp.billAttachment || null;
+            state.tempFormCache = {
+                category: exp.category || 'Office',
+                clientNamePlace: exp.clientNamePlace || '',
+                amount: exp.amount || '',
+                title: exp.title || '',
+                date: exp.date || new Date().toISOString().split('T')[0],
+                notes: exp.notes || ''
+            };
+            switchTab('add', true);
         }
 
         function cancelEdit() {
@@ -3439,7 +3473,7 @@
 
         function escapeHtml(str) {
             if (!str) return '';
-            return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+            return String(str).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
         }
 
         window.addEventListener('resize', syncPersistentNavbar);
