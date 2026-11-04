@@ -436,6 +436,7 @@
             themeMode: localStorage.getItem(THEME_STORAGE_KEY) || 'system',
             soundEnabled: localStorage.getItem(SOUND_STORAGE_KEY) !== 'false',
             soundVolume: parseInt(localStorage.getItem(SOUND_VOL_STORAGE_KEY) || '80', 10),
+            showSoundPanel: false,
             darkMode: false,
             editingExpenseId: null,
             tempBillData: null,
@@ -558,16 +559,24 @@
             }
         }
 
-        function toggleNotificationSound() {
+        function toggleSoundPanel() {
+            state.showSoundPanel = !state.showSoundPanel;
+            renderMainContentOnly();
+        }
+
+        function toggleNotificationSound(event) {
+            if (event) event.stopPropagation();
             state.soundEnabled = !state.soundEnabled;
             localStorage.setItem(SOUND_STORAGE_KEY, String(state.soundEnabled));
             if (state.soundEnabled) {
+                state.showSoundPanel = true;
                 if ('Notification' in window && Notification.permission === 'default') {
                     Notification.requestPermission().catch(() => {});
                 }
                 playNotificationChime('wallet_credit', true);
                 showToast('Ringer & Chime alerts enabled', 'success');
             } else {
+                state.showSoundPanel = false;
                 showToast('Notification alerts muted', 'info');
             }
             render();
@@ -3224,7 +3233,7 @@
                         </span>
                     </div>
 
-                    <!-- Appearance & Ringer Sound Settings Card -->
+                    <!-- Appearance Card -->
                     <div class="bg-white dark:bg-slate-900 rounded-3xl p-5 sm:p-6 border border-slate-200 dark:border-slate-800 shadow-sm space-y-4 w-full">
                         <div class="space-y-3">
                             <div class="flex items-center justify-between px-1">
@@ -3250,46 +3259,54 @@
                             </div>
                         </div>
 
-                        <div class="pt-3 border-t border-slate-100 dark:border-slate-800 space-y-3 px-1">
-                            <div class="flex items-center justify-between">
-                                <div>
-                                    <h4 class="font-semibold text-xs text-slate-900 dark:text-white flex items-center space-x-2">
-                                        <i class="fa-solid ${state.soundEnabled ? 'fa-bell text-indigo-500' : 'fa-bell-slash text-slate-400'}"></i>
-                                        <span>Ringer & Notification Sound</span>
-                                    </h4>
-                                    <p class="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">Uses system notification ringer, vibration & chime</p>
+                        <!-- Collapsible Ringer & Notification Sound Section -->
+                        <div class="pt-3 border-t border-slate-100 dark:border-slate-800">
+                            <div class="bg-slate-50/70 dark:bg-slate-800/40 rounded-2xl border border-slate-200/70 dark:border-slate-700/60 overflow-hidden transition-all duration-200">
+                                <div onclick="toggleSoundPanel()" class="flex items-center justify-between p-3.5 cursor-pointer select-none hover:bg-slate-100/80 dark:hover:bg-slate-800/80 transition">
+                                    <div class="flex items-center space-x-2.5 min-w-0 pr-2">
+                                        <div class="w-8 h-8 rounded-xl ${state.soundEnabled ? 'bg-indigo-500/10 text-indigo-600 dark:text-indigo-400' : 'bg-slate-200 dark:bg-slate-700 text-slate-400'} flex items-center justify-center shrink-0">
+                                            <i class="fa-solid ${state.soundEnabled ? 'fa-bell' : 'fa-bell-slash'} text-xs"></i>
+                                        </div>
+                                        <div class="min-w-0">
+                                            <h4 class="font-semibold text-xs text-slate-900 dark:text-white flex items-center space-x-1.5">
+                                                <span class="truncate">Ringer & Notification Sound</span>
+                                                <i class="fa-solid fa-chevron-down text-[10px] text-slate-400 transition-transform duration-200 ${state.showSoundPanel ? 'rotate-180 text-indigo-500' : ''}"></i>
+                                            </h4>
+                                            <p class="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5 truncate">Tap to adjust chime level & ringer settings</p>
+                                        </div>
+                                    </div>
+                                    <button type="button" onclick="toggleNotificationSound(event)" class="relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${state.soundEnabled ? 'bg-indigo-600' : 'bg-slate-300 dark:bg-slate-700'}">
+                                        <span class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-lg ring-0 transition duration-200 ease-in-out ${state.soundEnabled ? 'translate-x-5' : 'translate-x-0'}"></span>
+                                    </button>
                                 </div>
-                                <button type="button" onclick="toggleNotificationSound()" class="relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${state.soundEnabled ? 'bg-indigo-600' : 'bg-slate-300 dark:bg-slate-700'}">
-                                    <span class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-lg ring-0 transition duration-200 ease-in-out ${state.soundEnabled ? 'translate-x-5' : 'translate-x-0'}"></span>
-                                </button>
-                            </div>
 
-                            ${state.soundEnabled ? `
-                                <div class="bg-slate-50 dark:bg-slate-800/60 p-3 rounded-2xl space-y-2.5">
-                                    <div class="flex items-center justify-between text-xs">
-                                        <span class="font-medium text-slate-600 dark:text-slate-300 flex items-center gap-1.5">
-                                            <i class="fa-solid fa-volume-high text-indigo-500"></i>
-                                            <span>Chime Level</span>
-                                        </span>
-                                        <span id="sound-vol-label" class="font-bold text-indigo-600 dark:text-indigo-400">${state.soundVolume}%</span>
+                                ${state.showSoundPanel ? `
+                                    <div class="px-3.5 pb-3.5 pt-2.5 border-t border-slate-200/60 dark:border-slate-700/60 space-y-2.5 bg-white/60 dark:bg-slate-900/40">
+                                        <div class="flex items-center justify-between text-xs">
+                                            <span class="font-medium text-slate-600 dark:text-slate-300 flex items-center gap-1.5">
+                                                <i class="fa-solid fa-volume-high text-indigo-500"></i>
+                                                <span>Chime Level</span>
+                                            </span>
+                                            <span id="sound-vol-label" class="font-bold text-indigo-600 dark:text-indigo-400">${state.soundVolume}%</span>
+                                        </div>
+                                        <div class="flex items-center space-x-3">
+                                            <input type="range" min="10" max="100" step="5" value="${state.soundVolume}" oninput="handleSoundVolumeChange(this.value)" onchange="previewSoundVolume()" class="w-full accent-indigo-600 cursor-pointer h-1.5 bg-slate-200 dark:bg-slate-700 rounded-lg">
+                                            <button type="button" onclick="previewSoundVolume()" class="px-2.5 py-1 bg-indigo-50 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-400 rounded-xl text-[10px] font-semibold border border-indigo-200 dark:border-indigo-800 shrink-0">Test</button>
+                                        </div>
+                                        ${notifPermission !== 'granted' && notifPermission !== 'unsupported' ? `
+                                            <button type="button" onclick="requestSystemRingerPermission()" class="w-full py-2 px-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-[11px] font-semibold transition flex items-center justify-center space-x-1.5 shadow-sm">
+                                                <i class="fa-solid fa-mobile-screen-button"></i>
+                                                <span>Enable OS Ringer Channel Permission</span>
+                                            </button>
+                                        ` : `
+                                            <p class="text-[10px] text-emerald-600 dark:text-emerald-400 font-medium flex items-center gap-1">
+                                                <i class="fa-solid fa-circle-check"></i>
+                                                <span>OS Ringer & Vibration channel active</span>
+                                            </p>
+                                        `}
                                     </div>
-                                    <div class="flex items-center space-x-3">
-                                        <input type="range" min="10" max="100" step="5" value="${state.soundVolume}" oninput="handleSoundVolumeChange(this.value)" onchange="previewSoundVolume()" class="w-full accent-indigo-600 cursor-pointer h-1.5 bg-slate-200 dark:bg-slate-700 rounded-lg">
-                                        <button type="button" onclick="previewSoundVolume()" class="px-2.5 py-1 bg-indigo-50 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-400 rounded-xl text-[10px] font-semibold border border-indigo-200 dark:border-indigo-800 shrink-0">Test</button>
-                                    </div>
-                                    ${notifPermission !== 'granted' && notifPermission !== 'unsupported' ? `
-                                        <button type="button" onclick="requestSystemRingerPermission()" class="w-full py-2 px-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-[11px] font-semibold transition flex items-center justify-center space-x-1.5 shadow-sm">
-                                            <i class="fa-solid fa-mobile-screen-button"></i>
-                                            <span>Enable OS Ringer Channel Permission</span>
-                                        </button>
-                                    ` : `
-                                        <p class="text-[10px] text-emerald-600 dark:text-emerald-400 font-medium flex items-center gap-1">
-                                            <i class="fa-solid fa-circle-check"></i>
-                                            <span>OS Ringer & Vibration channel active</span>
-                                        </p>
-                                    `}
-                                </div>
-                            ` : ''}
+                                ` : ''}
+                            </div>
                         </div>
                     </div>
 
