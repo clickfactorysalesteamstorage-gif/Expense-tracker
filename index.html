@@ -129,6 +129,24 @@
             animation: simple-spin 0.8s linear infinite;
         }
 
+        /* Smooth Zoom-Out Entrance Transition after Loading */
+        @keyframes homeZoomOut {
+            0% {
+                opacity: 0;
+                transform: scale(1.12);
+                filter: blur(4px);
+            }
+            100% {
+                opacity: 1;
+                transform: scale(1);
+                filter: blur(0px);
+            }
+        }
+        .animate-zoom-out-enter {
+            animation: homeZoomOut 0.55s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+            will-change: transform, opacity, filter;
+        }
+
         @keyframes pulse-ring {
             0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(79, 70, 229, 0.7); }
             70% { transform: scale(1); box-shadow: 0 0 0 8px rgba(79, 70, 229, 0); }
@@ -424,6 +442,7 @@
 
         let state = {
             isDbLoading: true,
+            justFinishedLoading: false,
             currentUser: null,
             adminPassword: 'adminpassword',
             users: [],
@@ -733,6 +752,7 @@
         function checkInitialSyncComplete() {
             if (state.isDbLoading && initialSyncFlags.users && initialSyncFlags.expenses) {
                 state.isDbLoading = false;
+                state.justFinishedLoading = true;
                 render();
             }
         }
@@ -740,6 +760,7 @@
         setTimeout(() => {
             if (state.isDbLoading) {
                 state.isDbLoading = false;
+                state.justFinishedLoading = true;
                 render();
             }
         }, 6000);
@@ -981,6 +1002,17 @@
                     <p class="text-sm font-semibold text-slate-600 dark:text-slate-300 tracking-tight">Loading Expense...</p>
                 </div>
             `;
+        }
+
+        function triggerZoomOutEntrance() {
+            const app = document.getElementById('app');
+            if (!app) return;
+            app.classList.remove('animate-zoom-out-enter');
+            void app.offsetWidth; // Force reflow for smooth restart
+            app.classList.add('animate-zoom-out-enter');
+            setTimeout(() => {
+                app.classList.remove('animate-zoom-out-enter');
+            }, 600);
         }
 
         function showToast(message, type = 'success', undoCallback = null) {
@@ -1647,6 +1679,11 @@
                 return;
             }
 
+            const shouldPlayZoomEntrance = state.justFinishedLoading;
+            if (state.justFinishedLoading) {
+                state.justFinishedLoading = false;
+            }
+
             if (!state.currentUser) {
                 const navWrapper = document.getElementById('persistent-nav-wrapper');
                 if (navWrapper) {
@@ -1654,6 +1691,7 @@
                     navWrapper.style.display = 'none';
                 }
                 app.innerHTML = state.authView === 'forgot' ? renderForgotPasswordPage() : renderLoginPage();
+                if (shouldPlayZoomEntrance) triggerZoomOutEntrance();
                 return;
             }
 
@@ -1714,6 +1752,7 @@
                 <div id="modal-root"></div>
             `;
 
+            if (shouldPlayZoomEntrance) triggerZoomOutEntrance();
             syncPersistentNavbar();
         }
 
@@ -1918,6 +1957,7 @@
             if (foundUser) {
                 state.currentUser = foundUser;
                 state.activeTab = 'home';
+                state.justFinishedLoading = true; // Trigger zoom-out transition into Home screen
                 localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(foundUser));
                 if ('Notification' in window && Notification.permission === 'default') {
                     Notification.requestPermission().catch(() => {});
