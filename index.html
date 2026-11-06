@@ -180,7 +180,7 @@
             display: flex;
             justify-content: center;
             padding: 0 16px;
-            z-index: 50;
+            z-index: 40; /* Lowered from 50 to 40 so modals (z-[60]) sit cleanly above the dock */
             pointer-events: none;
         }
 
@@ -389,7 +389,7 @@
         </div>
     </div>
 
-    <!-- Persistent Liquid Glass Navigation Bar -->
+    <!-- Persistent Liquid Glass Navigation Bar (z-40) -->
     <div id="persistent-nav-wrapper" class="liquid-nav-container hidden" style="display: none;">
         <nav id="liquid-nav" class="liquid-dock">
             <div id="liquid-bubble" class="liquid-bubble"></div>
@@ -425,7 +425,11 @@
         </nav>
     </div>
 
-    <div id="toast-container" class="fixed top-12 left-1/2 transform -translate-x-1/2 z-50 flex flex-col gap-2 pointer-events-none w-11/12 max-w-sm"></div>
+    <!-- Top-Level Modal Root (z-[60] so modals sit above the bottom navigation bar) -->
+    <div id="modal-root" class="relative z-[60]"></div>
+
+    <!-- Toast Notifications Container (z-[70] so alerts appear above open modals) -->
+    <div id="toast-container" class="fixed top-12 left-1/2 transform -translate-x-1/2 z-[70] flex flex-col gap-2 pointer-events-none w-11/12 max-w-sm"></div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
@@ -1503,8 +1507,8 @@
 
             const root = document.getElementById('modal-root');
             root.innerHTML = `
-                <div class="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-sm flex items-center justify-center p-4 animate-fadeIn">
-                    <div class="ios-glass-modal bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 max-w-sm w-full shadow-2xl space-y-4 max-h-[90vh] flex flex-col">
+                <div class="fixed inset-0 z-[60] bg-slate-950/60 backdrop-blur-sm flex items-center justify-center p-4 animate-fadeIn">
+                    <div class="ios-glass-modal bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 max-w-sm w-full shadow-2xl space-y-4 max-h-[85vh] flex flex-col">
                         
                         <!-- Header -->
                         <div class="flex items-center justify-between shrink-0 pb-1 border-b border-slate-100 dark:border-slate-800/80">
@@ -1898,7 +1902,7 @@
             const backTargetTab = state.activeTab === 'notifications' ? 'home' : 'profile';
 
             app.innerHTML = `
-                <header class="sticky top-0 z-40 ios-glass-card border-b border-slate-200/80 dark:border-slate-800 px-4 sm:px-6 pt-3 pb-3 flex items-center justify-between w-full shadow-sm transition-colors duration-300">
+                <header class="sticky top-0 z-30 ios-glass-card border-b border-slate-200/80 dark:border-slate-800 px-4 sm:px-6 pt-3 pb-3 flex items-center justify-between w-full shadow-sm transition-colors duration-300">
                     <div class="flex items-center space-x-3 min-w-0 flex-1 pr-2">
                         ${isSubTab ? `
                             <button onclick="switchTab('${backTargetTab}')" class="w-9 h-9 rounded-2xl ios-glass-card flex items-center justify-center text-slate-700 dark:text-slate-200 hover:bg-slate-200/50 dark:hover:bg-slate-700/50 transition border border-slate-200/80 dark:border-slate-700 shrink-0" title="Back">
@@ -1939,8 +1943,6 @@
                     </button>
                     ` : ''}
                 </div>
-
-                <div id="modal-root"></div>
             `;
 
             if (shouldPlayZoomEntrance) triggerZoomOutEntrance();
@@ -2623,7 +2625,7 @@
             updateFormCache();
             const root = document.getElementById('modal-root');
             root.innerHTML = `
-                <div class="fixed inset-0 z-50 bg-slate-950/90 backdrop-blur-md flex flex-col items-center justify-center p-4">
+                <div class="fixed inset-0 z-[60] bg-slate-950/90 backdrop-blur-md flex flex-col items-center justify-center p-4">
                     <div class="w-full max-w-md bg-slate-900 rounded-3xl overflow-hidden border border-slate-800 shadow-2xl flex flex-col">
                         <div class="p-4 bg-slate-800/80 flex items-center justify-between border-b border-slate-700">
                             <h3 class="font-bold text-sm text-white flex items-center space-x-2"><i class="fa-solid fa-camera text-indigo-400"></i><span>Capture Bill Receipt</span></h3>
@@ -2710,7 +2712,7 @@
         function openBillPreviewModal(imgUrl, titleText) {
             const root = document.getElementById('modal-root');
             root.innerHTML = `
-                <div class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4">
+                <div class="fixed inset-0 z-[60] bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4">
                     <div class="ios-glass-modal rounded-3xl p-5 max-w-md w-full shadow-2xl space-y-4">
                         <div class="flex items-center justify-between">
                             <h3 class="font-bold text-sm text-slate-900 dark:text-white truncate">${escapeHtml(titleText)}</h3>
@@ -3349,7 +3351,7 @@
         function openAddUserModal() {
             const root = document.getElementById('modal-root');
             root.innerHTML = `
-                <div class="fixed inset-0 z-50 bg-slate-950/65 backdrop-blur-md flex items-center justify-center p-4">
+                <div class="fixed inset-0 z-[60] bg-slate-950/65 backdrop-blur-md flex items-center justify-center p-4">
                     <div class="ios-glass-modal rounded-3xl p-6 max-w-sm w-full shadow-2xl space-y-4">
                         <div class="flex items-center justify-between">
                             <h3 class="font-bold text-base text-slate-900 dark:text-white">Add User</h3>
@@ -3373,7 +3375,7 @@
 
             const root = document.getElementById('modal-root');
             root.innerHTML = `
-                <div class="fixed inset-0 z-50 bg-slate-950/65 backdrop-blur-md flex items-center justify-center p-4">
+                <div class="fixed inset-0 z-[60] bg-slate-950/65 backdrop-blur-md flex items-center justify-center p-4">
                     <div class="ios-glass-modal rounded-3xl p-6 max-w-sm w-full shadow-2xl space-y-4">
                         <div class="flex items-center justify-between">
                             <h3 class="font-bold text-base text-slate-900 dark:text-white">Edit User</h3>
@@ -3682,7 +3684,7 @@
         function openChangePasswordModal() {
             const root = document.getElementById('modal-root');
             root.innerHTML = `
-                <div class="fixed inset-0 z-50 bg-slate-950/65 backdrop-blur-md flex items-center justify-center p-4">
+                <div class="fixed inset-0 z-[60] bg-slate-950/65 backdrop-blur-md flex items-center justify-center p-4">
                     <div class="ios-glass-modal rounded-3xl p-6 max-w-sm w-full shadow-2xl space-y-4">
                         <div class="flex items-center justify-between">
                             <h3 class="font-bold text-base text-slate-900 dark:text-white">Change Admin Password</h3>
@@ -3780,7 +3782,7 @@
         function showConfirmModal(title, message, onConfirm) {
             const root = document.getElementById('modal-root');
             root.innerHTML = `
-                <div class="fixed inset-0 z-50 bg-slate-950/65 backdrop-blur-md flex items-center justify-center p-4">
+                <div class="fixed inset-0 z-[60] bg-slate-950/65 backdrop-blur-md flex items-center justify-center p-4">
                     <div class="ios-glass-modal rounded-3xl p-6 max-w-sm w-full shadow-2xl space-y-4">
                         <div class="w-12 h-12 rounded-2xl bg-rose-500/10 text-rose-600 flex items-center justify-center text-xl mx-auto"><i class="fa-solid fa-triangle-exclamation"></i></div>
                         <div class="text-center"><h3 class="font-bold text-base text-slate-900 dark:text-white mb-1">${escapeHtml(title)}</h3><p class="text-xs text-slate-500 dark:text-slate-400">${escapeHtml(message)}</p></div>
