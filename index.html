@@ -4,11 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="theme-color" id="meta-theme-color" content="#f8fafc">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <title>Click Factory Expense Tracker</title>
     <!-- Web App Manifest & Home Screen Icons -->
     <link rel="icon" type="image/gif" href="https://clickfactoryphotography.com/wp-content/uploads/2022/04/crop-logo.gif">
     <link rel="apple-touch-icon" href="https://clickfactoryphotography.com/wp-content/uploads/2022/04/crop-logo.gif">
-    <link rel="manifest" href="data:application/manifest+json;charset=utf-8,%7B%22name%22%3A%22Expense%20tracker%22%2C%22short_name%22%3A%22ExpenseTracker%22%2C%22start_url%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22orientation%22%3A%22any%22%2C%22background_color%22%3A%22%230f172a%22%2C%22theme_color%22%3A%22%234f46e5%22%2C%22icons%22%3A%5B%7B%22src%22%3A%22https%3A%2F%2Fclickfactoryphotography.com%2Fwp-content%2Fuploads%2F2022%2F04%2Fcrop-logo.gif%22%2C%22sizes%22%3A%22192x192%20512x512%22%2C%22type%22%3A%22image%2Fgif%22%7D%5D%7D">
+    <link rel="manifest" href="data:application/manifest+json;charset=utf-8,%7B%22name%22%3A%22Expense%20tracker%22%2C%22short_name%22%3A%22ExpenseTracker%22%2C%22start_url%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22orientation%22%3A%22any%22%2C%22background_color%22%3A%22%23020617%22%2C%22theme_color%22%3A%22%23020617%22%2C%22icons%22%3A%5B%7B%22src%22%3A%22https%3A%2F%2Fclickfactoryphotography.com%2Fwp-content%2Fuploads%2F2022%2F04%2Fcrop-logo.gif%22%2C%22sizes%22%3A%22192x192%20512x512%22%2C%22type%22%3A%22image%2Fgif%22%7D%5D%7D">
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- FontAwesome for Icons -->
@@ -55,7 +57,7 @@
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
         .dark ::-webkit-scrollbar-thumb { background: #475569; }
-        body {
+        html, body {
             font-family: 'Inter', sans-serif;
             -webkit-tap-highlight-color: transparent;
             margin: 0; padding: 0; width: 100vw;
@@ -63,7 +65,7 @@
             background-color: #f8fafc;
             transition: background-color 0.25s ease, color 0.25s ease;
         }
-        .dark body {
+        html.dark, .dark body {
             background-color: #020617;
         }
         input[type="date"], select { appearance: none; -webkit-appearance: none; }
@@ -71,23 +73,27 @@
         .app-container {
             width: 100%; max-width: 100%; min-height: 100vh;
             background-color: #f8fafc; display: flex; flex-direction: column;
-            padding-top: max(env(safe-area-inset-top), 12px);
+            padding-top: 0;
             transition: background-color 0.25s ease, color 0.25s ease;
         }
         .dark .app-container {
             background-color: #020617;
         }
 
-        @media (min-width: 640px) or (orientation: landscape) {
-            .app-container {
-                max-width: 100% !important;
-                min-height: 100vh !important;
-                margin: 0 !important;
-                border-radius: 0 !important;
-                box-shadow: none !important;
-                border: none !important;
-                padding-top: max(env(safe-area-inset-top), 12px);
-            }
+        /* Seamless Edge-to-Edge Frosted Top Header */
+        .ios-header {
+            padding-top: max(env(safe-area-inset-top, 0px), 12px);
+            background: rgba(248, 250, 252, 0.85);
+            backdrop-filter: blur(28px) saturate(200%);
+            -webkit-backdrop-filter: blur(28px) saturate(200%);
+            border-bottom: 1px solid rgba(226, 232, 240, 0.8);
+            transition: background-color 0.25s ease, border-color 0.25s ease;
+        }
+        .dark .ios-header {
+            background: rgba(2, 6, 23, 0.82);
+            backdrop-filter: blur(28px) saturate(200%);
+            -webkit-backdrop-filter: blur(28px) saturate(200%);
+            border-bottom: 1px solid rgba(30, 41, 59, 0.75);
         }
 
         .logo-container img {
@@ -180,7 +186,7 @@
             display: flex;
             justify-content: center;
             padding: 0 16px;
-            z-index: 40; /* Lowered from 50 to 40 so modals (z-[60]) sit cleanly above the dock */
+            z-index: 40;
             pointer-events: none;
         }
 
@@ -1902,31 +1908,42 @@
             const backTargetTab = state.activeTab === 'notifications' ? 'home' : 'profile';
 
             app.innerHTML = `
-                <header class="sticky top-0 z-30 ios-glass-card border-b border-slate-200/80 dark:border-slate-800 px-4 sm:px-6 pt-3 pb-3 flex items-center justify-between w-full shadow-sm transition-colors duration-300">
-                    <div class="flex items-center space-x-3 min-w-0 flex-1 pr-2">
+                <header class="sticky top-0 z-30 ios-header px-4 sm:px-6 pb-3 flex items-center justify-between w-full">
+                    <div class="flex items-center space-x-3.5 min-w-0 flex-1 pr-2">
                         ${isSubTab ? `
-                            <button onclick="switchTab('${backTargetTab}')" class="w-9 h-9 rounded-2xl ios-glass-card flex items-center justify-center text-slate-700 dark:text-slate-200 hover:bg-slate-200/50 dark:hover:bg-slate-700/50 transition border border-slate-200/80 dark:border-slate-700 shrink-0" title="Back">
+                            <button onclick="switchTab('${backTargetTab}')" class="w-10 h-10 rounded-2xl bg-slate-100/80 dark:bg-slate-800/80 flex items-center justify-center text-slate-700 dark:text-slate-200 hover:bg-slate-200/70 dark:hover:bg-slate-700/70 transition border border-slate-200/80 dark:border-slate-700/70 shrink-0 shadow-sm" title="Back">
                                 <i class="fa-solid fa-arrow-left text-sm"></i>
                             </button>
                         ` : `
-                            <div class="w-10 h-10 flex items-center justify-center overflow-hidden shrink-0 logo-container">
-                                <img src="https://clickfactoryphotography.com/wp-content/uploads/2022/04/crop-logo.gif" alt="Click Factory Logo" class="w-full h-full object-contain drop-shadow" onerror="this.src='https://placehold.co/40x40/4f46e5/ffffff?text=CF'">
+                            <div class="w-11 h-11 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-sm flex items-center justify-center p-1.5 overflow-hidden shrink-0 logo-container">
+                                <img src="https://clickfactoryphotography.com/wp-content/uploads/2022/04/crop-logo.gif" alt="Click Factory Logo" class="w-full h-full object-contain" onerror="this.src='https://placehold.co/40x40/4f46e5/ffffff?text=CF'">
                             </div>
                         `}
                         <div class="min-w-0 flex-1">
-                            <h1 class="font-semibold text-sm sm:text-base leading-tight tracking-tight text-slate-900 dark:text-white truncate">${isSubTab ? subTabTitle : 'Click Factory'}</h1>
-                            <p class="text-[11px] text-slate-500 dark:text-slate-400 font-medium truncate">
-                                ${isSubTab ? (state.activeTab === 'notifications' ? 'Activity & Alerts' : 'Back to Profile') : (isAdmin ? '<span class="text-indigo-600 dark:text-indigo-400 font-semibold"><i class="fa-solid fa-shield-halved mr-1"></i>Admin</span>' : 'Expense Tracker')}
-                            </p>
+                            <div class="flex items-center gap-2">
+                                <h1 class="font-bold text-base sm:text-lg leading-tight tracking-tight text-slate-900 dark:text-white truncate">${isSubTab ? subTabTitle : 'Click Factory'}</h1>
+                            </div>
+                            <div class="flex items-center mt-0.5">
+                                ${isSubTab ? `
+                                    <p class="text-[11px] text-slate-500 dark:text-slate-400 font-medium truncate">${state.activeTab === 'notifications' ? 'Activity & Alerts' : 'Back to Profile'}</p>
+                                ` : (isAdmin ? `
+                                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-indigo-500/10 text-indigo-600 dark:bg-indigo-500/20 dark:text-indigo-300 border border-indigo-500/20">
+                                        <i class="fa-solid fa-shield-halved text-[9px]"></i>
+                                        <span>Admin Portal</span>
+                                    </span>
+                                ` : `
+                                    <p class="text-[11px] text-slate-500 dark:text-slate-400 font-medium truncate">Expense Tracker</p>
+                                `)}
+                            </div>
                         </div>
                     </div>
                     
-                    <div class="flex items-center space-x-2 shrink-0">
-                        <button onclick="switchTab('notifications')" class="relative w-10 h-10 rounded-2xl ${state.activeTab === 'notifications' ? 'bg-indigo-600 text-white' : 'ios-glass-card text-slate-600 dark:text-slate-300 hover:bg-slate-200/50 dark:hover:bg-slate-700/50'} flex items-center justify-center transition border border-slate-200/80 dark:border-slate-700/60 shadow-sm" title="Notifications">
+                    <div class="flex items-center space-x-2.5 shrink-0">
+                        <button onclick="switchTab('notifications')" class="relative w-10 h-10 rounded-2xl ${state.activeTab === 'notifications' ? 'bg-indigo-600 text-white border-indigo-500' : 'bg-slate-100/80 dark:bg-slate-900/90 text-slate-600 dark:text-slate-300 hover:bg-slate-200/60 dark:hover:bg-slate-800 border-slate-200/80 dark:border-slate-800'} flex items-center justify-center transition border shadow-sm" title="Notifications">
                             <i class="fa-solid fa-bell text-sm ${unreadNotifCount > 0 && state.activeTab !== 'notifications' ? 'animate-bounce text-indigo-600 dark:text-indigo-400' : ''}"></i>
                             ${unreadNotifCount > 0 ? `<span class="liquid-badge">${unreadNotifCount > 99 ? '99+' : unreadNotifCount}</span>` : ''}
                         </button>
-                        <button onclick="confirmLogout()" class="w-10 h-10 rounded-2xl bg-rose-500/10 dark:bg-rose-950/40 flex items-center justify-center text-rose-600 dark:text-rose-400 hover:bg-rose-500/20 transition border border-rose-500/20 shadow-sm" title="Logout">
+                        <button onclick="confirmLogout()" class="w-10 h-10 rounded-2xl bg-rose-500/10 dark:bg-rose-950/50 flex items-center justify-center text-rose-600 dark:text-rose-400 hover:bg-rose-500/20 transition border border-rose-500/20 dark:border-rose-900/60 shadow-sm" title="Logout">
                             <i class="fa-solid fa-arrow-right-from-bracket text-sm"></i>
                         </button>
                     </div>
