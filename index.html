@@ -117,7 +117,6 @@
             display: none;
         }
 
-        /* Simple Clean Spinner Animation */
         @keyframes simple-spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
@@ -129,7 +128,6 @@
             animation: simple-spin 0.8s linear infinite;
         }
 
-        /* Smooth Zoom-Out Entrance Transition after Loading */
         @keyframes homeZoomOut {
             0% {
                 opacity: 0;
@@ -156,7 +154,24 @@
             animation: pulse-ring 1.2s infinite;
         }
 
-        /* Persistent Liquid Dock Styles */
+        /* iOS-Style Page Slide Transitions */
+        @keyframes slideInFromRight {
+            0% { transform: translateX(35px); opacity: 0; filter: blur(4px); }
+            100% { transform: translateX(0); opacity: 1; filter: blur(0px); }
+        }
+        @keyframes slideInFromLeft {
+            0% { transform: translateX(-35px); opacity: 0; filter: blur(4px); }
+            100% { transform: translateX(0); opacity: 1; filter: blur(0px); }
+        }
+        .animate-slide-right {
+            animation: slideInFromRight 0.38s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+            will-change: transform, opacity, filter;
+        }
+        .animate-slide-left {
+            animation: slideInFromLeft 0.38s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+            will-change: transform, opacity, filter;
+        }
+
         .liquid-nav-container {
             position: fixed;
             bottom: max(env(safe-area-inset-bottom, 14px), 18px);
@@ -169,6 +184,7 @@
             pointer-events: none;
         }
 
+        /* iOS-Style Liquid Glass Navigation Dock */
         .liquid-dock {
             position: relative;
             display: flex;
@@ -183,28 +199,30 @@
             user-select: none;
             -webkit-user-select: none;
 
-            background: rgba(255, 255, 255, 0.82);
-            backdrop-filter: blur(28px) saturate(180%);
-            -webkit-backdrop-filter: blur(28px) saturate(180%);
-            border: 1px solid rgba(255, 255, 255, 0.85);
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(36px) saturate(210%);
+            -webkit-backdrop-filter: blur(36px) saturate(210%);
+            border: 1px solid rgba(255, 255, 255, 0.9);
             box-shadow: 
-                0 20px 40px -10px rgba(0, 0, 0, 0.12),
-                0 6px 16px -4px rgba(0, 0, 0, 0.06),
-                inset 0 1.5px 2px rgba(255, 255, 255, 1),
-                inset 0 -1.5px 2px rgba(0, 0, 0, 0.04);
+                0 24px 48px -12px rgba(0, 0, 0, 0.16),
+                0 8px 20px -4px rgba(0, 0, 0, 0.08),
+                inset 0 1.5px 3px rgba(255, 255, 255, 1),
+                inset 0 -2px 3px rgba(0, 0, 0, 0.06),
+                inset 0 0 12px rgba(255, 255, 255, 0.5);
             transition: background 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
         }
 
         .dark .liquid-dock {
             background: rgba(15, 23, 42, 0.85);
-            backdrop-filter: blur(28px) saturate(180%);
-            -webkit-backdrop-filter: blur(28px) saturate(180%);
-            border: 1px solid rgba(255, 255, 255, 0.12);
+            backdrop-filter: blur(36px) saturate(210%);
+            -webkit-backdrop-filter: blur(36px) saturate(210%);
+            border: 1px solid rgba(255, 255, 255, 0.16);
             box-shadow: 
-                0 24px 44px -8px rgba(0, 0, 0, 0.55),
-                0 8px 18px -4px rgba(0, 0, 0, 0.35),
-                inset 0 1.5px 2px rgba(255, 255, 255, 0.18),
-                inset 0 -1px 2px rgba(0, 0, 0, 0.45);
+                0 28px 52px -10px rgba(0, 0, 0, 0.65),
+                0 10px 24px -4px rgba(0, 0, 0, 0.4),
+                inset 0 1.5px 3px rgba(255, 255, 255, 0.22),
+                inset 0 -1.5px 3px rgba(0, 0, 0, 0.55),
+                inset 0 0 15px rgba(99, 102, 241, 0.15);
         }
 
         .liquid-bubble {
@@ -218,24 +236,52 @@
             will-change: transform, width;
             transform: translateX(0);
 
-            background: linear-gradient(135deg, rgba(230, 237, 255, 0.8) 0%, rgba(215, 226, 255, 0.6) 100%);
-            border: 1px solid rgba(255, 255, 255, 0.95);
+            background: linear-gradient(135deg, rgba(240, 244, 255, 0.95) 0%, rgba(210, 224, 255, 0.75) 100%);
+            border: 1px solid rgba(255, 255, 255, 1);
             box-shadow: 
-                0 6px 16px -2px rgba(26, 98, 255, 0.14),
-                inset 0 1px 2px rgba(255, 255, 255, 0.95),
-                inset 0 -2px 4px rgba(26, 98, 255, 0.08);
+                0 8px 20px -3px rgba(26, 98, 255, 0.18),
+                inset 0 1.5px 2px rgba(255, 255, 255, 1),
+                inset 0 -3px 6px rgba(26, 98, 255, 0.12);
             transition: 
                 transform 0.4s cubic-bezier(0.25, 1, 0.35, 1),
                 width 0.35s cubic-bezier(0.25, 1, 0.35, 1);
         }
 
         .dark .liquid-bubble {
-            background: linear-gradient(135deg, rgba(79, 70, 229, 0.4) 0%, rgba(99, 102, 241, 0.25) 100%);
-            border: 1px solid rgba(129, 140, 248, 0.45);
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.55) 0%, rgba(79, 70, 229, 0.35) 100%);
+            border: 1px solid rgba(165, 180, 252, 0.55);
             box-shadow: 
-                0 6px 16px -2px rgba(0, 0, 0, 0.35),
-                inset 0 1px 2px rgba(255, 255, 255, 0.25),
-                inset 0 -1px 3px rgba(79, 70, 229, 0.2);
+                0 8px 20px -3px rgba(0, 0, 0, 0.45),
+                inset 0 1.5px 2px rgba(255, 255, 255, 0.35),
+                inset 0 -2px 4px rgba(79, 70, 229, 0.3);
+        }
+
+        /* Base Card and Modal CSS */
+        .ios-glass-card {
+            background: rgba(255, 255, 255, 0.92) !important;
+            backdrop-filter: blur(24px) saturate(190%) !important;
+            -webkit-backdrop-filter: blur(24px) saturate(190%) !important;
+            border: 1px solid rgba(226, 232, 240, 0.9) !important;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.01) !important;
+        }
+        .dark .ios-glass-card {
+            background: rgba(15, 23, 42, 0.88) !important;
+            backdrop-filter: blur(24px) saturate(190%) !important;
+            -webkit-backdrop-filter: blur(24px) saturate(190%) !important;
+            border: 1px solid rgba(51, 65, 85, 0.65) !important;
+            box-shadow: 0 14px 28px -6px rgba(0, 0, 0, 0.5), 0 10px 10px -5px rgba(0, 0, 0, 0.04) !important;
+        }
+
+        /* Solid, high-contrast modal backdrops preventing gray wash-out */
+        .ios-glass-modal {
+            background: #ffffff !important;
+            border: 1px solid #e2e8f0 !important;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25) !important;
+        }
+        .dark .ios-glass-modal {
+            background: #0f172a !important;
+            border: 1px solid #334155 !important;
+            box-shadow: 0 30px 60px -15px rgba(0, 0, 0, 0.75) !important;
         }
 
         .liquid-nav-btn {
@@ -333,7 +379,6 @@
 </head>
 <body class="bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-100 flex flex-col justify-center items-center h-full selection:bg-indigo-500 selection:text-white">
 
-    <!-- Initial App Container with Simple Loading Screen -->
     <div id="app" class="app-container w-full flex flex-col relative transition-colors duration-200">
         <div class="flex-1 flex flex-col items-center justify-center p-6 text-center select-none">
             <div class="relative w-16 h-16 flex items-center justify-center mx-auto mb-4">
@@ -438,6 +483,7 @@
         const THEME_STORAGE_KEY = 'click_factory_theme_v1';
         const SOUND_STORAGE_KEY = 'click_factory_sound_v1';
         const SOUND_VOL_STORAGE_KEY = 'click_factory_sound_vol_v1';
+        const DOCK_ALPHA_STORAGE_KEY = 'click_factory_dock_alpha_v1';
         const CURRENT_CLIENT_APP_VERSION = '1.1.2';
 
         let state = {
@@ -454,6 +500,7 @@
             passwordRequests: [],
             appSettings: { autoDeleteEnabled: false, currentVersion: '1.1.2' },
             activeTab: 'home',
+            slideDirection: 'animate-slide-right',
             filterCategory: 'All',
             filterMonth: 'All',
             filterUser: 'All',
@@ -464,6 +511,7 @@
             themeMode: localStorage.getItem(THEME_STORAGE_KEY) || 'system',
             soundEnabled: localStorage.getItem(SOUND_STORAGE_KEY) !== 'false',
             soundVolume: parseInt(localStorage.getItem(SOUND_VOL_STORAGE_KEY) || '80', 10),
+            dockAlpha: parseFloat(localStorage.getItem(DOCK_ALPHA_STORAGE_KEY) || '0.85'),
             showSoundPanel: false,
             isSoundTesting: false,
             userFilterTab: 'all',
@@ -475,12 +523,70 @@
             lastClearedExpensesCache: null
         };
 
+        const tabOrder = ['home', 'summary', 'admin', 'analytics', 'users', 'wallet', 'add', 'profile', 'recycle', 'userRecycle', 'requests', 'notifications'];
         let knownNotificationIds = new Set();
         let initialNotificationsLoaded = false;
         let sharedAudioCtx = null;
         let swRegistration = null;
+        let lastHapticAlphaStep = state.dockAlpha;
+        let lastHapticSoundStep = state.soundVolume;
 
-        // Register Inline Service Worker so system notifications use OS Ringer/Notification Volume
+        function triggerHaptic(pattern = 12) {
+            if (!state.soundEnabled) return;
+            if ('vibrate' in navigator) {
+                try {
+                    navigator.vibrate(pattern);
+                } catch (e) {}
+            }
+        }
+
+        document.addEventListener('click', (e) => {
+            if (e.target.closest('button, [onclick], input[type="submit"], select')) {
+                triggerHaptic(14);
+            }
+        });
+
+        function applyDockTransparency(val) {
+            state.dockAlpha = parseFloat(val);
+            localStorage.setItem(DOCK_ALPHA_STORAGE_KEY, String(state.dockAlpha));
+
+            let styleTag = document.getElementById('dynamic-glass-style');
+            if (!styleTag) {
+                styleTag = document.createElement('style');
+                styleTag.id = 'dynamic-glass-style';
+                document.head.appendChild(styleTag);
+            }
+
+            const lightAlpha = state.dockAlpha;
+            const darkAlpha = Math.min(0.96, state.dockAlpha + 0.05);
+            const bubbleLight = Math.min(1, state.dockAlpha + 0.08);
+            const bubbleDark = Math.max(0.3, state.dockAlpha - 0.25);
+
+            // Modals and cards are explicitly kept solid and decoupled from transparency slider
+            styleTag.innerHTML = `
+                .liquid-dock {
+                    background: rgba(255, 255, 255, ${lightAlpha}) !important;
+                    backdrop-filter: blur(${Math.round(24 + (state.dockAlpha * 16))}px) saturate(210%) !important;
+                    -webkit-backdrop-filter: blur(${Math.round(24 + (state.dockAlpha * 16))}px) saturate(210%) !important;
+                }
+                .dark .liquid-dock {
+                    background: rgba(15, 23, 42, ${darkAlpha}) !important;
+                    backdrop-filter: blur(${Math.round(24 + (state.dockAlpha * 16))}px) saturate(210%) !important;
+                    -webkit-backdrop-filter: blur(${Math.round(24 + (state.dockAlpha * 16))}px) saturate(210%) !important;
+                }
+                .liquid-bubble {
+                    background: linear-gradient(135deg, rgba(240, 244, 255, ${bubbleLight}) 0%, rgba(210, 224, 255, ${Math.max(0.4, bubbleLight - 0.2)}) 100%) !important;
+                }
+                .dark .liquid-bubble {
+                    background: linear-gradient(135deg, rgba(99, 102, 241, ${Math.max(0.35, bubbleDark)}) 0%, rgba(79, 70, 229, ${Math.max(0.2, bubbleDark - 0.15)}) 100%) !important;
+                }
+            `;
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            applyDockTransparency(state.dockAlpha);
+        });
+
         (function registerNotificationServiceWorker() {
             if ('serviceWorker' in navigator) {
                 const swCode = `
@@ -618,6 +724,25 @@
             localStorage.setItem(SOUND_VOL_STORAGE_KEY, String(state.soundVolume));
             const labelEl = document.getElementById('sound-vol-label');
             if (labelEl) labelEl.textContent = `${state.soundVolume}%`;
+
+            if (Math.abs(state.soundVolume - lastHapticSoundStep) >= 5) {
+                triggerHaptic(8);
+                lastHapticSoundStep = state.soundVolume;
+            }
+        }
+
+        function handleDockAlphaChange(val) {
+            const floatVal = parseFloat(val);
+            applyDockTransparency(floatVal);
+            const labelEl = document.getElementById('dock-alpha-label');
+            if (labelEl) {
+                labelEl.textContent = `${Math.round(floatVal * 100)}%`;
+            }
+
+            if (Math.abs(floatVal - lastHapticAlphaStep) >= 0.04) {
+                triggerHaptic(8);
+                lastHapticAlphaStep = floatVal;
+            }
         }
 
         function previewSoundVolume() {
@@ -645,7 +770,6 @@
             render();
         }
 
-        // Helper: Refund an expense amount back to the individual user's wallet & record in Wallet Transaction History
         async function refundExpenseToUserWallet(userId, amountToRefund, reasonTitle = 'Expense', category = '') {
             const refundAmt = Number(amountToRefund || 0);
             if (!userId || isNaN(refundAmt) || refundAmt <= 0) return;
@@ -685,7 +809,6 @@
                 localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(state.currentUser));
             }
 
-            // Record the Undo Expense Refund in Wallet Transaction History
             const txnId = 'txn_' + Date.now() + '_' + Math.random().toString(36).substring(2, 5);
             const catLabel = category ? ` (${category})` : '';
             let txnTitle = `Undo Expense: ${reasonTitle}${catLabel}`;
@@ -1008,7 +1131,7 @@
             const app = document.getElementById('app');
             if (!app) return;
             app.classList.remove('animate-zoom-out-enter');
-            void app.offsetWidth; // Force reflow for smooth restart
+            void app.offsetWidth;
             app.classList.add('animate-zoom-out-enter');
             setTimeout(() => {
                 app.classList.remove('animate-zoom-out-enter');
@@ -1019,23 +1142,38 @@
             const container = document.getElementById('toast-container');
             if (!container) return;
             const toast = document.createElement('div');
-            const bgClass = type === 'success' ? 'bg-emerald-600 text-white' : type === 'error' ? 'bg-rose-600 text-white' : 'bg-slate-800 text-white';
-            const icon = type === 'success' ? 'fa-circle-check' : type === 'error' ? 'fa-circle-exclamation' : 'fa-circle-info';
             
-            toast.className = `${bgClass} px-4 py-3 rounded-2xl shadow-xl flex items-center justify-between text-sm font-medium transform transition-all duration-300 translate-y-[-20px] opacity-0 pointer-events-auto gap-3`;
+            let bgStyle = 'bg-slate-900 text-white border-slate-700/80 shadow-slate-900/30';
+            let icon = 'fa-circle-info text-indigo-400';
+
+            if (type === 'success') {
+                bgStyle = 'bg-emerald-600 text-white border-emerald-500/60 shadow-emerald-900/25';
+                icon = 'fa-circle-check text-emerald-200';
+            } else if (type === 'error') {
+                bgStyle = 'bg-rose-600 text-white border-rose-500/60 shadow-rose-900/25';
+                icon = 'fa-circle-exclamation text-rose-200';
+            }
+            
+            toast.className = `${bgStyle} border px-4 py-3.5 rounded-2xl shadow-xl flex items-center justify-between text-sm font-medium transform transition-all duration-300 translate-y-[-20px] opacity-0 pointer-events-auto gap-3 backdrop-blur-md`;
             
             let undoBtnHtml = '';
             if (undoCallback) {
-                undoBtnHtml = `<button id="toast-undo-btn" class="px-2.5 py-1 bg-white text-slate-900 rounded-xl font-bold text-xs hover:bg-slate-100 transition shrink-0">Undo</button>`;
+                undoBtnHtml = `<button id="toast-undo-btn" class="px-2.5 py-1 bg-white text-slate-900 rounded-xl font-bold text-xs hover:bg-slate-100 transition shrink-0 shadow-sm">Undo</button>`;
             }
 
-            toast.innerHTML = `<div class="flex items-center space-x-2.5 min-w-0 flex-1"><i class="fa-solid ${icon} text-lg shrink-0"></i><span class="flex-1 break-words">${message}</span></div>${undoBtnHtml}`;
+            toast.innerHTML = `
+                <div class="flex items-center space-x-3 min-w-0 flex-1">
+                    <i class="fa-solid ${icon} text-lg shrink-0"></i>
+                    <span class="flex-1 break-words leading-tight">${message}</span>
+                </div>
+                ${undoBtnHtml}
+            `;
             
             container.appendChild(toast);
             setTimeout(() => toast.classList.remove('translate-y-[-20px]', 'opacity-0'), 10);
 
             if (undoCallback) {
-                const undoBtn = document.getElementById('toast-undo-btn');
+                const undoBtn = toast.querySelector('#toast-undo-btn');
                 if (undoBtn) {
                     undoBtn.onclick = () => {
                         undoCallback();
@@ -1048,7 +1186,7 @@
             setTimeout(() => {
                 toast.classList.add('translate-y-[-20px]', 'opacity-0');
                 setTimeout(() => toast.remove(), 300);
-            }, 6000);
+            }, 5000);
         }
 
         function formatCurrency(amount) {
@@ -1165,7 +1303,7 @@
 
                     <div class="space-y-3 w-full">
                         ${myNotifs.length === 0 ? `
-                            <div class="bg-white dark:bg-slate-900 rounded-3xl p-8 text-center border border-slate-200 dark:border-slate-800 shadow-sm w-full mt-3">
+                            <div class="ios-glass-card rounded-3xl p-8 text-center shadow-sm w-full mt-3">
                                 <div class="w-14 h-14 bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 rounded-2xl flex items-center justify-center mx-auto mb-3 text-xl">
                                     <i class="fa-solid fa-bell-slash"></i>
                                 </div>
@@ -1180,7 +1318,7 @@
                                 : (isDebit ? 'bg-amber-500/10 text-amber-600 dark:text-amber-400 fa-wallet' : 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 fa-wallet');
 
                             return `
-                                <div onclick="markNotificationRead('${n.id}')" class="cursor-pointer bg-white dark:bg-slate-900 rounded-3xl p-5 border ${!n.read ? 'border-indigo-500/60 dark:border-indigo-500/60 ring-1 ring-indigo-500/20' : 'border-slate-200 dark:border-slate-800'} shadow-sm transition relative w-full flex items-start space-x-3.5">
+                                <div onclick="markNotificationRead('${n.id}')" class="cursor-pointer ios-glass-card rounded-3xl p-5 border ${!n.read ? 'border-indigo-500/60 dark:border-indigo-500/60 ring-1 ring-indigo-500/20' : 'border-slate-200/80 dark:border-slate-750'} shadow-sm transition relative w-full flex items-start space-x-3.5">
                                     <div class="w-10 h-10 rounded-2xl ${iconClass.split(' ').slice(0, 3).join(' ')} flex items-center justify-center shrink-0 mt-0.5">
                                         <i class="fa-solid ${iconClass.split(' ').pop()}"></i>
                                     </div>
@@ -1195,7 +1333,7 @@
                                             </button>
                                         </div>
                                         <p class="text-xs text-slate-600 dark:text-slate-300 mt-1 break-words">${escapeHtml(n.message)}</p>
-                                        <div class="flex items-center justify-between text-[10px] text-slate-400 mt-2.5 pt-2 border-t border-slate-100 dark:border-slate-800/60">
+                                        <div class="flex items-center justify-between text-[10px] text-slate-400 mt-2.5 pt-2 border-t border-slate-200/50 dark:border-slate-800">
                                             <span><i class="fa-regular fa-clock mr-1"></i>${formatTimestamp(n.timestamp)}</span>
                                             ${n.triggeredBy ? `<span class="italic">From: ${escapeHtml(n.triggeredBy)}</span>` : ''}
                                         </div>
@@ -1269,7 +1407,7 @@
 
             return `
                 <div class="space-y-4 w-full max-w-full">
-                    <div class="bg-gradient-to-br from-emerald-600 to-teal-700 rounded-3xl p-5 sm:p-6 text-white shadow-xl shadow-emerald-500/20 relative overflow-hidden w-full">
+                    <div class="bg-gradient-to-br from-emerald-600 to-teal-700 rounded-3xl p-5 sm:p-6 text-white shadow-lg shadow-emerald-500/20 relative overflow-hidden w-full border border-emerald-500/30">
                         <div class="flex justify-between items-start mb-3 gap-2">
                             <div class="min-w-0 flex-1">
                                 <p class="text-emerald-100 text-xs font-semibold uppercase tracking-wider flex items-center gap-1.5">
@@ -1278,20 +1416,20 @@
                                 </p>
                                 <h2 class="text-2xl sm:text-3xl font-bold tracking-tight mt-1 break-all">${formatCurrency(userWallet)}</h2>
                             </div>
-                            <span class="bg-white/20 backdrop-blur-md text-white text-xs font-semibold px-3 py-1 rounded-full shrink-0">
+                            <span class="bg-white/20 backdrop-blur-md text-white text-xs font-semibold px-3 py-1 rounded-full shrink-0 border border-white/20">
                                 ${userTxns.length} Records
                             </span>
                         </div>
 
-                        <div class="grid grid-cols-2 gap-3 mt-4 pt-4 border-t border-white/15">
-                            <div class="bg-black/10 backdrop-blur-sm rounded-2xl p-3 min-w-0">
+                        <div class="grid grid-cols-2 gap-3 mt-4 pt-4 border-t border-white/20">
+                            <div class="bg-black/15 backdrop-blur-sm rounded-2xl p-3 min-w-0 border border-white/10">
                                 <div class="flex items-center space-x-1.5 text-emerald-100 text-xs mb-1 min-w-0">
                                     <i class="fa-solid fa-receipt shrink-0"></i>
                                     <span class="truncate">Total Spent</span>
                                 </div>
                                 <p class="font-bold text-sm sm:text-base break-all">${formatCurrency(userExpensesTotal)}</p>
                             </div>
-                            <div class="bg-black/10 backdrop-blur-sm rounded-2xl p-3 min-w-0">
+                            <div class="bg-black/15 backdrop-blur-sm rounded-2xl p-3 min-w-0 border border-white/10">
                                 <div class="flex items-center space-x-1.5 text-emerald-100 text-xs mb-1 min-w-0">
                                     <i class="fa-solid fa-circle-exclamation shrink-0"></i>
                                     <span class="truncate">Excess Due</span>
@@ -1302,13 +1440,13 @@
                     </div>
 
                     ${userExcessSpent > 0 ? `
-                        <div class="bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900/60 rounded-3xl p-4 flex items-start space-x-3 w-full">
+                        <div class="bg-rose-50/90 dark:bg-rose-950/60 border border-rose-200 dark:border-rose-900 rounded-3xl p-4 flex items-start space-x-3 w-full shadow-sm">
                             <div class="w-9 h-9 rounded-2xl bg-rose-500/15 text-rose-600 dark:text-rose-400 flex items-center justify-center shrink-0 mt-0.5">
                                 <i class="fa-solid fa-triangle-exclamation text-sm"></i>
                             </div>
                             <div class="min-w-0 flex-1">
                                 <h4 class="text-xs font-bold text-rose-700 dark:text-rose-300 uppercase tracking-wider">Excess Spent Due: ${formatCurrency(userExcessSpent)}</h4>
-                                <p class="text-xs text-rose-600/80 dark:text-rose-400/80 mt-0.5">Your expenses exceeded your wallet balance. This amount will be automatically settled on your next wallet top-up or expense undo.</p>
+                                <p class="text-xs text-rose-600 dark:text-rose-300/90 mt-0.5">Your expenses exceeded your wallet balance. This amount will be automatically settled on your next wallet top-up or expense undo.</p>
                             </div>
                         </div>
                     ` : ''}
@@ -1320,7 +1458,7 @@
                         </div>
 
                         ${userTxns.length === 0 ? `
-                            <div class="bg-white dark:bg-slate-900 rounded-3xl p-8 text-center border border-slate-200 dark:border-slate-800 shadow-sm w-full">
+                            <div class="ios-glass-card rounded-3xl p-8 text-center shadow-sm w-full">
                                 <div class="w-14 h-14 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 rounded-2xl flex items-center justify-center mx-auto mb-3 text-xl">
                                     <i class="fa-solid fa-wallet"></i>
                                 </div>
@@ -1331,7 +1469,7 @@
                             const isUndo = t.type === 'undo_refund' || (t.title && t.title.toLowerCase().includes('undo'));
                             const isShortage = t.type === 'shortage';
                             return `
-                                <div class="bg-white dark:bg-slate-900 rounded-3xl p-5 border border-slate-200 dark:border-slate-800 shadow-sm flex items-center justify-between gap-3 w-full">
+                                <div class="ios-glass-card rounded-3xl p-5 shadow-sm flex items-center justify-between gap-3 w-full">
                                     <div class="flex items-start space-x-3.5 min-w-0 flex-1">
                                         <div class="w-10 h-10 rounded-2xl ${isUndo ? 'bg-indigo-500/10 text-indigo-600 dark:text-indigo-400' : (isShortage ? 'bg-rose-500/10 text-rose-600 dark:text-rose-400' : 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400')} flex items-center justify-center shrink-0 mt-0.5">
                                             <i class="fa-solid ${isUndo ? 'fa-rotate-left' : (isShortage ? 'fa-arrow-up-long rotate-45' : 'fa-arrow-down-long rotate-45')}"></i>
@@ -1366,44 +1504,91 @@
             const root = document.getElementById('modal-root');
             root.innerHTML = `
                 <div class="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-sm flex items-center justify-center p-4 animate-fadeIn">
-                    <div class="bg-white dark:bg-slate-900 rounded-3xl p-6 max-w-sm w-full border border-slate-200 dark:border-slate-800 shadow-2xl space-y-4 max-h-[90vh] flex flex-col">
-                        <div class="flex items-center justify-between shrink-0">
-                            <h3 class="font-bold text-base text-slate-900 dark:text-white">Manage Wallet</h3>
-                            <button onclick="closeModal()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark"></i></button>
-                        </div>
-                        <p class="text-xs text-slate-500 shrink-0">User: <span class="font-bold text-indigo-600">${escapeHtml(userName)}</span></p>
+                    <div class="ios-glass-modal bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 max-w-sm w-full shadow-2xl space-y-4 max-h-[90vh] flex flex-col">
                         
-                        <form onsubmit="handleWalletAdd(event, '${userId}')" class="space-y-3 shrink-0">
-                            <div class="w-full">
-                                <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Add Wallet Funds / Adjust Shortage (₹)</label>
-                                <input type="number" id="wallet-add-amount" required step="any" placeholder="0.00" class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm text-slate-900 dark:text-white font-semibold">
+                        <!-- Header -->
+                        <div class="flex items-center justify-between shrink-0 pb-1 border-b border-slate-100 dark:border-slate-800/80">
+                            <div>
+                                <h3 class="font-bold text-base text-slate-900 dark:text-white">Manage Wallet</h3>
+                                <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                                    User: <span class="font-bold text-indigo-600 dark:text-indigo-400">${escapeHtml(userName)}</span>
+                                </p>
                             </div>
-                            <button type="submit" class="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-2xl shadow-md transition text-xs">Process Funds / Shortage</button>
+                            <button onclick="closeModal()" class="w-8 h-8 rounded-full flex items-center justify-center text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition">
+                                <i class="fa-solid fa-xmark text-sm"></i>
+                            </button>
+                        </div>
+                        
+                        <!-- Input Form -->
+                        <form onsubmit="handleWalletAdd(event, '${userId}')" class="space-y-3 shrink-0 pt-1">
+                            <div class="w-full">
+                                <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">
+                                    Add Funds / Adjust Shortage (₹)
+                                </label>
+                                <div class="relative">
+                                    <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-slate-400 font-bold text-sm">₹</span>
+                                    <input type="number" id="wallet-add-amount" required step="any" placeholder="0.00" 
+                                        class="w-full pl-8 pr-4 py-3 bg-slate-50 dark:bg-slate-800/80 border border-slate-300 dark:border-slate-700 rounded-2xl text-sm text-slate-900 dark:text-white font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500 transition shadow-sm placeholder:text-slate-400">
+                                </div>
+                                <p class="text-[10px] text-slate-400 mt-1">Enter positive amount to top up, or negative (e.g. -100) to adjust shortage.</p>
+                            </div>
+                            <button type="submit" class="w-full py-3 bg-emerald-600 hover:bg-emerald-700 active:scale-[0.99] text-white font-semibold rounded-2xl shadow-md shadow-emerald-600/20 transition text-xs flex items-center justify-center gap-1.5">
+                                <i class="fa-solid fa-check"></i>
+                                <span>Process Funds / Shortage</span>
+                            </button>
                         </form>
 
-                        <div class="space-y-2 flex-1 overflow-y-auto pr-1 pt-2 border-t border-slate-100 dark:border-slate-800">
+                        <!-- History Section -->
+                        <div class="space-y-2.5 flex-1 overflow-y-auto pr-1 pt-3 border-t border-slate-200/70 dark:border-slate-800/80">
                             <div class="flex items-center justify-between px-1">
-                                <h4 class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Wallet Transaction History</h4>
-                                ${userTxns.length > 0 ? `<button type="button" onclick="confirmClearUserHistory('${userId}', '${escapeHtml(userName)}')" class="text-[11px] text-rose-600 hover:underline font-semibold"><i class="fa-solid fa-trash-can mr-1"></i>Clear History</button>` : ''}
+                                <h4 class="text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider flex items-center gap-1">
+                                    <i class="fa-solid fa-clock-rotate-left text-[11px] text-slate-400"></i>
+                                    <span>Transaction History</span>
+                                </h4>
+                                ${userTxns.length > 0 ? `
+                                    <button type="button" onclick="confirmClearUserHistory('${userId}', '${escapeHtml(userName)}')" class="text-[11px] text-rose-600 dark:text-rose-400 hover:underline font-semibold flex items-center gap-1">
+                                        <i class="fa-solid fa-trash-can text-[10px]"></i>
+                                        <span>Clear</span>
+                                    </button>
+                                ` : ''}
                             </div>
+                            
                             ${userTxns.length === 0 ? `
-                                <div class="text-center py-4 text-xs text-slate-400">No wallet history yet.</div>
+                                <div class="text-center py-6 px-4 bg-slate-50 dark:bg-slate-800/40 border border-dashed border-slate-200 dark:border-slate-700/60 rounded-2xl">
+                                    <i class="fa-solid fa-receipt text-slate-300 dark:text-slate-600 text-xl mb-1 block"></i>
+                                    <span class="text-xs text-slate-500 dark:text-slate-400">No transaction records found</span>
+                                </div>
                             ` : userTxns.map(t => {
                                 const isUndo = t.type === 'undo_refund' || (t.title && t.title.toLowerCase().includes('undo'));
                                 const isShortage = t.type === 'shortage';
+                                
+                                const badgeBg = isUndo ? 'bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400' 
+                                              : (isShortage ? 'bg-rose-50 dark:bg-rose-950/60 text-rose-600 dark:text-rose-400' 
+                                              : 'bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400');
+                                              
+                                const amountColor = isShortage ? 'text-rose-600 dark:text-rose-400' : 'text-emerald-600 dark:text-emerald-400';
+                                
                                 return `
-                                    <div class="bg-slate-50 dark:bg-slate-800/40 p-2.5 rounded-2xl border border-slate-100 dark:border-slate-800/80 space-y-1 text-xs">
+                                    <div class="bg-white dark:bg-slate-800/80 p-3 rounded-2xl border border-slate-200/90 dark:border-slate-700/70 shadow-sm space-y-1.5 text-xs transition">
                                         <div class="flex items-center justify-between gap-2">
-                                            <span class="font-semibold text-slate-800 dark:text-slate-200 flex items-center gap-1.5 min-w-0">
-                                                <i class="fa-solid ${isUndo ? 'fa-rotate-left text-indigo-500' : (isShortage ? 'fa-circle-minus text-rose-500' : 'fa-circle-plus text-emerald-500')} shrink-0"></i>
+                                            <span class="font-semibold text-slate-900 dark:text-slate-100 flex items-center gap-2 min-w-0">
+                                                <span class="w-6 h-6 rounded-lg ${badgeBg} flex items-center justify-center shrink-0 text-[11px]">
+                                                    <i class="fa-solid ${isUndo ? 'fa-rotate-left' : (isShortage ? 'fa-minus' : 'fa-plus')}"></i>
+                                                </span>
                                                 <span class="truncate">${escapeHtml(t.title)}</span>
                                             </span>
-                                            <span class="font-bold ${isShortage ? 'text-rose-600 dark:text-rose-400' : 'text-emerald-600 dark:text-emerald-400'} shrink-0">${isShortage ? '-' : '+'}${formatCurrency(t.amount)}</span>
+                                            <span class="font-bold ${amountColor} shrink-0 text-sm whitespace-nowrap">
+                                                ${isShortage ? '-' : '+'}${formatCurrency(t.amount)}
+                                            </span>
                                         </div>
-                                        ${t.subtitle ? `<p class="text-[10px] text-emerald-600 dark:text-emerald-400 font-medium">${escapeHtml(t.subtitle)}</p>` : ''}
-                                        <div class="flex items-center justify-between text-[10px] text-slate-400">
+                                        ${t.subtitle ? `
+                                            <p class="text-[10px] text-emerald-700 dark:text-emerald-300 font-medium pl-8 break-words">
+                                                ${escapeHtml(t.subtitle)}
+                                            </p>
+                                        ` : ''}
+                                        <div class="flex items-center justify-between text-[10px] text-slate-500 dark:text-slate-400 pl-8 pt-0.5">
                                             <span>${formatTimestamp(t.timestamp)}</span>
-                                            <span class="italic">By ${escapeHtml(t.performedBy)}</span>
+                                            <span class="italic text-slate-400 dark:text-slate-500">By ${escapeHtml(t.performedBy)}</span>
                                         </div>
                                     </div>
                                 `;
@@ -1648,11 +1833,17 @@
         }
 
         function switchTab(tab, keepEditState = false) {
+            const prevIndex = tabOrder.indexOf(state.activeTab);
+            
             if (tab === 'summary') {
                 state.activeTab = (state.currentUser && state.currentUser.role === 'admin') ? 'admin' : 'analytics';
             } else {
                 state.activeTab = tab;
             }
+            
+            const nextIndex = tabOrder.indexOf(state.activeTab);
+            state.slideDirection = nextIndex >= prevIndex ? 'animate-slide-right' : 'animate-slide-left';
+
             if (!keepEditState) {
                 state.editingExpenseId = null;
                 state.tempBillData = null;
@@ -1707,10 +1898,10 @@
             const backTargetTab = state.activeTab === 'notifications' ? 'home' : 'profile';
 
             app.innerHTML = `
-                <header class="sticky top-0 z-40 bg-white/75 dark:bg-slate-900/75 backdrop-blur-xl border-b border-slate-200/80 dark:border-slate-800 px-4 sm:px-6 pt-3 pb-3 flex items-center justify-between w-full shadow-sm transition-colors duration-300">
+                <header class="sticky top-0 z-40 ios-glass-card border-b border-slate-200/80 dark:border-slate-800 px-4 sm:px-6 pt-3 pb-3 flex items-center justify-between w-full shadow-sm transition-colors duration-300">
                     <div class="flex items-center space-x-3 min-w-0 flex-1 pr-2">
                         ${isSubTab ? `
-                            <button onclick="switchTab('${backTargetTab}')" class="w-9 h-9 rounded-2xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-700 dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-700 transition border border-slate-200/60 dark:border-slate-700 shrink-0" title="Back">
+                            <button onclick="switchTab('${backTargetTab}')" class="w-9 h-9 rounded-2xl ios-glass-card flex items-center justify-center text-slate-700 dark:text-slate-200 hover:bg-slate-200/50 dark:hover:bg-slate-700/50 transition border border-slate-200/80 dark:border-slate-700 shrink-0" title="Back">
                                 <i class="fa-solid fa-arrow-left text-sm"></i>
                             </button>
                         ` : `
@@ -1727,7 +1918,7 @@
                     </div>
                     
                     <div class="flex items-center space-x-2 shrink-0">
-                        <button onclick="switchTab('notifications')" class="relative w-10 h-10 rounded-2xl ${state.activeTab === 'notifications' ? 'bg-indigo-600 text-white' : 'bg-slate-100 dark:bg-slate-800/80 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'} flex items-center justify-center transition border border-slate-200/70 dark:border-slate-700/60 shadow-sm" title="Notifications">
+                        <button onclick="switchTab('notifications')" class="relative w-10 h-10 rounded-2xl ${state.activeTab === 'notifications' ? 'bg-indigo-600 text-white' : 'ios-glass-card text-slate-600 dark:text-slate-300 hover:bg-slate-200/50 dark:hover:bg-slate-700/50'} flex items-center justify-center transition border border-slate-200/80 dark:border-slate-700/60 shadow-sm" title="Notifications">
                             <i class="fa-solid fa-bell text-sm ${unreadNotifCount > 0 && state.activeTab !== 'notifications' ? 'animate-bounce text-indigo-600 dark:text-indigo-400' : ''}"></i>
                             ${unreadNotifCount > 0 ? `<span class="liquid-badge">${unreadNotifCount > 99 ? '99+' : unreadNotifCount}</span>` : ''}
                         </button>
@@ -1737,7 +1928,7 @@
                     </div>
                 </header>
 
-                <main id="main-content" class="flex-1 overflow-y-auto pb-32 pt-4 px-4 sm:px-6 w-full max-w-full">
+                <main id="main-content" class="flex-1 overflow-y-auto pb-32 pt-4 px-4 sm:px-6 w-full max-w-full ${state.slideDirection || 'animate-slide-right'}">
                     ${renderActiveTabContent()}
                 </main>
 
@@ -1787,7 +1978,7 @@
                         <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Expense Management Portal</p>
                     </div>
 
-                    <div class="bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl py-8 px-6 shadow-2xl rounded-3xl border border-slate-200/80 dark:border-slate-800 space-y-5 w-full">
+                    <div class="ios-glass-card py-8 px-6 shadow-2xl rounded-3xl space-y-5 w-full">
                         <form onsubmit="handleLoginSubmit(event)" class="space-y-4">
                             <div class="w-full">
                                 <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">Username</label>
@@ -1795,7 +1986,7 @@
                                     <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
                                         <i class="fa-solid fa-user text-sm"></i>
                                     </span>
-                                    <input type="text" id="login-username" required placeholder="Enter username" class="w-full pl-10 pr-4 py-3.5 bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 text-slate-900 dark:text-white">
+                                    <input type="text" id="login-username" required placeholder="Enter username" class="w-full pl-10 pr-4 py-3.5 bg-slate-50/80 dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 text-slate-900 dark:text-white">
                                 </div>
                             </div>
 
@@ -1808,7 +1999,7 @@
                                     <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
                                         <i class="fa-solid fa-lock text-sm"></i>
                                     </span>
-                                    <input type="password" id="login-password" required placeholder="••••••••" class="w-full pl-10 pr-12 py-3.5 bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 text-slate-900 dark:text-white">
+                                    <input type="password" id="login-password" required placeholder="••••••••" class="w-full pl-10 pr-12 py-3.5 bg-slate-50/80 dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 text-slate-900 dark:text-white">
                                     <button type="button" onclick="togglePasswordVisibility('login-password', 'toggle-login-pass-icon')" class="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 focus:outline-none">
                                         <i id="toggle-login-pass-icon" class="fa-solid fa-eye text-sm"></i>
                                     </button>
@@ -1836,22 +2027,22 @@
                         <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Request a recovery code from Admin</p>
                     </div>
 
-                    <div class="bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl py-8 px-6 shadow-2xl rounded-3xl border border-slate-200/80 dark:border-slate-800 space-y-4 w-full">
+                    <div class="ios-glass-card py-8 px-6 shadow-2xl rounded-3xl space-y-4 w-full">
                         <form onsubmit="handleForgotPasswordSubmit(event)" class="space-y-4">
                             <div class="w-full">
                                 <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">Username</label>
-                                <input type="text" id="forgot-username" required placeholder="Enter your username" class="w-full px-4 py-3.5 bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 text-slate-900 dark:text-white">
+                                <input type="text" id="forgot-username" required placeholder="Enter your username" class="w-full px-4 py-3.5 bg-slate-50/80 dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 text-slate-900 dark:text-white">
                             </div>
 
                             <div class="w-full">
                                 <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">Admin Auth Code (6-digit)</label>
-                                <input type="text" id="forgot-auth-code" maxlength="6" placeholder="Enter code provided by Admin" class="w-full px-4 py-3.5 bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm tracking-widest text-center font-bold focus:outline-none focus:ring-2 focus:ring-indigo-500 text-slate-900 dark:text-white">
+                                <input type="text" id="forgot-auth-code" maxlength="6" placeholder="Enter code provided by Admin" class="w-full px-4 py-3.5 bg-slate-50/80 dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700 rounded-2xl text-sm tracking-widest text-center font-bold focus:outline-none focus:ring-2 focus:ring-indigo-500 text-slate-900 dark:text-white">
                             </div>
 
                             <div class="w-full">
                                 <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">New Password</label>
                                 <div class="relative w-full">
-                                    <input type="password" id="forgot-new-password" required placeholder="Enter new password" class="w-full pl-4 pr-12 py-3.5 bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 text-slate-900 dark:text-white">
+                                    <input type="password" id="forgot-new-password" required placeholder="Enter new password" class="w-full pl-4 pr-12 py-3.5 bg-slate-50/80 dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 text-slate-900 dark:text-white">
                                     <button type="button" onclick="togglePasswordVisibility('forgot-new-password', 'toggle-forgot-pass-icon')" class="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 focus:outline-none">
                                         <i id="toggle-forgot-pass-icon" class="fa-solid fa-eye text-sm"></i>
                                     </button>
@@ -1859,7 +2050,7 @@
                             </div>
 
                             <div class="flex flex-col gap-2.5 pt-1 w-full">
-                                <button type="button" onclick="requestAdminAuthCode()" class="w-full py-3 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-indigo-600 dark:text-indigo-400 font-semibold rounded-2xl transition text-xs border border-slate-200 dark:border-slate-700">
+                                <button type="button" onclick="requestAdminAuthCode()" class="w-full py-3 bg-slate-100/90 dark:bg-slate-800/90 hover:bg-slate-200 text-indigo-600 dark:text-indigo-400 font-semibold rounded-2xl transition text-xs border border-slate-200/80 dark:border-slate-700">
                                     <i class="fa-solid fa-paper-plane mr-1.5"></i> Request Code from Admin
                                 </button>
                                 <button type="submit" class="w-full py-3.5 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-2xl shadow-lg shadow-indigo-500/25 transition text-sm">
@@ -1957,7 +2148,7 @@
             if (foundUser) {
                 state.currentUser = foundUser;
                 state.activeTab = 'home';
-                state.justFinishedLoading = true; // Trigger zoom-out transition into Home screen
+                state.justFinishedLoading = true;
                 localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(foundUser));
                 if ('Notification' in window && Notification.permission === 'default') {
                     Notification.requestPermission().catch(() => {});
@@ -2052,7 +2243,7 @@
 
             return `
                 <div class="space-y-4 w-full max-w-full">
-                    <div class="bg-gradient-to-br from-indigo-600 to-violet-700 rounded-3xl p-5 sm:p-6 text-white shadow-xl shadow-indigo-500/20 relative overflow-hidden w-full">
+                    <div class="bg-gradient-to-br from-indigo-600 to-violet-700 rounded-3xl p-5 sm:p-6 text-white shadow-lg shadow-indigo-500/20 relative overflow-hidden w-full border border-indigo-500/30">
                         <div class="flex justify-between items-start mb-3 gap-2">
                             <div class="min-w-0 flex-1">
                                 <p class="text-indigo-200 text-xs font-medium uppercase tracking-wider truncate">
@@ -2060,20 +2251,20 @@
                                 </p>
                                 <h2 class="text-2xl sm:text-3xl font-bold tracking-tight mt-0.5 break-all">${formatCurrency(totalAmount)}</h2>
                             </div>
-                            <span class="bg-white/20 backdrop-blur-md text-white text-xs font-semibold px-3 py-1 rounded-full shrink-0">
+                            <span class="bg-white/20 backdrop-blur-md text-white text-xs font-semibold px-3 py-1 rounded-full shrink-0 border border-white/20">
                                 ${filtered.length} Items
                             </span>
                         </div>
                         
-                        <div class="grid grid-cols-2 gap-3 mt-4 pt-4 border-t border-white/15">
-                            <div class="bg-black/10 backdrop-blur-sm rounded-2xl p-3 min-w-0">
+                        <div class="grid grid-cols-2 gap-3 mt-4 pt-4 border-t border-white/20">
+                            <div class="bg-black/15 backdrop-blur-sm rounded-2xl p-3 min-w-0 border border-white/10">
                                 <div class="flex items-center space-x-1.5 text-indigo-200 text-xs mb-1 min-w-0">
                                     <i class="fa-solid fa-briefcase shrink-0"></i>
                                     <span class="truncate">Office</span>
                                 </div>
                                 <p class="font-bold text-sm sm:text-base break-all">${formatCurrency(officeTotal)}</p>
                             </div>
-                            <div class="bg-black/10 backdrop-blur-sm rounded-2xl p-3 min-w-0">
+                            <div class="bg-black/15 backdrop-blur-sm rounded-2xl p-3 min-w-0 border border-white/10">
                                 <div class="flex items-center space-x-1.5 text-indigo-200 text-xs mb-1 min-w-0">
                                     <i class="fa-solid fa-clapperboard shrink-0"></i>
                                     <span class="truncate">Shoot</span>
@@ -2089,24 +2280,24 @@
                                 <span class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400">
                                     <i class="fa-solid fa-magnifying-glass text-sm"></i>
                                 </span>
-                                <input type="text" id="search-input" value="${state.searchQuery}" oninput="handleSearchInput(event)" placeholder="Search expenses, notes, client, user..." class="w-full pl-10 pr-10 py-3.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 shadow-sm text-slate-900 dark:text-white">
+                                <input type="text" id="search-input" value="${state.searchQuery}" oninput="handleSearchInput(event)" placeholder="Search expenses, notes, client, user..." class="w-full pl-10 pr-10 py-3.5 ios-glass-card border border-slate-200/80 dark:border-slate-800 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 shadow-sm text-slate-900 dark:text-white">
                                 ${state.searchQuery ? `<button onclick="clearSearch()" class="absolute inset-y-0 right-0 pr-4 flex items-center text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark"></i></button>` : ''}
                             </div>
-                            <button onclick="toggleDateFilter()" class="w-12 h-12 rounded-2xl ${state.showDateFilter || hasDateFilterActive ? 'bg-indigo-600 text-white shadow-md' : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-800'} flex items-center justify-center shrink-0 relative" title="Toggle Date Filter">
+                            <button onclick="toggleDateFilter()" class="w-12 h-12 rounded-2xl ${state.showDateFilter || hasDateFilterActive ? 'bg-indigo-600 text-white shadow-md' : 'ios-glass-card text-slate-600 dark:text-slate-400 border border-slate-200/80 dark:border-slate-800'} flex items-center justify-center shrink-0 relative" title="Toggle Date Filter">
                                 <i class="fa-solid fa-calendar-days text-sm"></i>
                                 ${hasDateFilterActive ? '<span class="absolute top-2 right-2 w-2 h-2 rounded-full bg-amber-400"></span>' : ''}
                             </button>
                         </div>
 
                         <div class="flex items-center space-x-2 overflow-x-auto pb-1 no-scrollbar w-full">
-                            <button onclick="setFilterCategory('All')" class="px-4 py-2 rounded-2xl text-xs font-medium whitespace-nowrap transition shrink-0 ${state.filterCategory === 'All' ? 'bg-indigo-600 text-white shadow-md' : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-800'}">All Categories</button>
-                            <button onclick="setFilterCategory('Office')" class="px-4 py-2 rounded-2xl text-xs font-medium whitespace-nowrap transition shrink-0 ${state.filterCategory === 'Office' ? 'bg-indigo-600 text-white shadow-md' : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-800'}">Office Expense</button>
-                            <button onclick="setFilterCategory('Shoot')" class="px-4 py-2 rounded-2xl text-xs font-medium whitespace-nowrap transition shrink-0 ${state.filterCategory === 'Shoot' ? 'bg-indigo-600 text-white shadow-md' : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-800'}">Shoot Expense</button>
+                            <button onclick="setFilterCategory('All')" class="px-4 py-2 rounded-2xl text-xs font-medium whitespace-nowrap transition shrink-0 ${state.filterCategory === 'All' ? 'bg-indigo-600 text-white shadow-md' : 'ios-glass-card text-slate-600 dark:text-slate-400 border border-slate-200/80 dark:border-slate-800'}">All Categories</button>
+                            <button onclick="setFilterCategory('Office')" class="px-4 py-2 rounded-2xl text-xs font-medium whitespace-nowrap transition shrink-0 ${state.filterCategory === 'Office' ? 'bg-indigo-600 text-white shadow-md' : 'ios-glass-card text-slate-600 dark:text-slate-400 border border-slate-200/80 dark:border-slate-800'}">Office Expense</button>
+                            <button onclick="setFilterCategory('Shoot')" class="px-4 py-2 rounded-2xl text-xs font-medium whitespace-nowrap transition shrink-0 ${state.filterCategory === 'Shoot' ? 'bg-indigo-600 text-white shadow-md' : 'ios-glass-card text-slate-600 dark:text-slate-400 border border-slate-200/80 dark:border-slate-800'}">Shoot Expense</button>
                         </div>
 
                         <div class="grid grid-cols-${isAdmin ? '2' : '1'} gap-2.5 w-full">
                             <div class="relative w-full">
-                                <select onchange="setFilterMonth(this.value)" class="w-full appearance-none bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl px-3.5 py-3 text-xs font-medium text-slate-700 dark:text-slate-300">
+                                <select onchange="setFilterMonth(this.value)" class="w-full appearance-none ios-glass-card border border-slate-200/80 dark:border-slate-800 rounded-2xl px-3.5 py-3 text-xs font-medium text-slate-700 dark:text-slate-300">
                                     <option value="All" ${state.filterMonth === 'All' && !state.filterStartDate && !state.filterEndDate ? 'selected' : ''}>All Months</option>
                                     ${availableMonths.map(m => `<option value="${m}" ${state.filterMonth === m ? 'selected' : ''}>${formatMonthName(m)}</option>`).join('')}
                                 </select>
@@ -2115,7 +2306,7 @@
 
                             ${isAdmin ? `
                             <div class="relative w-full">
-                                <select onchange="setFilterUser(this.value)" class="w-full appearance-none bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl px-3.5 py-3 text-xs font-medium text-slate-700 dark:text-slate-300">
+                                <select onchange="setFilterUser(this.value)" class="w-full appearance-none ios-glass-card border border-slate-200/80 dark:border-slate-800 rounded-2xl px-3.5 py-3 text-xs font-medium text-slate-700 dark:text-slate-300">
                                     <option value="All" ${state.filterUser === 'All' ? 'selected' : ''}>All Users</option>${state.users.map(u => `<option value="${u.id}" ${state.filterUser === u.id ? 'selected' : ''}>${u.name}</option>`).join('')}
                                 </select>
                                 <span class="absolute inset-y-0 right-0 pr-3.5 flex items-center pointer-events-none text-slate-400 text-xs"><i class="fa-solid fa-chevron-down"></i></span>
@@ -2124,17 +2315,17 @@
                         </div>
 
                         ${state.showDateFilter ? `
-                        <div class="bg-white dark:bg-slate-900 p-2.5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-1.5 w-full">
+                        <div class="ios-glass-card p-2.5 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-sm space-y-1.5 w-full">
                             <div class="flex items-center justify-between text-[11px] font-semibold text-slate-700 dark:text-slate-300 px-1">
                                 <span><i class="fa-solid fa-calendar-days mr-1 text-indigo-500"></i>Date Range Filter</span>
                                 ${(state.filterStartDate || state.filterEndDate) ? `<button onclick="clearDateRange()" class="text-indigo-600 dark:text-indigo-400 hover:underline">Clear</button>` : ''}
                             </div>
                             <div class="grid grid-cols-2 gap-1.5 w-full">
-                                <div class="custom-date-wrapper rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden">
+                                <div class="custom-date-wrapper rounded-xl border border-slate-200/80 dark:border-slate-700 overflow-hidden">
                                     <input type="date" id="filter-start-date" value="${state.filterStartDate}" onchange="setFilterStartDate(this.value)" required class="w-full px-2.5 py-1.5 bg-transparent text-[11px] text-slate-900 dark:text-white min-h-[36px] focus:outline-none">
                                     <span class="custom-date-placeholder">dd-mm-yy</span>
                                 </div>
-                                <div class="custom-date-wrapper rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden">
+                                <div class="custom-date-wrapper rounded-xl border border-slate-200/80 dark:border-slate-700 overflow-hidden">
                                     <input type="date" id="filter-end-date" value="${state.filterEndDate}" onchange="setFilterEndDate(this.value)" required class="w-full px-2.5 py-1.5 bg-transparent text-[11px] text-slate-900 dark:text-white min-h-[36px] focus:outline-none">
                                     <span class="custom-date-placeholder">dd-mm-yy</span>
                                 </div>
@@ -2150,7 +2341,7 @@
                         </div>
 
                         ${filtered.length === 0 ? `
-                            <div class="bg-white dark:bg-slate-900 rounded-3xl p-8 text-center border border-slate-200 dark:border-slate-800 shadow-sm mt-3 w-full">
+                            <div class="ios-glass-card rounded-3xl p-8 text-center shadow-sm mt-3 w-full">
                                 <div class="w-14 h-14 bg-slate-100 dark:bg-slate-800 text-slate-400 rounded-2xl flex items-center justify-center mx-auto mb-3 text-xl"><i class="fa-solid fa-receipt"></i></div>
                                 <h4 class="font-semibold text-slate-700 dark:text-slate-300 mb-1">No expenses found</h4>
                                 <p class="text-xs text-slate-500 mb-4">Try changing filters or add a new expense record.</p>
@@ -2173,7 +2364,7 @@
                                         const isOffice = exp.category === 'Office';
                                         const isOwner = exp.userId === state.currentUser.id;
                                         return `
-                                            <div class="bg-white dark:bg-slate-900 rounded-3xl py-5 sm:py-6 px-5 sm:px-6 border border-slate-200 dark:border-slate-800 shadow-sm transition relative group w-full mt-3">
+                                            <div class="ios-glass-card rounded-3xl py-5 sm:py-6 px-5 sm:px-6 shadow-sm transition relative group w-full mt-3">
                                                 <div class="flex items-start space-x-3.5 w-full">
                                                     <div class="w-10 h-10 rounded-2xl ${isOffice ? 'bg-amber-500/10 text-amber-600 dark:text-amber-400' : 'bg-indigo-500/10 text-indigo-600 dark:text-indigo-400'} flex items-center justify-center shrink-0 mt-0.5">
                                                         <i class="fa-solid ${isOffice ? 'fa-briefcase' : 'fa-clapperboard'}"></i>
@@ -2197,9 +2388,9 @@
                                                             </div>
                                                         ` : ''}
 
-                                                        ${exp.notes ? `<p class="text-xs text-slate-600 dark:text-slate-400 mt-2.5 bg-slate-50 dark:bg-slate-800/50 p-3 rounded-2xl border border-slate-100 dark:border-slate-800/80 break-words">${escapeHtml(exp.notes)}</p>` : ''}
+                                                        ${exp.notes ? `<p class="text-xs text-slate-600 dark:text-slate-400 mt-2.5 bg-slate-50/80 dark:bg-slate-800/60 p-3 rounded-2xl border border-slate-200/60 dark:border-slate-700/60 break-words">${escapeHtml(exp.notes)}</p>` : ''}
                                                         
-                                                        <div class="flex items-center justify-between mt-3 pt-2 border-t border-slate-100 dark:border-slate-800/60 w-full gap-2">
+                                                        <div class="flex items-center justify-between mt-3 pt-2 border-t border-slate-200/50 dark:border-slate-800 w-full gap-2">
                                                             <div>
                                                                 ${exp.billAttachment ? `
                                                                     <button onclick="viewBillModal('${exp.id}')" class="inline-flex items-center space-x-1.5 px-3.5 py-1.5 rounded-xl bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 text-xs font-medium border border-indigo-200/60 hover:bg-indigo-100 transition">
@@ -2214,8 +2405,8 @@
                                                                         <i class="fa-solid fa-rotate-left"></i>
                                                                         <span>Undo</span>
                                                                     </button>
-                                                                    <button onclick="startEditExpense('${exp.id}')" class="w-8 h-8 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-indigo-50 hover:text-indigo-600 transition flex items-center justify-center text-xs" title="Edit"><i class="fa-solid fa-pen"></i></button>
-                                                                    <button onclick="confirmDeleteExpense('${exp.id}', '${exp.billAttachment || ''}')" class="w-8 h-8 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-rose-50 hover:text-rose-600 transition flex items-center justify-center text-xs" title="Delete"><i class="fa-solid fa-trash"></i></button>
+                                                                    <button onclick="startEditExpense('${exp.id}')" class="w-8 h-8 rounded-xl bg-slate-100/80 dark:bg-slate-800/80 text-slate-600 dark:text-slate-300 hover:bg-indigo-50 hover:text-indigo-600 transition flex items-center justify-center text-xs" title="Edit"><i class="fa-solid fa-pen"></i></button>
+                                                                    <button onclick="confirmDeleteExpense('${exp.id}', '${exp.billAttachment || ''}')" class="w-8 h-8 rounded-xl bg-slate-100/80 dark:bg-slate-800/80 text-slate-600 dark:text-slate-300 hover:bg-rose-50 hover:text-rose-600 transition flex items-center justify-center text-xs" title="Delete"><i class="fa-solid fa-trash"></i></button>
                                                                 </div>
                                                             ` : ''}
                                                         </div>
@@ -2308,12 +2499,12 @@
                         ${isEditing ? `<button type="button" onclick="cancelEdit()" class="text-xs font-medium text-slate-500 hover:text-slate-700 shrink-0">Cancel Edit</button>` : ''}
                     </div>
 
-                    <form onsubmit="handleExpenseSubmit(event)" class="bg-white dark:bg-slate-900 rounded-3xl p-5 sm:p-7 border border-slate-200 dark:border-slate-800 shadow-sm space-y-6 w-full mt-2">
+                    <form onsubmit="handleExpenseSubmit(event)" class="ios-glass-card rounded-3xl p-5 sm:p-7 shadow-sm space-y-6 w-full mt-2">
                         <div class="w-full">
                             <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-2.5">Expense Type</label>
                             <div class="grid grid-cols-2 gap-3 w-full">
-                                <button type="button" onclick="setFormCategory('Office')" id="btn-cat-office" class="py-3.5 px-3 rounded-2xl border font-medium text-xs sm:text-sm flex items-center justify-center space-x-2 transition truncate ${expense.category === 'Office' ? 'bg-indigo-600 text-white border-indigo-600 shadow-md' : 'bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700'}"><i class="fa-solid fa-briefcase"></i><span>Office</span></button>
-                                <button type="button" onclick="setFormCategory('Shoot')" id="btn-cat-shoot" class="py-3.5 px-3 rounded-2xl border font-medium text-xs sm:text-sm flex items-center justify-center space-x-2 transition truncate ${expense.category === 'Shoot' ? 'bg-indigo-600 text-white border-indigo-600 shadow-md' : 'bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700'}"><i class="fa-solid fa-clapperboard"></i><span>Shoot</span></button>
+                                <button type="button" onclick="setFormCategory('Office')" id="btn-cat-office" class="py-3.5 px-3 rounded-2xl border font-medium text-xs sm:text-sm flex items-center justify-center space-x-2 transition truncate ${expense.category === 'Office' ? 'bg-indigo-600 text-white border-indigo-600 shadow-md' : 'bg-slate-50/80 dark:bg-slate-800/80 text-slate-700 dark:text-slate-300 border-slate-200/80 dark:border-slate-700'}"><i class="fa-solid fa-briefcase"></i><span>Office</span></button>
+                                <button type="button" onclick="setFormCategory('Shoot')" id="btn-cat-shoot" class="py-3.5 px-3 rounded-2xl border font-medium text-xs sm:text-sm flex items-center justify-center space-x-2 transition truncate ${expense.category === 'Shoot' ? 'bg-indigo-600 text-white border-indigo-600 shadow-md' : 'bg-slate-50/80 dark:bg-slate-800/80 text-slate-700 dark:text-slate-300 border-slate-200/80 dark:border-slate-700'}"><i class="fa-solid fa-clapperboard"></i><span>Shoot</span></button>
                             </div>
                             <input type="hidden" id="expense-category" value="${expense.category}">
                         </div>
@@ -2322,7 +2513,7 @@
                             <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-2.5">Client Name & Place</label>
                             <div class="relative w-full">
                                 <span class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400"><i class="fa-solid fa-location-dot text-sm"></i></span>
-                                <input type="text" id="expense-client" value="${escapeHtml(expense.clientNamePlace || '')}" oninput="updateFormCache()" placeholder="e.g., Acme Corp / Studio Location" class="w-full pl-10 pr-4 py-3.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 text-slate-900 dark:text-white">
+                                <input type="text" id="expense-client" value="${escapeHtml(expense.clientNamePlace || '')}" oninput="updateFormCache()" placeholder="e.g., Acme Corp / Studio Location" class="w-full pl-10 pr-4 py-3.5 bg-slate-50/80 dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 text-slate-900 dark:text-white">
                             </div>
                         </div>
 
@@ -2330,30 +2521,30 @@
                             <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-2.5">Amount (₹)</label>
                             <div class="relative w-full">
                                 <span class="absolute inset-y-0 left-0 pl-4 flex items-center font-bold text-slate-400">₹</span>
-                                <input type="number" id="expense-amount" value="${expense.amount}" oninput="updateFormCache()" required min="1" step="any" placeholder="0.00" class="w-full pl-9 pr-4 py-3.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-base font-semibold focus:outline-none focus:ring-2 focus:ring-indigo-500 text-slate-900 dark:text-white">
+                                <input type="number" id="expense-amount" value="${expense.amount}" oninput="updateFormCache()" required min="1" step="any" placeholder="0.00" class="w-full pl-9 pr-4 py-3.5 bg-slate-50/80 dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700 rounded-2xl text-base font-semibold focus:outline-none focus:ring-2 focus:ring-indigo-500 text-slate-900 dark:text-white">
                             </div>
                         </div>
 
                         <div class="w-full">
                             <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-2.5">Title / Description</label>
-                            <input type="text" id="expense-title" value="${escapeHtml(expense.title)}" oninput="updateFormCache()" required placeholder="e.g., Studio Rent, Camera Rental" class="w-full px-4 py-3.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 text-slate-900 dark:text-white">
+                            <input type="text" id="expense-title" value="${escapeHtml(expense.title)}" oninput="updateFormCache()" required placeholder="e.g., Studio Rent, Camera Rental" class="w-full px-4 py-3.5 bg-slate-50/80 dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 text-slate-900 dark:text-white">
                         </div>
 
                         <div class="w-full">
                             <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-2.5">Date</label>
-                            <input type="date" id="expense-date" value="${expense.date}" oninput="updateFormCache()" required class="w-full px-4 py-3.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 text-slate-900 dark:text-white">
+                            <input type="date" id="expense-date" value="${expense.date}" oninput="updateFormCache()" required class="w-full px-4 py-3.5 bg-slate-50/80 dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 text-slate-900 dark:text-white">
                         </div>
 
                         <div class="w-full">
                             <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-2.5">Notes / Receipt details (Optional)</label>
-                            <textarea id="expense-notes" rows="3" oninput="updateFormCache()" placeholder="Vendor invoice number or remarks..." class="w-full px-4 py-3.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 text-slate-900 dark:text-white">${escapeHtml(expense.notes)}</textarea>
+                            <textarea id="expense-notes" rows="3" oninput="updateFormCache()" placeholder="Vendor invoice number or remarks..." class="w-full px-4 py-3.5 bg-slate-50/80 dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 text-slate-900 dark:text-white">${escapeHtml(expense.notes)}</textarea>
                         </div>
 
                         <div class="w-full">
                             <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-2.5">Bill / Receipt Attachment (Optional)</label>
                             
                             ${currentBill ? `
-                                <div class="bg-indigo-50 dark:bg-indigo-950/60 p-4 rounded-2xl border border-indigo-200 dark:border-indigo-800 flex items-center justify-between mb-3 w-full gap-2">
+                                <div class="bg-indigo-50/90 dark:bg-indigo-950/80 p-4 rounded-2xl border border-indigo-200/80 dark:border-indigo-800/80 flex items-center justify-between mb-3 w-full gap-2">
                                     <div class="flex items-center space-x-2 text-indigo-600 dark:text-indigo-400 text-xs font-semibold min-w-0 flex-1">
                                         <i class="fa-solid fa-file-image text-base shrink-0"></i>
                                         <span class="truncate">Bill attached</span>
@@ -2366,7 +2557,7 @@
                             ` : ''}
 
                             <div class="grid grid-cols-2 gap-3 w-full">
-                                <div class="relative border-2 border-dashed border-slate-200 dark:border-slate-700 rounded-2xl p-4 text-center bg-slate-50 dark:bg-slate-800/40 hover:border-indigo-500 transition cursor-pointer">
+                                <div class="relative border-2 border-dashed border-slate-300 dark:border-slate-700 rounded-2xl p-4 text-center bg-slate-50/60 dark:bg-slate-800/40 hover:border-indigo-500 transition cursor-pointer">
                                     <input type="file" id="bill-file-input" accept="image/*" onchange="handleBillUpload(event)" class="absolute inset-0 opacity-0 cursor-pointer w-full h-full">
                                     <div class="flex flex-col items-center justify-center space-y-1">
                                         <div class="w-10 h-10 rounded-2xl bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 flex items-center justify-center text-xs"><i class="fa-solid fa-cloud-arrow-up"></i></div>
@@ -2375,7 +2566,7 @@
                                     </div>
                                 </div>
 
-                                <button type="button" onclick="openCameraCaptureModal()" class="border-2 border-dashed border-slate-200 dark:border-slate-700 rounded-2xl p-4 text-center bg-slate-50 dark:bg-slate-800/40 hover:border-indigo-500 transition flex flex-col items-center justify-center space-x-1">
+                                <button type="button" onclick="openCameraCaptureModal()" class="border-2 border-dashed border-slate-300 dark:border-slate-700 rounded-2xl p-4 text-center bg-slate-50/60 dark:bg-slate-800/40 hover:border-indigo-500 transition flex flex-col items-center justify-center space-x-1">
                                     <div class="w-10 h-10 rounded-2xl bg-violet-50 dark:bg-violet-950/60 text-violet-600 dark:text-violet-400 flex items-center justify-center text-xs"><i class="fa-solid fa-camera"></i></div>
                                     <p class="text-[11px] font-semibold text-slate-700 dark:text-slate-300">Capture Bill</p>
                                     <p class="text-[9px] text-slate-400">Use Camera</p>
@@ -2495,7 +2686,7 @@
         function removeBillAttachment(event) {
             if (event) event.stopPropagation();
             updateFormCache();
-            state.tempBillData = ''; // Explicitly mark bill as removed
+            state.tempBillData = '';
             showToast('Bill removed.', 'info');
             renderMainContentOnly();
         }
@@ -2520,15 +2711,15 @@
             const root = document.getElementById('modal-root');
             root.innerHTML = `
                 <div class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4">
-                    <div class="bg-white dark:bg-slate-900 rounded-3xl p-5 max-w-md w-full border border-slate-200 dark:border-slate-800 shadow-2xl space-y-4">
+                    <div class="ios-glass-modal rounded-3xl p-5 max-w-md w-full shadow-2xl space-y-4">
                         <div class="flex items-center justify-between">
                             <h3 class="font-bold text-sm text-slate-900 dark:text-white truncate">${escapeHtml(titleText)}</h3>
                             <button onclick="closeModal()" class="text-slate-400 hover:text-slate-600 text-lg"><i class="fa-solid fa-xmark"></i></button>
                         </div>
-                        <div class="bg-slate-100 dark:bg-slate-800 rounded-2xl overflow-hidden flex items-center justify-center max-h-[60vh]">
+                        <div class="bg-slate-100/80 dark:bg-slate-800/80 rounded-2xl overflow-hidden flex items-center justify-center max-h-[60vh]">
                             <img src="${imgUrl}" alt="Bill" class="max-w-full max-h-[60vh] object-contain">
                         </div>
-                        <button onclick="closeModal()" class="w-full py-3 bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 text-slate-800 dark:text-slate-200 font-semibold rounded-2xl text-xs transition">Close</button>
+                        <button onclick="closeModal()" class="w-full py-3 bg-slate-200/90 dark:bg-slate-800/90 hover:bg-slate-300 text-slate-800 dark:text-slate-200 font-semibold rounded-2xl text-xs transition">Close</button>
                     </div>
                 </div>
             `;
@@ -2545,11 +2736,11 @@
 
             if (cat === 'Office') {
                 btnOffice.className = 'py-3.5 px-3 rounded-2xl border font-medium text-xs sm:text-sm flex items-center justify-center space-x-2 transition truncate bg-indigo-600 text-white border-indigo-600 shadow-md';
-                btnShoot.className = 'py-3.5 px-3 rounded-2xl border font-medium text-xs sm:text-sm flex items-center justify-center space-x-2 transition truncate bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700';
+                btnShoot.className = 'py-3.5 px-3 rounded-2xl border font-medium text-xs sm:text-sm flex items-center justify-center space-x-2 transition truncate bg-slate-50/80 dark:bg-slate-800/80 text-slate-700 dark:text-slate-300 border-slate-200/80 dark:border-slate-700';
                 if (clientContainer) clientContainer.classList.add('hidden');
             } else {
                 btnShoot.className = 'py-3.5 px-3 rounded-2xl border font-medium text-xs sm:text-sm flex items-center justify-center space-x-2 transition truncate bg-indigo-600 text-white border-indigo-600 shadow-md';
-                btnOffice.className = 'py-3.5 px-3 rounded-2xl border font-medium text-xs sm:text-sm flex items-center justify-center space-x-2 transition truncate bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700';
+                btnOffice.className = 'py-3.5 px-3 rounded-2xl border font-medium text-xs sm:text-sm flex items-center justify-center space-x-2 transition truncate bg-slate-50/80 dark:bg-slate-800/80 text-slate-700 dark:text-slate-300 border-slate-200/80 dark:border-slate-700';
                 if (clientContainer) clientContainer.classList.remove('hidden');
             }
         }
@@ -2719,7 +2910,6 @@
             switchTab('home');
         }
 
-        // Individual User Undo Expense: refunds amount back to wallet, logs in Wallet Transaction History, and moves expense to Recycle Bin
         function confirmUndoExpense(id) {
             const exp = state.expenses.find(e => e.id === id);
             if (!exp) return;
@@ -2752,7 +2942,6 @@
             );
         }
 
-        // Standard Delete Expense behavior (moves to Recycle Bin without changing wallet balance)
         function confirmDeleteExpense(id, billUrl) {
             showConfirmModal(
                 'Delete Expense',
@@ -2780,7 +2969,7 @@
 
                     <div class="space-y-3.5 w-full">
                         ${state.recycleBin.length === 0 ? `
-                            <div class="bg-white dark:bg-slate-900 rounded-3xl p-8 text-center border border-slate-200 dark:border-slate-800 shadow-sm w-full mt-3">
+                            <div class="ios-glass-card rounded-3xl p-8 text-center shadow-sm w-full mt-3">
                                 <div class="w-14 h-14 bg-amber-500/10 text-amber-600 rounded-2xl flex items-center justify-center mx-auto mb-3 text-xl"><i class="fa-solid fa-trash-can"></i></div>
                                 <h4 class="font-semibold text-slate-700 dark:text-slate-300 mb-1">Recycle Bin is Empty</h4>
                                 <p class="text-xs text-slate-500">Deleted expenses will appear here.</p>
@@ -2789,7 +2978,7 @@
 
                         ${state.recycleBin.map(exp => {
                             return `
-                                <div class="bg-white dark:bg-slate-900 rounded-3xl py-5 sm:py-6 px-5 sm:px-6 border border-slate-200 dark:border-slate-800 shadow-sm transition relative group w-full mt-3">
+                                <div class="ios-glass-card rounded-3xl py-5 sm:py-6 px-5 sm:px-6 shadow-sm transition relative group w-full mt-3">
                                     <div class="flex items-start space-x-3.5 w-full">
                                         <div class="w-10 h-10 rounded-2xl bg-amber-500/10 text-amber-600 flex items-center justify-center shrink-0 mt-0.5">
                                             <i class="fa-solid fa-trash-can"></i>
@@ -2820,7 +3009,7 @@
                                                 </div>
                                             ` : ''}
 
-                                            <div class="flex items-center justify-end mt-3 pt-2 border-t border-slate-100 dark:border-slate-800/60 w-full gap-2">
+                                            <div class="flex items-center justify-end mt-3 pt-2 border-t border-slate-200/50 dark:border-slate-800 w-full gap-2">
                                                 <button onclick="restoreFromRecycleBin('${exp.id}')" class="px-3.5 py-1.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 text-xs font-semibold border border-emerald-200 hover:bg-emerald-100 transition">
                                                     <i class="fa-solid fa-rotate-left mr-1"></i>Restore
                                                 </button>
@@ -2869,7 +3058,7 @@
                 <div class="space-y-4 w-full max-w-full">
                     <div class="space-y-3.5 w-full">
                         ${state.userRecycleBin.length === 0 ? `
-                            <div class="bg-white dark:bg-slate-900 rounded-3xl p-8 text-center border border-slate-200 dark:border-slate-800 shadow-sm w-full mt-3">
+                            <div class="ios-glass-card rounded-3xl p-8 text-center shadow-sm w-full mt-3">
                                 <div class="w-14 h-14 bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 rounded-2xl flex items-center justify-center mx-auto mb-3 text-xl"><i class="fa-solid fa-user-slash"></i></div>
                                 <h4 class="font-semibold text-slate-700 dark:text-slate-300 mb-1">No Pending Deleted Users</h4>
                                 <p class="text-xs text-slate-500">Users scheduled for deletion within 48 hours will appear here for recovery.</p>
@@ -2877,7 +3066,7 @@
                         ` : ''}
 
                         ${state.userRecycleBin.map(item => `
-                            <div class="bg-white dark:bg-slate-900 rounded-2xl py-5 px-5 sm:px-6 border border-slate-200 dark:border-slate-800 shadow-sm flex items-center justify-between gap-3 w-full mt-3">
+                            <div class="ios-glass-card rounded-2xl py-5 px-5 sm:px-6 shadow-sm flex items-center justify-between gap-3 w-full mt-3">
                                 <div class="space-y-1 min-w-0 flex-1">
                                     <h4 class="font-semibold text-sm text-slate-900 dark:text-white truncate">${escapeHtml(item.name)} (@${escapeHtml(item.username)})</h4>
                                     <p class="text-[11px] text-rose-500 font-medium">Deleted on ${formatDate(item.deletedAt)}. Permanent wipe in 48 hrs.</p>
@@ -2926,7 +3115,7 @@
 
             return `
                 <div class="space-y-4 w-full max-w-full">
-                    <div class="bg-gradient-to-br from-slate-900 to-indigo-950 rounded-3xl p-5 sm:p-6 text-white shadow-xl relative overflow-hidden border border-indigo-500/20 w-full">
+                    <div class="bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 rounded-3xl p-5 sm:p-6 text-white shadow-xl relative overflow-hidden border border-indigo-500/30 w-full">
                         <div class="flex justify-between items-start mb-3 gap-2">
                             <div class="min-w-0 flex-1">
                                 <p class="text-indigo-300 text-xs font-semibold uppercase tracking-wider flex items-center truncate">
@@ -2956,18 +3145,18 @@
                         ${sortedMonths.map(monthKey => {
                             const data = monthlyMap[monthKey];
                             return `
-                                <div class="bg-white dark:bg-slate-900 rounded-3xl p-5 sm:p-6 border border-slate-200 dark:border-slate-800 shadow-sm space-y-3 w-full mt-3">
+                                <div class="ios-glass-card rounded-3xl p-5 sm:p-6 shadow-sm space-y-3 w-full mt-3">
                                     <div class="flex items-center justify-between">
                                         <div class="flex items-center space-x-2 min-w-0 pr-2">
                                             <div class="w-8 h-8 rounded-xl bg-violet-500/10 text-violet-600 dark:text-violet-400 flex items-center justify-center text-xs font-bold shrink-0"><i class="fa-solid fa-calendar-days"></i></div>
                                             <h4 class="font-bold text-sm text-slate-900 dark:text-white truncate">${formatMonthName(monthKey)}</h4>
                                         </div>
-                                        <span class="text-xs font-semibold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 px-3 py-1 rounded-full shrink-0">${data.count} Expenses</span>
+                                        <span class="text-xs font-semibold bg-slate-100/90 dark:bg-slate-800 text-slate-600 dark:text-slate-300 px-3 py-1 rounded-full shrink-0 border border-slate-200/60 dark:border-slate-700">${data.count} Expenses</span>
                                     </div>
-                                    <div class="grid grid-cols-3 gap-2.5 pt-2 border-t border-slate-100 dark:border-slate-800">
-                                        <div class="bg-slate-50 dark:bg-slate-800/50 p-2.5 rounded-2xl text-center min-w-0"><span class="text-[10px] uppercase font-semibold text-slate-400 block mb-0.5 truncate">Office</span><span class="font-bold text-xs sm:text-sm text-slate-800 dark:text-slate-200 break-all block">${formatCurrency(data.office)}</span></div>
-                                        <div class="bg-slate-50 dark:bg-slate-800/50 p-2.5 rounded-2xl text-center min-w-0"><span class="text-[10px] uppercase font-semibold text-slate-400 block mb-0.5 truncate">Shoot</span><span class="font-bold text-xs sm:text-sm text-slate-800 dark:text-slate-200 break-all block">${formatCurrency(data.shoot)}</span></div>
-                                        <div class="bg-indigo-50 dark:bg-indigo-950/40 p-2.5 rounded-2xl text-center border border-indigo-100 dark:border-indigo-900/50 min-w-0"><span class="text-[10px] uppercase font-semibold text-indigo-600 dark:text-indigo-400 block mb-0.5 truncate">Total</span><span class="font-bold text-xs sm:text-sm text-indigo-600 dark:text-indigo-400 break-all block">${formatCurrency(data.total)}</span></div>
+                                    <div class="grid grid-cols-3 gap-2.5 pt-2 border-t border-slate-200/50 dark:border-slate-800">
+                                        <div class="bg-slate-50/90 dark:bg-slate-800/60 p-2.5 rounded-2xl text-center min-w-0 border border-slate-200/50 dark:border-slate-700/50"><span class="text-[10px] uppercase font-semibold text-slate-400 block mb-0.5 truncate">Office</span><span class="font-bold text-xs sm:text-sm text-slate-800 dark:text-slate-200 break-all block">${formatCurrency(data.office)}</span></div>
+                                        <div class="bg-slate-50/90 dark:bg-slate-800/60 p-2.5 rounded-2xl text-center min-w-0 border border-slate-200/50 dark:border-slate-700/50"><span class="text-[10px] uppercase font-semibold text-slate-400 block mb-0.5 truncate">Shoot</span><span class="font-bold text-xs sm:text-sm text-slate-800 dark:text-slate-200 break-all block">${formatCurrency(data.shoot)}</span></div>
+                                        <div class="bg-indigo-50/90 dark:bg-indigo-950/60 p-2.5 rounded-2xl text-center border border-indigo-200/60 dark:border-indigo-900 min-w-0"><span class="text-[10px] uppercase font-semibold text-indigo-600 dark:text-indigo-400 block mb-0.5 truncate">Total</span><span class="font-bold text-xs sm:text-sm text-indigo-600 dark:text-indigo-400 break-all block">${formatCurrency(data.total)}</span></div>
                                     </div>
                                 </div>
                             `;
@@ -2982,7 +3171,7 @@
                 <div class="space-y-4 w-full max-w-full">
                     <div class="space-y-3 w-full">
                         ${state.passwordRequests.length === 0 ? `
-                            <div class="bg-white dark:bg-slate-900 rounded-3xl p-8 text-center border border-slate-200 dark:border-slate-800 shadow-sm w-full mt-3">
+                            <div class="ios-glass-card rounded-3xl p-8 text-center shadow-sm w-full mt-3">
                                 <div class="w-14 h-14 bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 rounded-2xl flex items-center justify-center mx-auto mb-3 text-xl"><i class="fa-solid fa-key"></i></div>
                                 <h4 class="font-semibold text-slate-700 dark:text-slate-300 mb-1">No pending requests</h4>
                                 <p class="text-xs text-slate-500">When users request password resets, their 6-digit codes will appear here.</p>
@@ -2992,7 +3181,7 @@
                         ${state.passwordRequests.map(req => {
                             const isPending = req.status === 'pending';
                             return `
-                                <div class="bg-white dark:bg-slate-900 rounded-2xl py-5 px-5 sm:px-6 border border-slate-200 dark:border-slate-800 shadow-sm flex items-center justify-between gap-3 w-full mt-3">
+                                <div class="ios-glass-card rounded-2xl py-5 px-5 sm:px-6 shadow-sm flex items-center justify-between gap-3 w-full mt-3">
                                     <div class="space-y-1 min-w-0 flex-1">
                                         <div class="flex items-center space-x-2 truncate">
                                             <h4 class="font-semibold text-sm text-slate-900 dark:text-white truncate">${escapeHtml(req.name)}</h4>
@@ -3005,7 +3194,7 @@
                                     </div>
                                     <div class="flex items-center space-x-2 shrink-0">
                                         <span class="px-3 py-1 rounded-full text-xs font-semibold ${isPending ? 'bg-amber-500/10 text-amber-600' : 'bg-emerald-500/10 text-emerald-600'}">${isPending ? 'Pending' : 'Approved'}</span>
-                                        ${isPending ? `<button onclick="dismissRequest('${req.id}')" class="w-8 h-8 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-400 hover:text-rose-600 flex items-center justify-center text-xs" title="Dismiss"><i class="fa-solid fa-xmark"></i></button>` : ''}
+                                        ${isPending ? `<button onclick="dismissRequest('${req.id}')" class="w-8 h-8 rounded-xl bg-slate-100/90 dark:bg-slate-800 text-slate-400 hover:text-rose-600 flex items-center justify-center text-xs" title="Dismiss"><i class="fa-solid fa-xmark"></i></button>` : ''}
                                     </div>
                                 </div>
                             `;
@@ -3046,20 +3235,18 @@
                         </button>
                     </div>
 
-                    <!-- Filter Pills -->
-                    <div class="flex items-center space-x-2 bg-slate-100 dark:bg-slate-800/80 p-1.5 rounded-2xl w-full">
-                        <button onclick="setUserFilterTab('all')" class="flex-1 py-2 px-3 rounded-xl text-xs font-semibold transition ${filter === 'all' ? 'bg-white dark:bg-slate-900 text-indigo-600 dark:text-indigo-400 shadow-sm' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'}">
+                    <div class="flex items-center space-x-2 ios-glass-card p-1.5 rounded-2xl w-full">
+                        <button onclick="setUserFilterTab('all')" class="flex-1 py-2 px-3 rounded-xl text-xs font-semibold transition ${filter === 'all' ? 'bg-white dark:bg-slate-900 text-indigo-600 dark:text-indigo-400 shadow-sm border border-slate-200/50 dark:border-slate-800' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'}">
                             All (${state.users.length})
                         </button>
-                        <button onclick="setUserFilterTab('user')" class="flex-1 py-2 px-3 rounded-xl text-xs font-semibold transition ${filter === 'user' ? 'bg-white dark:bg-slate-900 text-indigo-600 dark:text-indigo-400 shadow-sm' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'}">
+                        <button onclick="setUserFilterTab('user')" class="flex-1 py-2 px-3 rounded-xl text-xs font-semibold transition ${filter === 'user' ? 'bg-white dark:bg-slate-900 text-indigo-600 dark:text-indigo-400 shadow-sm border border-slate-200/50 dark:border-slate-800' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'}">
                             Users (${regularUsers.length})
                         </button>
-                        <button onclick="setUserFilterTab('admin')" class="flex-1 py-2 px-3 rounded-xl text-xs font-semibold transition ${filter === 'admin' ? 'bg-white dark:bg-slate-900 text-indigo-600 dark:text-indigo-400 shadow-sm' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'}">
+                        <button onclick="setUserFilterTab('admin')" class="flex-1 py-2 px-3 rounded-xl text-xs font-semibold transition ${filter === 'admin' ? 'bg-white dark:bg-slate-900 text-indigo-600 dark:text-indigo-400 shadow-sm border border-slate-200/50 dark:border-slate-800' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'}">
                             Admins (${adminUsers.length})
                         </button>
                     </div>
 
-                    <!-- Regular Users Section (Shown First) -->
                     ${showRegular ? `
                         <div class="space-y-3 w-full">
                             <div class="flex items-center justify-between px-1">
@@ -3069,14 +3256,13 @@
                                 </h3>
                             </div>
                             ${regularUsers.length === 0 ? `
-                                <div class="bg-white dark:bg-slate-900 rounded-3xl p-6 text-center border border-slate-200 dark:border-slate-800 shadow-sm text-xs text-slate-400">
+                                <div class="ios-glass-card rounded-3xl p-6 text-center shadow-sm text-xs text-slate-400">
                                     No regular users found.
                                 </div>
                             ` : regularUsers.map(u => renderUserCard(u)).join('')}
                         </div>
                     ` : ''}
 
-                    <!-- Administrators Section (Shown Below) -->
                     ${showAdmins ? `
                         <div class="space-y-3 w-full pt-2">
                             <div class="flex items-center justify-between px-1">
@@ -3085,7 +3271,7 @@
                                     <span>Administrators (${adminUsers.length})</span>
                                 </h3>
                             </div>
-                            ${adminUsers.length === 0 ? `<div class="bg-white dark:bg-slate-900 rounded-3xl p-6 text-center border border-slate-200 dark:border-slate-800 shadow-sm text-xs text-slate-400">No admins found.</div>` : adminUsers.map(u => renderUserCard(u)).join('')}
+                            ${adminUsers.length === 0 ? `<div class="ios-glass-card rounded-3xl p-6 text-center shadow-sm text-xs text-slate-400">No admins found.</div>` : adminUsers.map(u => renderUserCard(u)).join('')}
                         </div>
                     ` : ''}
                 </div>
@@ -3101,7 +3287,7 @@
             const userTotalSpent = state.expenses.filter(e => e.userId === u.id).reduce((s, e) => s + e.amount, 0);
 
             return `
-                <div class="bg-white dark:bg-slate-900 rounded-3xl p-5 border border-slate-200 dark:border-slate-800 shadow-sm space-y-4 w-full mt-3">
+                <div class="ios-glass-card rounded-3xl p-5 shadow-sm space-y-4 w-full mt-3">
                     <div class="flex items-center justify-between gap-2">
                         <div class="flex items-center space-x-3.5 min-w-0 flex-1">
                             <div class="w-10 h-10 rounded-2xl ${isUserAdmin ? 'bg-indigo-500/10 text-indigo-600 dark:text-indigo-400' : 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400'} flex items-center justify-center font-bold text-sm shrink-0">${u.name.charAt(0)}</div>
@@ -3119,17 +3305,17 @@
                                 <span>Wallet</span>
                             </button>
                             ` : ''}
-                            <button onclick="openEditUserModal('${u.id}')" class="w-9 h-9 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-500 hover:bg-indigo-50 hover:text-indigo-600 transition flex items-center justify-center text-xs" title="Edit User"><i class="fa-solid fa-pen"></i></button>
+                            <button onclick="openEditUserModal('${u.id}')" class="w-9 h-9 rounded-xl bg-slate-100/90 dark:bg-slate-800 text-slate-500 hover:bg-indigo-50 hover:text-indigo-600 transition flex items-center justify-center text-xs" title="Edit User"><i class="fa-solid fa-pen"></i></button>
                         </div>
                     </div>
 
                     ${!isUserAdmin ? `
-                    <div class="grid grid-cols-2 gap-3 pt-3 border-t border-slate-100 dark:border-slate-800 text-xs">
-                        <div class="bg-slate-50 dark:bg-slate-800/40 p-3 rounded-2xl">
+                    <div class="grid grid-cols-2 gap-3 pt-3 border-t border-slate-200/50 dark:border-slate-800 text-xs">
+                        <div class="bg-slate-50/90 dark:bg-slate-800/60 p-3 rounded-2xl border border-slate-200/50 dark:border-slate-700/50">
                             <span class="text-slate-400 block text-[10px] uppercase font-semibold mb-0.5">Wallet Balance</span>
                             <span class="font-bold text-sm text-emerald-600 dark:text-emerald-400">${formatCurrency(uWallet)}</span>
                         </div>
-                        <div class="bg-slate-50 dark:bg-slate-800/40 p-3 rounded-2xl">
+                        <div class="bg-slate-50/90 dark:bg-slate-800/60 p-3 rounded-2xl border border-slate-200/50 dark:border-slate-700/50">
                             <span class="text-slate-400 block text-[10px] uppercase font-semibold mb-0.5">Excess Spent Due</span>
                             <span class="font-bold text-sm text-rose-600 dark:text-rose-400">${formatCurrency(uExcess)}</span>
                         </div>
@@ -3163,17 +3349,17 @@
         function openAddUserModal() {
             const root = document.getElementById('modal-root');
             root.innerHTML = `
-                <div class="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-sm flex items-center justify-center p-4">
-                    <div class="bg-white dark:bg-slate-900 rounded-3xl p-6 max-w-sm w-full border border-slate-200 dark:border-slate-800 shadow-2xl space-y-4">
+                <div class="fixed inset-0 z-50 bg-slate-950/65 backdrop-blur-md flex items-center justify-center p-4">
+                    <div class="ios-glass-modal rounded-3xl p-6 max-w-sm w-full shadow-2xl space-y-4">
                         <div class="flex items-center justify-between">
                             <h3 class="font-bold text-base text-slate-900 dark:text-white">Add User</h3>
                             <button onclick="closeModal()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark"></i></button>
                         </div>
                         <form onsubmit="handleAddNewUser(event)" class="space-y-3.5 w-full">
-                            <div class="w-full"><label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Full Name</label><input type="text" id="new-user-name" required placeholder="Priya Sharma" class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm text-slate-900 dark:text-white"></div>
-                            <div class="w-full"><label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Username</label><input type="text" id="new-user-username" required placeholder="user3" class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm text-slate-900 dark:text-white"></div>
-                            <div class="w-full"><label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Password</label><input type="password" id="new-user-password" required placeholder="••••••••" class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm text-slate-900 dark:text-white"></div>
-                            <div class="w-full"><label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Role</label><select id="new-user-role" class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm text-slate-900 dark:text-white"><option value="user">Regular User</option><option value="admin">Administrator</option></select></div>
+                            <div class="w-full"><label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Full Name</label><input type="text" id="new-user-name" required placeholder="Priya Sharma" class="w-full px-4 py-3 bg-slate-50/80 dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700 rounded-2xl text-sm text-slate-900 dark:text-white"></div>
+                            <div class="w-full"><label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Username</label><input type="text" id="new-user-username" required placeholder="user3" class="w-full px-4 py-3 bg-slate-50/80 dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700 rounded-2xl text-sm text-slate-900 dark:text-white"></div>
+                            <div class="w-full"><label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Password</label><input type="password" id="new-user-password" required placeholder="••••••••" class="w-full px-4 py-3 bg-slate-50/80 dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700 rounded-2xl text-sm text-slate-900 dark:text-white"></div>
+                            <div class="w-full"><label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Role</label><select id="new-user-role" class="w-full px-4 py-3 bg-slate-50/80 dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700 rounded-2xl text-sm text-slate-900 dark:text-white"><option value="user">Regular User</option><option value="admin">Administrator</option></select></div>
                             <div class="pt-2 w-full"><button type="submit" class="w-full py-3.5 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-2xl shadow-md transition text-sm">Create User</button></div>
                         </form>
                     </div>
@@ -3187,15 +3373,15 @@
 
             const root = document.getElementById('modal-root');
             root.innerHTML = `
-                <div class="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-sm flex items-center justify-center p-4">
-                    <div class="bg-white dark:bg-slate-900 rounded-3xl p-6 max-w-sm w-full border border-slate-200 dark:border-slate-800 shadow-2xl space-y-4">
+                <div class="fixed inset-0 z-50 bg-slate-950/65 backdrop-blur-md flex items-center justify-center p-4">
+                    <div class="ios-glass-modal rounded-3xl p-6 max-w-sm w-full shadow-2xl space-y-4">
                         <div class="flex items-center justify-between">
                             <h3 class="font-bold text-base text-slate-900 dark:text-white">Edit User</h3>
                             <button onclick="closeModal()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark"></i></button>
                         </div>
                         <form onsubmit="handleEditUser(event, '${user.id}')" class="space-y-3.5 w-full">
-                            <div class="w-full"><label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Full Name</label><input type="text" id="edit-user-name" required value="${escapeHtml(user.name)}" class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm text-slate-900 dark:text-white"></div>
-                            <div class="w-full"><label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Role</label><select id="edit-user-role" class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm text-slate-900 dark:text-white"><option value="user" ${user.role === 'user' ? 'selected' : ''}>Regular User</option><option value="admin" ${user.role === 'admin' ? 'selected' : ''}>Administrator</option></select></div>
+                            <div class="w-full"><label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Full Name</label><input type="text" id="edit-user-name" required value="${escapeHtml(user.name)}" class="w-full px-4 py-3 bg-slate-50/80 dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700 rounded-2xl text-sm text-slate-900 dark:text-white"></div>
+                            <div class="w-full"><label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Role</label><select id="edit-user-role" class="w-full px-4 py-3 bg-slate-50/80 dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700 rounded-2xl text-sm text-slate-900 dark:text-white"><option value="user" ${user.role === 'user' ? 'selected' : ''}>Regular User</option><option value="admin" ${user.role === 'admin' ? 'selected' : ''}>Administrator</option></select></div>
                             <div class="pt-2 w-full"><button type="submit" class="w-full py-3.5 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-2xl shadow-md transition text-sm">Save Changes</button></div>
                         </form>
                     </div>
@@ -3300,12 +3486,12 @@
 
             return `
                 <div class="space-y-4 w-full max-w-full">
-                    <div class="bg-gradient-to-br from-violet-600 to-indigo-700 rounded-3xl p-5 sm:p-6 text-white shadow-xl w-full">
+                    <div class="bg-gradient-to-br from-violet-600 to-indigo-700 rounded-3xl p-5 sm:p-6 text-white shadow-lg shadow-violet-500/20 border border-violet-500/30 w-full">
                         <p class="text-violet-200 text-xs font-semibold uppercase tracking-wider">My Expense Summary</p>
                         <h2 class="text-2xl sm:text-3xl font-bold tracking-tight mt-0.5 break-all">${formatCurrency(total)}</h2>
-                        <div class="grid grid-cols-2 gap-3 mt-4 pt-4 border-t border-white/15">
-                            <div class="min-w-0"><span class="text-xs text-violet-200 truncate block">Office Expense</span><p class="font-bold text-sm sm:text-base break-all">${formatCurrency(office)}</p></div>
-                            <div class="min-w-0"><span class="text-xs text-violet-200 truncate block">Shoot Expense</span><p class="font-bold text-sm sm:text-base break-all">${formatCurrency(shoot)}</p></div>
+                        <div class="grid grid-cols-2 gap-3 mt-4 pt-4 border-t border-white/20">
+                            <div class="bg-black/15 backdrop-blur-sm rounded-2xl p-3 min-w-0 border border-white/10"><span class="text-xs text-violet-200 truncate block">Office Expense</span><p class="font-bold text-sm sm:text-base break-all">${formatCurrency(office)}</p></div>
+                            <div class="bg-black/15 backdrop-blur-sm rounded-2xl p-3 min-w-0 border border-white/10"><span class="text-xs text-violet-200 truncate block">Shoot Expense</span><p class="font-bold text-sm sm:text-base break-all">${formatCurrency(shoot)}</p></div>
                         </div>
                     </div>
 
@@ -3315,12 +3501,12 @@
                             <button onclick="exportUserCSV('${state.currentUser.id}', '${state.currentUser.name}')" class="text-xs font-semibold text-indigo-600 dark:text-indigo-400 hover:underline flex items-center space-x-1 shrink-0"><i class="fa-solid fa-download"></i><span>Export CSV</span></button>
                         </div>
                         ${months.map(m => `
-                            <div class="bg-white dark:bg-slate-900 rounded-3xl p-6 sm:p-7 border border-slate-200 dark:border-slate-800 shadow-sm space-y-3 w-full mt-3">
+                            <div class="ios-glass-card rounded-3xl p-6 sm:p-7 shadow-sm space-y-3 w-full mt-3">
                                 <div class="flex items-center justify-between">
                                     <span class="font-bold text-sm sm:text-base text-slate-900 dark:text-white truncate pr-2">${formatMonthName(m)}</span>
                                     <span class="font-bold text-base text-indigo-600 dark:text-indigo-400 shrink-0">${formatCurrency(monthlyMap[m].total)}</span>
                                 </div>
-                                <div class="flex justify-between text-xs sm:text-sm text-slate-500 dark:text-slate-400 pt-3 border-t border-slate-100 dark:border-slate-800">
+                                <div class="flex justify-between text-xs sm:text-sm text-slate-500 dark:text-slate-400 pt-3 border-t border-slate-200/50 dark:border-slate-800">
                                     <span class="truncate pr-1">Office: ${formatCurrency(monthlyMap[m].office)}</span>
                                     <span class="truncate pl-1 text-right">Shoot: ${formatCurrency(monthlyMap[m].shoot)}</span>
                                 </div>
@@ -3339,7 +3525,7 @@
 
             return `
                 <div class="space-y-4 w-full max-w-full">
-                    <div class="bg-white dark:bg-slate-900 rounded-3xl p-6 sm:p-7 border border-slate-200 dark:border-slate-800 shadow-sm text-center w-full">
+                    <div class="ios-glass-card rounded-3xl p-6 sm:p-7 shadow-sm text-center w-full">
                         <div class="w-16 h-16 flex items-center justify-center mx-auto mb-3 overflow-hidden logo-container">
                             <img src="https://clickfactoryphotography.com/wp-content/uploads/2022/04/crop-logo.gif" alt="Click Factory Logo" class="w-full h-full object-contain" onerror="this.src='https://placehold.co/64x64/4f46e5/ffffff?text=CF'">
                         </div>
@@ -3350,8 +3536,8 @@
                         </span>
                     </div>
 
-                    <!-- Appearance Card -->
-                    <div class="bg-white dark:bg-slate-900 rounded-3xl p-5 sm:p-6 border border-slate-200 dark:border-slate-800 shadow-sm space-y-4 w-full">
+                    <!-- Appearance & iOS Liquid Glass Transparency Card -->
+                    <div class="ios-glass-card rounded-3xl p-5 sm:p-6 shadow-sm space-y-4 w-full">
                         <div class="space-y-3">
                             <div class="flex items-center justify-between px-1">
                                 <div>
@@ -3360,33 +3546,45 @@
                                 </div>
                                 <span class="text-[11px] font-semibold text-indigo-600 dark:text-indigo-400 capitalize">${state.themeMode === 'system' ? `System (${state.darkMode ? 'Dark' : 'Light'})` : state.themeMode}</span>
                             </div>
-                            <div class="grid grid-cols-3 gap-2 bg-slate-100 dark:bg-slate-800/80 p-1.5 rounded-2xl">
-                                <button type="button" onclick="setThemeMode('light')" class="py-2.5 px-3 rounded-xl text-xs font-semibold flex items-center justify-center space-x-1.5 transition ${state.themeMode === 'light' ? 'bg-white dark:bg-slate-900 text-amber-600 shadow-sm' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'}">
+                            <div class="grid grid-cols-3 gap-2 bg-slate-100/90 dark:bg-slate-800 p-1.5 rounded-2xl border border-slate-200/60 dark:border-slate-700">
+                                <button type="button" onclick="setThemeMode('light')" class="py-2.5 px-3 rounded-xl text-xs font-semibold flex items-center justify-center space-x-1.5 transition ${state.themeMode === 'light' ? 'bg-white dark:bg-slate-900 text-amber-600 shadow-sm border border-slate-200/50 dark:border-slate-700' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'}">
                                     <i class="fa-solid fa-sun"></i>
                                     <span>Light</span>
                                 </button>
-                                <button type="button" onclick="setThemeMode('dark')" class="py-2.5 px-3 rounded-xl text-xs font-semibold flex items-center justify-center space-x-1.5 transition ${state.themeMode === 'dark' ? 'bg-white dark:bg-slate-900 text-indigo-500 dark:text-indigo-400 shadow-sm' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'}">
+                                <button type="button" onclick="setThemeMode('dark')" class="py-2.5 px-3 rounded-xl text-xs font-semibold flex items-center justify-center space-x-1.5 transition ${state.themeMode === 'dark' ? 'bg-white dark:bg-slate-900 text-indigo-500 dark:text-indigo-400 shadow-sm border border-slate-200/50 dark:border-slate-700' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'}">
                                     <i class="fa-solid fa-moon"></i>
                                     <span>Dark</span>
                                 </button>
-                                <button type="button" onclick="setThemeMode('system')" class="py-2.5 px-3 rounded-xl text-xs font-semibold flex items-center justify-center space-x-1.5 transition ${state.themeMode === 'system' ? 'bg-white dark:bg-slate-900 text-indigo-600 dark:text-indigo-400 shadow-sm' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'}">
+                                <button type="button" onclick="setThemeMode('system')" class="py-2.5 px-3 rounded-xl text-xs font-semibold flex items-center justify-center space-x-1.5 transition ${state.themeMode === 'system' ? 'bg-white dark:bg-slate-900 text-indigo-600 dark:text-indigo-400 shadow-sm border border-slate-200/50 dark:border-slate-700' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'}">
                                     <i class="fa-solid fa-circle-half-stroke"></i>
                                     <span>System</span>
                                 </button>
                             </div>
+
+                            <!-- iOS Liquid Glass Transparency Slider -->
+                            <div class="pt-3.5 border-t border-slate-200/50 dark:border-slate-800 space-y-2">
+                                <div class="flex items-center justify-between text-xs px-1">
+                                    <span class="font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
+                                        <i class="fa-solid fa-droplet text-indigo-500"></i>
+                                        <span>iOS Liquid Glass Transparency</span>
+                                    </span>
+                                    <span id="dock-alpha-label" class="font-bold text-indigo-600 dark:text-indigo-400">${Math.round(state.dockAlpha * 100)}%</span>
+                                </div>
+                                <input type="range" min="0.30" max="0.95" step="0.02" value="${state.dockAlpha}" oninput="handleDockAlphaChange(this.value)" class="w-full accent-indigo-600 cursor-pointer h-1.5 bg-slate-200 dark:bg-slate-700 rounded-lg">
+                            </div>
                         </div>
 
                         <!-- Collapsible Ringer & Notification Sound Section -->
-                        <div class="pt-3 border-t border-slate-100 dark:border-slate-800">
+                        <div class="pt-3 border-t border-slate-200/50 dark:border-slate-800">
                             <div class="bg-slate-50/70 dark:bg-slate-800/40 rounded-2xl border border-slate-200/70 dark:border-slate-700/60 overflow-hidden transition-all duration-200">
-                                <div onclick="toggleSoundPanel()" class="flex items-center justify-between p-3.5 cursor-pointer select-none hover:bg-slate-100/80 dark:hover:bg-slate-800/80 transition">
+                                <div onclick="toggleSoundPanel()" class="flex items-center justify-between p-3.5 cursor-pointer select-none hover:bg-slate-100/60 dark:hover:bg-slate-800/60 transition">
                                     <div class="flex items-center space-x-2.5 min-w-0 pr-2">
                                         <div class="w-8 h-8 rounded-xl ${state.soundEnabled ? 'bg-indigo-500/10 text-indigo-600 dark:text-indigo-400' : 'bg-slate-200 dark:bg-slate-700 text-slate-400'} flex items-center justify-center shrink-0">
                                             <i class="fa-solid ${state.soundEnabled ? 'fa-bell' : 'fa-bell-slash'} text-xs"></i>
                                         </div>
                                         <div class="min-w-0">
                                             <h4 class="font-semibold text-xs text-slate-900 dark:text-white flex items-center space-x-1.5">
-                                                <span class="truncate">Ringer & Notification Sound</span>
+                                                <span class="truncate">Ringer, Chimes & Haptics</span>
                                                 <i class="fa-solid fa-chevron-down text-[10px] text-slate-400 transition-transform duration-200 ${state.showSoundPanel ? 'rotate-180 text-indigo-500' : ''}"></i>
                                             </h4>
                                             <p class="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5 truncate">Tap to adjust chime level & ringer settings</p>
@@ -3398,7 +3596,7 @@
                                 </div>
 
                                 ${state.showSoundPanel ? `
-                                    <div class="px-3.5 pb-3.5 pt-2.5 border-t border-slate-200/60 dark:border-slate-700/60 space-y-2.5 bg-white/60 dark:bg-slate-900/40">
+                                    <div class="px-3.5 pb-3.5 pt-2.5 border-t border-slate-200/50 dark:border-slate-700/50 space-y-2.5 bg-white/50 dark:bg-slate-900/40">
                                         <div class="flex items-center justify-between text-xs">
                                             <span class="font-medium text-slate-600 dark:text-slate-300 flex items-center gap-1.5">
                                                 <i class="fa-solid fa-volume-high text-indigo-500"></i>
@@ -3418,7 +3616,7 @@
                                         ` : `
                                             <p class="text-[10px] text-emerald-600 dark:text-emerald-400 font-medium flex items-center gap-1">
                                                 <i class="fa-solid fa-circle-check"></i>
-                                                <span>OS Ringer & Vibration channel active</span>
+                                                <span>OS Ringer & Haptic Vibration channel active</span>
                                             </p>
                                         `}
                                     </div>
@@ -3428,7 +3626,7 @@
                     </div>
 
                     ${isAdmin ? `
-                    <div class="bg-white dark:bg-slate-900 rounded-3xl p-5 sm:p-6 border border-slate-200 dark:border-slate-800 shadow-sm space-y-4 w-full mt-3">
+                    <div class="ios-glass-card rounded-3xl p-5 sm:p-6 shadow-sm space-y-4 w-full mt-3">
                         <h3 class="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider px-1">Admin Management</h3>
                         
                         <div class="flex items-center justify-between py-2 px-1">
@@ -3444,7 +3642,7 @@
                             </button>
                         </div>
 
-                        <div class="pt-3 border-t border-slate-100 dark:border-slate-800 space-y-1">
+                        <div class="pt-3 border-t border-slate-200/50 dark:border-slate-800 space-y-1">
                             <h4 class="font-semibold text-xs text-slate-900 dark:text-white flex items-center space-x-2">
                                 <i class="fa-solid fa-circle-info text-indigo-500"></i>
                                 <span>System Version</span>
@@ -3452,20 +3650,20 @@
                             <p class="text-[10px] text-slate-500 dark:text-slate-400">Running v${CURRENT_CLIENT_APP_VERSION} (Auto-syncs with cloud)</p>
                         </div>
 
-                        <div class="space-y-2.5 pt-1 border-t border-slate-100 dark:border-slate-800">
-                            <button onclick="switchTab('recycle')" class="w-full py-3 px-4 rounded-2xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-700 dark:text-slate-300 text-xs font-semibold transition flex items-center justify-between">
+                        <div class="space-y-2.5 pt-1 border-t border-slate-200/50 dark:border-slate-800">
+                            <button onclick="switchTab('recycle')" class="w-full py-3 px-4 rounded-2xl bg-slate-100/90 dark:bg-slate-800 hover:bg-slate-200 text-slate-700 dark:text-slate-300 text-xs font-semibold transition flex items-center justify-between border border-slate-200/50 dark:border-slate-700/60">
                                 <span class="flex items-center space-x-2"><i class="fa-solid fa-trash-can text-amber-500"></i><span>Recycle Bin</span></span>
                                 ${state.recycleBin.length > 0 ? `<span class="px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-600 text-[10px] font-bold">${state.recycleBin.length}</span>` : '<i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i>'}
                             </button>
-                            <button onclick="switchTab('userRecycle')" class="w-full py-3 px-4 rounded-2xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-700 dark:text-slate-300 text-xs font-semibold transition flex items-center justify-between">
+                            <button onclick="switchTab('userRecycle')" class="w-full py-3 px-4 rounded-2xl bg-slate-100/90 dark:bg-slate-800 hover:bg-slate-200 text-slate-700 dark:text-slate-300 text-xs font-semibold transition flex items-center justify-between border border-slate-200/50 dark:border-slate-700/60">
                                 <span class="flex items-center space-x-2"><i class="fa-solid fa-user-slash text-rose-500"></i><span>Deleted Users Bin</span></span>
                                 ${state.userRecycleBin.length > 0 ? `<span class="px-2 py-0.5 rounded-full bg-rose-500/20 text-rose-600 text-[10px] font-bold">${state.userRecycleBin.length}</span>` : '<i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i>'}
                             </button>
-                            <button onclick="switchTab('requests')" class="w-full py-3 px-4 rounded-2xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-700 dark:text-slate-300 text-xs font-semibold transition flex items-center justify-between">
+                            <button onclick="switchTab('requests')" class="w-full py-3 px-4 rounded-2xl bg-slate-100/90 dark:bg-slate-800 hover:bg-slate-200 text-slate-700 dark:text-slate-300 text-xs font-semibold transition flex items-center justify-between border border-slate-200/50 dark:border-slate-700/60">
                                 <span class="flex items-center space-x-2"><i class="fa-solid fa-key text-amber-500"></i><span>Password Requests</span></span>
                                 ${pendingRequestsCount > 0 ? `<span class="px-2 py-0.5 rounded-full bg-rose-500/20 text-rose-600 text-[10px] font-bold">${pendingRequestsCount} Pending</span>` : '<i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i>'}
                             </button>
-                            <button onclick="openChangePasswordModal()" class="w-full py-3 px-4 rounded-2xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-700 dark:text-slate-300 text-xs font-semibold transition flex items-center justify-between">
+                            <button onclick="openChangePasswordModal()" class="w-full py-3 px-4 rounded-2xl bg-slate-100/90 dark:bg-slate-800 hover:bg-slate-200 text-slate-700 dark:text-slate-300 text-xs font-semibold transition flex items-center justify-between border border-slate-200/50 dark:border-slate-700/60">
                                 <span class="flex items-center space-x-2"><i class="fa-solid fa-shield-halved text-indigo-500"></i><span>Change Admin Password</span></span>
                                 <i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i>
                             </button>
@@ -3484,8 +3682,8 @@
         function openChangePasswordModal() {
             const root = document.getElementById('modal-root');
             root.innerHTML = `
-                <div class="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-sm flex items-center justify-center p-4">
-                    <div class="bg-white dark:bg-slate-900 rounded-3xl p-6 max-w-sm w-full border border-slate-200 dark:border-slate-800 shadow-2xl space-y-4">
+                <div class="fixed inset-0 z-50 bg-slate-950/65 backdrop-blur-md flex items-center justify-center p-4">
+                    <div class="ios-glass-modal rounded-3xl p-6 max-w-sm w-full shadow-2xl space-y-4">
                         <div class="flex items-center justify-between">
                             <h3 class="font-bold text-base text-slate-900 dark:text-white">Change Admin Password</h3>
                             <button onclick="closeModal()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark"></i></button>
@@ -3494,7 +3692,7 @@
                             <div class="w-full">
                                 <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Current Password</label>
                                 <div class="relative w-full">
-                                    <input type="password" id="current-pass" required class="w-full px-4 pr-12 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm text-slate-900 dark:text-white">
+                                    <input type="password" id="current-pass" required class="w-full px-4 pr-12 py-3 bg-slate-50/80 dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700 rounded-2xl text-sm text-slate-900 dark:text-white">
                                     <button type="button" onclick="togglePasswordVisibility('current-pass', 'toggle-curr-pass-icon')" class="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 focus:outline-none">
                                         <i id="toggle-curr-pass-icon" class="fa-solid fa-eye text-sm"></i>
                                     </button>
@@ -3503,7 +3701,7 @@
                             <div class="w-full">
                                 <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">New Password</label>
                                 <div class="relative w-full">
-                                    <input type="password" id="new-pass" required class="w-full px-4 pr-12 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm text-slate-900 dark:text-white">
+                                    <input type="password" id="new-pass" required class="w-full px-4 pr-12 py-3 bg-slate-50/80 dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700 rounded-2xl text-sm text-slate-900 dark:text-white">
                                     <button type="button" onclick="togglePasswordVisibility('new-pass', 'toggle-new-pass-icon')" class="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 focus:outline-none">
                                         <i id="toggle-new-pass-icon" class="fa-solid fa-eye text-sm"></i>
                                     </button>
@@ -3582,12 +3780,12 @@
         function showConfirmModal(title, message, onConfirm) {
             const root = document.getElementById('modal-root');
             root.innerHTML = `
-                <div class="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-sm flex items-center justify-center p-4">
-                    <div class="bg-white dark:bg-slate-900 rounded-3xl p-6 max-w-sm w-full border border-slate-200 dark:border-slate-800 shadow-sm shadow-2xl space-y-4">
+                <div class="fixed inset-0 z-50 bg-slate-950/65 backdrop-blur-md flex items-center justify-center p-4">
+                    <div class="ios-glass-modal rounded-3xl p-6 max-w-sm w-full shadow-2xl space-y-4">
                         <div class="w-12 h-12 rounded-2xl bg-rose-500/10 text-rose-600 flex items-center justify-center text-xl mx-auto"><i class="fa-solid fa-triangle-exclamation"></i></div>
                         <div class="text-center"><h3 class="font-bold text-base text-slate-900 dark:text-white mb-1">${escapeHtml(title)}</h3><p class="text-xs text-slate-500 dark:text-slate-400">${escapeHtml(message)}</p></div>
                         <div class="grid grid-cols-2 gap-3 pt-2">
-                            <button onclick="closeModal()" class="py-3 px-4 rounded-2xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-semibold">Cancel</button>
+                            <button onclick="closeModal()" class="py-3 px-4 rounded-2xl bg-slate-100/90 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-semibold">Cancel</button>
                             <button id="modal-confirm-btn" class="py-3 px-4 rounded-2xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-semibold shadow-md">Confirm</button>
                         </div>
                     </div>
