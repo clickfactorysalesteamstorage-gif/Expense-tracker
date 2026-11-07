@@ -127,7 +127,7 @@
         
         .app-container {
             width: 100%; max-width: 100%;
-            height: 100%; height: 100dvh;
+            flex: 1; min-height: 0;
             overflow: hidden;
             background-color: #f8fafc; display: flex; flex-direction: column;
             padding-top: 0;
@@ -137,14 +137,15 @@
             background-color: #020617;
         }
 
-        /* Crisp Solid Top Header (No iOS Blur Bleed) */
+        /* Crisp Solid Top Header - Pushed 26px below status bar to completely clear iOS 18's status-bar blur gradient */
         .ios-header {
             flex-shrink: 0;
-            padding-top: 10px;
+            padding-top: calc(env(safe-area-inset-top, 0px) + 26px);
+            padding-bottom: 10px;
             background-color: #f8fafc;
             border-bottom: none;
-            transform: translateZ(0);
-            -webkit-transform: translateZ(0);
+            position: relative;
+            z-index: 45;
             transition: background-color 0.25s ease;
         }
         .dark .ios-header {
@@ -198,7 +199,7 @@
         @keyframes homeZoomOut {
             0% {
                 opacity: 0;
-                transform: scale(1.06);
+                transform: scale(1.04);
             }
             100% {
                 opacity: 1;
@@ -206,7 +207,7 @@
             }
         }
         .animate-zoom-out-enter {
-            animation: homeZoomOut 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+            animation: homeZoomOut 0.35s cubic-bezier(0.22, 1, 0.36, 1);
         }
 
         @keyframes pulse-ring {
@@ -218,20 +219,20 @@
             animation: pulse-ring 1.2s infinite;
         }
 
-        /* Crisp iOS-Style Page Slide Transitions (Without Blur Filter Bug) */
+        /* Crisp iOS-Style Page Slide Transitions */
         @keyframes slideInFromRight {
-            0% { transform: translateX(28px); opacity: 0; }
+            0% { transform: translateX(24px); opacity: 0; }
             100% { transform: translateX(0); opacity: 1; }
         }
         @keyframes slideInFromLeft {
-            0% { transform: translateX(-28px); opacity: 0; }
+            0% { transform: translateX(-24px); opacity: 0; }
             100% { transform: translateX(0); opacity: 1; }
         }
         .animate-slide-right {
-            animation: slideInFromRight 0.32s cubic-bezier(0.16, 1, 0.3, 1);
+            animation: slideInFromRight 0.28s cubic-bezier(0.16, 1, 0.3, 1);
         }
         .animate-slide-left {
-            animation: slideInFromLeft 0.32s cubic-bezier(0.16, 1, 0.3, 1);
+            animation: slideInFromLeft 0.28s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
         .liquid-nav-container {
@@ -318,23 +319,19 @@
                 inset 0 -2px 4px rgba(79, 70, 229, 0.3);
         }
 
-        /* Base Card and Modal CSS */
+        /* Crisp Solid Cards (Removed backdrop-filter from cards to prevent iOS Safari GPU blur bleed) */
         .ios-glass-card {
-            background: rgba(255, 255, 255, 0.92) !important;
-            backdrop-filter: blur(24px) saturate(190%) !important;
-            -webkit-backdrop-filter: blur(24px) saturate(190%) !important;
-            border: 1px solid rgba(226, 232, 240, 0.9) !important;
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.01) !important;
+            background: #ffffff !important;
+            border: 1px solid rgba(226, 232, 240, 0.95) !important;
+            box-shadow: 0 8px 20px -4px rgba(0, 0, 0, 0.04), 0 4px 6px -4px rgba(0, 0, 0, 0.02) !important;
         }
         .dark .ios-glass-card {
-            background: rgba(15, 23, 42, 0.88) !important;
-            backdrop-filter: blur(24px) saturate(190%) !important;
-            -webkit-backdrop-filter: blur(24px) saturate(190%) !important;
-            border: 1px solid rgba(51, 65, 85, 0.65) !important;
-            box-shadow: 0 14px 28px -6px rgba(0, 0, 0, 0.5), 0 10px 10px -5px rgba(0, 0, 0, 0.04) !important;
+            background: #0f172a !important;
+            border: 1px solid rgba(51, 65, 85, 0.7) !important;
+            box-shadow: 0 12px 24px -6px rgba(0, 0, 0, 0.45) !important;
         }
 
-        /* Solid, high-contrast modal backdrops preventing gray wash-out */
+        /* Solid, high-contrast modal backdrops */
         .ios-glass-modal {
             background: #ffffff !important;
             border: 1px solid #e2e8f0 !important;
@@ -439,7 +436,10 @@
         }
     </style>
 </head>
-<body class="bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-100 flex flex-col justify-center items-center h-full selection:bg-indigo-500 selection:text-white">
+<body class="bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-100 flex flex-col items-stretch h-full selection:bg-indigo-500 selection:text-white">
+
+    <!-- Top-Level Persistent Header (Isolated from page animations & cleared below iOS status bar blur) -->
+    <header id="persistent-header" class="ios-header px-4 sm:px-6 flex items-center justify-between w-full hidden" style="display: none;"></header>
 
     <div id="app" class="app-container w-full flex flex-col relative transition-colors duration-200">
         <div class="flex-1 flex flex-col items-center justify-center p-6 text-center select-none">
@@ -1194,14 +1194,14 @@
         }
 
         function triggerZoomOutEntrance() {
-            const app = document.getElementById('app');
-            if (!app) return;
-            app.classList.remove('animate-zoom-out-enter');
-            void app.offsetWidth;
-            app.classList.add('animate-zoom-out-enter');
+            const main = document.getElementById('main-content');
+            if (!main) return;
+            main.classList.remove('animate-zoom-out-enter');
+            void main.offsetWidth;
+            main.classList.add('animate-zoom-out-enter');
             setTimeout(() => {
-                app.classList.remove('animate-zoom-out-enter');
-            }, 450);
+                main.classList.remove('animate-zoom-out-enter');
+            }, 400);
         }
 
         function showToast(message, type = 'success', undoCallback = null) {
@@ -1811,6 +1811,72 @@
             );
         }
 
+        function syncPersistentHeader() {
+            const headerEl = document.getElementById('persistent-header');
+            if (!headerEl) return;
+
+            if (!state.currentUser || state.isDbLoading) {
+                headerEl.classList.add('hidden');
+                headerEl.style.display = 'none';
+                return;
+            }
+
+            headerEl.classList.remove('hidden');
+            headerEl.style.display = 'flex';
+
+            const isAdmin = state.currentUser.role === 'admin';
+            const isSubTab = ['recycle', 'requests', 'userRecycle', 'notifications'].includes(state.activeTab);
+            const unreadNotifCount = getMyNotifications().filter(n => !n.read).length;
+
+            let subTabTitle = 'Recycle Bin';
+            if (state.activeTab === 'requests') subTabTitle = 'Password Requests';
+            if (state.activeTab === 'userRecycle') subTabTitle = 'Deleted Users';
+            if (state.activeTab === 'notifications') subTabTitle = 'Notifications';
+
+            const backTargetTab = state.activeTab === 'notifications' ? 'home' : 'profile';
+
+            headerEl.innerHTML = `
+                <div class="flex items-center space-x-3 min-w-0 flex-1 pr-2">
+                    ${isSubTab ? `
+                        <button onclick="switchTab('${backTargetTab}')" class="w-10 h-10 rounded-2xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-700 dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-700 transition border border-slate-200/80 dark:border-slate-700/70 shrink-0 shadow-sm" title="Back">
+                            <i class="fa-solid fa-arrow-left text-sm"></i>
+                        </button>
+                    ` : `
+                        <div class="w-10 h-10 flex items-center justify-center overflow-hidden shrink-0 logo-container">
+                            <img src="https://clickfactoryphotography.com/wp-content/uploads/2022/04/crop-logo.gif" alt="Click Factory Logo" class="w-full h-full object-contain" onerror="this.src='https://placehold.co/40x40/4f46e5/ffffff?text=CF'">
+                        </div>
+                    `}
+                    <div class="min-w-0 flex-1">
+                        <div class="flex items-center gap-2">
+                            <h1 class="font-bold text-base sm:text-lg leading-tight tracking-tight text-slate-900 dark:text-white truncate">${isSubTab ? subTabTitle : 'Click Factory'}</h1>
+                        </div>
+                        <div class="flex items-center mt-0.5">
+                            ${isSubTab ? `
+                                <p class="text-[11px] text-slate-500 dark:text-slate-400 font-medium truncate">${state.activeTab === 'notifications' ? 'Activity & Alerts' : 'Back to Profile'}</p>
+                            ` : (isAdmin ? `
+                                <span class="inline-flex items-center gap-1 text-[11px] font-semibold text-indigo-600 dark:text-indigo-400">
+                                    <i class="fa-solid fa-shield-halved text-[10px]"></i>
+                                    <span>Admin</span>
+                                </span>
+                            ` : `
+                                <p class="text-[11px] text-slate-500 dark:text-slate-400 font-medium truncate">Expense Tracker</p>
+                            `)}
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="flex items-center space-x-2.5 shrink-0">
+                    <button onclick="switchTab('notifications')" class="relative w-10 h-10 rounded-2xl ${state.activeTab === 'notifications' ? 'bg-indigo-600 text-white border-indigo-500' : 'bg-slate-100 dark:bg-slate-900 text-slate-600 dark:text-slate-300 hover:bg-slate-200/70 dark:hover:bg-slate-800 border-slate-200/80 dark:border-slate-800'} flex items-center justify-center transition border shadow-sm" title="Notifications">
+                        <i class="fa-solid fa-bell text-sm ${unreadNotifCount > 0 && state.activeTab !== 'notifications' ? 'animate-bounce text-indigo-600 dark:text-indigo-400' : ''}"></i>
+                        ${unreadNotifCount > 0 ? `<span class="liquid-badge">${unreadNotifCount > 99 ? '99+' : unreadNotifCount}</span>` : ''}
+                    </button>
+                    <button onclick="confirmLogout()" class="w-10 h-10 rounded-2xl bg-rose-500/10 dark:bg-rose-950/50 flex items-center justify-center text-rose-600 dark:text-rose-400 hover:bg-rose-500/20 transition border border-rose-500/20 dark:border-rose-900/60 shadow-sm" title="Logout">
+                        <i class="fa-solid fa-arrow-right-from-bracket text-sm"></i>
+                    </button>
+                </div>
+            `;
+        }
+
         function syncPersistentNavbar() {
             const navWrapper = document.getElementById('persistent-nav-wrapper');
             if (!navWrapper) return;
@@ -1906,6 +1972,7 @@
                 state.tempFormCache = null;
             }
 
+            syncPersistentHeader();
             syncPersistentNavbar();
             render();
         }
@@ -1917,11 +1984,8 @@
             applyTheme();
 
             if (state.isDbLoading) {
-                const navWrapper = document.getElementById('persistent-nav-wrapper');
-                if (navWrapper) {
-                    navWrapper.classList.add('hidden');
-                    navWrapper.style.display = 'none';
-                }
+                syncPersistentHeader();
+                syncPersistentNavbar();
                 app.innerHTML = renderDatabaseLoadingScreen();
                 return;
             }
@@ -1932,69 +1996,15 @@
             }
 
             if (!state.currentUser) {
-                const navWrapper = document.getElementById('persistent-nav-wrapper');
-                if (navWrapper) {
-                    navWrapper.classList.add('hidden');
-                    navWrapper.style.display = 'none';
-                }
+                syncPersistentHeader();
+                syncPersistentNavbar();
                 app.innerHTML = state.authView === 'forgot' ? renderForgotPasswordPage() : renderLoginPage();
-                if (shouldPlayZoomEntrance) triggerZoomOutEntrance();
                 return;
             }
 
-            const isAdmin = state.currentUser.role === 'admin';
-            const isSubTab = ['recycle', 'requests', 'userRecycle', 'notifications'].includes(state.activeTab);
-            const unreadNotifCount = getMyNotifications().filter(n => !n.read).length;
-
-            let subTabTitle = 'Recycle Bin';
-            if (state.activeTab === 'requests') subTabTitle = 'Password Requests';
-            if (state.activeTab === 'userRecycle') subTabTitle = 'Deleted Users';
-            if (state.activeTab === 'notifications') subTabTitle = 'Notifications';
-
-            const backTargetTab = state.activeTab === 'notifications' ? 'home' : 'profile';
+            syncPersistentHeader();
 
             app.innerHTML = `
-                <header class="z-30 ios-header px-4 sm:px-6 pb-2 flex items-center justify-between w-full">
-                    <div class="flex items-center space-x-3 min-w-0 flex-1 pr-2">
-                        ${isSubTab ? `
-                            <button onclick="switchTab('${backTargetTab}')" class="w-10 h-10 rounded-2xl bg-slate-100/80 dark:bg-slate-800/80 flex items-center justify-center text-slate-700 dark:text-slate-200 hover:bg-slate-200/70 dark:hover:bg-slate-700/70 transition border border-slate-200/80 dark:border-slate-700/70 shrink-0 shadow-sm" title="Back">
-                                <i class="fa-solid fa-arrow-left text-sm"></i>
-                            </button>
-                        ` : `
-                            <div class="w-10 h-10 flex items-center justify-center overflow-hidden shrink-0 logo-container">
-                                <img src="https://clickfactoryphotography.com/wp-content/uploads/2022/04/crop-logo.gif" alt="Click Factory Logo" class="w-full h-full object-contain" onerror="this.src='https://placehold.co/40x40/4f46e5/ffffff?text=CF'">
-                            </div>
-                        `}
-                        <div class="min-w-0 flex-1">
-                            <div class="flex items-center gap-2">
-                                <h1 class="font-bold text-base sm:text-lg leading-tight tracking-tight text-slate-900 dark:text-white truncate">${isSubTab ? subTabTitle : 'Click Factory'}</h1>
-                            </div>
-                            <div class="flex items-center mt-0.5">
-                                ${isSubTab ? `
-                                    <p class="text-[11px] text-slate-500 dark:text-slate-400 font-medium truncate">${state.activeTab === 'notifications' ? 'Activity & Alerts' : 'Back to Profile'}</p>
-                                ` : (isAdmin ? `
-                                    <span class="inline-flex items-center gap-1 text-[11px] font-semibold text-indigo-600 dark:text-indigo-400">
-                                        <i class="fa-solid fa-shield-halved text-[10px]"></i>
-                                        <span>Admin</span>
-                                    </span>
-                                ` : `
-                                    <p class="text-[11px] text-slate-500 dark:text-slate-400 font-medium truncate">Expense Tracker</p>
-                                `)}
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="flex items-center space-x-2.5 shrink-0">
-                        <button onclick="switchTab('notifications')" class="relative w-10 h-10 rounded-2xl ${state.activeTab === 'notifications' ? 'bg-indigo-600 text-white border-indigo-500' : 'bg-slate-100/80 dark:bg-slate-900/90 text-slate-600 dark:text-slate-300 hover:bg-slate-200/60 dark:hover:bg-slate-800 border-slate-200/80 dark:border-slate-800'} flex items-center justify-center transition border shadow-sm" title="Notifications">
-                            <i class="fa-solid fa-bell text-sm ${unreadNotifCount > 0 && state.activeTab !== 'notifications' ? 'animate-bounce text-indigo-600 dark:text-indigo-400' : ''}"></i>
-                            ${unreadNotifCount > 0 ? `<span class="liquid-badge">${unreadNotifCount > 99 ? '99+' : unreadNotifCount}</span>` : ''}
-                        </button>
-                        <button onclick="confirmLogout()" class="w-10 h-10 rounded-2xl bg-rose-500/10 dark:bg-rose-950/50 flex items-center justify-center text-rose-600 dark:text-rose-400 hover:bg-rose-500/20 transition border border-rose-500/20 dark:border-rose-900/60 shadow-sm" title="Logout">
-                            <i class="fa-solid fa-arrow-right-from-bracket text-sm"></i>
-                        </button>
-                    </div>
-                </header>
-
                 <main id="main-content" class="flex-1 overflow-y-auto no-scrollbar pb-32 pt-2.5 px-4 sm:px-6 w-full max-w-full ${state.slideDirection || 'animate-slide-right'}">
                     ${renderActiveTabContent()}
                 </main>
@@ -2020,6 +2030,7 @@
                 render();
                 return;
             }
+            syncPersistentHeader();
             main.innerHTML = renderActiveTabContent();
             
             const fab = document.getElementById('add-fab-container');
@@ -3307,13 +3318,13 @@
                     </div>
 
                     <div class="flex items-center space-x-2 ios-glass-card p-1.5 rounded-2xl w-full">
-                        <button onclick="setUserFilterTab('all')" class="flex-1 py-2 px-3 rounded-xl text-xs font-semibold transition ${filter === 'all' ? 'bg-white dark:bg-slate-900 text-indigo-600 dark:text-indigo-400 shadow-sm border border-slate-200/50 dark:border-slate-800' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'}">
+                        <button onclick="setUserFilterTab('all')" class="flex-1 py-2 px-3 rounded-xl text-xs font-semibold transition ${filter === 'all' ? 'bg-slate-100 dark:bg-slate-800 text-indigo-600 dark:text-indigo-400 shadow-sm border border-slate-200/60 dark:border-slate-700' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'}">
                             All (${state.users.length})
                         </button>
-                        <button onclick="setUserFilterTab('user')" class="flex-1 py-2 px-3 rounded-xl text-xs font-semibold transition ${filter === 'user' ? 'bg-white dark:bg-slate-900 text-indigo-600 dark:text-indigo-400 shadow-sm border border-slate-200/50 dark:border-slate-800' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'}">
+                        <button onclick="setUserFilterTab('user')" class="flex-1 py-2 px-3 rounded-xl text-xs font-semibold transition ${filter === 'user' ? 'bg-slate-100 dark:bg-slate-800 text-indigo-600 dark:text-indigo-400 shadow-sm border border-slate-200/60 dark:border-slate-700' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'}">
                             Users (${regularUsers.length})
                         </button>
-                        <button onclick="setUserFilterTab('admin')" class="flex-1 py-2 px-3 rounded-xl text-xs font-semibold transition ${filter === 'admin' ? 'bg-white dark:bg-slate-900 text-indigo-600 dark:text-indigo-400 shadow-sm border border-slate-200/50 dark:border-slate-800' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'}">
+                        <button onclick="setUserFilterTab('admin')" class="flex-1 py-2 px-3 rounded-xl text-xs font-semibold transition ${filter === 'admin' ? 'bg-slate-100 dark:bg-slate-800 text-indigo-600 dark:text-indigo-400 shadow-sm border border-slate-200/60 dark:border-slate-700' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'}">
                             Admins (${adminUsers.length})
                         </button>
                     </div>
