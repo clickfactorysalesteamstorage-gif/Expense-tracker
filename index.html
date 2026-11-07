@@ -319,7 +319,7 @@
                 inset 0 -2px 4px rgba(79, 70, 229, 0.3);
         }
 
-        /* Crisp Solid Cards (Removed backdrop-filter from cards to prevent iOS Safari GPU blur bleed) */
+        /* Crisp Solid Cards */
         .ios-glass-card {
             background: #ffffff !important;
             border: 1px solid rgba(226, 232, 240, 0.95) !important;
@@ -438,7 +438,7 @@
 </head>
 <body class="bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-100 flex flex-col items-stretch h-full selection:bg-indigo-500 selection:text-white">
 
-    <!-- Top-Level Persistent Header (Isolated from page animations & cleared below iOS status bar blur) -->
+    <!-- Top-Level Persistent Header -->
     <header id="persistent-header" class="ios-header px-4 sm:px-6 flex items-center justify-between w-full hidden" style="display: none;"></header>
 
     <div id="app" class="app-container w-full flex flex-col relative transition-colors duration-200">
@@ -2125,6 +2125,16 @@
                                 </div>
                             </div>
 
+                            <div class="w-full">
+                                <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">Confirm New Password</label>
+                                <div class="relative w-full">
+                                    <input type="password" id="forgot-confirm-password" required placeholder="Re-enter new password" class="w-full pl-4 pr-12 py-3.5 bg-slate-50/80 dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 text-slate-900 dark:text-white">
+                                    <button type="button" onclick="togglePasswordVisibility('forgot-confirm-password', 'toggle-forgot-confirm-pass-icon')" class="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 focus:outline-none">
+                                        <i id="toggle-forgot-confirm-pass-icon" class="fa-solid fa-eye text-sm"></i>
+                                    </button>
+                                </div>
+                            </div>
+
                             <div class="flex flex-col gap-2.5 pt-1 w-full">
                                 <button type="button" onclick="requestAdminAuthCode()" class="w-full py-3 bg-slate-100/90 dark:bg-slate-800/90 hover:bg-slate-200 text-indigo-600 dark:text-indigo-400 font-semibold rounded-2xl transition text-xs border border-slate-200/80 dark:border-slate-700">
                                     <i class="fa-solid fa-paper-plane mr-1.5"></i> Request Code from Admin
@@ -2187,6 +2197,7 @@
             const username = document.getElementById('forgot-username').value.trim().toLowerCase();
             const authCode = document.getElementById('forgot-auth-code').value.trim();
             const newPassword = document.getElementById('forgot-new-password').value;
+            const confirmPassword = document.getElementById('forgot-confirm-password').value;
 
             const user = state.users.find(u => u.username.toLowerCase() === username);
             if (!user) {
@@ -2202,6 +2213,11 @@
 
             if (!newPassword || newPassword.length < 4) {
                 showToast('Password must be at least 4 characters.', 'error');
+                return;
+            }
+
+            if (newPassword !== confirmPassword) {
+                showToast('Passwords do not match.', 'error');
                 return;
             }
 
@@ -3435,17 +3451,48 @@
             const root = document.getElementById('modal-root');
             root.innerHTML = `
                 <div class="fixed inset-0 z-[60] bg-slate-950/65 backdrop-blur-md flex items-center justify-center p-4">
-                    <div class="ios-glass-modal rounded-3xl p-6 max-w-sm w-full shadow-2xl space-y-4">
+                    <div class="ios-glass-modal rounded-3xl p-6 max-w-sm w-full shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto no-scrollbar">
                         <div class="flex items-center justify-between">
                             <h3 class="font-bold text-base text-slate-900 dark:text-white">Add User</h3>
                             <button onclick="closeModal()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark"></i></button>
                         </div>
                         <form onsubmit="handleAddNewUser(event)" class="space-y-3.5 w-full">
-                            <div class="w-full"><label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Full Name</label><input type="text" id="new-user-name" required placeholder="Priya Sharma" class="w-full px-4 py-3 bg-slate-50/80 dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700 rounded-2xl text-sm text-slate-900 dark:text-white"></div>
-                            <div class="w-full"><label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Username</label><input type="text" id="new-user-username" required placeholder="user3" class="w-full px-4 py-3 bg-slate-50/80 dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700 rounded-2xl text-sm text-slate-900 dark:text-white"></div>
-                            <div class="w-full"><label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Password</label><input type="password" id="new-user-password" required placeholder="••••••••" class="w-full px-4 py-3 bg-slate-50/80 dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700 rounded-2xl text-sm text-slate-900 dark:text-white"></div>
-                            <div class="w-full"><label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Role</label><select id="new-user-role" class="w-full px-4 py-3 bg-slate-50/80 dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700 rounded-2xl text-sm text-slate-900 dark:text-white"><option value="user">Regular User</option><option value="admin">Administrator</option></select></div>
-                            <div class="pt-2 w-full"><button type="submit" class="w-full py-3.5 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-2xl shadow-md transition text-sm">Create User</button></div>
+                            <div class="w-full">
+                                <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Full Name</label>
+                                <input type="text" id="new-user-name" required placeholder="Priya Sharma" class="w-full px-4 py-3 bg-slate-50/80 dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700 rounded-2xl text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                            </div>
+                            <div class="w-full">
+                                <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Username</label>
+                                <input type="text" id="new-user-username" required placeholder="user3" class="w-full px-4 py-3 bg-slate-50/80 dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700 rounded-2xl text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                            </div>
+                            <div class="w-full">
+                                <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Password</label>
+                                <div class="relative w-full">
+                                    <input type="password" id="new-user-password" required placeholder="••••••••" class="w-full pl-4 pr-12 py-3 bg-slate-50/80 dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700 rounded-2xl text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                                    <button type="button" onclick="togglePasswordVisibility('new-user-password', 'toggle-create-pass-icon')" class="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 focus:outline-none">
+                                        <i id="toggle-create-pass-icon" class="fa-solid fa-eye text-sm"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="w-full">
+                                <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Confirm Password</label>
+                                <div class="relative w-full">
+                                    <input type="password" id="new-user-confirm-password" required placeholder="••••••••" class="w-full pl-4 pr-12 py-3 bg-slate-50/80 dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700 rounded-2xl text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                                    <button type="button" onclick="togglePasswordVisibility('new-user-confirm-password', 'toggle-create-confirm-pass-icon')" class="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 focus:outline-none">
+                                        <i id="toggle-create-confirm-pass-icon" class="fa-solid fa-eye text-sm"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="w-full">
+                                <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Role</label>
+                                <select id="new-user-role" class="w-full px-4 py-3 bg-slate-50/80 dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700 rounded-2xl text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                                    <option value="user">Regular User</option>
+                                    <option value="admin">Administrator</option>
+                                </select>
+                            </div>
+                            <div class="pt-2 w-full">
+                                <button type="submit" class="w-full py-3.5 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-2xl shadow-md transition text-sm">Create User</button>
+                            </div>
                         </form>
                     </div>
                 </div>
@@ -3503,7 +3550,18 @@
             const name = document.getElementById('new-user-name').value.trim();
             const username = document.getElementById('new-user-username').value.trim().toLowerCase();
             const password = document.getElementById('new-user-password').value;
+            const confirmPassword = document.getElementById('new-user-confirm-password').value;
             const role = document.getElementById('new-user-role').value;
+
+            if (!password || password.length < 4) {
+                showToast('Password must be at least 4 characters.', 'error');
+                return;
+            }
+
+            if (password !== confirmPassword) {
+                showToast('Passwords do not match!', 'error');
+                return;
+            }
 
             if (state.users.some(u => u.username.toLowerCase() === username)) {
                 showToast('Username already exists.', 'error');
@@ -3777,7 +3835,7 @@
                             <div class="w-full">
                                 <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Current Password</label>
                                 <div class="relative w-full">
-                                    <input type="password" id="current-pass" required class="w-full px-4 pr-12 py-3 bg-slate-50/80 dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700 rounded-2xl text-sm text-slate-900 dark:text-white">
+                                    <input type="password" id="current-pass" required placeholder="••••••••" class="w-full px-4 pr-12 py-3 bg-slate-50/80 dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700 rounded-2xl text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500">
                                     <button type="button" onclick="togglePasswordVisibility('current-pass', 'toggle-curr-pass-icon')" class="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 focus:outline-none">
                                         <i id="toggle-curr-pass-icon" class="fa-solid fa-eye text-sm"></i>
                                     </button>
@@ -3786,9 +3844,18 @@
                             <div class="w-full">
                                 <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">New Password</label>
                                 <div class="relative w-full">
-                                    <input type="password" id="new-pass" required class="w-full px-4 pr-12 py-3 bg-slate-50/80 dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700 rounded-2xl text-sm text-slate-900 dark:text-white">
+                                    <input type="password" id="new-pass" required placeholder="••••••••" class="w-full px-4 pr-12 py-3 bg-slate-50/80 dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700 rounded-2xl text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500">
                                     <button type="button" onclick="togglePasswordVisibility('new-pass', 'toggle-new-pass-icon')" class="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 focus:outline-none">
                                         <i id="toggle-new-pass-icon" class="fa-solid fa-eye text-sm"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="w-full">
+                                <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Confirm New Password</label>
+                                <div class="relative w-full">
+                                    <input type="password" id="confirm-new-pass" required placeholder="••••••••" class="w-full px-4 pr-12 py-3 bg-slate-50/80 dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700 rounded-2xl text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                                    <button type="button" onclick="togglePasswordVisibility('confirm-new-pass', 'toggle-confirm-new-pass-icon')" class="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 focus:outline-none">
+                                        <i id="toggle-confirm-new-pass-icon" class="fa-solid fa-eye text-sm"></i>
                                     </button>
                                 </div>
                             </div>
@@ -3803,6 +3870,7 @@
             e.preventDefault();
             const current = document.getElementById('current-pass').value;
             const newPass = document.getElementById('new-pass').value;
+            const confirmNewPass = document.getElementById('confirm-new-pass').value;
 
             const adminUser = state.users.find(u => u.role === 'admin');
             if (!adminUser || current !== adminUser.password) {
@@ -3812,6 +3880,11 @@
 
             if (!newPass || newPass.length < 4) {
                 showToast('Password must be at least 4 characters.', 'error');
+                return;
+            }
+
+            if (newPass !== confirmNewPass) {
+                showToast('New passwords do not match!', 'error');
                 return;
             }
 
