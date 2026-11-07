@@ -189,7 +189,7 @@
             transition: opacity 0.2s ease;
         }
 
-        /* Repositioned Bottom Toast Notification Container */
+        /* Toast Notification Container */
         #toast-container {
             position: fixed;
             bottom: 92px;
@@ -1658,9 +1658,9 @@
                                 const isShortage = t.type === 'shortage';
                                 
                                 const badgeBg = isUndo ? 'bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400' 
-                                            : (isShortage ? 'bg-rose-50 dark:bg-rose-950/60 text-rose-600 dark:text-rose-400' 
-                                            : 'bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400');
-                                            
+                                        : (isShortage ? 'bg-rose-50 dark:bg-rose-950/60 text-rose-600 dark:text-rose-400' 
+                                        : 'bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400');
+                                        
                                 const amountColor = isShortage ? 'text-rose-600 dark:text-rose-400' : 'text-emerald-600 dark:text-emerald-400';
                                 
                                 return `
@@ -4002,9 +4002,7 @@
             return String(str).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
         }
 
-        // ==========================================
-        // PULL-TO-REFRESH & ROTATING ARROW & HAPTIC GESTURES
-        // ==========================================
+        // Pull-to-Refresh & Touch Gestures
         let ptrStartY = 0;
         let ptrCurrentY = 0;
         let isPulling = false;
