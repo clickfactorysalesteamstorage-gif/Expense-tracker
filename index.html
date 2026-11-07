@@ -149,7 +149,7 @@
             background-color: #020617;
         }
 
-        /* Main Content Viewport */
+        /* Main Content Viewport with Extra Bottom Clearance */
         #main-content {
             flex: 1;
             overflow-y: auto;
@@ -157,6 +157,7 @@
             overscroll-behavior-y: contain;
             position: relative;
             padding-top: 8px;
+            padding-bottom: 140px; /* Safe bottom spacing so elements don't get hidden behind the dock */
         }
 
         /* Pull-to-Refresh Container Fixed Above Scroll View */
@@ -2037,7 +2038,7 @@
             syncPersistentHeader();
 
             app.innerHTML = `
-                <main id="main-content" class="flex-1 overflow-y-auto no-scrollbar pb-32 px-4 sm:px-6 w-full max-w-full ${state.slideDirection || 'animate-slide-right'}">
+                <main id="main-content" class="flex-1 overflow-y-auto no-scrollbar px-4 sm:px-6 w-full max-w-full ${state.slideDirection || 'animate-slide-right'}">
                     <div id="ptr-container">
                         <i id="ptr-icon" class="fa-solid fa-arrow-down"></i>
                         <span id="ptr-text">Pull down to refresh</span>
