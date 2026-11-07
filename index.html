@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="theme-color" id="meta-theme-color" content="#f8fafc">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <title>Click Factory Expense Tracker</title>
     <!-- Web App Manifest & Home Screen Icons -->
     <link rel="icon" type="image/gif" href="https://clickfactoryphotography.com/wp-content/uploads/2022/04/crop-logo.gif">
@@ -97,8 +97,9 @@
         html, body {
             font-family: 'Inter', sans-serif;
             -webkit-tap-highlight-color: transparent;
-            margin: 0; padding: 0; width: 100vw;
-            overflow-x: hidden; word-wrap: break-word; overflow-wrap: break-word;
+            margin: 0; padding: 0; width: 100%;
+            height: 100%; height: 100dvh;
+            overflow: hidden; word-wrap: break-word; overflow-wrap: break-word;
             background-color: #f8fafc;
             transition: background-color 0.25s ease, color 0.25s ease;
         }
@@ -108,7 +109,9 @@
         input[type="date"], select { appearance: none; -webkit-appearance: none; }
         
         .app-container {
-            width: 100%; max-width: 100%; min-height: 100vh;
+            width: 100%; max-width: 100%;
+            height: 100%; height: 100dvh;
+            overflow: hidden;
             background-color: #f8fafc; display: flex; flex-direction: column;
             padding-top: 0;
             transition: background-color 0.25s ease, color 0.25s ease;
@@ -117,20 +120,22 @@
             background-color: #020617;
         }
 
-        /* Seamless Borderless Frosted Top Header */
+        /* Crisp Fixed Top Header (Prevents iOS Status Bar Progressive Blur Overlap) */
         .ios-header {
-            padding-top: max(env(safe-area-inset-top, 0px), 12px);
-            background: rgba(248, 250, 252, 0.85);
-            backdrop-filter: blur(28px) saturate(200%);
-            -webkit-backdrop-filter: blur(28px) saturate(200%);
+            flex-shrink: 0;
+            padding-top: max(env(safe-area-inset-top, 0px), 14px);
+            background-color: #f8fafc;
             border-bottom: none;
             transition: background-color 0.25s ease;
         }
         .dark .ios-header {
-            background: rgba(2, 6, 23, 0.82);
-            backdrop-filter: blur(28px) saturate(200%);
-            -webkit-backdrop-filter: blur(28px) saturate(200%);
+            background-color: #020617;
             border-bottom: none;
+        }
+
+        #main-content {
+            -webkit-overflow-scrolling: touch;
+            overscroll-behavior-y: contain;
         }
 
         .logo-container img {
@@ -1935,7 +1940,7 @@
             const backTargetTab = state.activeTab === 'notifications' ? 'home' : 'profile';
 
             app.innerHTML = `
-                <header class="sticky top-0 z-30 ios-header px-4 sm:px-6 pb-3 flex items-center justify-between w-full">
+                <header class="z-30 ios-header px-4 sm:px-6 pb-2.5 flex items-center justify-between w-full">
                     <div class="flex items-center space-x-3 min-w-0 flex-1 pr-2">
                         ${isSubTab ? `
                             <button onclick="switchTab('${backTargetTab}')" class="w-10 h-10 rounded-2xl bg-slate-100/80 dark:bg-slate-800/80 flex items-center justify-center text-slate-700 dark:text-slate-200 hover:bg-slate-200/70 dark:hover:bg-slate-700/70 transition border border-slate-200/80 dark:border-slate-700/70 shrink-0 shadow-sm" title="Back">
@@ -2015,7 +2020,7 @@
 
         function renderLoginPage() {
             return `
-                <div class="flex-1 flex flex-col justify-center px-4 py-8 max-w-sm mx-auto w-full relative">
+                <div class="flex-1 overflow-y-auto flex flex-col justify-center px-4 py-8 max-w-sm mx-auto w-full relative">
                     <div class="text-center mb-6">
                         <div class="w-12 h-12 flex items-center justify-center mx-auto mb-2 logo-container">
                             <img src="https://clickfactoryphotography.com/wp-content/uploads/2022/04/crop-logo.gif" alt="Click Factory Logo" class="w-full h-full object-contain" onerror="this.src='https://placehold.co/40x40/4f46e5/ffffff?text=CF'">
@@ -2064,7 +2069,7 @@
 
         function renderForgotPasswordPage() {
             return `
-                <div class="flex-1 flex flex-col justify-center px-4 py-8 max-w-sm mx-auto w-full">
+                <div class="flex-1 overflow-y-auto flex flex-col justify-center px-4 py-8 max-w-sm mx-auto w-full">
                     <div class="text-center mb-6">
                         <div class="w-12 h-12 bg-indigo-50 dark:bg-indigo-950/60 rounded-2xl flex items-center justify-center mx-auto mb-4 text-indigo-600 dark:text-indigo-400 text-xl shadow-sm border border-indigo-200 dark:border-indigo-800">
                             <i class="fa-solid fa-key"></i>
@@ -3276,11 +3281,11 @@
             const showRegular = filter === 'all' || filter === 'user';
 
             return `
-                <div class="space-y-6 w-full max-w-full">
-                    <div class="flex items-center justify-between">
-                        <div class="min-w-0 pr-2">
-                            <h2 class="text-lg font-bold text-slate-900 dark:text-white truncate">User Management</h2>
-                            <p class="text-xs text-slate-500 dark:text-slate-400 truncate">Manage regular user and administrator accounts & wallets</p>
+                <div class="space-y-5 w-full max-w-full">
+                    <div class="flex items-center justify-between gap-3">
+                        <div class="min-w-0 flex-1">
+                            <h2 class="text-lg font-bold text-slate-900 dark:text-white leading-snug">User Management</h2>
+                            <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed mt-0.5">Manage user accounts & wallets</p>
                         </div>
                         <button onclick="openAddUserModal()" class="px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl text-xs font-semibold shadow-md transition flex items-center space-x-1.5 shrink-0">
                             <i class="fa-solid fa-user-plus"></i><span>Add User</span>
@@ -3339,21 +3344,24 @@
             const userTotalSpent = state.expenses.filter(e => e.userId === u.id).reduce((s, e) => s + e.amount, 0);
 
             return `
-                <div class="ios-glass-card rounded-3xl p-5 shadow-sm space-y-4 w-full mt-3">
-                    <div class="flex items-center justify-between gap-2">
-                        <div class="flex items-center space-x-3.5 min-w-0 flex-1">
-                            <div class="w-10 h-10 rounded-2xl ${isUserAdmin ? 'bg-indigo-500/10 text-indigo-600 dark:text-indigo-400' : 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400'} flex items-center justify-center font-bold text-sm shrink-0">${u.name.charAt(0)}</div>
+                <div class="ios-glass-card rounded-3xl p-4 sm:p-5 shadow-sm space-y-3.5 w-full mt-3">
+                    <div class="flex items-start justify-between gap-2.5">
+                        <div class="flex items-start space-x-3 min-w-0 flex-1">
+                            <div class="w-10 h-10 rounded-2xl ${isUserAdmin ? 'bg-indigo-500/10 text-indigo-600 dark:text-indigo-400' : 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400'} flex items-center justify-center font-bold text-sm shrink-0 mt-0.5">${u.name.charAt(0)}</div>
                             <div class="min-w-0 flex-1">
-                                <div class="flex items-center space-x-2 truncate">
-                                    <h4 class="font-semibold text-sm text-slate-900 dark:text-white truncate">${escapeHtml(u.name)}</h4>${isCurrent ? '<span class="text-[10px] bg-emerald-500/10 text-emerald-600 font-semibold px-2 py-0.5 rounded-full shrink-0">Active</span>' : ''}
+                                <div class="flex items-center flex-wrap gap-1.5">
+                                    <h4 class="font-semibold text-sm text-slate-900 dark:text-white break-words">${escapeHtml(u.name)}</h4>
+                                    ${isCurrent ? '<span class="text-[10px] bg-emerald-500/10 text-emerald-600 font-semibold px-2 py-0.5 rounded-full shrink-0">Active</span>' : ''}
                                 </div>
-                                <p class="text-xs text-slate-500 truncate">@${escapeHtml(u.username)} • <span class="capitalize font-medium text-indigo-600">${u.role}</span> • ${expCount} expenses (${formatCurrency(userTotalSpent)})</p>
+                                <p class="text-[11px] text-slate-500 dark:text-slate-400 leading-snug mt-0.5 break-words">
+                                    @${escapeHtml(u.username)} • <span class="capitalize font-medium text-indigo-600 dark:text-indigo-400">${u.role}</span> • ${expCount} exp (${formatCurrency(userTotalSpent)})
+                                </p>
                             </div>
                         </div>
                         <div class="flex items-center space-x-1.5 shrink-0">
                             ${!isUserAdmin ? `
-                            <button onclick="openAddWalletModal('${u.id}', '${escapeHtml(u.name)}')" class="px-3.5 py-2 rounded-2xl bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-xs font-bold border border-emerald-500/20 transition flex items-center space-x-1.5" title="Wallet">
-                                <i class="fa-solid fa-wallet text-sm"></i>
+                            <button onclick="openAddWalletModal('${u.id}', '${escapeHtml(u.name)}')" class="px-3 py-2 rounded-2xl bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-xs font-bold border border-emerald-500/20 transition flex items-center space-x-1.5" title="Wallet">
+                                <i class="fa-solid fa-wallet text-xs"></i>
                                 <span>Wallet</span>
                             </button>
                             ` : ''}
@@ -3362,35 +3370,35 @@
                     </div>
 
                     ${!isUserAdmin ? `
-                    <div class="grid grid-cols-2 gap-3 pt-3 border-t border-slate-200/50 dark:border-slate-800 text-xs">
+                    <div class="grid grid-cols-2 gap-2.5 pt-3 border-t border-slate-200/50 dark:border-slate-800 text-xs">
                         <div class="bg-slate-50/90 dark:bg-slate-800/60 p-3 rounded-2xl border border-slate-200/50 dark:border-slate-700/50">
                             <span class="text-slate-400 block text-[10px] uppercase font-semibold mb-0.5">Wallet Balance</span>
-                            <span class="font-bold text-sm text-emerald-600 dark:text-emerald-400">${formatCurrency(uWallet)}</span>
+                            <span class="font-bold text-sm text-emerald-600 dark:text-emerald-400 break-all">${formatCurrency(uWallet)}</span>
                         </div>
                         <div class="bg-slate-50/90 dark:bg-slate-800/60 p-3 rounded-2xl border border-slate-200/50 dark:border-slate-700/50">
                             <span class="text-slate-400 block text-[10px] uppercase font-semibold mb-0.5">Excess Spent Due</span>
-                            <span class="font-bold text-sm text-rose-600 dark:text-rose-400">${formatCurrency(uExcess)}</span>
+                            <span class="font-bold text-sm text-rose-600 dark:text-rose-400 break-all">${formatCurrency(uExcess)}</span>
                         </div>
                     </div>
                     ` : ''}
 
-                    <div class="grid grid-cols-${!isUserAdmin ? '3' : '2'} gap-2 pt-1 w-full">
+                    <div class="grid grid-cols-${!isUserAdmin ? '3' : '2'} gap-2 pt-0.5 w-full">
                         ${!isUserAdmin ? `
-                        <button onclick="confirmResetUserWallet('${u.id}', '${escapeHtml(u.name)}')" class="py-2.5 px-2 rounded-2xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-600 dark:text-amber-400 text-[11px] font-bold border border-amber-500/20 transition flex items-center justify-center space-x-1 truncate" title="Reset Wallet">
-                            <i class="fa-solid fa-rotate-right shrink-0"></i>
-                            <span class="truncate">Reset Wallet</span>
+                        <button onclick="confirmResetUserWallet('${u.id}', '${escapeHtml(u.name)}')" class="py-2.5 px-1.5 rounded-2xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-600 dark:text-amber-400 text-[10.5px] font-bold border border-amber-500/20 transition flex items-center justify-center space-x-1 whitespace-nowrap" title="Reset Wallet">
+                            <i class="fa-solid fa-rotate-right text-[10px] shrink-0"></i>
+                            <span>Reset Wallet</span>
                         </button>
                         ` : ''}
                         
-                        <button onclick="confirmClearUserExpenses('${u.id}', '${escapeHtml(u.name)}')" class="py-2.5 px-2 rounded-2xl bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-600 dark:text-indigo-400 text-[11px] font-bold border border-indigo-500/20 transition flex items-center justify-center space-x-1 truncate" title="Clear Expenses">
-                            <i class="fa-solid fa-receipt shrink-0"></i>
-                            <span class="truncate">Clear Expenses</span>
+                        <button onclick="confirmClearUserExpenses('${u.id}', '${escapeHtml(u.name)}')" class="py-2.5 px-1.5 rounded-2xl bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-600 dark:text-indigo-400 text-[10.5px] font-bold border border-indigo-500/20 transition flex items-center justify-center space-x-1 whitespace-nowrap" title="Clear Expenses">
+                            <i class="fa-solid fa-receipt text-[10px] shrink-0"></i>
+                            <span>Clear Exp</span>
                         </button>
 
                         ${state.users.length > 1 && !isCurrent ? `
-                            <button onclick="confirmRemoveUser('${u.id}', '${escapeHtml(u.name)}')" class="py-2.5 px-2 rounded-2xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-600 dark:text-rose-400 text-[11px] font-bold border border-rose-500/20 transition flex items-center justify-center space-x-1 truncate" title="Delete User">
-                                <i class="fa-solid fa-trash shrink-0"></i>
-                                <span class="truncate">Delete User</span>
+                            <button onclick="confirmRemoveUser('${u.id}', '${escapeHtml(u.name)}')" class="py-2.5 px-1.5 rounded-2xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-600 dark:text-rose-400 text-[10.5px] font-bold border border-rose-500/20 transition flex items-center justify-center space-x-1 whitespace-nowrap" title="Delete User">
+                                <i class="fa-solid fa-trash text-[10px] shrink-0"></i>
+                                <span>Delete User</span>
                             </button>
                         ` : '<div class="hidden"></div>'}
                     </div>
