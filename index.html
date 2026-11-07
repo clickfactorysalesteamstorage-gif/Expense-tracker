@@ -1167,7 +1167,7 @@
             toast.className = `${bgStyle} border px-4 py-3.5 rounded-2xl shadow-xl flex items-center justify-between text-sm font-medium transform transition-all duration-300 translate-y-[-20px] opacity-0 pointer-events-auto gap-3 backdrop-blur-md`;
             
             let undoBtnHtml = '';
-            if (undoCallback) {
+            if (undoCallback && (!state.currentUser || state.currentUser.role !== 'admin')) {
                 undoBtnHtml = `<button id="toast-undo-btn" class="px-2.5 py-1 bg-white text-slate-900 rounded-xl font-bold text-xs hover:bg-slate-100 transition shrink-0 shadow-sm">Undo</button>`;
             }
 
@@ -1182,7 +1182,7 @@
             container.appendChild(toast);
             setTimeout(() => toast.classList.remove('translate-y-[-20px]', 'opacity-0'), 10);
 
-            if (undoCallback) {
+            if (undoCallback && (!state.currentUser || state.currentUser.role !== 'admin')) {
                 const undoBtn = toast.querySelector('#toast-undo-btn');
                 if (undoBtn) {
                     undoBtn.onclick = () => {
@@ -1734,15 +1734,13 @@
                 'Clear Expenses',
                 `Are you sure you want to delete all expense records for ${userName}?`,
                 async () => {
-                    const { db, doc, deleteDoc, setDoc } = window.FB;
+                    const { db, doc, deleteDoc } = window.FB;
                     const userExpenses = state.expenses.filter(e => e.userId === userId);
                     
                     if (userExpenses.length === 0) {
                         showToast('No expenses found for this user.', 'info');
                         return;
                     }
-
-                    state.lastClearedExpensesCache = { userId, expenses: userExpenses };
 
                     for (const exp of userExpenses) {
                         try {
@@ -1752,15 +1750,7 @@
                         }
                     }
 
-                    showToast(`Cleared expenses for ${userName}.`, 'success', async () => {
-                        if (state.lastClearedExpensesCache && state.lastClearedExpensesCache.userId === userId) {
-                            for (const exp of state.lastClearedExpensesCache.expenses) {
-                                await setDoc(doc(db, 'expenses', exp.id), exp);
-                            }
-                            state.lastClearedExpensesCache = null;
-                            showToast(`Restored all expenses for ${userName}!`, 'success');
-                        }
-                    });
+                    showToast(`Cleared expenses for ${userName}.`, 'success');
                 }
             );
         }
@@ -2420,10 +2410,12 @@
 
                                                             ${isOwner ? `
                                                                 <div class="flex items-center space-x-1.5 shrink-0">
-                                                                    <button onclick="confirmUndoExpense('${exp.id}')" class="px-2.5 h-8 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/20 border border-emerald-500/20 transition flex items-center justify-center space-x-1 text-xs font-semibold" title="Undo Expense & Refund to Wallet">
-                                                                        <i class="fa-solid fa-rotate-left"></i>
-                                                                        <span>Undo</span>
-                                                                    </button>
+                                                                    ${!isAdmin ? `
+                                                                        <button onclick="confirmUndoExpense('${exp.id}')" class="px-2.5 h-8 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/20 border border-emerald-500/20 transition flex items-center justify-center space-x-1 text-xs font-semibold" title="Undo Expense & Refund to Wallet">
+                                                                            <i class="fa-solid fa-rotate-left"></i>
+                                                                            <span>Undo</span>
+                                                                        </button>
+                                                                    ` : ''}
                                                                     <button onclick="startEditExpense('${exp.id}')" class="w-8 h-8 rounded-xl bg-slate-100/80 dark:bg-slate-800/80 text-slate-600 dark:text-slate-300 hover:bg-indigo-50 hover:text-indigo-600 transition flex items-center justify-center text-xs" title="Edit"><i class="fa-solid fa-pen"></i></button>
                                                                     <button onclick="confirmDeleteExpense('${exp.id}', '${exp.billAttachment || ''}')" class="w-8 h-8 rounded-xl bg-slate-100/80 dark:bg-slate-800/80 text-slate-600 dark:text-slate-300 hover:bg-rose-50 hover:text-rose-600 transition flex items-center justify-center text-xs" title="Delete"><i class="fa-solid fa-trash"></i></button>
                                                                 </div>
@@ -2930,6 +2922,10 @@
         }
 
         function confirmUndoExpense(id) {
+            if (!state.currentUser || state.currentUser.role === 'admin') {
+                return;
+            }
+
             const exp = state.expenses.find(e => e.id === id);
             if (!exp) return;
 
@@ -3091,7 +3087,7 @@
                                     <p class="text-[11px] text-rose-500 font-medium">Deleted on ${formatDate(item.deletedAt)}. Permanent wipe in 48 hrs.</p>
                                 </div>
                                 <button onclick="undoDeleteUser('${item.userId}')" class="px-3.5 py-1.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 text-xs font-semibold border border-emerald-200 hover:bg-emerald-100 transition shrink-0">
-                                    <i class="fa-solid fa-rotate-left mr-1"></i>Undo Delete
+                                    <i class="fa-solid fa-rotate-left mr-1"></i>Restore User
                                 </button>
                             </div>
                         `).join('')}
