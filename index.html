@@ -135,32 +135,36 @@
             background-color: #020617;
         }
 
-        .ios-header {
+        /* Fixed Header Wrapper */
+        #persistent-header {
             flex-shrink: 0;
-            padding-top: calc(env(safe-area-inset-top, 0px) + 26px);
-            padding-bottom: 10px;
-            background-color: #f8fafc;
-            border-bottom: none;
-            position: relative;
+            padding-top: calc(env(safe-area-inset-top, 0px) + 14px);
+            padding-bottom: 12px;
+            background-color: rgba(248, 250, 252, 0.92);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            position: sticky;
+            top: 0;
+            left: 0;
+            right: 0;
             z-index: 45;
             transition: background-color 0.25s ease;
         }
-        .dark .ios-header {
-            background-color: #020617;
-            border-bottom: none;
+        .dark #persistent-header {
+            background-color: rgba(2, 6, 23, 0.92);
         }
 
         #main-content {
             -webkit-overflow-scrolling: touch;
             overscroll-behavior-y: contain;
             position: relative;
-            padding-top: 12px;
+            padding-top: 16px; /* Added spacing so content starts below the header cleanly */
         }
 
         /* Pull-to-Refresh Styles */
         #ptr-container {
             position: absolute;
-            top: -42px;
+            top: -46px;
             left: 0;
             right: 0;
             height: 40px;
@@ -169,7 +173,7 @@
             justify-content: center;
             gap: 8px;
             transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-            z-index: 5;
+            z-index: 1;
             pointer-events: none;
         }
         #ptr-icon {
@@ -475,7 +479,7 @@
 </head>
 <body class="bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-100 flex flex-col items-stretch h-full selection:bg-indigo-500 selection:text-white">
 
-    <header id="persistent-header" class="ios-header px-4 sm:px-6 flex items-center justify-between w-full hidden" style="display: none;"></header>
+    <header id="persistent-header" class="px-4 sm:px-6 flex items-center justify-between w-full hidden" style="display: none;"></header>
 
     <div id="app" class="app-container w-full flex flex-col relative transition-colors duration-200">
         <div class="flex-1 flex flex-col items-center justify-center p-6 text-center select-none">
@@ -2035,7 +2039,7 @@
             syncPersistentHeader();
 
             app.innerHTML = `
-                <main id="main-content" class="flex-1 overflow-y-auto no-scrollbar pb-32 pt-2.5 px-4 sm:px-6 w-full max-w-full ${state.slideDirection || 'animate-slide-right'}">
+                <main id="main-content" class="flex-1 overflow-y-auto no-scrollbar pb-32 px-4 sm:px-6 w-full max-w-full ${state.slideDirection || 'animate-slide-right'}">
                     <div id="ptr-container">
                         <i id="ptr-icon" class="fa-solid fa-arrow-down"></i>
                         <span id="ptr-text">Pull down to refresh</span>
