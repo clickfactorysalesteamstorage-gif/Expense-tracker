@@ -54,7 +54,6 @@
     <style>
         *, ::before, ::after { box-sizing: border-box; }
         
-        /* Desktop Floating Pill Scrollbar & Hidden Mobile Scrollbar */
         @media (min-width: 769px) and (hover: hover) {
             * {
                 scrollbar-width: thin;
@@ -89,7 +88,6 @@
             }
         }
 
-        /* Completely hide scrollbar on mobile & touch devices while keeping smooth scrolling */
         @media (max-width: 768px), (hover: none) {
             * {
                 -ms-overflow-style: none !important;
@@ -137,7 +135,6 @@
             background-color: #020617;
         }
 
-        /* Crisp Solid Top Header - Pushed 26px below status bar to completely clear iOS 18's status-bar blur gradient */
         .ios-header {
             flex-shrink: 0;
             padding-top: calc(env(safe-area-inset-top, 0px) + 26px);
@@ -159,7 +156,7 @@
             position: relative;
         }
 
-        /* Pull-to-Refresh Indicator Styles */
+        /* Pull-to-Refresh Styles */
         #ptr-container {
             position: absolute;
             top: -50px;
@@ -169,17 +166,25 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            gap: 8px;
             transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
             z-index: 50;
             pointer-events: none;
         }
-        #ptr-spinner {
-            width: 28px;
-            height: 28px;
-            border: 3px solid rgba(99, 102, 241, 0.2);
-            border-top-color: #6366f1;
-            border-radius: 50%;
+        #ptr-icon {
+            font-size: 14px;
+            color: #6366f1;
+            opacity: 0;
+            transform: rotate(0deg);
+            transition: opacity 0.2s ease;
+        }
+        #ptr-icon.is-spinning {
             animation: simple-spin 0.8s linear infinite;
+        }
+        #ptr-text {
+            font-size: 11px;
+            font-weight: 600;
+            color: #64748b;
             opacity: 0;
             transition: opacity 0.2s ease;
         }
@@ -223,14 +228,8 @@
         }
 
         @keyframes homeZoomOut {
-            0% {
-                opacity: 0;
-                transform: scale(1.04);
-            }
-            100% {
-                opacity: 1;
-                transform: scale(1);
-            }
+            0% { opacity: 0; transform: scale(1.04); }
+            100% { opacity: 1; transform: scale(1); }
         }
         .animate-zoom-out-enter {
             animation: homeZoomOut 0.35s cubic-bezier(0.22, 1, 0.36, 1);
@@ -245,7 +244,6 @@
             animation: pulse-ring 1.2s infinite;
         }
 
-        /* Crisp iOS-Style Page Slide Transitions */
         @keyframes slideInFromRight {
             0% { transform: translateX(24px); opacity: 0; }
             100% { transform: translateX(0); opacity: 1; }
@@ -273,7 +271,6 @@
             pointer-events: none;
         }
 
-        /* iOS-Style Liquid Glass Navigation Dock */
         .liquid-dock {
             position: relative;
             display: flex;
@@ -345,7 +342,6 @@
                 inset 0 -2px 4px rgba(79, 70, 229, 0.3);
         }
 
-        /* Crisp Solid Cards */
         .ios-glass-card {
             background: #ffffff !important;
             border: 1px solid rgba(226, 232, 240, 0.95) !important;
@@ -357,7 +353,6 @@
             box-shadow: 0 12px 24px -6px rgba(0, 0, 0, 0.45) !important;
         }
 
-        /* Solid, high-contrast modal backdrops */
         .ios-glass-modal {
             background: #ffffff !important;
             border: 1px solid #e2e8f0 !important;
@@ -464,7 +459,6 @@
 </head>
 <body class="bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-100 flex flex-col items-stretch h-full selection:bg-indigo-500 selection:text-white">
 
-    <!-- Top-Level Persistent Header -->
     <header id="persistent-header" class="ios-header px-4 sm:px-6 flex items-center justify-between w-full hidden" style="display: none;"></header>
 
     <div id="app" class="app-container w-full flex flex-col relative transition-colors duration-200">
@@ -477,7 +471,6 @@
         </div>
     </div>
 
-    <!-- Persistent Liquid Glass Navigation Bar (z-40) -->
     <div id="persistent-nav-wrapper" class="liquid-nav-container hidden" style="display: none;">
         <nav id="liquid-nav" class="liquid-dock">
             <div id="liquid-bubble" class="liquid-bubble"></div>
@@ -513,10 +506,7 @@
         </nav>
     </div>
 
-    <!-- Top-Level Modal Root (z-[60] so modals sit above the bottom navigation bar) -->
     <div id="modal-root" class="relative z-[60]"></div>
-
-    <!-- Toast Notifications Container (z-[70] so alerts appear above open modals) -->
     <div id="toast-container" class="fixed top-12 left-1/2 transform -translate-x-1/2 z-[70] flex flex-col gap-2 pointer-events-none w-11/12 max-w-sm"></div>
 
     <script type="module">
@@ -1597,7 +1587,6 @@
                 <div class="fixed inset-0 z-[60] bg-slate-950/60 backdrop-blur-sm flex items-center justify-center p-4 animate-fadeIn">
                     <div class="ios-glass-modal bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 max-w-sm w-full shadow-2xl space-y-4 max-h-[85vh] flex flex-col">
                         
-                        <!-- Header -->
                         <div class="flex items-center justify-between shrink-0 pb-1 border-b border-slate-100 dark:border-slate-800/80">
                             <div>
                                 <h3 class="font-bold text-base text-slate-900 dark:text-white">Manage Wallet</h3>
@@ -1610,7 +1599,6 @@
                             </button>
                         </div>
                         
-                        <!-- Input Form -->
                         <form onsubmit="handleWalletAdd(event, '${userId}')" class="space-y-3 shrink-0 pt-1">
                             <div class="w-full">
                                 <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">
@@ -1629,7 +1617,6 @@
                             </button>
                         </form>
 
-                        <!-- History Section -->
                         <div class="space-y-2.5 flex-1 overflow-y-auto no-scrollbar pr-0.5 pt-3 border-t border-slate-200/70 dark:border-slate-800/80">
                             <div class="flex items-center justify-between px-1">
                                 <h4 class="text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider flex items-center gap-1">
@@ -2032,7 +2019,8 @@
             app.innerHTML = `
                 <main id="main-content" class="flex-1 overflow-y-auto no-scrollbar pb-32 pt-2.5 px-4 sm:px-6 w-full max-w-full ${state.slideDirection || 'animate-slide-right'}">
                     <div id="ptr-container">
-                        <div id="ptr-spinner"></div>
+                        <i id="ptr-icon" class="fa-solid fa-arrow-down"></i>
+                        <span id="ptr-text">Pull down to refresh</span>
                     </div>
                     ${renderActiveTabContent()}
                 </main>
@@ -2061,7 +2049,8 @@
             syncPersistentHeader();
             main.innerHTML = `
                 <div id="ptr-container">
-                    <div id="ptr-spinner"></div>
+                    <i id="ptr-icon" class="fa-solid fa-arrow-down"></i>
+                    <span id="ptr-text">Pull down to refresh</span>
                 </div>
                 ${renderActiveTabContent()}
             `;
@@ -3712,7 +3701,6 @@
                         </span>
                     </div>
 
-                    <!-- Appearance & iOS Liquid Glass Transparency Card -->
                     <div class="ios-glass-card rounded-3xl p-5 sm:p-6 shadow-sm space-y-4 w-full">
                         <div class="space-y-3">
                             <div class="flex items-center justify-between px-1">
@@ -3737,7 +3725,6 @@
                                 </button>
                             </div>
 
-                            <!-- iOS Liquid Glass Transparency Slider -->
                             <div class="pt-3.5 border-t border-slate-200/50 dark:border-slate-800 space-y-2">
                                 <div class="flex items-center justify-between text-xs px-1">
                                     <span class="font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
@@ -3750,7 +3737,6 @@
                             </div>
                         </div>
 
-                        <!-- Collapsible Ringer & Notification Sound Section -->
                         <div class="pt-3 border-t border-slate-200/50 dark:border-slate-800">
                             <div class="bg-slate-50/70 dark:bg-slate-800/40 rounded-2xl border border-slate-200/70 dark:border-slate-700/60 overflow-hidden transition-all duration-200">
                                 <div onclick="toggleSoundPanel()" class="flex items-center justify-between p-3.5 cursor-pointer select-none hover:bg-slate-100/60 dark:hover:bg-slate-800/60 transition">
@@ -4000,7 +3986,7 @@
         }
 
         // ==========================================
-        // PULL-TO-REFRESH & HAPTIC GESTURE HANDLERS
+        // PULL-TO-REFRESH & ROTATING ARROW & HAPTIC GESTURES
         // ==========================================
         let ptrStartY = 0;
         let ptrCurrentY = 0;
@@ -4016,6 +4002,15 @@
                 ptrStartY = e.touches[0].clientY;
                 isPulling = true;
                 hasVibrated = false;
+                
+                const icon = document.getElementById('ptr-icon');
+                const text = document.getElementById('ptr-text');
+                if (icon) icon.classList.remove('is-spinning');
+                if (text) {
+                    text.textContent = 'Pull down to refresh';
+                    text.style.opacity = '0';
+                    text.style.color = '#64748b';
+                }
             }
         }, { passive: true });
 
@@ -4031,13 +4026,30 @@
             const diff = ptrCurrentY - ptrStartY;
 
             const ptrEl = document.getElementById('ptr-container');
-            const spinner = document.getElementById('ptr-spinner');
+            const icon = document.getElementById('ptr-icon');
+            const text = document.getElementById('ptr-text');
 
             if (diff > 0 && diff < 180) {
                 if (ptrEl) ptrEl.style.transform = `translateY(${Math.min(diff * 0.5, 70)}px)`;
-                if (spinner) spinner.style.opacity = Math.min(diff / 100, 1);
+                
+                const opacityVal = Math.min(diff / 80, 1);
+                if (icon) {
+                    icon.style.opacity = opacityVal;
+                    const rotation = Math.min(diff * 2.5, 180);
+                    icon.style.transform = `rotate(${rotation}deg)`;
+                }
+                if (text) {
+                    text.style.opacity = opacityVal;
+                    if (diff >= REFRESH_THRESHOLD) {
+                        text.textContent = 'Release to refresh';
+                        text.style.color = '#4f46e5';
+                    } else {
+                        text.textContent = 'Pull down to refresh';
+                        text.style.color = '#64748b';
+                    }
+                }
 
-                // Trigger crisp 15ms haptic pulse exactly once when crossing threshold
+                // Trigger 15ms haptic vibration once when threshold is crossed
                 if (diff >= REFRESH_THRESHOLD && !hasVibrated) {
                     if (state.soundEnabled && 'vibrate' in navigator) {
                         try {
@@ -4055,11 +4067,20 @@
 
             const diff = ptrCurrentY - ptrStartY;
             const ptrEl = document.getElementById('ptr-container');
-            const spinner = document.getElementById('ptr-spinner');
+            const icon = document.getElementById('ptr-icon');
+            const text = document.getElementById('ptr-text');
 
             if (diff >= REFRESH_THRESHOLD) {
                 isRefreshing = true;
                 if (ptrEl) ptrEl.style.transform = `translateY(55px)`;
+                
+                if (icon) {
+                    icon.style.transform = `rotate(180deg)`;
+                    icon.classList.add('is-spinning');
+                }
+                if (text) {
+                    text.textContent = 'Refreshing...';
+                }
                 
                 showToast('Refreshing data...', 'info');
 
@@ -4077,7 +4098,16 @@
             }
 
             if (ptrEl) ptrEl.style.transform = `translateY(0px)`;
-            if (spinner) spinner.style.opacity = '0';
+            if (icon) {
+                icon.style.opacity = '0';
+                icon.classList.remove('is-spinning');
+                icon.style.transform = `rotate(0deg)`;
+            }
+            if (text) {
+                text.style.opacity = '0';
+                text.textContent = 'Pull down to refresh';
+                text.style.color = '#64748b';
+            }
             ptrStartY = 0;
             ptrCurrentY = 0;
             hasVibrated = false;
