@@ -4049,7 +4049,6 @@
                     }
                 }
 
-                // Trigger 15ms haptic vibration once when threshold is crossed
                 if (diff >= REFRESH_THRESHOLD && !hasVibrated) {
                     if (state.soundEnabled && 'vibrate' in navigator) {
                         try {
