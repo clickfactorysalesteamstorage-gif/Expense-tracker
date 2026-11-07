@@ -154,21 +154,22 @@
             -webkit-overflow-scrolling: touch;
             overscroll-behavior-y: contain;
             position: relative;
+            padding-top: 12px;
         }
 
         /* Pull-to-Refresh Styles */
         #ptr-container {
             position: absolute;
-            top: -50px;
+            top: -42px;
             left: 0;
             right: 0;
-            height: 50px;
+            height: 40px;
             display: flex;
             align-items: center;
             justify-content: center;
             gap: 8px;
             transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-            z-index: 50;
+            z-index: 5;
             pointer-events: none;
         }
         #ptr-icon {
@@ -189,7 +190,7 @@
             transition: opacity 0.2s ease;
         }
 
-        /* Toast Notification Container */
+        /* Repositioned Bottom Toast Notification Container */
         #toast-container {
             position: fixed;
             bottom: 92px;
