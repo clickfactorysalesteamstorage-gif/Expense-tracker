@@ -156,6 +156,32 @@
         #main-content {
             -webkit-overflow-scrolling: touch;
             overscroll-behavior-y: contain;
+            position: relative;
+        }
+
+        /* Pull-to-Refresh Indicator Styles */
+        #ptr-container {
+            position: absolute;
+            top: -50px;
+            left: 0;
+            right: 0;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+            z-index: 50;
+            pointer-events: none;
+        }
+        #ptr-spinner {
+            width: 28px;
+            height: 28px;
+            border: 3px solid rgba(99, 102, 241, 0.2);
+            border-top-color: #6366f1;
+            border-radius: 50%;
+            animation: simple-spin 0.8s linear infinite;
+            opacity: 0;
+            transition: opacity 0.2s ease;
         }
 
         .logo-container img {
@@ -628,7 +654,6 @@
             const bubbleLight = Math.min(1, state.dockAlpha + 0.08);
             const bubbleDark = Math.max(0.3, state.dockAlpha - 0.25);
 
-            // Modals and cards are explicitly kept solid and decoupled from transparency slider
             styleTag.innerHTML = `
                 .liquid-dock {
                     background: rgba(255, 255, 255, ${lightAlpha}) !important;
@@ -1629,9 +1654,9 @@
                                 const isShortage = t.type === 'shortage';
                                 
                                 const badgeBg = isUndo ? 'bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400' 
-                                              : (isShortage ? 'bg-rose-50 dark:bg-rose-950/60 text-rose-600 dark:text-rose-400' 
-                                              : 'bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400');
-                                              
+                                            : (isShortage ? 'bg-rose-50 dark:bg-rose-950/60 text-rose-600 dark:text-rose-400' 
+                                            : 'bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400');
+                                            
                                 const amountColor = isShortage ? 'text-rose-600 dark:text-rose-400' : 'text-emerald-600 dark:text-emerald-400';
                                 
                                 return `
@@ -2006,6 +2031,9 @@
 
             app.innerHTML = `
                 <main id="main-content" class="flex-1 overflow-y-auto no-scrollbar pb-32 pt-2.5 px-4 sm:px-6 w-full max-w-full ${state.slideDirection || 'animate-slide-right'}">
+                    <div id="ptr-container">
+                        <div id="ptr-spinner"></div>
+                    </div>
                     ${renderActiveTabContent()}
                 </main>
 
@@ -2031,7 +2059,12 @@
                 return;
             }
             syncPersistentHeader();
-            main.innerHTML = renderActiveTabContent();
+            main.innerHTML = `
+                <div id="ptr-container">
+                    <div id="ptr-spinner"></div>
+                </div>
+                ${renderActiveTabContent()}
+            `;
             
             const fab = document.getElementById('add-fab-container');
             if (fab) {
@@ -3965,6 +3998,90 @@
             if (!str) return '';
             return String(str).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
         }
+
+        // ==========================================
+        // PULL-TO-REFRESH & HAPTIC GESTURE HANDLERS
+        // ==========================================
+        let ptrStartY = 0;
+        let ptrCurrentY = 0;
+        let isPulling = false;
+        let isRefreshing = false;
+        let hasVibrated = false;
+
+        const REFRESH_THRESHOLD = 70; // px
+
+        document.addEventListener('touchstart', (e) => {
+            const mainContent = document.getElementById('main-content');
+            if (mainContent && mainContent.scrollTop <= 0) {
+                ptrStartY = e.touches[0].clientY;
+                isPulling = true;
+                hasVibrated = false;
+            }
+        }, { passive: true });
+
+        document.addEventListener('touchmove', (e) => {
+            if (!isPulling || isRefreshing) return;
+            const mainContent = document.getElementById('main-content');
+            if (!mainContent || mainContent.scrollTop > 0) {
+                isPulling = false;
+                return;
+            }
+
+            ptrCurrentY = e.touches[0].clientY;
+            const diff = ptrCurrentY - ptrStartY;
+
+            const ptrEl = document.getElementById('ptr-container');
+            const spinner = document.getElementById('ptr-spinner');
+
+            if (diff > 0 && diff < 180) {
+                if (ptrEl) ptrEl.style.transform = `translateY(${Math.min(diff * 0.5, 70)}px)`;
+                if (spinner) spinner.style.opacity = Math.min(diff / 100, 1);
+
+                // Trigger crisp 15ms haptic pulse exactly once when crossing threshold
+                if (diff >= REFRESH_THRESHOLD && !hasVibrated) {
+                    if (state.soundEnabled && 'vibrate' in navigator) {
+                        try {
+                            navigator.vibrate(15);
+                        } catch (err) {}
+                    }
+                    hasVibrated = true;
+                }
+            }
+        }, { passive: true });
+
+        document.addEventListener('touchend', async () => {
+            if (!isPulling || isRefreshing) return;
+            isPulling = false;
+
+            const diff = ptrCurrentY - ptrStartY;
+            const ptrEl = document.getElementById('ptr-container');
+            const spinner = document.getElementById('ptr-spinner');
+
+            if (diff >= REFRESH_THRESHOLD) {
+                isRefreshing = true;
+                if (ptrEl) ptrEl.style.transform = `translateY(55px)`;
+                
+                showToast('Refreshing data...', 'info');
+
+                try {
+                    if (typeof window.startAppListeners === 'function') {
+                        window.startAppListeners();
+                    }
+                    await new Promise(r => setTimeout(r, 650));
+                    showToast('Data updated!', 'success');
+                } catch (err) {
+                    showToast('Refresh failed', 'error');
+                }
+
+                isRefreshing = false;
+            }
+
+            if (ptrEl) ptrEl.style.transform = `translateY(0px)`;
+            if (spinner) spinner.style.opacity = '0';
+            ptrStartY = 0;
+            ptrCurrentY = 0;
+            hasVibrated = false;
+        });
 
         window.addEventListener('resize', syncPersistentNavbar);
         window.addEventListener('orientationchange', () => setTimeout(syncPersistentNavbar, 100));
