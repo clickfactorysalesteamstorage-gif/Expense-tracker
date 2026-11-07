@@ -189,6 +189,21 @@
             transition: opacity 0.2s ease;
         }
 
+        /* Repositioned Bottom Toast Notification Container */
+        #toast-container {
+            position: fixed;
+            bottom: 92px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 70;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            pointer-events: none;
+            width: 90%;
+            max-width: 380px;
+        }
+
         .logo-container img {
             width: auto; height: auto; max-width: 100%; max-height: 100%;
             object-fit: contain; object-position: center;
@@ -507,7 +522,7 @@
     </div>
 
     <div id="modal-root" class="relative z-[60]"></div>
-    <div id="toast-container" class="fixed top-12 left-1/2 transform -translate-x-1/2 z-[70] flex flex-col gap-2 pointer-events-none w-11/12 max-w-sm"></div>
+    <div id="toast-container" class="fixed z-[70]"></div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
@@ -1224,18 +1239,18 @@
             if (!container) return;
             const toast = document.createElement('div');
             
-            let bgStyle = 'bg-slate-900 text-white border-slate-700/80 shadow-slate-900/30';
+            let bgStyle = 'bg-slate-900/95 text-white border-slate-700/80 shadow-slate-900/30';
             let icon = 'fa-circle-info text-indigo-400';
 
             if (type === 'success') {
-                bgStyle = 'bg-emerald-600 text-white border-emerald-500/60 shadow-emerald-900/25';
+                bgStyle = 'bg-emerald-600/95 text-white border-emerald-500/60 shadow-emerald-900/25';
                 icon = 'fa-circle-check text-emerald-200';
             } else if (type === 'error') {
-                bgStyle = 'bg-rose-600 text-white border-rose-500/60 shadow-rose-900/25';
+                bgStyle = 'bg-rose-600/95 text-white border-rose-500/60 shadow-rose-900/25';
                 icon = 'fa-circle-exclamation text-rose-200';
             }
             
-            toast.className = `${bgStyle} border px-4 py-3.5 rounded-2xl shadow-xl flex items-center justify-between text-sm font-medium transform transition-all duration-300 translate-y-[-20px] opacity-0 pointer-events-auto gap-3 backdrop-blur-md`;
+            toast.className = `${bgStyle} border px-4 py-3 rounded-2xl shadow-xl flex items-center justify-between text-xs sm:text-sm font-medium transform transition-all duration-300 translate-y-[20px] opacity-0 pointer-events-auto gap-3 backdrop-blur-xl`;
             
             let undoBtnHtml = '';
             if (undoCallback && (!state.currentUser || state.currentUser.role !== 'admin')) {
@@ -1243,31 +1258,33 @@
             }
 
             toast.innerHTML = `
-                <div class="flex items-center space-x-3 min-w-0 flex-1">
-                    <i class="fa-solid ${icon} text-lg shrink-0"></i>
+                <div class="flex items-center space-x-2.5 min-w-0 flex-1">
+                    <i class="fa-solid ${icon} text-base shrink-0"></i>
                     <span class="flex-1 break-words leading-tight">${message}</span>
                 </div>
                 ${undoBtnHtml}
             `;
             
             container.appendChild(toast);
-            setTimeout(() => toast.classList.remove('translate-y-[-20px]', 'opacity-0'), 10);
+            requestAnimationFrame(() => {
+                toast.classList.remove('translate-y-[20px]', 'opacity-0');
+            });
 
             if (undoCallback && (!state.currentUser || state.currentUser.role !== 'admin')) {
                 const undoBtn = toast.querySelector('#toast-undo-btn');
                 if (undoBtn) {
                     undoBtn.onclick = () => {
                         undoCallback();
-                        toast.classList.add('translate-y-[-20px]', 'opacity-0');
+                        toast.classList.add('translate-y-[20px]', 'opacity-0');
                         setTimeout(() => toast.remove(), 300);
                     };
                 }
             }
 
             setTimeout(() => {
-                toast.classList.add('translate-y-[-20px]', 'opacity-0');
+                toast.classList.add('translate-y-[20px]', 'opacity-0');
                 setTimeout(() => toast.remove(), 300);
-            }, 5000);
+            }, 4000);
         }
 
         function formatCurrency(amount) {
