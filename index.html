@@ -621,6 +621,14 @@
         };
 
         const tabOrder = ['home', 'summary', 'admin', 'analytics', 'users', 'wallet', 'add', 'profile', 'recycle', 'userRecycle', 'requests', 'notifications'];
+        
+        // Allowed tabs for Pull Down To Refresh: Home, Summary (Admin/Analytics), Users/Wallet, and Account (Profile)
+        const PTR_ALLOWED_TABS = ['home', 'admin', 'analytics', 'users', 'wallet', 'profile'];
+
+        function isPtrAllowed() {
+            return state.currentUser && !state.isDbLoading && PTR_ALLOWED_TABS.includes(state.activeTab);
+        }
+
         let knownNotificationIds = new Set();
         let initialNotificationsLoaded = false;
         let sharedAudioCtx = null;
@@ -2032,12 +2040,15 @@
 
             syncPersistentHeader();
 
+            const showPtr = isPtrAllowed();
+
             app.innerHTML = `
                 <main id="main-content" class="flex-1 overflow-y-auto no-scrollbar px-4 sm:px-6 w-full max-w-full ${state.slideDirection || 'animate-slide-right'}">
+                    ${showPtr ? `
                     <div id="ptr-container">
                         <i id="ptr-icon" class="fa-solid fa-arrow-down"></i>
                         <span id="ptr-text">Pull down to refresh</span>
-                    </div>
+                    </div>` : ''}
                     ${renderActiveTabContent()}
                 </main>
 
@@ -2063,11 +2074,14 @@
                 return;
             }
             syncPersistentHeader();
+            const showPtr = isPtrAllowed();
+
             main.innerHTML = `
+                ${showPtr ? `
                 <div id="ptr-container">
                     <i id="ptr-icon" class="fa-solid fa-arrow-down"></i>
                     <span id="ptr-text">Pull down to refresh</span>
-                </div>
+                </div>` : ''}
                 ${renderActiveTabContent()}
             `;
             
@@ -4010,6 +4024,11 @@
         const REFRESH_THRESHOLD = 70;
 
         document.addEventListener('touchstart', (e) => {
+            if (!isPtrAllowed()) {
+                isPulling = false;
+                return;
+            }
+
             const mainContent = document.getElementById('main-content');
             if (mainContent && mainContent.scrollTop <= 0) {
                 ptrStartY = e.touches[0].clientY;
@@ -4028,7 +4047,7 @@
         }, { passive: true });
 
         document.addEventListener('touchmove', (e) => {
-            if (!isPulling || isRefreshing) return;
+            if (!isPulling || isRefreshing || !isPtrAllowed()) return;
             const mainContent = document.getElementById('main-content');
             if (!mainContent || mainContent.scrollTop > 0) {
                 isPulling = false;
@@ -4074,7 +4093,10 @@
         }, { passive: true });
 
         document.addEventListener('touchend', async () => {
-            if (!isPulling || isRefreshing) return;
+            if (!isPulling || isRefreshing || !isPtrAllowed()) {
+                isPulling = false;
+                return;
+            }
             isPulling = false;
 
             const diff = ptrCurrentY - ptrStartY;
@@ -4117,7 +4139,7 @@
             }
             if (text) {
                 text.style.opacity = '0';
-                text.style.textContent = 'Pull down to refresh';
+                text.textContent = 'Pull down to refresh';
                 text.style.color = '#64748b';
             }
             ptrStartY = 0;
