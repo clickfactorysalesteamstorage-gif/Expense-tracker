@@ -54,44 +54,60 @@
     <style>
         *, ::before, ::after { box-sizing: border-box; }
         
-        /* Sleek Floating Pill Scrollbar */
-        * {
-            scrollbar-width: thin;
-            scrollbar-color: rgba(148, 163, 184, 0.35) transparent;
+        /* Desktop Floating Pill Scrollbar & Hidden Mobile Scrollbar */
+        @media (min-width: 769px) and (hover: hover) {
+            * {
+                scrollbar-width: thin;
+                scrollbar-color: rgba(148, 163, 184, 0.35) transparent;
+            }
+            .dark * {
+                scrollbar-color: rgba(99, 102, 241, 0.35) transparent;
+            }
+            ::-webkit-scrollbar {
+                width: 6px;
+                height: 6px;
+            }
+            ::-webkit-scrollbar-track {
+                background: transparent;
+                margin: 6px 0;
+            }
+            ::-webkit-scrollbar-thumb {
+                background-color: rgba(148, 163, 184, 0.4);
+                border-radius: 9999px;
+                border: 1.5px solid transparent;
+                background-clip: content-box;
+                transition: background-color 0.2s ease;
+            }
+            ::-webkit-scrollbar-thumb:hover {
+                background-color: rgba(99, 102, 241, 0.75);
+            }
+            .dark ::-webkit-scrollbar-thumb {
+                background-color: rgba(148, 163, 184, 0.25);
+            }
+            .dark ::-webkit-scrollbar-thumb:hover {
+                background-color: rgba(129, 140, 248, 0.65);
+            }
         }
-        .dark * {
-            scrollbar-color: rgba(99, 102, 241, 0.35) transparent;
+
+        /* Completely hide scrollbar on mobile & touch devices while keeping smooth scrolling */
+        @media (max-width: 768px), (hover: none) {
+            * {
+                -ms-overflow-style: none !important;
+                scrollbar-width: none !important;
+            }
+            *::-webkit-scrollbar {
+                display: none !important;
+                width: 0 !important;
+                height: 0 !important;
+            }
         }
-        ::-webkit-scrollbar {
-            width: 6px;
-            height: 6px;
-        }
-        ::-webkit-scrollbar-track {
-            background: transparent;
-            margin: 6px 0;
-        }
-        ::-webkit-scrollbar-thumb {
-            background-color: rgba(148, 163, 184, 0.4);
-            border-radius: 9999px;
-            border: 1.5px solid transparent;
-            background-clip: content-box;
-            transition: background-color 0.2s ease;
-        }
-        ::-webkit-scrollbar-thumb:hover {
-            background-color: rgba(99, 102, 241, 0.75);
-        }
-        .dark ::-webkit-scrollbar-thumb {
-            background-color: rgba(148, 163, 184, 0.25);
-        }
-        .dark ::-webkit-scrollbar-thumb:hover {
-            background-color: rgba(129, 140, 248, 0.65);
-        }
+
         .no-scrollbar::-webkit-scrollbar {
-            display: none;
+            display: none !important;
         }
         .no-scrollbar {
-            -ms-overflow-style: none;
-            scrollbar-width: none;
+            -ms-overflow-style: none !important;
+            scrollbar-width: none !important;
         }
 
         html, body {
@@ -120,13 +136,18 @@
             background-color: #020617;
         }
 
-        /* Crisp Fixed Top Header (Prevents iOS Status Bar Progressive Blur Overlap) */
+        /* Crisp Fixed Top Header (Clears iPhone Notch / Dynamic Island Blur Zone) */
         .ios-header {
             flex-shrink: 0;
             padding-top: max(env(safe-area-inset-top, 0px), 14px);
             background-color: #f8fafc;
             border-bottom: none;
             transition: background-color 0.25s ease;
+        }
+        @supports (-webkit-touch-callout: none) {
+            .ios-header {
+                padding-top: max(calc(env(safe-area-inset-top, 44px) + 6px), 50px);
+            }
         }
         .dark .ios-header {
             background-color: #020617;
@@ -1591,7 +1612,7 @@
                         </form>
 
                         <!-- History Section -->
-                        <div class="space-y-2.5 flex-1 overflow-y-auto pr-1 pt-3 border-t border-slate-200/70 dark:border-slate-800/80">
+                        <div class="space-y-2.5 flex-1 overflow-y-auto no-scrollbar pr-0.5 pt-3 border-t border-slate-200/70 dark:border-slate-800/80">
                             <div class="flex items-center justify-between px-1">
                                 <h4 class="text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider flex items-center gap-1">
                                     <i class="fa-solid fa-clock-rotate-left text-[11px] text-slate-400"></i>
@@ -1981,7 +2002,7 @@
                     </div>
                 </header>
 
-                <main id="main-content" class="flex-1 overflow-y-auto pb-32 pt-3 px-4 sm:px-6 w-full max-w-full ${state.slideDirection || 'animate-slide-right'}">
+                <main id="main-content" class="flex-1 overflow-y-auto no-scrollbar pb-32 pt-3 px-4 sm:px-6 w-full max-w-full ${state.slideDirection || 'animate-slide-right'}">
                     ${renderActiveTabContent()}
                 </main>
 
@@ -2020,7 +2041,7 @@
 
         function renderLoginPage() {
             return `
-                <div class="flex-1 overflow-y-auto flex flex-col justify-center px-4 py-8 max-w-sm mx-auto w-full relative">
+                <div class="flex-1 overflow-y-auto no-scrollbar flex flex-col justify-center px-4 py-8 max-w-sm mx-auto w-full relative">
                     <div class="text-center mb-6">
                         <div class="w-12 h-12 flex items-center justify-center mx-auto mb-2 logo-container">
                             <img src="https://clickfactoryphotography.com/wp-content/uploads/2022/04/crop-logo.gif" alt="Click Factory Logo" class="w-full h-full object-contain" onerror="this.src='https://placehold.co/40x40/4f46e5/ffffff?text=CF'">
@@ -2069,7 +2090,7 @@
 
         function renderForgotPasswordPage() {
             return `
-                <div class="flex-1 overflow-y-auto flex flex-col justify-center px-4 py-8 max-w-sm mx-auto w-full">
+                <div class="flex-1 overflow-y-auto no-scrollbar flex flex-col justify-center px-4 py-8 max-w-sm mx-auto w-full">
                     <div class="text-center mb-6">
                         <div class="w-12 h-12 bg-indigo-50 dark:bg-indigo-950/60 rounded-2xl flex items-center justify-center mx-auto mb-4 text-indigo-600 dark:text-indigo-400 text-xl shadow-sm border border-indigo-200 dark:border-indigo-800">
                             <i class="fa-solid fa-key"></i>
