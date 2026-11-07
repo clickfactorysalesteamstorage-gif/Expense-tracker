@@ -160,34 +160,62 @@
 
         #ptr-container {
             position: absolute;
-            top: -45px;
+            top: 12px;
             left: 0;
             right: 0;
-            height: 40px;
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 8px;
-            transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-            z-index: 10;
+            z-index: 50;
             pointer-events: none;
-        }
-        #ptr-icon {
-            font-size: 14px;
-            color: #6366f1;
             opacity: 0;
-            transform: rotate(0deg);
-            transition: opacity 0.2s ease;
+            transform: translateY(-40px);
+            transition: opacity 0.2s ease, transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
         }
+
+        .ptr-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 14px;
+            border-radius: 9999px;
+            background: rgba(255, 255, 255, 0.9);
+            border: 1px solid rgba(226, 232, 240, 0.8);
+            box-shadow: 0 4px 14px -2px rgba(0, 0, 0, 0.08), 0 2px 6px -1px rgba(0, 0, 0, 0.04);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            transition: all 0.2s ease;
+        }
+
+        .dark .ptr-pill {
+            background: rgba(15, 23, 42, 0.85);
+            border-color: rgba(51, 65, 85, 0.7);
+            box-shadow: 0 4px 16px -2px rgba(0, 0, 0, 0.5);
+        }
+
+        #ptr-icon {
+            font-size: 13px;
+            color: #6366f1;
+            transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
         #ptr-icon.is-spinning {
-            animation: simple-spin 0.8s linear infinite;
+            animation: simple-spin 0.7s linear infinite;
         }
+
         #ptr-text {
             font-size: 11px;
             font-weight: 600;
-            color: #64748b;
-            opacity: 0;
-            transition: opacity 0.2s ease;
+            color: #475569;
+            letter-spacing: -0.01em;
+            transition: color 0.2s ease;
+        }
+
+        .dark .ptr-text {
+            color: #cbd5e1;
         }
 
         #toast-container {
@@ -622,7 +650,7 @@
 
         const tabOrder = ['home', 'summary', 'admin', 'analytics', 'users', 'wallet', 'add', 'profile', 'recycle', 'userRecycle', 'requests', 'notifications'];
         
-        // Allowed tabs for Pull Down To Refresh: Home, Summary (Admin/Analytics), Users/Wallet, and Account (Profile)
+        // Allowed primary tabs for Pull Down To Refresh: Home, Summary (Admin/Analytics), Users/Wallet, and Account (Profile)
         const PTR_ALLOWED_TABS = ['home', 'admin', 'analytics', 'users', 'wallet', 'profile'];
 
         function isPtrAllowed() {
@@ -2046,8 +2074,10 @@
                 <main id="main-content" class="flex-1 overflow-y-auto no-scrollbar px-4 sm:px-6 w-full max-w-full ${state.slideDirection || 'animate-slide-right'}">
                     ${showPtr ? `
                     <div id="ptr-container">
-                        <i id="ptr-icon" class="fa-solid fa-arrow-down"></i>
-                        <span id="ptr-text">Pull down to refresh</span>
+                        <div class="ptr-pill">
+                            <i id="ptr-icon" class="fa-solid fa-arrow-down"></i>
+                            <span id="ptr-text">Pull to refresh</span>
+                        </div>
                     </div>` : ''}
                     ${renderActiveTabContent()}
                 </main>
@@ -2079,8 +2109,10 @@
             main.innerHTML = `
                 ${showPtr ? `
                 <div id="ptr-container">
-                    <i id="ptr-icon" class="fa-solid fa-arrow-down"></i>
-                    <span id="ptr-text">Pull down to refresh</span>
+                    <div class="ptr-pill">
+                        <i id="ptr-icon" class="fa-solid fa-arrow-down"></i>
+                        <span id="ptr-text">Pull to refresh</span>
+                    </div>
                 </div>` : ''}
                 ${renderActiveTabContent()}
             `;
@@ -4021,10 +4053,11 @@
         let isRefreshing = false;
         let hasVibrated = false;
 
-        const REFRESH_THRESHOLD = 70;
+        const REFRESH_THRESHOLD = 65;
+        const MAX_PULL_DISTANCE = 110;
 
         document.addEventListener('touchstart', (e) => {
-            if (!isPtrAllowed()) {
+            if (!isPtrAllowed() || isRefreshing) {
                 isPulling = false;
                 return;
             }
@@ -4032,62 +4065,82 @@
             const mainContent = document.getElementById('main-content');
             if (mainContent && mainContent.scrollTop <= 0) {
                 ptrStartY = e.touches[0].clientY;
+                ptrCurrentY = ptrStartY;
                 isPulling = true;
                 hasVibrated = false;
-                
+
+                const ptrContainer = document.getElementById('ptr-container');
                 const icon = document.getElementById('ptr-icon');
                 const text = document.getElementById('ptr-text');
-                if (icon) icon.classList.remove('is-spinning');
+
+                if (ptrContainer) {
+                    ptrContainer.style.transition = 'none';
+                }
+                if (icon) {
+                    icon.className = 'fa-solid fa-arrow-down';
+                    icon.classList.remove('is-spinning');
+                    icon.style.transform = 'rotate(0deg)';
+                }
                 if (text) {
-                    text.textContent = 'Pull down to refresh';
-                    text.style.opacity = '0';
-                    text.style.color = '#64748b';
+                    text.textContent = 'Pull to refresh';
+                    text.style.color = '';
                 }
             }
         }, { passive: true });
 
         document.addEventListener('touchmove', (e) => {
             if (!isPulling || isRefreshing || !isPtrAllowed()) return;
+
             const mainContent = document.getElementById('main-content');
             if (!mainContent || mainContent.scrollTop > 0) {
                 isPulling = false;
+                resetPtrVisuals();
                 return;
             }
 
             ptrCurrentY = e.touches[0].clientY;
-            const diff = ptrCurrentY - ptrStartY;
+            const rawDiff = ptrCurrentY - ptrStartY;
 
-            const ptrEl = document.getElementById('ptr-container');
+            if (rawDiff <= 0) {
+                resetPtrVisuals();
+                return;
+            }
+
+            // Resistance curve: pull distance dampens progressively
+            const pullDistance = Math.min(
+                MAX_PULL_DISTANCE,
+                rawDiff * 0.45 * (1 - (rawDiff / (rawDiff + 300)))
+            );
+
+            const ptrContainer = document.getElementById('ptr-container');
             const icon = document.getElementById('ptr-icon');
             const text = document.getElementById('ptr-text');
 
-            if (diff > 0 && diff < 180) {
-                if (ptrEl) ptrEl.style.transform = `translateY(${Math.min(diff * 0.5, 70)}px)`;
-                
-                const opacityVal = Math.min(diff / 80, 1);
-                if (icon) {
-                    icon.style.opacity = opacityVal;
-                    const rotation = Math.min(diff * 2.5, 180);
-                    icon.style.transform = `rotate(${rotation}deg)`;
-                }
-                if (text) {
-                    text.style.opacity = opacityVal;
-                    if (diff >= REFRESH_THRESHOLD) {
+            if (ptrContainer) {
+                const progress = Math.min(1, pullDistance / REFRESH_THRESHOLD);
+                ptrContainer.style.opacity = progress.toString();
+                ptrContainer.style.transform = `translateY(${pullDistance}px)`;
+
+                if (pullDistance >= REFRESH_THRESHOLD) {
+                    if (icon) icon.style.transform = 'rotate(180deg)';
+                    if (text) {
                         text.textContent = 'Release to refresh';
                         text.style.color = '#4f46e5';
-                    } else {
-                        text.textContent = 'Pull down to refresh';
-                        text.style.color = '#64748b';
                     }
-                }
-
-                if (diff >= REFRESH_THRESHOLD && !hasVibrated) {
-                    if (state.soundEnabled && 'vibrate' in navigator) {
-                        try {
-                            navigator.vibrate(15);
-                        } catch (err) {}
+                    if (!hasVibrated) {
+                        if (state.soundEnabled && 'vibrate' in navigator) {
+                            try { navigator.vibrate(12); } catch (err) {}
+                        }
+                        hasVibrated = true;
                     }
-                    hasVibrated = true;
+                } else {
+                    const rotation = (pullDistance / REFRESH_THRESHOLD) * 180;
+                    if (icon) icon.style.transform = `rotate(${rotation}deg)`;
+                    if (text) {
+                        text.textContent = 'Pull to refresh';
+                        text.style.color = '';
+                    }
+                    hasVibrated = false;
                 }
             }
         }, { passive: true });
@@ -4099,31 +4152,37 @@
             }
             isPulling = false;
 
-            const diff = ptrCurrentY - ptrStartY;
-            const ptrEl = document.getElementById('ptr-container');
+            const rawDiff = ptrCurrentY - ptrStartY;
+            const ptrContainer = document.getElementById('ptr-container');
             const icon = document.getElementById('ptr-icon');
             const text = document.getElementById('ptr-text');
 
-            if (diff >= REFRESH_THRESHOLD) {
+            if (ptrContainer) {
+                ptrContainer.style.transition = 'transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.2s ease';
+            }
+
+            if (rawDiff >= REFRESH_THRESHOLD * 1.6) {
                 isRefreshing = true;
-                if (ptrEl) ptrEl.style.transform = `translateY(55px)`;
-                
+
+                if (ptrContainer) {
+                    ptrContainer.style.transform = 'translateY(42px)';
+                    ptrContainer.style.opacity = '1';
+                }
                 if (icon) {
-                    icon.style.transform = `rotate(180deg)`;
-                    icon.classList.add('is-spinning');
+                    icon.className = 'fa-solid fa-circle-notch is-spinning';
+                    icon.style.transform = 'none';
                 }
                 if (text) {
-                    text.textContent = 'Refreshing...';
+                    text.textContent = 'Updating...';
+                    text.style.color = '#4f46e5';
                 }
-                
-                showToast('Refreshing data...', 'info');
 
                 try {
                     if (typeof window.startAppListeners === 'function') {
                         window.startAppListeners();
                     }
                     await new Promise(r => setTimeout(r, 650));
-                    showToast('Data updated!', 'success');
+                    showToast('Data refreshed!', 'success');
                 } catch (err) {
                     showToast('Refresh failed', 'error');
                 }
@@ -4131,21 +4190,32 @@
                 isRefreshing = false;
             }
 
-            if (ptrEl) ptrEl.style.transform = `translateY(0px)`;
+            resetPtrVisuals();
+        });
+
+        function resetPtrVisuals() {
+            const ptrContainer = document.getElementById('ptr-container');
+            const icon = document.getElementById('ptr-icon');
+            const text = document.getElementById('ptr-text');
+
+            if (ptrContainer) {
+                ptrContainer.style.transform = 'translateY(-40px)';
+                ptrContainer.style.opacity = '0';
+            }
             if (icon) {
-                icon.style.opacity = '0';
+                icon.className = 'fa-solid fa-arrow-down';
                 icon.classList.remove('is-spinning');
-                icon.style.transform = `rotate(0deg)`;
+                icon.style.transform = 'rotate(0deg)';
             }
             if (text) {
-                text.style.opacity = '0';
-                text.textContent = 'Pull down to refresh';
-                text.style.color = '#64748b';
+                text.textContent = 'Pull to refresh';
+                text.style.color = '';
             }
+
             ptrStartY = 0;
             ptrCurrentY = 0;
             hasVibrated = false;
-        });
+        }
 
         window.addEventListener('resize', syncPersistentNavbar);
         window.addEventListener('orientationchange', () => setTimeout(syncPersistentNavbar, 100));
