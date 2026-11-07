@@ -53,10 +53,47 @@
     </script>
     <style>
         *, ::before, ::after { box-sizing: border-box; }
-        ::-webkit-scrollbar { width: 4px; height: 4px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
-        .dark ::-webkit-scrollbar-thumb { background: #475569; }
+        
+        /* Sleek Floating Pill Scrollbar */
+        * {
+            scrollbar-width: thin;
+            scrollbar-color: rgba(148, 163, 184, 0.35) transparent;
+        }
+        .dark * {
+            scrollbar-color: rgba(99, 102, 241, 0.35) transparent;
+        }
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+            margin: 6px 0;
+        }
+        ::-webkit-scrollbar-thumb {
+            background-color: rgba(148, 163, 184, 0.4);
+            border-radius: 9999px;
+            border: 1.5px solid transparent;
+            background-clip: content-box;
+            transition: background-color 0.2s ease;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background-color: rgba(99, 102, 241, 0.75);
+        }
+        .dark ::-webkit-scrollbar-thumb {
+            background-color: rgba(148, 163, 184, 0.25);
+        }
+        .dark ::-webkit-scrollbar-thumb:hover {
+            background-color: rgba(129, 140, 248, 0.65);
+        }
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
         html, body {
             font-family: 'Inter', sans-serif;
             -webkit-tap-highlight-color: transparent;
@@ -80,20 +117,20 @@
             background-color: #020617;
         }
 
-        /* Seamless Edge-to-Edge Frosted Top Header */
+        /* Seamless Borderless Frosted Top Header */
         .ios-header {
             padding-top: max(env(safe-area-inset-top, 0px), 12px);
             background: rgba(248, 250, 252, 0.85);
             backdrop-filter: blur(28px) saturate(200%);
             -webkit-backdrop-filter: blur(28px) saturate(200%);
-            border-bottom: 1px solid rgba(226, 232, 240, 0.8);
-            transition: background-color 0.25s ease, border-color 0.25s ease;
+            border-bottom: none;
+            transition: background-color 0.25s ease;
         }
         .dark .ios-header {
             background: rgba(2, 6, 23, 0.82);
             backdrop-filter: blur(28px) saturate(200%);
             -webkit-backdrop-filter: blur(28px) saturate(200%);
-            border-bottom: 1px solid rgba(30, 41, 59, 0.75);
+            border-bottom: none;
         }
 
         .logo-container img {
@@ -1899,13 +1936,13 @@
 
             app.innerHTML = `
                 <header class="sticky top-0 z-30 ios-header px-4 sm:px-6 pb-3 flex items-center justify-between w-full">
-                    <div class="flex items-center space-x-3.0 min-w-0 flex-1 pr-2">
+                    <div class="flex items-center space-x-3 min-w-0 flex-1 pr-2">
                         ${isSubTab ? `
                             <button onclick="switchTab('${backTargetTab}')" class="w-10 h-10 rounded-2xl bg-slate-100/80 dark:bg-slate-800/80 flex items-center justify-center text-slate-700 dark:text-slate-200 hover:bg-slate-200/70 dark:hover:bg-slate-700/70 transition border border-slate-200/80 dark:border-slate-700/70 shrink-0 shadow-sm" title="Back">
                                 <i class="fa-solid fa-arrow-left text-sm"></i>
                             </button>
                         ` : `
-                            <div class="w-12 h-12  flex items-center justify-center p-1.5 overflow-hidden shrink-0 logo-container">
+                            <div class="w-10 h-10 flex items-center justify-center overflow-hidden shrink-0 logo-container">
                                 <img src="https://clickfactoryphotography.com/wp-content/uploads/2022/04/crop-logo.gif" alt="Click Factory Logo" class="w-full h-full object-contain" onerror="this.src='https://placehold.co/40x40/4f46e5/ffffff?text=CF'">
                             </div>
                         `}
@@ -1917,9 +1954,9 @@
                                 ${isSubTab ? `
                                     <p class="text-[11px] text-slate-500 dark:text-slate-400 font-medium truncate">${state.activeTab === 'notifications' ? 'Activity & Alerts' : 'Back to Profile'}</p>
                                 ` : (isAdmin ? `
-                                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-indigo-500/10 text-indigo-600 dark:bg-indigo-500/20 dark:text-indigo-300 border border-indigo-500/20">
-                                        <i class="fa-solid fa-shield-halved text-[9px]"></i>
-                                        <span>Admin Portal</span>
+                                    <span class="inline-flex items-center gap-1 text-[11px] font-semibold text-indigo-600 dark:text-indigo-400">
+                                        <i class="fa-solid fa-shield-halved text-[10px]"></i>
+                                        <span>Admin</span>
                                     </span>
                                 ` : `
                                     <p class="text-[11px] text-slate-500 dark:text-slate-400 font-medium truncate">Expense Tracker</p>
@@ -1939,7 +1976,7 @@
                     </div>
                 </header>
 
-                <main id="main-content" class="flex-1 overflow-y-auto pb-32 pt-4 px-4 sm:px-6 w-full max-w-full ${state.slideDirection || 'animate-slide-right'}">
+                <main id="main-content" class="flex-1 overflow-y-auto pb-32 pt-3 px-4 sm:px-6 w-full max-w-full ${state.slideDirection || 'animate-slide-right'}">
                     ${renderActiveTabContent()}
                 </main>
 
