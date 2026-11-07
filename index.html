@@ -136,18 +136,13 @@
             background-color: #020617;
         }
 
-        /* Crisp Fixed Top Header (Clears iPhone Notch / Dynamic Island Blur Zone) */
+        /* Compact, Crisp Top Header (No Extra Top Gap) */
         .ios-header {
             flex-shrink: 0;
-            padding-top: max(env(safe-area-inset-top, 0px), 14px);
+            padding-top: max(env(safe-area-inset-top, 0px), 10px);
             background-color: #f8fafc;
             border-bottom: none;
             transition: background-color 0.25s ease;
-        }
-        @supports (-webkit-touch-callout: none) {
-            .ios-header {
-                padding-top: max(calc(env(safe-area-inset-top, 44px) + 6px), 50px);
-            }
         }
         .dark .ios-header {
             background-color: #020617;
@@ -1961,7 +1956,7 @@
             const backTargetTab = state.activeTab === 'notifications' ? 'home' : 'profile';
 
             app.innerHTML = `
-                <header class="z-30 ios-header px-4 sm:px-6 pb-2.5 flex items-center justify-between w-full">
+                <header class="z-30 ios-header px-4 sm:px-6 pb-2 flex items-center justify-between w-full">
                     <div class="flex items-center space-x-3 min-w-0 flex-1 pr-2">
                         ${isSubTab ? `
                             <button onclick="switchTab('${backTargetTab}')" class="w-10 h-10 rounded-2xl bg-slate-100/80 dark:bg-slate-800/80 flex items-center justify-center text-slate-700 dark:text-slate-200 hover:bg-slate-200/70 dark:hover:bg-slate-700/70 transition border border-slate-200/80 dark:border-slate-700/70 shrink-0 shadow-sm" title="Back">
@@ -2002,7 +1997,7 @@
                     </div>
                 </header>
 
-                <main id="main-content" class="flex-1 overflow-y-auto no-scrollbar pb-32 pt-3 px-4 sm:px-6 w-full max-w-full ${state.slideDirection || 'animate-slide-right'}">
+                <main id="main-content" class="flex-1 overflow-y-auto no-scrollbar pb-32 pt-2.5 px-4 sm:px-6 w-full max-w-full ${state.slideDirection || 'animate-slide-right'}">
                     ${renderActiveTabContent()}
                 </main>
 
@@ -2349,11 +2344,11 @@
                     <div class="space-y-3 w-full">
                         <div class="flex items-center space-x-2 w-full">
                             <div class="relative flex-1">
-                                <span class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400">
+                                <span class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-500 dark:text-slate-400 z-10">
                                     <i class="fa-solid fa-magnifying-glass text-sm"></i>
                                 </span>
-                                <input type="text" id="search-input" value="${state.searchQuery}" oninput="handleSearchInput(event)" placeholder="Search expenses, notes, client, user..." class="w-full pl-10 pr-10 py-3.5 ios-glass-card border border-slate-200/80 dark:border-slate-800 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 shadow-sm text-slate-900 dark:text-white">
-                                ${state.searchQuery ? `<button onclick="clearSearch()" class="absolute inset-y-0 right-0 pr-4 flex items-center text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark"></i></button>` : ''}
+                                <input type="text" id="search-input" value="${state.searchQuery}" oninput="handleSearchInput(event)" placeholder="Search expenses, notes, client, user..." class="w-full pl-10 pr-10 py-3.5 ios-glass-card border border-slate-200/80 dark:border-slate-800 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 shadow-sm text-slate-900 dark:text-white placeholder:text-slate-400">
+                                ${state.searchQuery ? `<button onclick="clearSearch()" class="absolute inset-y-0 right-0 pr-4 flex items-center text-slate-400 hover:text-slate-600 z-10"><i class="fa-solid fa-xmark"></i></button>` : ''}
                             </div>
                             <button onclick="toggleDateFilter()" class="w-12 h-12 rounded-2xl ${state.showDateFilter || hasDateFilterActive ? 'bg-indigo-600 text-white shadow-md' : 'ios-glass-card text-slate-600 dark:text-slate-400 border border-slate-200/80 dark:border-slate-800'} flex items-center justify-center shrink-0 relative" title="Toggle Date Filter">
                                 <i class="fa-solid fa-calendar-days text-sm"></i>
