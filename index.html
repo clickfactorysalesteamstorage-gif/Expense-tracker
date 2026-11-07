@@ -135,7 +135,6 @@
             background-color: #020617;
         }
 
-        /* Top Header Styles */
         .ios-header {
             flex-shrink: 0;
             padding-top: calc(env(safe-area-inset-top, 0px) + 16px);
@@ -149,7 +148,6 @@
             background-color: #020617;
         }
 
-        /* Main Content Viewport with Extra Bottom Clearance */
         #main-content {
             flex: 1;
             overflow-y: auto;
@@ -157,10 +155,9 @@
             overscroll-behavior-y: contain;
             position: relative;
             padding-top: 8px;
-            padding-bottom: 140px; /* Safe bottom spacing so elements don't get hidden behind the dock */
+            padding-bottom: 140px;
         }
 
-        /* Pull-to-Refresh Container Fixed Above Scroll View */
         #ptr-container {
             position: absolute;
             top: -45px;
@@ -193,7 +190,6 @@
             transition: opacity 0.2s ease;
         }
 
-        /* Repositioned Bottom Toast Notification Container */
         #toast-container {
             position: fixed;
             bottom: 92px;
@@ -1159,7 +1155,6 @@
                                 console.error("Auto-delete sync error:", err);
                             }
                         }
-                        return;
                     }
                 }
 
@@ -2734,7 +2729,7 @@
                     let height = img.height;
                     const maxDim = 800;
 
-                    if (width > height && width > maxDim) {
+                    if (width >= height && width > maxDim) {
                         height = Math.round((height * maxDim) / width);
                         width = maxDim;
                     } else if (height > maxDim) {
@@ -2798,7 +2793,7 @@
             let height = videoElement.videoHeight || 480;
             const maxDim = 800;
 
-            if (width > height && width > maxDim) {
+            if (width >= height && width > maxDim) {
                 height = Math.round((height * maxDim) / width);
                 width = maxDim;
             } else if (height > maxDim) {
@@ -4006,14 +4001,13 @@
             return String(str).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
         }
 
-        // Pull-to-Refresh & Touch Gestures
         let ptrStartY = 0;
         let ptrCurrentY = 0;
         let isPulling = false;
         let isRefreshing = false;
         let hasVibrated = false;
 
-        const REFRESH_THRESHOLD = 70; // px
+        const REFRESH_THRESHOLD = 70;
 
         document.addEventListener('touchstart', (e) => {
             const mainContent = document.getElementById('main-content');
@@ -4123,7 +4117,7 @@
             }
             if (text) {
                 text.style.opacity = '0';
-                text.textContent = 'Pull down to refresh';
+                text.style.textContent = 'Pull down to refresh';
                 text.style.color = '#64748b';
             }
             ptrStartY = 0;
