@@ -4047,175 +4047,208 @@
             return String(str).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
         }
 
-        let ptrStartY = 0;
-        let ptrCurrentY = 0;
-        let isPulling = false;
-        let isRefreshing = false;
-        let hasVibrated = false;
+        // --- UPDATED PULL DOWN TO REFRESH LOGIC ---
+let ptrStartX = 0;
+let ptrStartY = 0;
+let ptrCurrentY = 0;
+let isPulling = false;
+let isRefreshing = false;
+let hasVibrated = false;
+let gestureAxis = null; // 'vertical', 'horizontal', or null
 
-        const REFRESH_THRESHOLD = 65;
-        const MAX_PULL_DISTANCE = 110;
+const REFRESH_THRESHOLD = 65;
+const MAX_PULL_DISTANCE = 110;
+const DIRECTION_LOCK_THRESHOLD = 8; // Pixels to move before deciding axis
 
-        document.addEventListener('touchstart', (e) => {
-            if (!isPtrAllowed() || isRefreshing) {
-                isPulling = false;
-                return;
-            }
+document.addEventListener('touchstart', (e) => {
+    if (!isPtrAllowed() || isRefreshing) {
+        isPulling = false;
+        return;
+    }
 
-            const mainContent = document.getElementById('main-content');
-            if (mainContent && mainContent.scrollTop <= 0) {
-                ptrStartY = e.touches[0].clientY;
-                ptrCurrentY = ptrStartY;
-                isPulling = true;
-                hasVibrated = false;
+    const mainContent = document.getElementById('main-content');
+    if (mainContent && mainContent.scrollTop <= 0) {
+        ptrStartX = e.touches[0].clientX;
+        ptrStartY = e.touches[0].clientY;
+        ptrCurrentY = ptrStartY;
+        isPulling = true;
+        hasVibrated = false;
+        gestureAxis = null; // Reset direction lock
 
-                const ptrContainer = document.getElementById('ptr-container');
-                const icon = document.getElementById('ptr-icon');
-                const text = document.getElementById('ptr-text');
+        const ptrContainer = document.getElementById('ptr-container');
+        const icon = document.getElementById('ptr-icon');
+        const text = document.getElementById('ptr-text');
 
-                if (ptrContainer) {
-                    ptrContainer.style.transition = 'none';
-                }
-                if (icon) {
-                    icon.className = 'fa-solid fa-arrow-down';
-                    icon.classList.remove('is-spinning');
-                    icon.style.transform = 'rotate(0deg)';
-                }
-                if (text) {
-                    text.textContent = 'Pull to refresh';
-                    text.style.color = '';
-                }
-            }
-        }, { passive: true });
+        if (ptrContainer) {
+            ptrContainer.style.transition = 'none';
+        }
+        if (icon) {
+            icon.className = 'fa-solid fa-arrow-down';
+            icon.classList.remove('is-spinning');
+            icon.style.transform = 'rotate(0deg)';
+        }
+        if (text) {
+            text.textContent = 'Pull to refresh';
+            text.style.color = '';
+        }
+    }
+}, { passive: true });
 
-        document.addEventListener('touchmove', (e) => {
-            if (!isPulling || isRefreshing || !isPtrAllowed()) return;
+document.addEventListener('touchmove', (e) => {
+    if (!isPulling || isRefreshing || !isPtrAllowed()) return;
 
-            const mainContent = document.getElementById('main-content');
-            if (!mainContent || mainContent.scrollTop > 0) {
+    const mainContent = document.getElementById('main-content');
+    if (!mainContent || mainContent.scrollTop > 0) {
+        isPulling = false;
+        resetPtrVisuals();
+        return;
+    }
+
+    const currentX = e.touches[0].clientX;
+    const currentY = e.touches[0].clientY;
+    const diffX = Math.abs(currentX - ptrStartX);
+    const diffY = currentY - ptrStartY;
+
+    // 1. Determine gesture axis before pulling starts
+    if (!gestureAxis) {
+        if (diffX > DIRECTION_LOCK_THRESHOLD || Math.abs(diffY) > DIRECTION_LOCK_THRESHOLD) {
+            if (diffX > Math.abs(diffY)) {
+                gestureAxis = 'horizontal';
                 isPulling = false;
                 resetPtrVisuals();
                 return;
+            } else {
+                gestureAxis = 'vertical';
             }
+        } else {
+            // Threshold not reached yet
+            return;
+        }
+    }
 
-            ptrCurrentY = e.touches[0].clientY;
-            const rawDiff = ptrCurrentY - ptrStartY;
+    // 2. Reject horizontal gestures or upward scroll
+    if (gestureAxis !== 'vertical' || diffY <= 0) {
+        resetPtrVisuals();
+        return;
+    }
 
-            if (rawDiff <= 0) {
-                resetPtrVisuals();
-                return;
+    ptrCurrentY = currentY;
+
+    // Resistance curve calculation
+    const pullDistance = Math.min(
+        MAX_PULL_DISTANCE,
+        diffY * 0.45 * (1 - (diffY / (diffY + 300)))
+    );
+
+    const ptrContainer = document.getElementById('ptr-container');
+    const icon = document.getElementById('ptr-icon');
+    const text = document.getElementById('ptr-text');
+
+    if (ptrContainer) {
+        const progress = Math.min(1, pullDistance / REFRESH_THRESHOLD);
+        ptrContainer.style.opacity = progress.toString();
+        ptrContainer.style.transform = `translateY(${pullDistance}px)`;
+
+        if (pullDistance >= REFRESH_THRESHOLD) {
+            if (icon) icon.style.transform = 'rotate(180deg)';
+            if (text) {
+                text.textContent = 'Release to refresh';
+                text.style.color = '#4f46e5';
             }
-
-            // Resistance curve: pull distance dampens progressively
-            const pullDistance = Math.min(
-                MAX_PULL_DISTANCE,
-                rawDiff * 0.45 * (1 - (rawDiff / (rawDiff + 300)))
-            );
-
-            const ptrContainer = document.getElementById('ptr-container');
-            const icon = document.getElementById('ptr-icon');
-            const text = document.getElementById('ptr-text');
-
-            if (ptrContainer) {
-                const progress = Math.min(1, pullDistance / REFRESH_THRESHOLD);
-                ptrContainer.style.opacity = progress.toString();
-                ptrContainer.style.transform = `translateY(${pullDistance}px)`;
-
-                if (pullDistance >= REFRESH_THRESHOLD) {
-                    if (icon) icon.style.transform = 'rotate(180deg)';
-                    if (text) {
-                        text.textContent = 'Release to refresh';
-                        text.style.color = '#4f46e5';
-                    }
-                    if (!hasVibrated) {
-                        if (state.soundEnabled && 'vibrate' in navigator) {
-                            try { navigator.vibrate(12); } catch (err) {}
-                        }
-                        hasVibrated = true;
-                    }
-                } else {
-                    const rotation = (pullDistance / REFRESH_THRESHOLD) * 180;
-                    if (icon) icon.style.transform = `rotate(${rotation}deg)`;
-                    if (text) {
-                        text.textContent = 'Pull to refresh';
-                        text.style.color = '';
-                    }
-                    hasVibrated = false;
+            if (!hasVibrated) {
+                if (state.soundEnabled && 'vibrate' in navigator) {
+                    try { navigator.vibrate(12); } catch (err) {}
                 }
+                hasVibrated = true;
             }
-        }, { passive: true });
-
-        document.addEventListener('touchend', async () => {
-            if (!isPulling || isRefreshing || !isPtrAllowed()) {
-                isPulling = false;
-                return;
-            }
-            isPulling = false;
-
-            const rawDiff = ptrCurrentY - ptrStartY;
-            const ptrContainer = document.getElementById('ptr-container');
-            const icon = document.getElementById('ptr-icon');
-            const text = document.getElementById('ptr-text');
-
-            if (ptrContainer) {
-                ptrContainer.style.transition = 'transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.2s ease';
-            }
-
-            if (rawDiff >= REFRESH_THRESHOLD * 1.6) {
-                isRefreshing = true;
-
-                if (ptrContainer) {
-                    ptrContainer.style.transform = 'translateY(42px)';
-                    ptrContainer.style.opacity = '1';
-                }
-                if (icon) {
-                    icon.className = 'fa-solid fa-circle-notch is-spinning';
-                    icon.style.transform = 'none';
-                }
-                if (text) {
-                    text.textContent = 'Updating...';
-                    text.style.color = '#4f46e5';
-                }
-
-                try {
-                    if (typeof window.startAppListeners === 'function') {
-                        window.startAppListeners();
-                    }
-                    await new Promise(r => setTimeout(r, 650));
-                    showToast('Data refreshed!', 'success');
-                } catch (err) {
-                    showToast('Refresh failed', 'error');
-                }
-
-                isRefreshing = false;
-            }
-
-            resetPtrVisuals();
-        });
-
-        function resetPtrVisuals() {
-            const ptrContainer = document.getElementById('ptr-container');
-            const icon = document.getElementById('ptr-icon');
-            const text = document.getElementById('ptr-text');
-
-            if (ptrContainer) {
-                ptrContainer.style.transform = 'translateY(-40px)';
-                ptrContainer.style.opacity = '0';
-            }
-            if (icon) {
-                icon.className = 'fa-solid fa-arrow-down';
-                icon.classList.remove('is-spinning');
-                icon.style.transform = 'rotate(0deg)';
-            }
+        } else {
+            const rotation = (pullDistance / REFRESH_THRESHOLD) * 180;
+            if (icon) icon.style.transform = `rotate(${rotation}deg)`;
             if (text) {
                 text.textContent = 'Pull to refresh';
                 text.style.color = '';
             }
-
-            ptrStartY = 0;
-            ptrCurrentY = 0;
             hasVibrated = false;
         }
+    }
+}, { passive: true });
+
+document.addEventListener('touchend', async () => {
+    if (!isPulling || isRefreshing || !isPtrAllowed() || gestureAxis !== 'vertical') {
+        isPulling = false;
+        gestureAxis = null;
+        resetPtrVisuals();
+        return;
+    }
+    isPulling = false;
+
+    const rawDiff = ptrCurrentY - ptrStartY;
+    const ptrContainer = document.getElementById('ptr-container');
+    const icon = document.getElementById('ptr-icon');
+    const text = document.getElementById('ptr-text');
+
+    if (ptrContainer) {
+        ptrContainer.style.transition = 'transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.2s ease';
+    }
+
+    if (rawDiff >= REFRESH_THRESHOLD * 1.6) {
+        isRefreshing = true;
+
+        if (ptrContainer) {
+            ptrContainer.style.transform = 'translateY(42px)';
+            ptrContainer.style.opacity = '1';
+        }
+        if (icon) {
+            icon.className = 'fa-solid fa-circle-notch is-spinning';
+            icon.style.transform = 'none';
+        }
+        if (text) {
+            text.textContent = 'Updating...';
+            text.style.color = '#4f46e5';
+        }
+
+        try {
+            if (typeof window.startAppListeners === 'function') {
+                window.startAppListeners();
+            }
+            await new Promise(r => setTimeout(r, 650));
+            showToast('Data refreshed!', 'success');
+        } catch (err) {
+            showToast('Refresh failed', 'error');
+        }
+
+        isRefreshing = false;
+    }
+
+    gestureAxis = null;
+    resetPtrVisuals();
+});
+
+function resetPtrVisuals() {
+    const ptrContainer = document.getElementById('ptr-container');
+    const icon = document.getElementById('ptr-icon');
+    const text = document.getElementById('ptr-text');
+
+    if (ptrContainer) {
+        ptrContainer.style.transform = 'translateY(-40px)';
+        ptrContainer.style.opacity = '0';
+    }
+    if (icon) {
+        icon.className = 'fa-solid fa-arrow-down';
+        icon.classList.remove('is-spinning');
+        icon.style.transform = 'rotate(0deg)';
+    }
+    if (text) {
+        text.textContent = 'Pull to refresh';
+        text.style.color = '';
+    }
+
+    ptrStartX = 0;
+    ptrStartY = 0;
+    ptrCurrentY = 0;
+    hasVibrated = false;
+    gestureAxis = null;
+}
 
         window.addEventListener('resize', syncPersistentNavbar);
         window.addEventListener('orientationchange', () => setTimeout(syncPersistentNavbar, 100));
