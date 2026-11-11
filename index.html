@@ -176,7 +176,6 @@
             overflow-y: auto;
             -webkit-overflow-scrolling: touch;
             overscroll-behavior-y: contain;
-            /* Prevents whole-page bounce */
             position: relative;
             padding-top: 8px;
             padding-bottom: 140px;
@@ -621,7 +620,20 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getFirestore, collection, getDocs, setDoc, doc, deleteDoc, updateDoc, onSnapshot, query, orderBy, runTransaction } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import {
+            getFirestore,
+            enableIndexedDbPersistence,
+            collection,
+            getDocs,
+            setDoc,
+            doc,
+            deleteDoc,
+            updateDoc,
+            onSnapshot,
+            query,
+            orderBy,
+            runTransaction
+        } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
         import { getStorage, ref as storageRef, uploadString, getDownloadURL, deleteObject } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
 
         const firebaseConfig = {
@@ -636,6 +648,15 @@
         const appInstance = initializeApp(firebaseConfig);
         const db = getFirestore(appInstance);
         const storage = getStorage(appInstance);
+
+        // Enable IndexedDB offline persistence for Firestore
+        enableIndexedDbPersistence(db).catch((err) => {
+            if (err.code === 'failed-precondition') {
+                console.warn("Firestore persistence failed: Multiple tabs open.");
+            } else if (err.code === 'unimplemented') {
+                console.warn("Firestore persistence not supported in this browser.");
+            }
+        });
 
         window.FB = { db, storage, collection, getDocs, setDoc, doc, deleteDoc, updateDoc, onSnapshot, query, orderBy, runTransaction, storageRef, uploadString, getDownloadURL, deleteObject };
 
@@ -685,7 +706,6 @@
         function lsSet(key, value) { try { localStorage.setItem(key, value); } catch (e) { } }
         function lsRemove(key) { try { localStorage.removeItem(key); } catch (e) { } }
 
-        // Never keep the password in localStorage
         function persistCurrentUser(user) {
             if (!user) return;
             const { password, ...safe } = user;
@@ -926,6 +946,7 @@
         async function requestSystemRingerPermission() {
             if (!('Notification' in window)) {
                 showToast('System notifications are not supported on this browser.', 'error');
+                showToast('System notifications are not supported on this browser.', 'error');
                 return;
             }
             const perm = await Notification.requestPermission();
@@ -938,11 +959,6 @@
             render();
         }
 
-        /*
-         * Atomic wallet adjustment (Firestore transaction).
-         * delta > 0 : money coming in  -> clears "excess due" first, remainder goes to wallet
-         * delta < 0 : money going out  -> wallet absorbs it, shortfall becomes "excess due"
-         */
         async function adjustWallet(userId, delta) {
             const { db, doc, runTransaction } = window.FB;
             const ref = doc(db, 'users', userId);
@@ -1062,7 +1078,7 @@
                 state.justFinishedLoading = true;
                 render();
             }
-        }, 6000);
+        }, 5000);
 
         const savedUser = lsGet(LOCAL_STORAGE_KEY);
         if (savedUser) {
@@ -1113,7 +1129,7 @@
                 silent: false,
                 tag: 'cf-notif-' + Date.now()
             };
-            try { new Notification(title, options); } catch (e) { /* e.g. Android Chrome requires a service worker */ }
+            try { new Notification(title, options); } catch (e) { }
         }
 
         async function createAppNotification({ recipientId = null, recipientRole = null, type, title, message, amount = 0, triggeredBy = '' }) {
@@ -1132,7 +1148,6 @@
             }
         }
 
-        // Re-render for incoming Firestore data without wiping the form, scroll position or focus
         function softRender() {
             if (state.activeTab === 'add') {
                 syncPersistentHeader();
@@ -1164,7 +1179,7 @@
 
         window.startAppListeners = function () {
             if (!window.FB) return;
-            if (window.__listenersStarted) return;   // never stack duplicate listeners
+            if (window.__listenersStarted) return;
             window.__listenersStarted = true;
             const { db, collection, onSnapshot, doc, setDoc, deleteDoc } = window.FB;
 
@@ -1226,11 +1241,9 @@
             activeUnsubscribers.push(onSnapshot(collection(db, 'expenses'), async (snapshot) => {
                 let allExpenses = snapshot.docs.map(docSnap => docSnap.data());
 
-                // Auto-delete runs from an admin session only, to avoid races between devices
                 if (state.appSettings && state.appSettings.autoDeleteEnabled && state.currentUser && state.currentUser.role === 'admin') {
                     const now = new Date();
                     const cutoffDate = new Date(now.getFullYear(), now.getMonth() - 2, now.getDate());
-
                     const expiredExpenses = allExpenses.filter(exp => exp.date && parseLocal(exp.date) < cutoffDate);
 
                     for (const exp of expiredExpenses) {
@@ -1281,7 +1294,7 @@
                             console.error("Permanent wipe error:", e);
                             stillPending.push(item);
                         }
-                        continue;   // was `return`, which aborted processing of the remaining users
+                        continue;
                     }
                     stillPending.push(item);
                 }
@@ -1683,7 +1696,6 @@
             root.innerHTML = `
                 <div class="fixed inset-0 z-[60] bg-slate-950/60 backdrop-blur-sm flex items-center justify-center p-4 animate-fadeIn">
                     <div class="ios-glass-modal bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 max-w-sm w-full shadow-2xl space-y-4 max-h-[85vh] flex flex-col">
-
                         <div class="flex items-center justify-between shrink-0 pb-1 border-b border-slate-100 dark:border-slate-800/80">
                             <div>
                                 <h3 class="font-bold text-base text-slate-900 dark:text-white">Manage Wallet</h3>
@@ -1736,11 +1748,9 @@
                             ` : userTxns.map(t => {
                 const isUndo = t.type === 'undo_refund' || (t.title && t.title.toLowerCase().includes('undo'));
                 const isShortage = t.type === 'shortage';
-
                 const badgeBg = isUndo ? 'bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400'
                     : (isShortage ? 'bg-rose-50 dark:bg-rose-950/60 text-rose-600 dark:text-rose-400'
                         : 'bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400');
-
                 const amountColor = isShortage ? 'text-rose-600 dark:text-rose-400' : 'text-emerald-600 dark:text-emerald-400';
 
                 return `
@@ -1756,11 +1766,7 @@
                                                 ${isShortage ? '-' : '+'}${formatCurrency(t.amount)}
                                             </span>
                                         </div>
-                                        ${t.subtitle ? `
-                                            <p class="text-[10px] text-emerald-700 dark:text-emerald-300 font-medium pl-8 break-words">
-                                                ${escapeHtml(t.subtitle)}
-                                            </p>
-                                        ` : ''}
+                                        ${t.subtitle ? `<p class="text-[10px] text-emerald-700 dark:text-emerald-300 font-medium pl-8 break-words">${escapeHtml(t.subtitle)}</p>` : ''}
                                         <div class="flex items-center justify-between text-[10px] text-slate-500 dark:text-slate-400 pl-8 pt-0.5">
                                             <span>${formatTimestamp(t.timestamp)}</span>
                                             <span class="italic text-slate-400 dark:text-slate-500">By ${escapeHtml(t.performedBy)}</span>
@@ -1878,17 +1884,14 @@
                 async () => {
                     const { db, doc, deleteDoc } = window.FB;
                     const userExpenses = state.expenses.filter(e => e.userId === userId);
-
                     if (userExpenses.length === 0) {
                         showToast('No expenses found for this user.', 'info');
                         return;
                     }
-
                     for (const exp of userExpenses) {
                         try { await deleteDoc(doc(db, 'expenses', exp.id)); }
                         catch (err) { console.error("Failed to delete user expense:", err); }
                     }
-
                     showToast(`Cleared expenses for ${userName}.`, 'success');
                 }
             );
@@ -2037,13 +2040,11 @@
 
         function switchTab(tab, keepEditState = false) {
             const prevIndex = tabOrder.indexOf(state.activeTab);
-
             if (tab === 'summary') {
                 state.activeTab = (state.currentUser && state.currentUser.role === 'admin') ? 'admin' : 'analytics';
             } else {
                 state.activeTab = tab;
             }
-
             const nextIndex = tabOrder.indexOf(state.activeTab);
             state.slideDirection = nextIndex >= prevIndex ? 'animate-slide-right' : 'animate-slide-left';
 
@@ -2082,7 +2083,6 @@
             }
 
             syncPersistentHeader();
-
             const showPtr = isPtrAllowed();
 
             app.innerHTML = `
@@ -2266,7 +2266,6 @@
 
             try {
                 const existingReq = state.passwordRequests.find(r => r.username.toLowerCase() === username && r.status === 'pending');
-                // crypto-grade code instead of Math.random
                 const arr = new Uint32Array(1);
                 crypto.getRandomValues(arr);
                 const code = existingReq ? existingReq.code : String(100000 + (arr[0] % 900000));
@@ -2396,7 +2395,6 @@
                 if (isAdmin && state.filterUser !== 'All' && exp.userId !== state.filterUser) return false;
                 if (state.filterCategory !== 'All' && exp.category !== state.filterCategory) return false;
                 if (state.filterMonth !== 'All' && !(exp.date || '').startsWith(state.filterMonth)) return false;
-
                 if (state.filterStartDate && exp.date < state.filterStartDate) return false;
                 if (state.filterEndDate && exp.date > state.filterEndDate) return false;
 
@@ -2763,7 +2761,7 @@
                 : `${base} bg-slate-50/80 dark:bg-slate-800/80 text-slate-700 dark:text-slate-300 border-slate-200/80 dark:border-slate-700`;
         }
 
-        function resizeImageToDataUrl(source, srcW, srcH, drawFn) {
+        function resizeImageToDataUrl(source, srcW, srcH) {
             const maxDim = 800;
             let width = srcW, height = srcH;
             if (width >= height && width > maxDim) {
@@ -2904,7 +2902,7 @@
             if (clientContainer) clientContainer.classList.toggle('hidden', cat === 'Office');
         }
 
-        const MAX_INLINE_BILL_CHARS = 900000; // Firestore documents are limited to ~1 MB
+        const MAX_INLINE_BILL_CHARS = 900000;
 
         async function handleExpenseSubmit(event) {
             event.preventDefault();
@@ -2940,13 +2938,15 @@
                         try { await deleteObject(storageRef(storage, `bills/${expenseId}.jpg`)); } catch (e) { }
                     }
                 } else if (state.tempBillData !== null && state.tempBillData !== undefined) {
-                    if (state.tempBillData.startsWith('data:image')) {
+                    if (!navigator.onLine) {
+                        billUrl = state.tempBillData;
+                    } else if (state.tempBillData.startsWith('data:image')) {
                         try {
                             const fileRef = storageRef(storage, `bills/${expenseId}.jpg`);
                             await uploadString(fileRef, state.tempBillData, 'data_url');
                             billUrl = await getDownloadURL(fileRef);
                         } catch (storageErr) {
-                            console.warn("Storage upload failed, falling back to inline base64:", storageErr);
+                            console.warn("Storage upload failed, falling back to offline inline base64:", storageErr);
                             if (state.tempBillData.length > MAX_INLINE_BILL_CHARS) {
                                 showToast('Bill image is too large to save. Please use a smaller image.', 'error');
                                 if (submitBtn) submitBtn.disabled = false;
@@ -2968,7 +2968,7 @@
                 let walletResult = null;
                 if (ownerUser.role !== 'admin') {
                     const oldAmount = existingExp ? Number(existingExp.amount) : 0;
-                    walletDelta = round2(-(amount - oldAmount));   // new expense: -amount; edit: -(difference)
+                    walletDelta = round2(-(amount - oldAmount));
                     if (walletDelta !== 0) {
                         walletOwnerId = ownerUser.id;
                         walletResult = await adjustWallet(walletOwnerId, walletDelta);
@@ -2985,7 +2985,6 @@
                         createdAt: existingExp ? existingExp.createdAt : new Date().toISOString()
                     });
                 } catch (saveErr) {
-                    // keep wallet and expenses consistent if the expense write fails
                     if (walletOwnerId) {
                         try { await adjustWallet(walletOwnerId, -walletDelta); } catch (e) { }
                     }
@@ -3012,7 +3011,7 @@
                 switchTab('home');
             } catch (error) {
                 console.error("Failed:", error);
-                showToast('Failed to save. Please check connection.', 'error');
+                showToast('Failed to save. Record will sync when online.', 'error');
                 if (submitBtn) submitBtn.disabled = false;
             }
         }
@@ -3635,7 +3634,6 @@
                     const userToRemove = state.users.find(u => u.id === userId);
                     if (!userToRemove) return;
                     try {
-                        // Inline base64 bills would blow the 1 MB document limit; keep only hosted bill URLs
                         const userExps = state.expenses
                             .filter(e => e.userId === userId)
                             .map(e => (e.billAttachment && String(e.billAttachment).startsWith('data:')) ? { ...e, billAttachment: null } : e);
@@ -3900,7 +3898,6 @@
             const newPass = document.getElementById('new-pass').value;
             const confirmNewPass = document.getElementById('confirm-new-pass').value;
 
-            // the logged-in user's own account (previously: the first admin found)
             const me = state.users.find(u => u.id === state.currentUser.id);
             if (!me || current !== me.password) {
                 showToast('Current password incorrect.', 'error');
@@ -3952,7 +3949,6 @@
                 return;
             }
             const headers = ['ID', 'User', 'Title', 'Category', 'Client & Place', 'Amount (INR)', 'Date', 'Notes', 'Has Bill'];
-            // quote every cell, double embedded quotes, neutralise spreadsheet formulas (=, +, -, @)
             const safe = v => {
                 let s = String(v ?? '');
                 if (/^[=+\-@\t\r]/.test(s)) s = "'" + s;
@@ -3962,7 +3958,6 @@
                 headers.map(safe).join(','),
                 ...dataArray.map(e => [e.id, e.userName, e.title, e.category, e.clientNamePlace, e.amount, e.date, e.notes, e.billAttachment ? 'Yes' : 'No'].map(safe).join(','))
             ];
-            // Blob instead of a data: URI, so '#' and other characters no longer truncate the file
             const blob = new Blob(['\ufeff' + lines.join('\r\n')], { type: 'text/csv;charset=utf-8' });
             const url = URL.createObjectURL(blob);
             const link = document.createElement('a');
@@ -4006,7 +4001,7 @@
             return String(str).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
         }
 
-        // ---------- Hardened Strict Pull-Down-to-Refresh ----------
+        // ---------- STRICT TOP-DOWN PULL TO REFRESH ----------
         let ptrStartX = 0;
         let ptrStartY = 0;
         let ptrCurrentY = 0;
@@ -4031,7 +4026,6 @@
             }
 
             const mainContent = document.getElementById('main-content');
-            // Strictly verify scroll position is at absolute top (<= 0)
             if (mainContent && mainContent.scrollTop <= 0) {
                 ptrStartX = e.touches[0].clientX;
                 ptrStartY = e.touches[0].clientY;
@@ -4073,13 +4067,11 @@
             const rawDiffX = currentX - ptrStartX;
             const rawDiffY = currentY - ptrStartY;
 
-            // Strict direction lock: cancel if user starts scrolling upwards or horizontally
             if (!gestureAxis) {
                 const absX = Math.abs(rawDiffX);
                 const absY = Math.abs(rawDiffY);
 
                 if (absX > DIRECTION_LOCK_THRESHOLD || absY > DIRECTION_LOCK_THRESHOLD) {
-                    // Cancel if horizontal intent OR if movement is upward (finger moving up, diffY < 0)
                     if (absX >= absY || rawDiffY <= 0) {
                         gestureAxis = 'cancelled';
                         isPulling = false;
@@ -4092,7 +4084,6 @@
                 }
             }
 
-            // Abort immediately if finger reverses upward past start point
             if (gestureAxis !== 'downward-pull' || rawDiffY <= 0) {
                 resetPtrVisuals();
                 return;
@@ -4177,6 +4168,50 @@
 
             gestureAxis = null;
             resetPtrVisuals();
+        });
+
+        function resetPtrVisuals() {
+            const ptrContainer = document.getElementById('ptr-container');
+            const icon = document.getElementById('ptr-icon');
+            const text = document.getElementById('ptr-text');
+
+            if (ptrContainer) {
+                ptrContainer.style.transform = 'translateY(-40px)';
+                ptrContainer.style.opacity = '0';
+            }
+            if (icon) {
+                icon.className = 'fa-solid fa-arrow-down';
+                icon.style.transform = 'rotate(0deg)';
+            }
+            if (text) {
+                text.textContent = 'Pull to refresh';
+                text.style.color = '';
+            }
+
+            ptrStartX = 0;
+            ptrStartY = 0;
+            ptrCurrentY = 0;
+            hasVibrated = false;
+            gestureAxis = null;
+        }
+
+        window.addEventListener('resize', syncPersistentNavbar);
+        window.addEventListener('orientationchange', () => setTimeout(syncPersistentNavbar, 100));
+
+        // Service Worker registration for PWA offline caching
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js').catch((err) => {
+                    console.warn('Service worker registration failed:', err);
+                });
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            render();
+            if (window.__listenersPending && typeof window.startAppListeners === 'function') {
+                window.startAppListeners();
+            }
         });
     </script>
 </body>
