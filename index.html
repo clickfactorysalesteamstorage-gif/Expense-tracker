@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en" class="h-full">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,9 +8,11 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <title>Click Factory Expense Tracker</title>
-    <link rel="icon" type="image/gif" href="https://clickfactoryphotography.com/wp-content/uploads/2022/04/crop-logo.gif">
+    <link rel="icon" type="image/gif"
+        href="https://clickfactoryphotography.com/wp-content/uploads/2022/04/crop-logo.gif">
     <link rel="apple-touch-icon" href="https://clickfactoryphotography.com/wp-content/uploads/2022/04/crop-logo.gif">
-    <link rel="manifest" href="data:application/manifest+json;charset=utf-8,%7B%22name%22%3A%22Expense%20tracker%22%2C%22short_name%22%3A%22ExpenseTracker%22%2C%22start_url%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22orientation%22%3A%22any%22%2C%22background_color%22%3A%22%23020617%22%2C%22theme_color%22%3A%22%23020617%22%2C%22icons%22%3A%5B%7B%22src%22%3A%22https%3A%2F%2Fclickfactoryphotography.com%2Fwp-content%2Fuploads%2F2022%2F04%2Fcrop-logo.gif%22%2C%22sizes%22%3A%22192x192%20512x512%22%2C%22type%22%3A%22image%2Fgif%22%7D%5D%7D">
+    <link rel="manifest"
+        href="data:application/manifest+json;charset=utf-8,%7B%22name%22%3A%22Expense%20tracker%22%2C%22short_name%22%3A%22ExpenseTracker%22%2C%22start_url%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22orientation%22%3A%22any%22%2C%22background_color%22%3A%22%23020617%22%2C%22theme_color%22%3A%22%23020617%22%2C%22icons%22%3A%5B%7B%22src%22%3A%22https%3A%2F%2Fclickfactoryphotography.com%2Fwp-content%2Fuploads%2F2022%2F04%2Fcrop-logo.gif%22%2C%22sizes%22%3A%22192x192%20512x512%22%2C%22type%22%3A%22image%2Fgif%22%7D%5D%7D">
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -24,9 +27,9 @@
             }
         };
 
-        (function() {
+        (function () {
             let savedTheme = 'system';
-            try { savedTheme = localStorage.getItem('click_factory_theme_v1') || 'system'; } catch (e) {}
+            try { savedTheme = localStorage.getItem('click_factory_theme_v1') || 'system'; } catch (e) { }
             const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
             const isDark = savedTheme === 'dark' || (savedTheme === 'system' && prefersDark);
             if (isDark) {
@@ -39,49 +42,120 @@
         })();
     </script>
     <style>
-        *, ::before, ::after { box-sizing: border-box; }
+        *,
+        ::before,
+        ::after {
+            box-sizing: border-box;
+        }
 
         @media (min-width: 769px) and (hover: hover) {
-            * { scrollbar-width: thin; scrollbar-color: rgba(148, 163, 184, 0.35) transparent; }
-            .dark * { scrollbar-color: rgba(99, 102, 241, 0.35) transparent; }
-            ::-webkit-scrollbar { width: 6px; height: 6px; }
-            ::-webkit-scrollbar-track { background: transparent; margin: 6px 0; }
-            ::-webkit-scrollbar-thumb { background-color: rgba(148, 163, 184, 0.4); border-radius: 9999px; border: 1.5px solid transparent; background-clip: content-box; transition: background-color 0.2s ease; }
-            ::-webkit-scrollbar-thumb:hover { background-color: rgba(99, 102, 241, 0.75); }
-            .dark ::-webkit-scrollbar-thumb { background-color: rgba(148, 163, 184, 0.25); }
-            .dark ::-webkit-scrollbar-thumb:hover { background-color: rgba(129, 140, 248, 0.65); }
+            * {
+                scrollbar-width: thin;
+                scrollbar-color: rgba(148, 163, 184, 0.35) transparent;
+            }
+
+            .dark * {
+                scrollbar-color: rgba(99, 102, 241, 0.35) transparent;
+            }
+
+            ::-webkit-scrollbar {
+                width: 6px;
+                height: 6px;
+            }
+
+            ::-webkit-scrollbar-track {
+                background: transparent;
+                margin: 6px 0;
+            }
+
+            ::-webkit-scrollbar-thumb {
+                background-color: rgba(148, 163, 184, 0.4);
+                border-radius: 9999px;
+                border: 1.5px solid transparent;
+                background-clip: content-box;
+                transition: background-color 0.2s ease;
+            }
+
+            ::-webkit-scrollbar-thumb:hover {
+                background-color: rgba(99, 102, 241, 0.75);
+            }
+
+            .dark ::-webkit-scrollbar-thumb {
+                background-color: rgba(148, 163, 184, 0.25);
+            }
+
+            .dark ::-webkit-scrollbar-thumb:hover {
+                background-color: rgba(129, 140, 248, 0.65);
+            }
         }
 
-        @media (max-width: 768px), (hover: none) {
-            * { -ms-overflow-style: none !important; scrollbar-width: none !important; }
-            *::-webkit-scrollbar { display: none !important; width: 0 !important; height: 0 !important; }
+        @media (max-width: 768px),
+        (hover: none) {
+            * {
+                -ms-overflow-style: none !important;
+                scrollbar-width: none !important;
+            }
+
+            *::-webkit-scrollbar {
+                display: none !important;
+                width: 0 !important;
+                height: 0 !important;
+            }
         }
 
-        .no-scrollbar::-webkit-scrollbar { display: none !important; }
-        .no-scrollbar { -ms-overflow-style: none !important; scrollbar-width: none !important; }
+        .no-scrollbar::-webkit-scrollbar {
+            display: none !important;
+        }
 
-        html, body {
+        .no-scrollbar {
+            -ms-overflow-style: none !important;
+            scrollbar-width: none !important;
+        }
+
+        html,
+        body {
             font-family: 'Inter', sans-serif;
             -webkit-tap-highlight-color: transparent;
             -webkit-font-smoothing: antialiased;
-            margin: 0; padding: 0; width: 100%;
-            height: 100%; height: 100dvh;
-            overflow: hidden; word-wrap: break-word; overflow-wrap: break-word;
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            height: 100dvh;
+            overflow: hidden;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
             background-color: #f8fafc;
             transition: background-color 0.25s ease, color 0.25s ease;
         }
-        html.dark, .dark body { background-color: #020617; }
-        input[type="date"], select { appearance: none; -webkit-appearance: none; }
+
+        html.dark,
+        .dark body {
+            background-color: #020617;
+        }
+
+        input[type="date"],
+        select {
+            appearance: none;
+            -webkit-appearance: none;
+        }
 
         .app-container {
-            width: 100%; max-width: 100%;
-            flex: 1; min-height: 0;
+            width: 100%;
+            max-width: 100%;
+            flex: 1;
+            min-height: 0;
             overflow: hidden;
-            background-color: #f8fafc; display: flex; flex-direction: column;
+            background-color: #f8fafc;
+            display: flex;
+            flex-direction: column;
             padding-top: 0;
             transition: background-color 0.25s ease, color 0.25s ease;
         }
-        .dark .app-container { background-color: #020617; }
+
+        .dark .app-container {
+            background-color: #020617;
+        }
 
         .ios-header {
             flex-shrink: 0;
@@ -92,7 +166,10 @@
             z-index: 45;
             transition: background-color 0.25s ease;
         }
-        .dark .ios-header { background-color: #020617; }
+
+        .dark .ios-header {
+            background-color: #020617;
+        }
 
         #main-content {
             flex: 1;
@@ -105,99 +182,268 @@
         }
 
         #ptr-container {
-            position: absolute; top: 12px; left: 0; right: 0;
-            display: flex; align-items: center; justify-content: center;
-            z-index: 50; pointer-events: none; opacity: 0;
+            position: absolute;
+            top: 12px;
+            left: 0;
+            right: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 50;
+            pointer-events: none;
+            opacity: 0;
             transform: translateY(-40px);
             transition: opacity 0.2s ease, transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
         }
+
         .ptr-pill {
-            display: inline-flex; align-items: center; gap: 8px;
-            padding: 6px 14px; border-radius: 9999px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 14px;
+            border-radius: 9999px;
             background: rgba(255, 255, 255, 0.9);
             border: 1px solid rgba(226, 232, 240, 0.8);
             box-shadow: 0 4px 14px -2px rgba(0, 0, 0, 0.08), 0 2px 6px -1px rgba(0, 0, 0, 0.04);
-            backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
             transition: all 0.2s ease;
         }
+
         .dark .ptr-pill {
             background: rgba(15, 23, 42, 0.85);
             border-color: rgba(51, 65, 85, 0.7);
             box-shadow: 0 4px 16px -2px rgba(0, 0, 0, 0.5);
         }
+
         #ptr-icon {
-            font-size: 13px; color: #6366f1;
+            font-size: 13px;
+            color: #6366f1;
             transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
-            display: inline-flex; align-items: center; justify-content: center;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
         }
-        #ptr-icon.is-spinning { animation: simple-spin 0.7s linear infinite; }
-        #ptr-text { font-size: 11px; font-weight: 600; color: #475569; letter-spacing: -0.01em; transition: color 0.2s ease; }
-        .dark #ptr-text { color: #cbd5e1; }
+
+        #ptr-icon.is-spinning {
+            animation: simple-spin 0.7s linear infinite;
+        }
+
+        #ptr-text {
+            font-size: 11px;
+            font-weight: 600;
+            color: #475569;
+            letter-spacing: -0.01em;
+            transition: color 0.2s ease;
+        }
+
+        .dark #ptr-text {
+            color: #cbd5e1;
+        }
 
         #toast-container {
-            position: fixed; bottom: 92px; left: 50%;
+            position: fixed;
+            bottom: 92px;
+            left: 50%;
             transform: translateX(-50%);
-            z-index: 70; display: flex; flex-direction: column; gap: 8px;
-            pointer-events: none; width: 90%; max-width: 380px;
+            z-index: 70;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            pointer-events: none;
+            width: 90%;
+            max-width: 380px;
         }
 
-        .logo-container img { width: auto; height: auto; max-width: 100%; max-height: 100%; object-fit: contain; object-position: center; }
-        .custom-date-wrapper { position: relative; background: #f8fafc; }
-        .dark .custom-date-wrapper { background: #1e293b; }
-        .custom-date-wrapper input[type="date"] { position: relative; color: transparent; width: 100%; }
+        .logo-container img {
+            width: auto;
+            height: auto;
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+            object-position: center;
+        }
+
+        .custom-date-wrapper {
+            position: relative;
+            background: #f8fafc;
+        }
+
+        .dark .custom-date-wrapper {
+            background: #1e293b;
+        }
+
+        .custom-date-wrapper input[type="date"] {
+            position: relative;
+            color: transparent;
+            width: 100%;
+        }
+
         .custom-date-wrapper input[type="date"]:focus,
-        .custom-date-wrapper input[type="date"]:valid { color: inherit; }
-        .custom-date-placeholder { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); pointer-events: none; color: #94a3b8; font-size: 11px; }
-        .custom-date-wrapper input[type="date"]:focus + .custom-date-placeholder,
-        .custom-date-wrapper input[type="date"]:valid + .custom-date-placeholder { display: none; }
+        .custom-date-wrapper input[type="date"]:valid {
+            color: inherit;
+        }
 
-        @keyframes simple-spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        .simple-spinner { border: 3px solid rgba(99, 102, 241, 0.15); border-top-color: #4f46e5; border-radius: 50%; animation: simple-spin 0.8s linear infinite; }
+        .custom-date-placeholder {
+            position: absolute;
+            left: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            pointer-events: none;
+            color: #94a3b8;
+            font-size: 11px;
+        }
 
-        @keyframes homeZoomOut { 0% { opacity: 0; transform: scale(1.04); } 100% { opacity: 1; transform: scale(1); } }
-        .animate-fadeIn { animation: homeZoomOut 0.25s ease; }
-        .animate-zoom-out-enter { animation: homeZoomOut 0.35s cubic-bezier(0.22, 1, 0.36, 1); }
+        .custom-date-wrapper input[type="date"]:focus+.custom-date-placeholder,
+        .custom-date-wrapper input[type="date"]:valid+.custom-date-placeholder {
+            display: none;
+        }
+
+        @keyframes simple-spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .simple-spinner {
+            border: 3px solid rgba(99, 102, 241, 0.15);
+            border-top-color: #4f46e5;
+            border-radius: 50%;
+            animation: simple-spin 0.8s linear infinite;
+        }
+
+        @keyframes homeZoomOut {
+            0% {
+                opacity: 0;
+                transform: scale(1.04);
+            }
+
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .animate-fadeIn {
+            animation: homeZoomOut 0.25s ease;
+        }
+
+        .animate-zoom-out-enter {
+            animation: homeZoomOut 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+        }
 
         @keyframes pulse-ring {
-            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(79, 70, 229, 0.7); }
-            70% { transform: scale(1); box-shadow: 0 0 0 8px rgba(79, 70, 229, 0); }
-            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(79, 70, 229, 0); }
-        }
-        .volume-pulse-badge { animation: pulse-ring 1.2s infinite; }
+            0% {
+                transform: scale(0.95);
+                box-shadow: 0 0 0 0 rgba(79, 70, 229, 0.7);
+            }
 
-        @keyframes slideInFromRight { 0% { transform: translateX(24px); opacity: 0; } 100% { transform: translateX(0); opacity: 1; } }
-        @keyframes slideInFromLeft { 0% { transform: translateX(-24px); opacity: 0; } 100% { transform: translateX(0); opacity: 1; } }
-        .animate-slide-right { animation: slideInFromRight 0.28s cubic-bezier(0.16, 1, 0.3, 1); }
-        .animate-slide-left { animation: slideInFromLeft 0.28s cubic-bezier(0.16, 1, 0.3, 1); }
+            70% {
+                transform: scale(1);
+                box-shadow: 0 0 0 8px rgba(79, 70, 229, 0);
+            }
+
+            100% {
+                transform: scale(0.95);
+                box-shadow: 0 0 0 0 rgba(79, 70, 229, 0);
+            }
+        }
+
+        .volume-pulse-badge {
+            animation: pulse-ring 1.2s infinite;
+        }
+
+        @keyframes slideInFromRight {
+            0% {
+                transform: translateX(24px);
+                opacity: 0;
+            }
+
+            100% {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideInFromLeft {
+            0% {
+                transform: translateX(-24px);
+                opacity: 0;
+            }
+
+            100% {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .animate-slide-right {
+            animation: slideInFromRight 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .animate-slide-left {
+            animation: slideInFromLeft 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+        }
 
         .liquid-nav-container {
-            position: fixed; bottom: max(env(safe-area-inset-bottom, 14px), 18px);
-            left: 0; right: 0; display: flex; justify-content: center;
-            padding: 0 16px; z-index: 40; pointer-events: none;
+            position: fixed;
+            bottom: max(env(safe-area-inset-bottom, 14px), 18px);
+            left: 0;
+            right: 0;
+            display: flex;
+            justify-content: center;
+            padding: 0 16px;
+            z-index: 40;
+            pointer-events: none;
         }
+
         .liquid-dock {
-            position: relative; display: flex; align-items: center; justify-content: space-around;
-            width: 100%; max-width: 440px; height: 68px; padding: 6px 8px;
-            border-radius: 9999px; pointer-events: auto; user-select: none; -webkit-user-select: none;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: space-around;
+            width: 100%;
+            max-width: 440px;
+            height: 68px;
+            padding: 6px 8px;
+            border-radius: 9999px;
+            pointer-events: auto;
+            user-select: none;
+            -webkit-user-select: none;
             background: rgba(255, 255, 255, 0.85);
-            backdrop-filter: blur(36px) saturate(210%); -webkit-backdrop-filter: blur(36px) saturate(210%);
+            backdrop-filter: blur(36px) saturate(210%);
+            -webkit-backdrop-filter: blur(36px) saturate(210%);
             border: 1px solid rgba(255, 255, 255, 0.9);
             box-shadow: 0 24px 48px -12px rgba(0, 0, 0, 0.16), 0 8px 20px -4px rgba(0, 0, 0, 0.08), inset 0 1.5px 3px rgba(255, 255, 255, 1), inset 0 -2px 3px rgba(0, 0, 0, 0.06), inset 0 0 12px rgba(255, 255, 255, 0.5);
             transition: background 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
         }
+
         .dark .liquid-dock {
             background: rgba(15, 23, 42, 0.85);
             border: 1px solid rgba(255, 255, 255, 0.16);
             box-shadow: 0 28px 52px -10px rgba(0, 0, 0, 0.65), 0 10px 24px -4px rgba(0, 0, 0, 0.4), inset 0 1.5px 3px rgba(255, 255, 255, 0.22), inset 0 -1.5px 3px rgba(0, 0, 0, 0.55), inset 0 0 15px rgba(99, 102, 241, 0.15);
         }
+
         .liquid-bubble {
-            position: absolute; top: 5px; bottom: 5px; left: 0; border-radius: 9999px;
-            z-index: 1; pointer-events: none; will-change: transform, width; transform: translateX(0);
+            position: absolute;
+            top: 5px;
+            bottom: 5px;
+            left: 0;
+            border-radius: 9999px;
+            z-index: 1;
+            pointer-events: none;
+            will-change: transform, width;
+            transform: translateX(0);
             background: linear-gradient(135deg, rgba(240, 244, 255, 0.95) 0%, rgba(210, 224, 255, 0.75) 100%);
             border: 1px solid rgba(255, 255, 255, 1);
             box-shadow: 0 8px 20px -3px rgba(26, 98, 255, 0.18), inset 0 1.5px 2px rgba(255, 255, 255, 1), inset 0 -3px 6px rgba(26, 98, 255, 0.12);
             transition: transform 0.4s cubic-bezier(0.25, 1, 0.35, 1), width 0.35s cubic-bezier(0.25, 1, 0.35, 1);
         }
+
         .dark .liquid-bubble {
             background: linear-gradient(135deg, rgba(99, 102, 241, 0.55) 0%, rgba(79, 70, 229, 0.35) 100%);
             border: 1px solid rgba(165, 180, 252, 0.55);
@@ -209,16 +455,19 @@
             border: 1px solid rgba(226, 232, 240, 0.95) !important;
             box-shadow: 0 8px 20px -4px rgba(0, 0, 0, 0.04), 0 4px 6px -4px rgba(0, 0, 0, 0.02) !important;
         }
+
         .dark .ios-glass-card {
             background: #0f172a !important;
             border: 1px solid rgba(51, 65, 85, 0.7) !important;
             box-shadow: 0 12px 24px -6px rgba(0, 0, 0, 0.45) !important;
         }
+
         .ios-glass-modal {
             background: #ffffff !important;
             border: 1px solid #e2e8f0 !important;
             box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25) !important;
         }
+
         .dark .ios-glass-modal {
             background: #0f172a !important;
             border: 1px solid #334155 !important;
@@ -226,43 +475,112 @@
         }
 
         .liquid-nav-btn {
-            position: relative; z-index: 2; display: flex; flex-direction: column;
-            align-items: center; justify-content: center; flex: 1; height: 100%;
-            padding: 2px 0; background: transparent; border: none; outline: none;
-            cursor: pointer; transition: transform 0.15s ease;
+            position: relative;
+            z-index: 2;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            flex: 1;
+            height: 100%;
+            padding: 2px 0;
+            background: transparent;
+            border: none;
+            outline: none;
+            cursor: pointer;
+            transition: transform 0.15s ease;
         }
-        .liquid-nav-btn:active { transform: scale(0.92); }
+
+        .liquid-nav-btn:active {
+            transform: scale(0.92);
+        }
+
         .liquid-icon-wrap {
-            position: relative; display: flex; align-items: center; justify-content: center;
-            height: 26px; font-size: 20px; color: #475569;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 26px;
+            font-size: 20px;
+            color: #475569;
             transition: color 0.3s ease, transform 0.3s cubic-bezier(0.34, 1.5, 0.64, 1);
         }
-        .dark .liquid-icon-wrap { color: #94a3b8; }
-        .liquid-label { font-size: 11px; font-weight: 500; letter-spacing: -0.01em; margin-top: 3px; color: #64748b; transition: color 0.3s ease, font-weight 0.2s ease; }
-        .dark .liquid-label { color: #94a3b8; }
-        .liquid-nav-btn.is-active .liquid-icon-wrap { color: #1a62ff !important; transform: translateY(-1.5px) scale(1.08); }
-        .dark .liquid-nav-btn.is-active .liquid-icon-wrap { color: #818cf8 !important; }
-        .liquid-nav-btn.is-active .liquid-label { color: #1a62ff !important; font-weight: 700; }
-        .dark .liquid-nav-btn.is-active .liquid-label { color: #a5b4fc !important; }
+
+        .dark .liquid-icon-wrap {
+            color: #94a3b8;
+        }
+
+        .liquid-label {
+            font-size: 11px;
+            font-weight: 500;
+            letter-spacing: -0.01em;
+            margin-top: 3px;
+            color: #64748b;
+            transition: color 0.3s ease, font-weight 0.2s ease;
+        }
+
+        .dark .liquid-label {
+            color: #94a3b8;
+        }
+
+        .liquid-nav-btn.is-active .liquid-icon-wrap {
+            color: #1a62ff !important;
+            transform: translateY(-1.5px) scale(1.08);
+        }
+
+        .dark .liquid-nav-btn.is-active .liquid-icon-wrap {
+            color: #818cf8 !important;
+        }
+
+        .liquid-nav-btn.is-active .liquid-label {
+            color: #1a62ff !important;
+            font-weight: 700;
+        }
+
+        .dark .liquid-nav-btn.is-active .liquid-label {
+            color: #a5b4fc !important;
+        }
 
         .liquid-badge {
-            position: absolute; top: -2px; right: -8px; min-width: 17px; height: 17px;
-            padding: 0 4px; border-radius: 9999px; background-color: #ef4444; color: #ffffff;
-            font-size: 10px; font-weight: 700; display: flex; align-items: center; justify-content: center;
-            border: 2px solid #ffffff; box-shadow: 0 2px 5px rgba(239, 68, 68, 0.4); line-height: 1; z-index: 3;
+            position: absolute;
+            top: -2px;
+            right: -8px;
+            min-width: 17px;
+            height: 17px;
+            padding: 0 4px;
+            border-radius: 9999px;
+            background-color: #ef4444;
+            color: #ffffff;
+            font-size: 10px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid #ffffff;
+            box-shadow: 0 2px 5px rgba(239, 68, 68, 0.4);
+            line-height: 1;
+            z-index: 3;
         }
-        .dark .liquid-badge { border-color: #0f172a; }
+
+        .dark .liquid-badge {
+            border-color: #0f172a;
+        }
     </style>
 </head>
-<body class="bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-100 flex flex-col items-stretch h-full selection:bg-indigo-500 selection:text-white">
 
-    <header id="persistent-header" class="ios-header px-4 sm:px-6 flex items-center justify-between w-full hidden" style="display: none;"></header>
+<body
+    class="bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-100 flex flex-col items-stretch h-full selection:bg-indigo-500 selection:text-white">
+
+    <header id="persistent-header" class="ios-header px-4 sm:px-6 flex items-center justify-between w-full hidden"
+        style="display: none;"></header>
 
     <div id="app" class="app-container w-full flex flex-col relative transition-colors duration-200">
         <div class="flex-1 flex flex-col items-center justify-center p-6 text-center select-none">
             <div class="relative w-16 h-16 flex items-center justify-center mx-auto mb-4">
                 <div class="absolute inset-0 simple-spinner"></div>
-                <img src="https://clickfactoryphotography.com/wp-content/uploads/2022/04/crop-logo.gif" alt="Click Factory Logo" class="w-9 h-9 object-contain" onerror="this.src='https://placehold.co/40x40/4f46e5/ffffff?text=CF'">
+                <img src="https://clickfactoryphotography.com/wp-content/uploads/2022/04/crop-logo.gif"
+                    alt="Click Factory Logo" class="w-9 h-9 object-contain"
+                    onerror="this.src='https://placehold.co/40x40/4f46e5/ffffff?text=CF'">
             </div>
             <p class="text-sm font-semibold text-slate-600 dark:text-slate-300 tracking-tight">Loading Expense...</p>
         </div>
@@ -302,7 +620,20 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getFirestore, collection, getDocs, setDoc, doc, deleteDoc, updateDoc, onSnapshot, query, orderBy, runTransaction } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import {
+            getFirestore,
+            enableIndexedDbPersistence,
+            collection,
+            getDocs,
+            setDoc,
+            doc,
+            deleteDoc,
+            updateDoc,
+            onSnapshot,
+            query,
+            orderBy,
+            runTransaction
+        } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
         import { getStorage, ref as storageRef, uploadString, getDownloadURL, deleteObject } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
 
         const firebaseConfig = {
@@ -317,6 +648,15 @@
         const appInstance = initializeApp(firebaseConfig);
         const db = getFirestore(appInstance);
         const storage = getStorage(appInstance);
+
+        // Enable IndexedDB offline persistence for Firestore
+        enableIndexedDbPersistence(db).catch((err) => {
+            if (err.code === 'failed-precondition') {
+                console.warn("Firestore persistence failed: Multiple tabs open.");
+            } else if (err.code === 'unimplemented') {
+                console.warn("Firestore persistence not supported in this browser.");
+            }
+        });
 
         window.FB = { db, storage, collection, getDocs, setDoc, doc, deleteDoc, updateDoc, onSnapshot, query, orderBy, runTransaction, storageRef, uploadString, getDownloadURL, deleteObject };
 
@@ -363,10 +703,9 @@
         function lsGet(key, fallback = null) {
             try { const v = localStorage.getItem(key); return v === null ? fallback : v; } catch (e) { return fallback; }
         }
-        function lsSet(key, value) { try { localStorage.setItem(key, value); } catch (e) {} }
-        function lsRemove(key) { try { localStorage.removeItem(key); } catch (e) {} }
+        function lsSet(key, value) { try { localStorage.setItem(key, value); } catch (e) { } }
+        function lsRemove(key) { try { localStorage.removeItem(key); } catch (e) { } }
 
-        // Never keep the password in localStorage
         function persistCurrentUser(user) {
             if (!user) return;
             const { password, ...safe } = user;
@@ -442,7 +781,7 @@
         function triggerHaptic(pattern = 12) {
             if (!state.soundEnabled) return;
             if ('vibrate' in navigator) {
-                try { navigator.vibrate(pattern); } catch (e) {}
+                try { navigator.vibrate(pattern); } catch (e) { }
             }
         }
 
@@ -498,7 +837,7 @@
                 if (!AudioCtx) return;
                 if (!sharedAudioCtx) sharedAudioCtx = new AudioCtx();
                 if (sharedAudioCtx.state === 'suspended') sharedAudioCtx.resume();
-            } catch (e) {}
+            } catch (e) { }
         }
 
         document.addEventListener('click', unlockAudioContext, { once: true });
@@ -508,7 +847,7 @@
             if (!state.soundEnabled && !forcePreview) return;
 
             if ('vibrate' in navigator) {
-                try { navigator.vibrate(type === 'excess_spent' ? [180, 90, 220] : [120, 60, 120]); } catch (e) {}
+                try { navigator.vibrate(type === 'excess_spent' ? [180, 90, 220] : [120, 60, 120]); } catch (e) { }
             }
 
             const volRatio = Math.max(0, Math.min(100, Number(state.soundVolume || 80))) / 100;
@@ -558,7 +897,7 @@
             if (state.soundEnabled) {
                 state.showSoundPanel = true;
                 if ('Notification' in window && Notification.permission === 'default') {
-                    Notification.requestPermission().catch(() => {});
+                    Notification.requestPermission().catch(() => { });
                 }
                 playNotificationChime('wallet_credit', true);
                 showToast('Ringer & Chime alerts enabled', 'success');
@@ -619,11 +958,6 @@
             render();
         }
 
-        /*
-         * Atomic wallet adjustment (Firestore transaction).
-         * delta > 0 : money coming in  -> clears "excess due" first, remainder goes to wallet
-         * delta < 0 : money going out  -> wallet absorbs it, shortfall becomes "excess due"
-         */
         async function adjustWallet(userId, delta) {
             const { db, doc, runTransaction } = window.FB;
             const ref = doc(db, 'users', userId);
@@ -693,7 +1027,6 @@
                 performedBy: state.currentUser ? state.currentUser.name : targetUser.name
             });
         }
-
         function applyTheme() {
             const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
             const isDark = state.themeMode === 'dark' || (state.themeMode === 'system' && prefersDark);
@@ -743,11 +1076,11 @@
                 state.justFinishedLoading = true;
                 render();
             }
-        }, 6000);
+        }, 5000);
 
         const savedUser = lsGet(LOCAL_STORAGE_KEY);
         if (savedUser) {
-            try { state.currentUser = JSON.parse(savedUser); } catch (e) {}
+            try { state.currentUser = JSON.parse(savedUser); } catch (e) { }
         }
 
         let touchStartX = 0;
@@ -794,7 +1127,7 @@
                 silent: false,
                 tag: 'cf-notif-' + Date.now()
             };
-            try { new Notification(title, options); } catch (e) { /* e.g. Android Chrome requires a service worker */ }
+            try { new Notification(title, options); } catch (e) { }
         }
 
         async function createAppNotification({ recipientId = null, recipientRole = null, type, title, message, amount = 0, triggeredBy = '' }) {
@@ -813,7 +1146,6 @@
             }
         }
 
-        // Re-render for incoming Firestore data without wiping the form, scroll position or focus
         function softRender() {
             if (state.activeTab === 'add') {
                 syncPersistentHeader();
@@ -833,7 +1165,7 @@
             if (m2) m2.scrollTop = top;
             if (aid === 'search-input') {
                 const i = document.getElementById(aid);
-                if (i) { i.focus(); try { i.setSelectionRange(pos, pos); } catch (e) {} }
+                if (i) { i.focus(); try { i.setSelectionRange(pos, pos); } catch (e) { } }
             }
         }
 
@@ -843,9 +1175,9 @@
             lsRemove(LOCAL_STORAGE_KEY);
         }
 
-        window.startAppListeners = function() {
+        window.startAppListeners = function () {
             if (!window.FB) return;
-            if (window.__listenersStarted) return;   // never stack duplicate listeners
+            if (window.__listenersStarted) return;
             window.__listenersStarted = true;
             const { db, collection, onSnapshot, doc, setDoc, deleteDoc } = window.FB;
 
@@ -907,11 +1239,9 @@
             activeUnsubscribers.push(onSnapshot(collection(db, 'expenses'), async (snapshot) => {
                 let allExpenses = snapshot.docs.map(docSnap => docSnap.data());
 
-                // Auto-delete runs from an admin session only, to avoid races between devices
                 if (state.appSettings && state.appSettings.autoDeleteEnabled && state.currentUser && state.currentUser.role === 'admin') {
                     const now = new Date();
                     const cutoffDate = new Date(now.getFullYear(), now.getMonth() - 2, now.getDate());
-
                     const expiredExpenses = allExpenses.filter(exp => exp.date && parseLocal(exp.date) < cutoffDate);
 
                     for (const exp of expiredExpenses) {
@@ -962,7 +1292,7 @@
                             console.error("Permanent wipe error:", e);
                             stillPending.push(item);
                         }
-                        continue;   // was `return`, which aborted processing of the remaining users
+                        continue;
                     }
                     stillPending.push(item);
                 }
@@ -1135,7 +1465,7 @@
                             if (item.billAttachment && item.billAttachment.includes('firebasestorage')) {
                                 await deleteObject(storageRef(storage, `bills/${item.id}.jpg`));
                             }
-                        } catch (e) {}
+                        } catch (e) { }
                     }
                     showToast('Recycle Bin emptied successfully!', 'success');
                 }
@@ -1177,13 +1507,13 @@
                                 <p class="text-xs text-slate-500">Wallet top-up alerts and excess spending updates will appear here.</p>
                             </div>
                         ` : myNotifs.map(n => {
-                            const isExcess = n.type === 'excess_spent';
-                            const isDebit = n.type === 'wallet_debit';
-                            const iconClass = isExcess
-                                ? 'bg-rose-500/10 text-rose-600 dark:text-rose-400 fa-triangle-exclamation'
-                                : (isDebit ? 'bg-amber-500/10 text-amber-600 dark:text-amber-400 fa-wallet' : 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 fa-wallet');
+                const isExcess = n.type === 'excess_spent';
+                const isDebit = n.type === 'wallet_debit';
+                const iconClass = isExcess
+                    ? 'bg-rose-500/10 text-rose-600 dark:text-rose-400 fa-triangle-exclamation'
+                    : (isDebit ? 'bg-amber-500/10 text-amber-600 dark:text-amber-400 fa-wallet' : 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 fa-wallet');
 
-                            return `
+                return `
                                 <div onclick="markNotificationRead('${n.id}')" class="cursor-pointer ios-glass-card rounded-3xl p-5 border ${!n.read ? 'border-indigo-500/60 dark:border-indigo-500/60 ring-1 ring-indigo-500/20' : 'border-slate-200/80 dark:border-slate-750'} shadow-sm transition relative w-full flex items-start space-x-3.5">
                                     <div class="w-10 h-10 rounded-2xl ${iconClass.split(' ').slice(0, 3).join(' ')} flex items-center justify-center shrink-0 mt-0.5">
                                         <i class="fa-solid ${iconClass.split(' ').pop()}"></i>
@@ -1206,7 +1536,7 @@
                                     </div>
                                 </div>
                             `;
-                        }).join('')}
+            }).join('')}
                     </div>
                 </div>
             `;
@@ -1216,7 +1546,7 @@
             const notif = state.notifications.find(n => n.id === notifId);
             if (!notif || notif.read) return;
             const { db, doc, updateDoc } = window.FB;
-            try { await updateDoc(doc(db, 'notifications', notifId), { read: true }); } catch (e) {}
+            try { await updateDoc(doc(db, 'notifications', notifId), { read: true }); } catch (e) { }
         }
 
         async function markAllNotificationsRead() {
@@ -1224,7 +1554,7 @@
             if (myUnread.length === 0) return;
             const { db, doc, updateDoc } = window.FB;
             for (const n of myUnread) {
-                try { await updateDoc(doc(db, 'notifications', n.id), { read: true }); } catch (e) {}
+                try { await updateDoc(doc(db, 'notifications', n.id), { read: true }); } catch (e) { }
             }
             showToast('All notifications marked as read.', 'info');
         }
@@ -1232,7 +1562,7 @@
         async function deleteSingleNotification(e, notifId) {
             if (e) e.stopPropagation();
             const { db, doc, deleteDoc } = window.FB;
-            try { await deleteDoc(doc(db, 'notifications', notifId)); } catch (err) {}
+            try { await deleteDoc(doc(db, 'notifications', notifId)); } catch (err) { }
         }
 
         function confirmClearMyNotifications() {
@@ -1244,7 +1574,7 @@
                 async () => {
                     const { db, doc, deleteDoc } = window.FB;
                     for (const n of myNotifs) {
-                        try { await deleteDoc(doc(db, 'notifications', n.id)); } catch (e) {}
+                        try { await deleteDoc(doc(db, 'notifications', n.id)); } catch (e) { }
                     }
                     showToast('Notifications cleared.', 'success');
                 }
@@ -1324,9 +1654,9 @@
                                 <p class="text-xs text-slate-500">Top-ups, undo expense refunds, and balance adjustments will appear here.</p>
                             </div>
                         ` : userTxns.map(t => {
-                            const isUndo = t.type === 'undo_refund' || (t.title && t.title.toLowerCase().includes('undo'));
-                            const isShortage = t.type === 'shortage';
-                            return `
+                const isUndo = t.type === 'undo_refund' || (t.title && t.title.toLowerCase().includes('undo'));
+                const isShortage = t.type === 'shortage';
+                return `
                                 <div class="ios-glass-card rounded-3xl p-5 shadow-sm flex items-center justify-between gap-3 w-full">
                                     <div class="flex items-start space-x-3.5 min-w-0 flex-1">
                                         <div class="w-10 h-10 rounded-2xl ${isUndo ? 'bg-indigo-500/10 text-indigo-600 dark:text-indigo-400' : (isShortage ? 'bg-rose-500/10 text-rose-600 dark:text-rose-400' : 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400')} flex items-center justify-center shrink-0 mt-0.5">
@@ -1348,7 +1678,7 @@
                                     <span class="font-bold text-base sm:text-lg ${isShortage ? 'text-rose-600 dark:text-rose-400' : 'text-emerald-600 dark:text-emerald-400'} whitespace-nowrap shrink-0">${isShortage ? '-' : '+'}${formatCurrency(t.amount)}</span>
                                 </div>
                             `;
-                        }).join('')}
+            }).join('')}
                     </div>
                 </div>
             `;
@@ -1364,7 +1694,6 @@
             root.innerHTML = `
                 <div class="fixed inset-0 z-[60] bg-slate-950/60 backdrop-blur-sm flex items-center justify-center p-4 animate-fadeIn">
                     <div class="ios-glass-modal bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 max-w-sm w-full shadow-2xl space-y-4 max-h-[85vh] flex flex-col">
-
                         <div class="flex items-center justify-between shrink-0 pb-1 border-b border-slate-100 dark:border-slate-800/80">
                             <div>
                                 <h3 class="font-bold text-base text-slate-900 dark:text-white">Manage Wallet</h3>
@@ -1415,16 +1744,14 @@
                                     <span class="text-xs text-slate-500 dark:text-slate-400">No transaction records found</span>
                                 </div>
                             ` : userTxns.map(t => {
-                                const isUndo = t.type === 'undo_refund' || (t.title && t.title.toLowerCase().includes('undo'));
-                                const isShortage = t.type === 'shortage';
+                const isUndo = t.type === 'undo_refund' || (t.title && t.title.toLowerCase().includes('undo'));
+                const isShortage = t.type === 'shortage';
+                const badgeBg = isUndo ? 'bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400'
+                    : (isShortage ? 'bg-rose-50 dark:bg-rose-950/60 text-rose-600 dark:text-rose-400'
+                        : 'bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400');
+                const amountColor = isShortage ? 'text-rose-600 dark:text-rose-400' : 'text-emerald-600 dark:text-emerald-400';
 
-                                const badgeBg = isUndo ? 'bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400'
-                                        : (isShortage ? 'bg-rose-50 dark:bg-rose-950/60 text-rose-600 dark:text-rose-400'
-                                        : 'bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400');
-
-                                const amountColor = isShortage ? 'text-rose-600 dark:text-rose-400' : 'text-emerald-600 dark:text-emerald-400';
-
-                                return `
+                return `
                                     <div class="bg-white dark:bg-slate-800/80 p-3 rounded-2xl border border-slate-200/90 dark:border-slate-700/70 shadow-sm space-y-1.5 text-xs transition">
                                         <div class="flex items-center justify-between gap-2">
                                             <span class="font-semibold text-slate-900 dark:text-slate-100 flex items-center gap-2 min-w-0">
@@ -1437,18 +1764,14 @@
                                                 ${isShortage ? '-' : '+'}${formatCurrency(t.amount)}
                                             </span>
                                         </div>
-                                        ${t.subtitle ? `
-                                            <p class="text-[10px] text-emerald-700 dark:text-emerald-300 font-medium pl-8 break-words">
-                                                ${escapeHtml(t.subtitle)}
-                                            </p>
-                                        ` : ''}
+                                        ${t.subtitle ? `<p class="text-[10px] text-emerald-700 dark:text-emerald-300 font-medium pl-8 break-words">${escapeHtml(t.subtitle)}</p>` : ''}
                                         <div class="flex items-center justify-between text-[10px] text-slate-500 dark:text-slate-400 pl-8 pt-0.5">
                                             <span>${formatTimestamp(t.timestamp)}</span>
                                             <span class="italic text-slate-400 dark:text-slate-500">By ${escapeHtml(t.performedBy)}</span>
                                         </div>
                                     </div>
                                 `;
-                            }).join('')}
+            }).join('')}
                         </div>
                     </div>
                 </div>
@@ -1559,17 +1882,14 @@
                 async () => {
                     const { db, doc, deleteDoc } = window.FB;
                     const userExpenses = state.expenses.filter(e => e.userId === userId);
-
                     if (userExpenses.length === 0) {
                         showToast('No expenses found for this user.', 'info');
                         return;
                     }
-
                     for (const exp of userExpenses) {
                         try { await deleteDoc(doc(db, 'expenses', exp.id)); }
                         catch (err) { console.error("Failed to delete user expense:", err); }
                     }
-
                     showToast(`Cleared expenses for ${userName}.`, 'success');
                 }
             );
@@ -1640,7 +1960,6 @@
                 </div>
             `;
         }
-
         function syncPersistentNavbar() {
             const navWrapper = document.getElementById('persistent-nav-wrapper');
             if (!navWrapper) return;
@@ -1718,13 +2037,11 @@
 
         function switchTab(tab, keepEditState = false) {
             const prevIndex = tabOrder.indexOf(state.activeTab);
-
             if (tab === 'summary') {
                 state.activeTab = (state.currentUser && state.currentUser.role === 'admin') ? 'admin' : 'analytics';
             } else {
                 state.activeTab = tab;
             }
-
             const nextIndex = tabOrder.indexOf(state.activeTab);
             state.slideDirection = nextIndex >= prevIndex ? 'animate-slide-right' : 'animate-slide-left';
 
@@ -1763,7 +2080,6 @@
             }
 
             syncPersistentHeader();
-
             const showPtr = isPtrAllowed();
 
             app.innerHTML = `
@@ -1947,7 +2263,6 @@
 
             try {
                 const existingReq = state.passwordRequests.find(r => r.username.toLowerCase() === username && r.status === 'pending');
-                // crypto-grade code instead of Math.random
                 const arr = new Uint32Array(1);
                 crypto.getRandomValues(arr);
                 const code = existingReq ? existingReq.code : String(100000 + (arr[0] % 900000));
@@ -2021,7 +2336,7 @@
                 state.justFinishedLoading = true;
                 persistCurrentUser(foundUser);
                 if ('Notification' in window && Notification.permission === 'default') {
-                    Notification.requestPermission().catch(() => {});
+                    Notification.requestPermission().catch(() => { });
                 }
                 showToast(`Welcome back, ${foundUser.name}!`, 'success');
                 render();
@@ -2077,7 +2392,6 @@
                 if (isAdmin && state.filterUser !== 'All' && exp.userId !== state.filterUser) return false;
                 if (state.filterCategory !== 'All' && exp.category !== state.filterCategory) return false;
                 if (state.filterMonth !== 'All' && !(exp.date || '').startsWith(state.filterMonth)) return false;
-
                 if (state.filterStartDate && exp.date < state.filterStartDate) return false;
                 if (state.filterEndDate && exp.date > state.filterEndDate) return false;
 
@@ -2223,18 +2537,18 @@
                         ` : ''}
 
                         ${sortedDates.map(dateKey => {
-                            const dayExpenses = groupedByDate[dateKey];
-                            const formattedDateHeader = parseLocal(dateKey).toLocaleDateString('en-US', {
-                                month: 'long', day: 'numeric', year: 'numeric'
-                            }).toUpperCase();
+                const dayExpenses = groupedByDate[dateKey];
+                const formattedDateHeader = parseLocal(dateKey).toLocaleDateString('en-US', {
+                    month: 'long', day: 'numeric', year: 'numeric'
+                }).toUpperCase();
 
-                            return `
+                return `
                                 <div class="space-y-2.5 mt-4">
                                     <h4 class="text-xs font-bold text-slate-400 dark:text-slate-400 uppercase tracking-wider px-1">${escapeHtml(formattedDateHeader)}</h4>
                                     ${dayExpenses.map(exp => {
-                                        const isOffice = exp.category === 'Office';
-                                        const isOwner = exp.userId === state.currentUser.id;
-                                        return `
+                    const isOffice = exp.category === 'Office';
+                    const isOwner = exp.userId === state.currentUser.id;
+                    return `
                                             <div class="ios-glass-card rounded-3xl py-5 sm:py-6 px-5 sm:px-6 shadow-sm transition relative group w-full mt-3">
                                                 <div class="flex items-start space-x-3.5 w-full">
                                                     <div class="w-10 h-10 rounded-2xl ${isOffice ? 'bg-amber-500/10 text-amber-600 dark:text-amber-400' : 'bg-indigo-500/10 text-indigo-600 dark:text-indigo-400'} flex items-center justify-center shrink-0 mt-0.5">
@@ -2287,10 +2601,10 @@
                                                 </div>
                                             </div>
                                         `;
-                                    }).join('')}
+                }).join('')}
                                 </div>
                             `;
-                        }).join('')}
+            }).join('')}
                     </div>
                 </div>
             `;
@@ -2444,7 +2758,7 @@
                 : `${base} bg-slate-50/80 dark:bg-slate-800/80 text-slate-700 dark:text-slate-300 border-slate-200/80 dark:border-slate-700`;
         }
 
-        function resizeImageToDataUrl(source, srcW, srcH, drawFn) {
+        function resizeImageToDataUrl(source, srcW, srcH) {
             const maxDim = 800;
             let width = srcW, height = srcH;
             if (width >= height && width > maxDim) {
@@ -2467,9 +2781,9 @@
             if (!file) return;
 
             const reader = new FileReader();
-            reader.onload = function(uploadEvent) {
+            reader.onload = function (uploadEvent) {
                 const img = new Image();
-                img.onload = function() {
+                img.onload = function () {
                     state.tempBillData = resizeImageToDataUrl(img, img.width, img.height);
                     showToast('Bill attached successfully!', 'success');
                     renderMainContentOnly();
@@ -2585,7 +2899,7 @@
             if (clientContainer) clientContainer.classList.toggle('hidden', cat === 'Office');
         }
 
-        const MAX_INLINE_BILL_CHARS = 900000; // Firestore documents are limited to ~1 MB
+        const MAX_INLINE_BILL_CHARS = 900000;
 
         async function handleExpenseSubmit(event) {
             event.preventDefault();
@@ -2618,16 +2932,18 @@
                 if (state.tempBillData === '') {
                     billUrl = null;
                     if (existingExp && existingExp.billAttachment && existingExp.billAttachment.includes('firebasestorage')) {
-                        try { await deleteObject(storageRef(storage, `bills/${expenseId}.jpg`)); } catch (e) {}
+                        try { await deleteObject(storageRef(storage, `bills/${expenseId}.jpg`)); } catch (e) { }
                     }
                 } else if (state.tempBillData !== null && state.tempBillData !== undefined) {
-                    if (state.tempBillData.startsWith('data:image')) {
+                    if (!navigator.onLine) {
+                        billUrl = state.tempBillData;
+                    } else if (state.tempBillData.startsWith('data:image')) {
                         try {
                             const fileRef = storageRef(storage, `bills/${expenseId}.jpg`);
                             await uploadString(fileRef, state.tempBillData, 'data_url');
                             billUrl = await getDownloadURL(fileRef);
                         } catch (storageErr) {
-                            console.warn("Storage upload failed, falling back to inline base64:", storageErr);
+                            console.warn("Storage upload failed, falling back to offline inline base64:", storageErr);
                             if (state.tempBillData.length > MAX_INLINE_BILL_CHARS) {
                                 showToast('Bill image is too large to save. Please use a smaller image.', 'error');
                                 if (submitBtn) submitBtn.disabled = false;
@@ -2649,7 +2965,7 @@
                 let walletResult = null;
                 if (ownerUser.role !== 'admin') {
                     const oldAmount = existingExp ? Number(existingExp.amount) : 0;
-                    walletDelta = round2(-(amount - oldAmount));   // new expense: -amount; edit: -(difference)
+                    walletDelta = round2(-(amount - oldAmount));
                     if (walletDelta !== 0) {
                         walletOwnerId = ownerUser.id;
                         walletResult = await adjustWallet(walletOwnerId, walletDelta);
@@ -2666,9 +2982,8 @@
                         createdAt: existingExp ? existingExp.createdAt : new Date().toISOString()
                     });
                 } catch (saveErr) {
-                    // keep wallet and expenses consistent if the expense write fails
                     if (walletOwnerId) {
-                        try { await adjustWallet(walletOwnerId, -walletDelta); } catch (e) {}
+                        try { await adjustWallet(walletOwnerId, -walletDelta); } catch (e) { }
                     }
                     throw saveErr;
                 }
@@ -2693,7 +3008,7 @@
                 switchTab('home');
             } catch (error) {
                 console.error("Failed:", error);
-                showToast('Failed to save. Please check connection.', 'error');
+                showToast('Failed to save. Record will sync when online.', 'error');
                 if (submitBtn) submitBtn.disabled = false;
             }
         }
@@ -2794,8 +3109,8 @@
                         ` : ''}
 
                         ${state.recycleBin.map(exp => {
-                            const wasRefunded = String(exp.deletedBy || '').includes('Undo & Refunded');
-                            return `
+                const wasRefunded = String(exp.deletedBy || '').includes('Undo & Refunded');
+                return `
                                 <div class="ios-glass-card rounded-3xl py-5 sm:py-6 px-5 sm:px-6 shadow-sm transition relative group w-full mt-3">
                                     <div class="flex items-start space-x-3.5 w-full">
                                         <div class="w-10 h-10 rounded-2xl bg-amber-500/10 text-amber-600 flex items-center justify-center shrink-0 mt-0.5">
@@ -2840,7 +3155,7 @@
                                     </div>
                                 </div>
                             `;
-                        }).join('')}
+            }).join('')}
                     </div>
                 </div>
             `;
@@ -2875,7 +3190,7 @@
                     try {
                         await deleteDoc(doc(db, 'recycleBin', id));
                         if (billUrl && billUrl.includes('firebasestorage')) {
-                            try { await deleteObject(storageRef(storage, `bills/${id}.jpg`)); } catch (e) {}
+                            try { await deleteObject(storageRef(storage, `bills/${id}.jpg`)); } catch (e) { }
                         }
                         showToast('Expense permanently deleted.', 'success');
                     } catch (err) {
@@ -2978,8 +3293,8 @@
                     <div class="space-y-3 w-full">
                         <h3 class="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider px-1 pt-3">Month-by-Month Summary</h3>
                         ${sortedMonths.map(monthKey => {
-                            const data = monthlyMap[monthKey];
-                            return `
+                const data = monthlyMap[monthKey];
+                return `
                                 <div class="ios-glass-card rounded-3xl p-5 sm:p-6 shadow-sm space-y-3 w-full mt-3">
                                     <div class="flex items-center justify-between">
                                         <div class="flex items-center space-x-2 min-w-0 pr-2">
@@ -2995,7 +3310,7 @@
                                     </div>
                                 </div>
                             `;
-                        }).join('')}
+            }).join('')}
                     </div>
                 </div>
             `;
@@ -3014,8 +3329,8 @@
                         ` : ''}
 
                         ${state.passwordRequests.map(req => {
-                            const isPending = req.status === 'pending';
-                            return `
+                const isPending = req.status === 'pending';
+                return `
                                 <div class="ios-glass-card rounded-2xl py-5 px-5 sm:px-6 shadow-sm flex items-center justify-between gap-3 w-full mt-3">
                                     <div class="space-y-1 min-w-0 flex-1">
                                         <div class="flex items-center space-x-2 truncate">
@@ -3033,7 +3348,7 @@
                                     </div>
                                 </div>
                             `;
-                        }).join('')}
+            }).join('')}
                     </div>
                 </div>
             `;
@@ -3316,7 +3631,6 @@
                     const userToRemove = state.users.find(u => u.id === userId);
                     if (!userToRemove) return;
                     try {
-                        // Inline base64 bills would blow the 1 MB document limit; keep only hosted bill URLs
                         const userExps = state.expenses
                             .filter(e => e.userId === userId)
                             .map(e => (e.billAttachment && String(e.billAttachment).startsWith('data:')) ? { ...e, billAttachment: null } : e);
@@ -3581,7 +3895,6 @@
             const newPass = document.getElementById('new-pass').value;
             const confirmNewPass = document.getElementById('confirm-new-pass').value;
 
-            // the logged-in user's own account (previously: the first admin found)
             const me = state.users.find(u => u.id === state.currentUser.id);
             if (!me || current !== me.password) {
                 showToast('Current password incorrect.', 'error');
@@ -3633,7 +3946,6 @@
                 return;
             }
             const headers = ['ID', 'User', 'Title', 'Category', 'Client & Place', 'Amount (INR)', 'Date', 'Notes', 'Has Bill'];
-            // quote every cell, double embedded quotes, neutralise spreadsheet formulas (=, +, -, @)
             const safe = v => {
                 let s = String(v ?? '');
                 if (/^[=+\-@\t\r]/.test(s)) s = "'" + s;
@@ -3643,7 +3955,6 @@
                 headers.map(safe).join(','),
                 ...dataArray.map(e => [e.id, e.userName, e.title, e.category, e.clientNamePlace, e.amount, e.date, e.notes, e.billAttachment ? 'Yes' : 'No'].map(safe).join(','))
             ];
-            // Blob instead of a data: URI, so '#' and other characters no longer truncate the file
             const blob = new Blob(['\ufeff' + lines.join('\r\n')], { type: 'text/csv;charset=utf-8' });
             const url = URL.createObjectURL(blob);
             const link = document.createElement('a');
@@ -3687,22 +3998,22 @@
             return String(str).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
         }
 
-        // ---------- Pull-down-to-refresh ----------
+        // ---------- STRICT TOP-DOWN PULL TO REFRESH ----------
         let ptrStartX = 0;
         let ptrStartY = 0;
         let ptrCurrentY = 0;
         let isPulling = false;
         let isRefreshing = false;
         let hasVibrated = false;
-        let gestureAxis = null; // 'vertical', 'horizontal', or null
+        let gestureAxis = null;
 
-        const REFRESH_THRESHOLD = 60;      // rubber-banded pull distance (px) needed to trigger
-        const MAX_PULL_DISTANCE = 150;
-        const DIRECTION_LOCK_THRESHOLD = 8;
+        const REFRESH_THRESHOLD = 60;
+        const MAX_PULL_DISTANCE = 140;
+        const DIRECTION_LOCK_THRESHOLD = 6;
 
-        // single resistance curve shared by the visuals and the release check
         function ptrPullDistance(rawDiff) {
-            return Math.min(MAX_PULL_DISTANCE, rawDiff * 0.45 * (1 - (rawDiff / (rawDiff + 300))));
+            if (rawDiff <= 0) return 0;
+            return Math.min(MAX_PULL_DISTANCE, rawDiff * 0.42 * (1 - (rawDiff / (rawDiff + 280))));
         }
 
         document.addEventListener('touchstart', (e) => {
@@ -3733,6 +4044,8 @@
                     text.textContent = 'Pull to refresh';
                     text.style.color = '';
                 }
+            } else {
+                isPulling = false;
             }
         }, { passive: true });
 
@@ -3748,31 +4061,33 @@
 
             const currentX = e.touches[0].clientX;
             const currentY = e.touches[0].clientY;
-            const diffX = Math.abs(currentX - ptrStartX);
-            const diffY = currentY - ptrStartY;
+            const rawDiffX = currentX - ptrStartX;
+            const rawDiffY = currentY - ptrStartY;
 
             if (!gestureAxis) {
-                if (diffX > DIRECTION_LOCK_THRESHOLD || Math.abs(diffY) > DIRECTION_LOCK_THRESHOLD) {
-                    if (diffX > Math.abs(diffY)) {
-                        gestureAxis = 'horizontal';
+                const absX = Math.abs(rawDiffX);
+                const absY = Math.abs(rawDiffY);
+
+                if (absX > DIRECTION_LOCK_THRESHOLD || absY > DIRECTION_LOCK_THRESHOLD) {
+                    if (absX >= absY || rawDiffY <= 0) {
+                        gestureAxis = 'cancelled';
                         isPulling = false;
                         resetPtrVisuals();
                         return;
-                    } else {
-                        gestureAxis = 'vertical';
                     }
+                    gestureAxis = 'downward-pull';
                 } else {
                     return;
                 }
             }
 
-            if (gestureAxis !== 'vertical' || diffY <= 0) {
+            if (gestureAxis !== 'downward-pull' || rawDiffY <= 0) {
                 resetPtrVisuals();
                 return;
             }
 
             ptrCurrentY = currentY;
-            const pullDistance = ptrPullDistance(diffY);
+            const pullDistance = ptrPullDistance(rawDiffY);
 
             const ptrContainer = document.getElementById('ptr-container');
             const icon = document.getElementById('ptr-icon');
@@ -3791,7 +4106,7 @@
                     }
                     if (!hasVibrated) {
                         if (state.soundEnabled && 'vibrate' in navigator) {
-                            try { navigator.vibrate(12); } catch (err) {}
+                            try { navigator.vibrate(12); } catch (err) { }
                         }
                         hasVibrated = true;
                     }
@@ -3808,7 +4123,7 @@
         }, { passive: true });
 
         document.addEventListener('touchend', async () => {
-            if (!isPulling || isRefreshing || !isPtrAllowed() || gestureAxis !== 'vertical') {
+            if (!isPulling || isRefreshing || !isPtrAllowed() || gestureAxis !== 'downward-pull') {
                 isPulling = false;
                 gestureAxis = null;
                 resetPtrVisuals();
@@ -3816,7 +4131,7 @@
             }
             isPulling = false;
 
-            const rawDiff = ptrCurrentY - ptrStartY;
+            const rawDiffY = ptrCurrentY - ptrStartY;
             const ptrContainer = document.getElementById('ptr-container');
             const icon = document.getElementById('ptr-icon');
             const text = document.getElementById('ptr-text');
@@ -3825,7 +4140,7 @@
                 ptrContainer.style.transition = 'transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.2s ease';
             }
 
-            if (ptrPullDistance(rawDiff) >= REFRESH_THRESHOLD) {
+            if (rawDiffY > 0 && ptrPullDistance(rawDiffY) >= REFRESH_THRESHOLD) {
                 isRefreshing = true;
 
                 if (ptrContainer) {
@@ -3841,8 +4156,6 @@
                     text.style.color = '#4f46e5';
                 }
 
-                // Firestore listeners are real-time, so a refresh only needs to re-render.
-                // (Re-registering listeners here used to stack duplicates every time.)
                 await new Promise(r => setTimeout(r, 650));
                 softRender();
                 showToast('Data refreshed!', 'success');
@@ -3882,13 +4195,22 @@
         window.addEventListener('resize', syncPersistentNavbar);
         window.addEventListener('orientationchange', () => setTimeout(syncPersistentNavbar, 100));
 
+        // Service Worker registration for PWA offline caching
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js').catch((err) => {
+                    console.warn('Service worker registration failed:', err);
+                });
+            });
+        }
+
         document.addEventListener('DOMContentLoaded', () => {
             render();
-            // the Firebase module may have finished before this script defined the listeners
             if (window.__listenersPending && typeof window.startAppListeners === 'function') {
                 window.startAppListeners();
             }
         });
     </script>
 </body>
+
 </html>
