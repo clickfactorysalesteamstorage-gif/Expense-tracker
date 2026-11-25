@@ -22,11 +22,20 @@
             theme: {
                 extend: {
                     fontFamily: { sans: ['Inter', 'sans-serif'] },
-                    colors: { brand: { 50: '#eef2ff', 100: '#e0e7ff', 500: '#6366f1', 600: '#4f46e5', 700: '#4338ca' } }
+                    colors: {
+                        brand: {
+                            50: '#eef2ff',
+                            100: '#e0e7ff',
+                            500: '#6366f1',
+                            600: '#4f46e5',
+                            700: '#4338ca'
+                        }
+                    }
                 }
             }
         };
 
+        // Immediately sync theme class before paint to avoid flash
         (function () {
             let savedTheme = 'system';
             try { savedTheme = localStorage.getItem('click_factory_theme_v1') || 'system'; } catch (e) { }
@@ -48,6 +57,7 @@
             box-sizing: border-box;
         }
 
+        /* Desktop thin custom scrollbars */
         @media (min-width: 769px) and (hover: hover) {
             * {
                 scrollbar-width: thin;
@@ -89,6 +99,7 @@
             }
         }
 
+        /* Mobile / touch hidden scrollbars */
         @media (max-width: 768px),
         (hover: none) {
             * {
@@ -159,7 +170,7 @@
 
         .ios-header {
             flex-shrink: 0;
-            padding-top: calc(env(safe-area-inset-top, 0px) + 16px);
+            padding-top: calc(env(safe-area-inset-top, 0px) + 14px);
             padding-bottom: 12px;
             background-color: #f8fafc;
             position: relative;
@@ -181,6 +192,7 @@
             padding-bottom: 140px;
         }
 
+        /* Pull-to-Refresh Pill */
         #ptr-container {
             position: absolute;
             top: 12px;
@@ -202,7 +214,7 @@
             gap: 8px;
             padding: 6px 14px;
             border-radius: 9999px;
-            background: rgba(255, 255, 255, 0.9);
+            background: rgba(255, 255, 255, 0.92);
             border: 1px solid rgba(226, 232, 240, 0.8);
             box-shadow: 0 4px 14px -2px rgba(0, 0, 0, 0.08), 0 2px 6px -1px rgba(0, 0, 0, 0.04);
             backdrop-filter: blur(16px);
@@ -211,7 +223,7 @@
         }
 
         .dark .ptr-pill {
-            background: rgba(15, 23, 42, 0.85);
+            background: rgba(15, 23, 42, 0.88);
             border-color: rgba(51, 65, 85, 0.7);
             box-shadow: 0 4px 16px -2px rgba(0, 0, 0, 0.5);
         }
@@ -243,7 +255,7 @@
 
         #toast-container {
             position: fixed;
-            bottom: 92px;
+            bottom: 96px;
             left: 50%;
             transform: translateX(-50%);
             z-index: 70;
@@ -300,13 +312,8 @@
         }
 
         @keyframes simple-spin {
-            0% {
-                transform: rotate(0deg);
-            }
-
-            100% {
-                transform: rotate(360deg);
-            }
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
 
         .simple-spinner {
@@ -317,15 +324,8 @@
         }
 
         @keyframes homeZoomOut {
-            0% {
-                opacity: 0;
-                transform: scale(1.04);
-            }
-
-            100% {
-                opacity: 1;
-                transform: scale(1);
-            }
+            0% { opacity: 0; transform: scale(1.03); }
+            100% { opacity: 1; transform: scale(1); }
         }
 
         .animate-fadeIn {
@@ -341,12 +341,10 @@
                 transform: scale(0.95);
                 box-shadow: 0 0 0 0 rgba(79, 70, 229, 0.7);
             }
-
             70% {
                 transform: scale(1);
                 box-shadow: 0 0 0 8px rgba(79, 70, 229, 0);
             }
-
             100% {
                 transform: scale(0.95);
                 box-shadow: 0 0 0 0 rgba(79, 70, 229, 0);
@@ -358,37 +356,24 @@
         }
 
         @keyframes slideInFromRight {
-            0% {
-                transform: translateX(24px);
-                opacity: 0;
-            }
-
-            100% {
-                transform: translateX(0);
-                opacity: 1;
-            }
+            0% { transform: translateX(20px); opacity: 0; }
+            100% { transform: translateX(0); opacity: 1; }
         }
 
         @keyframes slideInFromLeft {
-            0% {
-                transform: translateX(-24px);
-                opacity: 0;
-            }
-
-            100% {
-                transform: translateX(0);
-                opacity: 1;
-            }
+            0% { transform: translateX(-20px); opacity: 0; }
+            100% { transform: translateX(0); opacity: 1; }
         }
 
         .animate-slide-right {
-            animation: slideInFromRight 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+            animation: slideInFromRight 0.26s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
         .animate-slide-left {
-            animation: slideInFromLeft 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+            animation: slideInFromLeft 0.26s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
+        /* iOS Liquid Glass Floating Navigation Dock */
         .liquid-nav-container {
             position: fixed;
             bottom: max(env(safe-area-inset-bottom, 14px), 18px);
@@ -571,9 +556,12 @@
 <body
     class="bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-100 flex flex-col items-stretch h-full selection:bg-indigo-500 selection:text-white">
 
-    <header id="persistent-header" class="ios-header px-4 sm:px-6 flex items-center justify-between w-full hidden"
+    <!-- Persistent Top Header -->
+    <header id="persistent-header"
+        class="ios-header px-4 sm:px-6 flex items-center justify-between w-full max-w-2xl mx-auto hidden"
         style="display: none;"></header>
 
+    <!-- Main App Viewport -->
     <div id="app" class="app-container w-full flex flex-col relative transition-colors duration-200">
         <div class="flex-1 flex flex-col items-center justify-center p-6 text-center select-none">
             <div class="relative w-16 h-16 flex items-center justify-center mx-auto mb-4">
@@ -586,6 +574,7 @@
         </div>
     </div>
 
+    <!-- Floating iOS Liquid Glass Bottom Navigation -->
     <div id="persistent-nav-wrapper" class="liquid-nav-container hidden" style="display: none;">
         <nav id="liquid-nav" class="liquid-dock">
             <div id="liquid-bubble" class="liquid-bubble"></div>
@@ -618,87 +607,220 @@
     <div id="modal-root" class="relative z-[60]"></div>
     <div id="toast-container" class="fixed z-[70]"></div>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import {
-            getFirestore,
-            enableIndexedDbPersistence,
-            collection,
-            getDocs,
-            setDoc,
-            doc,
-            deleteDoc,
-            updateDoc,
-            onSnapshot,
-            query,
-            orderBy,
-            runTransaction
-        } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-        import { getStorage, ref as storageRef, uploadString, getDownloadURL, deleteObject } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
-
-        const firebaseConfig = {
-            apiKey: "AIzaSyDguDaGIQ8dbwLoqbXKDD4ixfPg7y3VCpg",
-            authDomain: "expensetracker-ec267.firebaseapp.com",
-            projectId: "expensetracker-ec267",
-            storageBucket: "expensetracker-ec267.firebasestorage.app",
-            messagingSenderId: "789003178398",
-            appId: "1:789003178398:web:1579e411ad728268c6468f"
-        };
-
-        const appInstance = initializeApp(firebaseConfig);
-        const db = getFirestore(appInstance);
-        const storage = getStorage(appInstance);
-
-        // Enable IndexedDB offline persistence for Firestore
-        enableIndexedDbPersistence(db).catch((err) => {
-            if (err.code === 'failed-precondition') {
-                console.warn("Firestore persistence failed: Multiple tabs open.");
-            } else if (err.code === 'unimplemented') {
-                console.warn("Firestore persistence not supported in this browser.");
-            }
-        });
-
-        window.FB = { db, storage, collection, getDocs, setDoc, doc, deleteDoc, updateDoc, onSnapshot, query, orderBy, runTransaction, storageRef, uploadString, getDownloadURL, deleteObject };
-
-        async function initializeData() {
-            try {
-                const usersSnap = await getDocs(collection(db, 'users'));
-                if (usersSnap.empty) {
-                    const defaultUsers = [
-                        { id: 'usr_adm', name: 'Admin Manager', username: 'admin', password: 'adminpassword', role: 'admin', email: 'admin@clickfactory.com', wallet: 0, excessSpent: 0 },
-                        { id: 'usr_1', name: 'User One', username: 'user1', password: 'password', role: 'user', email: 'user1@clickfactory.com', wallet: 0, excessSpent: 0 },
-                        { id: 'usr_2', name: 'User Two', username: 'user2', password: 'password', role: 'user', email: 'user2@clickfactory.com', wallet: 0, excessSpent: 0 }
-                    ];
-                    for (const u of defaultUsers) {
-                        await setDoc(doc(db, 'users', u.id), u);
-                    }
-                    await setDoc(doc(db, 'settings', 'admin_pass'), { password: 'adminpassword' });
-                }
-
-                const settingsSnap = await getDocs(collection(db, 'settings'));
-                if (settingsSnap.empty || !settingsSnap.docs.some(d => d.id === 'app_settings')) {
-                    await setDoc(doc(db, 'settings', 'app_settings'), { autoDeleteEnabled: false, currentVersion: '1.1.3' });
-                }
-            } catch (err) {
-                console.warn("Database initialization skipped or offline:", err);
-            }
-        }
-
-        initializeData().finally(() => {
-            if (typeof window.startAppListeners === 'function') {
-                window.startAppListeners();
-            } else {
-                window.__listenersPending = true;
-            }
-        });
-    </script>
+    <!-- Main Application Logic + Instant Preview & Firebase Sync Engine -->
     <script>
         const LOCAL_STORAGE_KEY = 'click_factory_current_user_v23';
         const THEME_STORAGE_KEY = 'click_factory_theme_v1';
         const SOUND_STORAGE_KEY = 'click_factory_sound_v1';
         const SOUND_VOL_STORAGE_KEY = 'click_factory_sound_vol_v1';
         const DOCK_ALPHA_STORAGE_KEY = 'click_factory_dock_alpha_v1';
+        const FALLBACK_DB_KEY = 'click_factory_local_fallback_db_v1';
         const CURRENT_CLIENT_APP_VERSION = '1.1.3';
+
+        function buildSeedDatabase() {
+            const today = new Date();
+            const fmt = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+            const d0 = fmt(today);
+            const d1 = fmt(new Date(today.getTime() - 86400000));
+            const d2 = fmt(new Date(today.getTime() - 2 * 86400000));
+
+            return {
+                users: {
+                    usr_adm: { id: 'usr_adm', name: 'Admin Manager', username: 'admin', password: 'adminpassword', role: 'admin', email: 'admin@clickfactory.com', wallet: 0, excessSpent: 0 },
+                    usr_1: { id: 'usr_1', name: 'User One', username: 'user1', password: 'password', role: 'user', email: 'user1@clickfactory.com', wallet: 8500, excessSpent: 0 },
+                    usr_2: { id: 'usr_2', name: 'User Two', username: 'user2', password: 'password', role: 'user', email: 'user2@clickfactory.com', wallet: 3200, excessSpent: 0 }
+                },
+                expenses: {
+                    exp_seed_1: {
+                        id: 'exp_seed_1',
+                        userId: 'usr_1',
+                        userName: 'User One',
+                        title: 'LED Light & Softbox Rental',
+                        amount: 1500,
+                        category: 'Shoot',
+                        date: d0,
+                        clientNamePlace: 'Velvet Weddings / ECR Beach Villa',
+                        notes: 'Full day rental with extra battery packs',
+                        billAttachment: null,
+                        createdAt: new Date(today.getTime() - 3600000).toISOString()
+                    },
+                    exp_seed_2: {
+                        id: 'exp_seed_2',
+                        userId: 'usr_2',
+                        userName: 'User Two',
+                        title: 'Studio Coffee & Client Refreshments',
+                        amount: 800,
+                        category: 'Office',
+                        date: d1,
+                        clientNamePlace: '',
+                        notes: 'Monthly pantry restock & snacks',
+                        billAttachment: null,
+                        createdAt: new Date(today.getTime() - 86400000).toISOString()
+                    },
+                    exp_seed_3: {
+                        id: 'exp_seed_3',
+                        userId: 'usr_1',
+                        userName: 'User One',
+                        title: 'Outdoor Crew Cab & Fuel',
+                        amount: 1200,
+                        category: 'Shoot',
+                        date: d2,
+                        clientNamePlace: 'Nakshatra Jewels / Anna Nagar',
+                        notes: 'Round trip crew transport',
+                        billAttachment: null,
+                        createdAt: new Date(today.getTime() - 2 * 86400000).toISOString()
+                    }
+                },
+                walletTransactions: {
+                    txn_seed_1: {
+                        id: 'txn_seed_1',
+                        userId: 'usr_1',
+                        type: 'topup',
+                        title: 'Added Wallet Funds',
+                        amount: 11200,
+                        timestamp: new Date(today.getTime() - 3 * 86400000).toISOString(),
+                        performedBy: 'Admin Manager'
+                    },
+                    txn_seed_2: {
+                        id: 'txn_seed_2',
+                        userId: 'usr_2',
+                        type: 'topup',
+                        title: 'Added Wallet Funds',
+                        amount: 4000,
+                        timestamp: new Date(today.getTime() - 3 * 86400000).toISOString(),
+                        performedBy: 'Admin Manager'
+                    }
+                },
+                notifications: {
+                    notif_seed_1: {
+                        id: 'notif_seed_1',
+                        recipientId: 'usr_1',
+                        recipientRole: 'user',
+                        type: 'wallet_credit',
+                        title: 'Wallet Credited!',
+                        message: 'Admin Manager added ₹11,200 to your wallet.',
+                        amount: 11200,
+                        read: false,
+                        timestamp: new Date(today.getTime() - 3 * 86400000).toISOString(),
+                        triggeredBy: 'Admin Manager'
+                    }
+                },
+                recycleBin: {},
+                userRecycleBin: {},
+                passwordRequests: {},
+                settings: {
+                    app_settings: { autoDeleteEnabled: false, currentVersion: '1.1.3' }
+                }
+            };
+        }
+
+        function createLocalFallbackAdapter() {
+            let store = null;
+            try {
+                const raw = localStorage.getItem(FALLBACK_DB_KEY);
+                if (raw) store = JSON.parse(raw);
+            } catch (e) { }
+
+            if (!store || !store.users || Object.keys(store.users).length === 0) {
+                store = buildSeedDatabase();
+                try { localStorage.setItem(FALLBACK_DB_KEY, JSON.stringify(store)); } catch (e) { }
+            }
+
+            const listeners = {};
+            function saveStore() {
+                try { localStorage.setItem(FALLBACK_DB_KEY, JSON.stringify(store)); } catch (e) { }
+            }
+            function notifyCollection(colName) {
+                const colObj = store[colName] || {};
+                const docs = Object.keys(colObj).map(id => ({
+                    id,
+                    data: () => JSON.parse(JSON.stringify(colObj[id]))
+                }));
+                (listeners[colName] || []).forEach(cb => {
+                    try { cb({ docs, empty: docs.length === 0 }); } catch (e) { }
+                });
+            }
+
+            return {
+                db: { __isLocalFallback: true },
+                storage: null,
+                isLocalFallback: true,
+                collection: (_db, colName) => ({ colName }),
+                doc: (_db, colName, docId) => ({ colName, docId }),
+                getDocs: async ({ colName }) => {
+                    const colObj = store[colName] || {};
+                    const docs = Object.keys(colObj).map(id => ({
+                        id,
+                        data: () => JSON.parse(JSON.stringify(colObj[id]))
+                    }));
+                    return { docs, empty: docs.length === 0 };
+                },
+                setDoc: async ({ colName, docId }, data, opts) => {
+                    if (!store[colName]) store[colName] = {};
+                    if (opts && opts.merge && store[colName][docId]) {
+                        store[colName][docId] = { ...store[colName][docId], ...JSON.parse(JSON.stringify(data)) };
+                    } else {
+                        store[colName][docId] = JSON.parse(JSON.stringify(data));
+                    }
+                    saveStore();
+                    notifyCollection(colName);
+                },
+                updateDoc: async ({ colName, docId }, patch) => {
+                    if (!store[colName]) store[colName] = {};
+                    if (!store[colName][docId]) throw new Error('Document does not exist');
+                    store[colName][docId] = { ...store[colName][docId], ...JSON.parse(JSON.stringify(patch)) };
+                    saveStore();
+                    notifyCollection(colName);
+                },
+                deleteDoc: async ({ colName, docId }) => {
+                    if (store[colName]) {
+                        delete store[colName][docId];
+                        saveStore();
+                        notifyCollection(colName);
+                    }
+                },
+                onSnapshot: ({ colName }, onNext) => {
+                    if (!listeners[colName]) listeners[colName] = [];
+                    listeners[colName].push(onNext);
+                    notifyCollection(colName);
+                    return () => {
+                        listeners[colName] = (listeners[colName] || []).filter(fn => fn !== onNext);
+                    };
+                },
+                runTransaction: async (_db, updateFn) => {
+                    const pendingUpdates = [];
+                    const tx = {
+                        get: async ({ colName, docId }) => {
+                            const item = store[colName] && store[colName][docId];
+                            return {
+                                exists: () => Boolean(item),
+                                data: () => JSON.parse(JSON.stringify(item))
+                            };
+                        },
+                        update: ({ colName, docId }, patch) => {
+                            pendingUpdates.push({ colName, docId, patch });
+                        }
+                    };
+                    const res = await updateFn(tx);
+                    const touchedCols = new Set();
+                    for (const u of pendingUpdates) {
+                        if (!store[u.colName]) store[u.colName] = {};
+                        store[u.colName][u.docId] = { ...store[u.colName][u.docId], ...JSON.parse(JSON.stringify(u.patch)) };
+                        touchedCols.add(u.colName);
+                    }
+                    saveStore();
+                    touchedCols.forEach(c => notifyCollection(c));
+                    return res;
+                },
+                storageRef: (_st, path) => ({ path }),
+                uploadString: async (_ref, dataUrl) => ({ dataUrl }),
+                getDownloadURL: async (ref) => ref.dataUrl || '',
+                deleteObject: async () => { }
+            };
+        }
+
+        // Initialize the instant local data adapter immediately so the UI never hangs
+        window.FB = createLocalFallbackAdapter();
 
         function lsGet(key, fallback = null) {
             try { const v = localStorage.getItem(key); return v === null ? fallback : v; } catch (e) { return fallback; }
@@ -718,10 +840,12 @@
             const d = new Date();
             return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
         }
+
         function parseLocal(s) {
             const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(s || '');
             return m ? new Date(+m[1], +m[2] - 1, +m[3]) : new Date(s);
         }
+
         function uName(id) {
             const u = state.users.find(x => x.id === id);
             return u ? u.name : '';
@@ -760,15 +884,14 @@
             editingExpenseId: null,
             tempBillData: null,
             tempFormCache: null,
-            authView: 'login',
-            lastClearedExpensesCache: null
+            authView: 'login'
         };
 
         const tabOrder = ['home', 'summary', 'admin', 'analytics', 'users', 'wallet', 'add', 'profile', 'recycle', 'userRecycle', 'requests', 'notifications'];
         const PTR_ALLOWED_TABS = ['home', 'admin', 'analytics', 'users', 'wallet', 'profile'];
 
         function isPtrAllowed() {
-            return state.currentUser && !state.isDbLoading && PTR_ALLOWED_TABS.includes(state.activeTab);
+            return Boolean(state.currentUser && !state.isDbLoading && PTR_ALLOWED_TABS.includes(state.activeTab));
         }
 
         let knownNotificationIds = new Set();
@@ -776,7 +899,7 @@
         let sharedAudioCtx = null;
         let lastHapticAlphaStep = state.dockAlpha;
         let lastHapticSoundStep = state.soundVolume;
-        let activeUnsubscribers = [];
+        window.activeUnsubscribers = [];
 
         function triggerHaptic(pattern = 12) {
             if (!state.soundEnabled) return;
@@ -827,10 +950,6 @@
             `;
         }
 
-        document.addEventListener('DOMContentLoaded', () => {
-            applyDockTransparency(state.dockAlpha);
-        });
-
         function unlockAudioContext() {
             try {
                 const AudioCtx = window.AudioContext || window.webkitAudioContext;
@@ -880,9 +999,7 @@
                     osc.start(startTime);
                     osc.stop(startTime + decay + 0.02);
                 });
-            } catch (err) {
-                console.warn("Audio chime skipped:", err);
-            }
+            } catch (err) { }
         }
 
         function toggleSoundPanel() {
@@ -1020,13 +1137,14 @@
                 id: txnId,
                 userId: userId,
                 type: 'undo_refund',
-                title: `Undo Expense: ${reasonTitle}${catLabel}`,
+                title: `Refund: ${reasonTitle}${catLabel}`,
                 subtitle: breakdownNote,
                 amount: refundAmt,
                 timestamp: new Date().toISOString(),
                 performedBy: state.currentUser ? state.currentUser.name : targetUser.name
             });
         }
+
         function applyTheme() {
             const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
             const isDark = state.themeMode === 'dark' || (state.themeMode === 'system' && prefersDark);
@@ -1076,58 +1194,228 @@
                 state.justFinishedLoading = true;
                 render();
             }
-        }, 5000);
+        }, 2500);
 
         const savedUser = lsGet(LOCAL_STORAGE_KEY);
         if (savedUser) {
             try { state.currentUser = JSON.parse(savedUser); } catch (e) { }
         }
 
-        let touchStartX = 0;
-        let touchStartY = 0;
+        // Unified Axis-Locked Touch Gesture Pipeline (Edge Back Swipe + Top-Down Pull-to-Refresh)
+        let gestureStartX = 0;
+        let gestureStartY = 0;
+        let gestureCurrentY = 0;
+        let gestureMode = null; // null | 'edge-back' | 'ptr' | 'ignored'
+        let isRefreshing = false;
+        let hasVibrated = false;
+
+        const REFRESH_THRESHOLD = 60;
+        const MAX_PULL_DISTANCE = 140;
+        const DIRECTION_LOCK_THRESHOLD = 8;
+
+        function ptrPullDistance(rawDiff) {
+            if (rawDiff <= 0) return 0;
+            return Math.min(MAX_PULL_DISTANCE, rawDiff * 0.42 * (1 - (rawDiff / (rawDiff + 280))));
+        }
 
         document.addEventListener('touchstart', (e) => {
-            touchStartX = e.changedTouches[0].screenX;
-            touchStartY = e.changedTouches[0].screenY;
-        }, false);
+            if (!state.currentUser || state.isDbLoading || isRefreshing || !e.touches || !e.touches.length) {
+                gestureMode = null;
+                return;
+            }
+            const t = e.touches[0];
+            gestureStartX = t.clientX;
+            gestureStartY = t.clientY;
+            gestureCurrentY = gestureStartY;
+            hasVibrated = false;
+            gestureMode = null;
 
-        document.addEventListener('touchend', (e) => {
-            if (!state.currentUser || state.isDbLoading) return;
-            const touchEndX = e.changedTouches[0].screenX;
-            const touchEndY = e.changedTouches[0].screenY;
-            const diffX = touchEndX - touchStartX;
-            const diffY = Math.abs(touchEndY - touchStartY);
-
-            if (touchStartX < 50 && diffX > 80 && diffY < 100) {
-                if (['recycle', 'requests', 'userRecycle', 'notifications'].includes(state.activeTab)) {
-                    switchTab(state.activeTab === 'notifications' ? 'home' : 'profile');
+            const mainContent = document.getElementById('main-content');
+            if (isPtrAllowed() && mainContent && mainContent.scrollTop <= 0) {
+                const ptrContainer = document.getElementById('ptr-container');
+                const icon = document.getElementById('ptr-icon');
+                const text = document.getElementById('ptr-text');
+                if (ptrContainer) ptrContainer.style.transition = 'none';
+                if (icon) {
+                    icon.className = 'fa-solid fa-arrow-down';
+                    icon.style.transform = 'rotate(0deg)';
+                }
+                if (text) {
+                    text.textContent = 'Pull to refresh';
+                    text.style.color = '';
                 }
             }
-        }, false);
+        }, { passive: true });
+
+        document.addEventListener('touchmove', (e) => {
+            if (!state.currentUser || state.isDbLoading || isRefreshing || gestureMode === 'ignored' || !e.touches || !e.touches.length) return;
+
+            const t = e.touches[0];
+            const rawDiffX = t.clientX - gestureStartX;
+            const rawDiffY = t.clientY - gestureStartY;
+
+            if (!gestureMode) {
+                const absX = Math.abs(rawDiffX);
+                const absY = Math.abs(rawDiffY);
+                if (absX < DIRECTION_LOCK_THRESHOLD && absY < DIRECTION_LOCK_THRESHOLD) return;
+
+                if (absX >= absY) {
+                    gestureMode = (gestureStartX < 44 && rawDiffX > 0) ? 'edge-back' : 'ignored';
+                    return;
+                }
+
+                const mainContent = document.getElementById('main-content');
+                if (isPtrAllowed() && mainContent && mainContent.scrollTop <= 0 && rawDiffY > 0) {
+                    gestureMode = 'ptr';
+                } else {
+                    gestureMode = 'ignored';
+                    return;
+                }
+            }
+
+            if (gestureMode !== 'ptr') return;
+
+            const mainContent = document.getElementById('main-content');
+            if (!mainContent || mainContent.scrollTop > 0 || rawDiffY <= 0) {
+                gestureMode = 'ignored';
+                resetPtrVisuals();
+                return;
+            }
+
+            gestureCurrentY = t.clientY;
+            const pullDistance = ptrPullDistance(rawDiffY);
+            const ptrContainer = document.getElementById('ptr-container');
+            const icon = document.getElementById('ptr-icon');
+            const text = document.getElementById('ptr-text');
+
+            if (ptrContainer) {
+                const progress = Math.min(1, pullDistance / REFRESH_THRESHOLD);
+                ptrContainer.style.opacity = progress.toString();
+                ptrContainer.style.transform = `translateY(${pullDistance}px)`;
+
+                if (pullDistance >= REFRESH_THRESHOLD) {
+                    if (icon) icon.style.transform = 'rotate(180deg)';
+                    if (text) {
+                        text.textContent = 'Release to refresh';
+                        text.style.color = '#4f46e5';
+                    }
+                    if (!hasVibrated) {
+                        triggerHaptic(12);
+                        hasVibrated = true;
+                    }
+                } else {
+                    const rotation = (pullDistance / REFRESH_THRESHOLD) * 180;
+                    if (icon) icon.style.transform = `rotate(${rotation}deg)`;
+                    if (text) {
+                        text.textContent = 'Pull to refresh';
+                        text.style.color = '';
+                    }
+                    hasVibrated = false;
+                }
+            }
+        }, { passive: true });
+
+        document.addEventListener('touchend', async (e) => {
+            if (!state.currentUser || state.isDbLoading || isRefreshing) {
+                gestureMode = null;
+                return;
+            }
+
+            const endX = (e.changedTouches && e.changedTouches[0]) ? e.changedTouches[0].clientX : gestureStartX;
+            const mode = gestureMode;
+            gestureMode = null;
+
+            if (mode === 'edge-back') {
+                if ((endX - gestureStartX) > 75 && ['recycle', 'requests', 'userRecycle', 'notifications'].includes(state.activeTab)) {
+                    switchTab(state.activeTab === 'notifications' ? 'home' : 'profile');
+                }
+                return;
+            }
+
+            if (mode !== 'ptr' || !isPtrAllowed()) {
+                resetPtrVisuals();
+                return;
+            }
+
+            const rawDiffY = gestureCurrentY - gestureStartY;
+            const ptrContainer = document.getElementById('ptr-container');
+            const icon = document.getElementById('ptr-icon');
+            const text = document.getElementById('ptr-text');
+
+            if (ptrContainer) {
+                ptrContainer.style.transition = 'transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.2s ease';
+            }
+
+            if (rawDiffY > 0 && ptrPullDistance(rawDiffY) >= REFRESH_THRESHOLD) {
+                isRefreshing = true;
+
+                if (ptrContainer) {
+                    ptrContainer.style.transform = 'translateY(42px)';
+                    ptrContainer.style.opacity = '1';
+                }
+                if (icon) {
+                    icon.className = 'fa-solid fa-circle-notch is-spinning';
+                    icon.style.transform = 'none';
+                }
+                if (text) {
+                    text.textContent = 'Updating...';
+                    text.style.color = '#4f46e5';
+                }
+
+                await new Promise(r => setTimeout(r, 550));
+                softRender();
+                showToast('Data refreshed!', 'success');
+                isRefreshing = false;
+            }
+
+            resetPtrVisuals();
+        }, { passive: true });
+
+        function resetPtrVisuals() {
+            const ptrContainer = document.getElementById('ptr-container');
+            const icon = document.getElementById('ptr-icon');
+            const text = document.getElementById('ptr-text');
+
+            if (ptrContainer) {
+                ptrContainer.style.transform = 'translateY(-40px)';
+                ptrContainer.style.opacity = '0';
+            }
+            if (icon) {
+                icon.className = 'fa-solid fa-arrow-down';
+                icon.style.transform = 'rotate(0deg)';
+            }
+            if (text) {
+                text.textContent = 'Pull to refresh';
+                text.style.color = '';
+            }
+
+            gestureStartX = 0;
+            gestureStartY = 0;
+            gestureCurrentY = 0;
+            hasVibrated = false;
+            gestureMode = null;
+        }
 
         function getMyNotifications() {
             if (!state.currentUser) return [];
             const isAdmin = state.currentUser.role === 'admin';
             return state.notifications
-                .filter(n => {
-                    if (isAdmin && n.recipientRole === 'admin') return true;
-                    if (n.recipientId === state.currentUser.id) return true;
-                    return false;
-                })
+                .filter(n => (isAdmin && n.recipientRole === 'admin') || (n.recipientId === state.currentUser.id))
                 .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
         }
 
         function sendBrowserNotification(title, body, type = 'wallet_credit') {
             if (!state.soundEnabled) return;
             if (!('Notification' in window) || Notification.permission !== 'granted') return;
-            const options = {
-                body: body,
-                icon: 'https://clickfactoryphotography.com/wp-content/uploads/2022/04/crop-logo.gif',
-                vibrate: type === 'excess_spent' ? [200, 100, 250] : [150, 80, 150],
-                silent: false,
-                tag: 'cf-notif-' + Date.now()
-            };
-            try { new Notification(title, options); } catch (e) { }
+            try {
+                new Notification(title, {
+                    body: body,
+                    icon: 'https://clickfactoryphotography.com/wp-content/uploads/2022/04/crop-logo.gif',
+                    vibrate: type === 'excess_spent' ? [200, 100, 250] : [150, 80, 150],
+                    silent: false,
+                    tag: 'cf-notif-' + Date.now()
+                });
+            } catch (e) { }
         }
 
         async function createAppNotification({ recipientId = null, recipientRole = null, type, title, message, amount = 0, triggeredBy = '' }) {
@@ -1141,9 +1429,7 @@
             };
             try {
                 await setDoc(doc(db, 'notifications', notifId), notifData);
-            } catch (err) {
-                console.error("Failed to create notification:", err);
-            }
+            } catch (err) { }
         }
 
         function softRender() {
@@ -1176,12 +1462,11 @@
         }
 
         window.startAppListeners = function () {
-            if (!window.FB) return;
-            if (window.__listenersStarted) return;
+            if (!window.FB || window.__listenersStarted) return;
             window.__listenersStarted = true;
             const { db, collection, onSnapshot, doc, setDoc, deleteDoc } = window.FB;
 
-            activeUnsubscribers.push(onSnapshot(collection(db, 'users'), (snapshot) => {
+            window.activeUnsubscribers.push(onSnapshot(collection(db, 'users'), (snapshot) => {
                 state.users = snapshot.docs.map(docSnap => docSnap.data());
                 if (state.currentUser) {
                     const freshUser = state.users.find(u => u.id === state.currentUser.id);
@@ -1194,25 +1479,24 @@
                 }
                 initialSyncFlags.users = true;
                 if (state.isDbLoading) checkInitialSyncComplete(); else softRender();
-            }, (err) => {
-                console.warn("Users listener notice:", err);
+            }, () => {
                 initialSyncFlags.users = true;
                 checkInitialSyncComplete();
             }));
 
-            activeUnsubscribers.push(onSnapshot(collection(db, 'settings'), (snapshot) => {
+            window.activeUnsubscribers.push(onSnapshot(collection(db, 'settings'), (snapshot) => {
                 snapshot.docs.forEach(docSnap => {
                     if (docSnap.id === 'app_settings') state.appSettings = docSnap.data();
                 });
                 if (!state.isDbLoading) softRender();
-            }, (err) => console.warn("Settings listener notice:", err)));
+            }, () => { }));
 
-            activeUnsubscribers.push(onSnapshot(collection(db, 'walletTransactions'), (snapshot) => {
+            window.activeUnsubscribers.push(onSnapshot(collection(db, 'walletTransactions'), (snapshot) => {
                 state.walletTransactions = snapshot.docs.map(docSnap => docSnap.data());
                 if (!state.isDbLoading) softRender();
-            }, (err) => console.warn("Transactions listener notice:", err)));
+            }, () => { }));
 
-            activeUnsubscribers.push(onSnapshot(collection(db, 'notifications'), (snapshot) => {
+            window.activeUnsubscribers.push(onSnapshot(collection(db, 'notifications'), (snapshot) => {
                 const allNotifs = snapshot.docs.map(docSnap => docSnap.data());
 
                 if (initialNotificationsLoaded && state.currentUser) {
@@ -1234,9 +1518,9 @@
                 initialNotificationsLoaded = true;
                 state.notifications = allNotifs;
                 if (!state.isDbLoading) softRender();
-            }, (err) => console.warn("Notifications listener notice:", err)));
+            }, () => { }));
 
-            activeUnsubscribers.push(onSnapshot(collection(db, 'expenses'), async (snapshot) => {
+            window.activeUnsubscribers.push(onSnapshot(collection(db, 'expenses'), async (snapshot) => {
                 let allExpenses = snapshot.docs.map(docSnap => docSnap.data());
 
                 if (state.appSettings && state.appSettings.autoDeleteEnabled && state.currentUser && state.currentUser.role === 'admin') {
@@ -1249,27 +1533,24 @@
                             const recycleItem = { ...exp, deletedAt: new Date().toISOString(), deletedBy: 'Auto-Delete System (2-Month Limit)' };
                             await setDoc(doc(db, 'recycleBin', exp.id), recycleItem);
                             await deleteDoc(doc(db, 'expenses', exp.id));
-                        } catch (err) {
-                            console.error("Auto-delete sync error:", err);
-                        }
+                        } catch (err) { }
                     }
                 }
 
                 state.expenses = allExpenses;
                 initialSyncFlags.expenses = true;
                 if (state.isDbLoading) checkInitialSyncComplete(); else softRender();
-            }, (err) => {
-                console.warn("Expenses listener notice:", err);
+            }, () => {
                 initialSyncFlags.expenses = true;
                 checkInitialSyncComplete();
             }));
 
-            activeUnsubscribers.push(onSnapshot(collection(db, 'recycleBin'), (snapshot) => {
+            window.activeUnsubscribers.push(onSnapshot(collection(db, 'recycleBin'), (snapshot) => {
                 state.recycleBin = snapshot.docs.map(docSnap => docSnap.data());
                 if (!state.isDbLoading) softRender();
-            }, (err) => console.warn("Recycle bin listener notice:", err)));
+            }, () => { }));
 
-            activeUnsubscribers.push(onSnapshot(collection(db, 'userRecycleBin'), async (snapshot) => {
+            window.activeUnsubscribers.push(onSnapshot(collection(db, 'userRecycleBin'), async (snapshot) => {
                 let deletedUsers = snapshot.docs.map(docSnap => docSnap.data());
                 const now = new Date();
                 const stillPending = [];
@@ -1289,7 +1570,6 @@
                                 await deleteDoc(doc(db, 'expenses', ue.id));
                             }
                         } catch (e) {
-                            console.error("Permanent wipe error:", e);
                             stillPending.push(item);
                         }
                         continue;
@@ -1299,12 +1579,12 @@
 
                 state.userRecycleBin = stillPending;
                 if (!state.isDbLoading) softRender();
-            }, (err) => console.warn("User recycle bin listener notice:", err)));
+            }, () => { }));
 
-            activeUnsubscribers.push(onSnapshot(collection(db, 'passwordRequests'), (snapshot) => {
+            window.activeUnsubscribers.push(onSnapshot(collection(db, 'passwordRequests'), (snapshot) => {
                 state.passwordRequests = snapshot.docs.map(docSnap => docSnap.data());
                 if (!state.isDbLoading) softRender();
-            }, (err) => console.warn("Requests listener notice:", err)));
+            }, () => { }));
         };
 
         function renderDatabaseLoadingScreen() {
@@ -1380,7 +1660,7 @@
         }
 
         function formatCurrency(amount) {
-            return '₹' + Number(amount).toLocaleString('en-IN');
+            return '₹' + Number(amount || 0).toLocaleString('en-IN');
         }
 
         function formatDate(dateString) {
@@ -1431,7 +1711,6 @@
                 await setDoc(doc(db, 'settings', 'app_settings'), { ...state.appSettings, autoDeleteEnabled: newState }, { merge: true });
                 showToast(newState ? '2-Month Auto-Delete Enabled' : '2-Month Auto-Delete Disabled', 'success');
             } catch (err) {
-                console.error("Failed to update setting:", err);
                 showToast('Failed to update setting.', 'error');
             }
         }
@@ -1462,7 +1741,7 @@
                     for (const item of state.recycleBin) {
                         try {
                             await deleteDoc(doc(db, 'recycleBin', item.id));
-                            if (item.billAttachment && item.billAttachment.includes('firebasestorage')) {
+                            if (storage && item.billAttachment && item.billAttachment.includes('firebasestorage')) {
                                 await deleteObject(storageRef(storage, `bills/${item.id}.jpg`));
                             }
                         } catch (e) { }
@@ -1477,7 +1756,7 @@
             const unreadCount = myNotifs.filter(n => !n.read).length;
 
             return `
-                <div class="space-y-4 w-full max-w-full">
+                <div class="space-y-4 w-full max-w-2xl mx-auto">
                     <div class="flex items-center justify-between px-1">
                         <div>
                             <h2 class="text-base font-bold text-slate-900 dark:text-white">Activity & Alerts</h2>
@@ -1514,7 +1793,7 @@
                     : (isDebit ? 'bg-amber-500/10 text-amber-600 dark:text-amber-400 fa-wallet' : 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 fa-wallet');
 
                 return `
-                                <div onclick="markNotificationRead('${n.id}')" class="cursor-pointer ios-glass-card rounded-3xl p-5 border ${!n.read ? 'border-indigo-500/60 dark:border-indigo-500/60 ring-1 ring-indigo-500/20' : 'border-slate-200/80 dark:border-slate-750'} shadow-sm transition relative w-full flex items-start space-x-3.5">
+                                <div onclick="markNotificationRead('${n.id}')" class="cursor-pointer ios-glass-card rounded-3xl p-5 border ${!n.read ? 'border-indigo-500/60 dark:border-indigo-500/60 ring-1 ring-indigo-500/20' : 'border-slate-200/80 dark:border-slate-800'} shadow-sm transition relative w-full flex items-start space-x-3.5">
                                     <div class="w-10 h-10 rounded-2xl ${iconClass.split(' ').slice(0, 3).join(' ')} flex items-center justify-center shrink-0 mt-0.5">
                                         <i class="fa-solid ${iconClass.split(' ').pop()}"></i>
                                     </div>
@@ -1594,7 +1873,7 @@
                 .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
 
             return `
-                <div class="space-y-4 w-full max-w-full">
+                <div class="space-y-4 w-full max-w-2xl mx-auto">
                     <div class="bg-gradient-to-br from-emerald-600 to-teal-700 rounded-3xl p-5 sm:p-6 text-white shadow-lg shadow-emerald-500/20 relative overflow-hidden w-full border border-emerald-500/30">
                         <div class="flex justify-between items-start mb-3 gap-2">
                             <div class="min-w-0 flex-1">
@@ -1634,7 +1913,7 @@
                             </div>
                             <div class="min-w-0 flex-1">
                                 <h4 class="text-xs font-bold text-rose-700 dark:text-rose-300 uppercase tracking-wider">Excess Spent Due: ${formatCurrency(userExcessSpent)}</h4>
-                                <p class="text-xs text-rose-600 dark:text-rose-300/90 mt-0.5">Your expenses exceeded your wallet balance. This amount will be automatically settled on your next wallet top-up or expense undo.</p>
+                                <p class="text-xs text-rose-600 dark:text-rose-300/90 mt-0.5">Your expenses exceeded your wallet balance. This amount will be automatically settled on your next wallet top-up or expense refund.</p>
                             </div>
                         </div>
                     ` : ''}
@@ -1645,43 +1924,116 @@
                             <span class="text-xs text-slate-400">${userTxns.length} Records</span>
                         </div>
 
+                        <div class="flex items-center flex-wrap gap-1.5 px-1">
+                            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-semibold bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border border-emerald-500/20">
+                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>Top-Up
+                            </span>
+                            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-semibold bg-amber-500/10 text-amber-700 dark:text-amber-300 border border-amber-500/20">
+                                <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>Excess Cleared
+                            </span>
+                            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-semibold bg-sky-500/10 text-sky-700 dark:text-sky-300 border border-sky-500/20">
+                                <span class="w-1.5 h-1.5 rounded-full bg-sky-500"></span>Undo Expense
+                            </span>
+                            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-semibold bg-rose-500/10 text-rose-700 dark:text-rose-300 border border-rose-500/20">
+                                <span class="w-1.5 h-1.5 rounded-full bg-rose-500"></span>Shortage
+                            </span>
+                        </div>
+
                         ${userTxns.length === 0 ? `
                             <div class="ios-glass-card rounded-3xl p-8 text-center shadow-sm w-full">
                                 <div class="w-14 h-14 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 rounded-2xl flex items-center justify-center mx-auto mb-3 text-xl">
                                     <i class="fa-solid fa-wallet"></i>
                                 </div>
                                 <h4 class="font-semibold text-slate-700 dark:text-slate-300 mb-1">No Wallet History Yet</h4>
-                                <p class="text-xs text-slate-500">Top-ups, undo expense refunds, and balance adjustments will appear here.</p>
+                                <p class="text-xs text-slate-500">Top-ups, expense refunds, and balance adjustments will appear here.</p>
                             </div>
                         ` : userTxns.map(t => {
-                const isUndo = t.type === 'undo_refund' || (t.title && t.title.toLowerCase().includes('undo'));
-                const isShortage = t.type === 'shortage';
+                const meta = getWalletTxnTheme(t);
                 return `
-                                <div class="ios-glass-card rounded-3xl p-5 shadow-sm flex items-center justify-between gap-3 w-full">
-                                    <div class="flex items-start space-x-3.5 min-w-0 flex-1">
-                                        <div class="w-10 h-10 rounded-2xl ${isUndo ? 'bg-indigo-500/10 text-indigo-600 dark:text-indigo-400' : (isShortage ? 'bg-rose-500/10 text-rose-600 dark:text-rose-400' : 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400')} flex items-center justify-center shrink-0 mt-0.5">
-                                            <i class="fa-solid ${isUndo ? 'fa-rotate-left' : (isShortage ? 'fa-arrow-up-long rotate-45' : 'fa-arrow-down-long rotate-45')}"></i>
+                                <div class="ios-glass-card rounded-3xl p-4 sm:p-5 shadow-sm flex flex-col gap-2 w-full border-l-4 ${meta.cardAccent}">
+                                    <div class="flex items-start justify-between gap-3 w-full">
+                                        <div class="flex items-start space-x-3 min-w-0 flex-1">
+                                            <div class="w-10 h-10 rounded-2xl ${meta.iconBox} flex items-center justify-center shrink-0 mt-0.5">
+                                                <i class="fa-solid ${meta.icon}"></i>
+                                            </div>
+                                            <div class="min-w-0 flex-1">
+                                                <h4 class="font-semibold text-sm sm:text-base text-slate-900 dark:text-white leading-snug break-words whitespace-normal">${escapeHtml(t.title)}</h4>
+                                                <div class="mt-1">
+                                                    <span class="inline-block px-2 py-0.5 text-[10px] font-bold rounded-full border ${meta.badge}">${meta.label}</span>
+                                                </div>
+                                            </div>
                                         </div>
-                                        <div class="min-w-0 flex-1">
-                                            <div class="flex items-center flex-wrap gap-1.5">
-                                                <h4 class="font-semibold text-sm sm:text-base text-slate-900 dark:text-white break-words">${escapeHtml(t.title)}</h4>
-                                                ${isUndo ? '<span class="px-2 py-0.5 text-[10px] font-bold rounded-full bg-indigo-50 dark:bg-indigo-950/80 text-indigo-600 dark:text-indigo-400 border border-indigo-200/60 dark:border-indigo-800">Undo Refund</span>' : ''}
-                                            </div>
-                                            ${t.subtitle ? `<p class="text-xs text-emerald-600 dark:text-emerald-400 font-medium mt-0.5 break-words">${escapeHtml(t.subtitle)}</p>` : ''}
-                                            <div class="flex items-center flex-wrap gap-1.5 text-xs text-slate-500 dark:text-slate-400 mt-1">
-                                                <span><i class="fa-regular fa-clock mr-1"></i>${formatTimestamp(t.timestamp)}</span>
-                                                <span>•</span>
-                                                <span class="italic">By ${escapeHtml(t.performedBy)}</span>
-                                            </div>
+                                        <span class="font-bold text-base sm:text-lg ${meta.amountColor} whitespace-nowrap shrink-0">${meta.sign}${formatCurrency(t.amount)}</span>
+                                    </div>
+                                    <div class="pl-[52px] space-y-1">
+                                        ${t.subtitle ? `<p class="text-xs ${meta.subtitleColor} font-medium leading-relaxed break-words whitespace-normal">${escapeHtml(t.subtitle)}</p>` : ''}
+                                        <div class="flex items-center flex-wrap gap-1.5 text-xs text-slate-500 dark:text-slate-400">
+                                            <span><i class="fa-regular fa-clock mr-1"></i>${formatTimestamp(t.timestamp)}</span>
+                                            <span>•</span>
+                                            <span class="italic break-words">By ${escapeHtml(t.performedBy)}</span>
                                         </div>
                                     </div>
-                                    <span class="font-bold text-base sm:text-lg ${isShortage ? 'text-rose-600 dark:text-rose-400' : 'text-emerald-600 dark:text-emerald-400'} whitespace-nowrap shrink-0">${isShortage ? '-' : '+'}${formatCurrency(t.amount)}</span>
                                 </div>
                             `;
             }).join('')}
                     </div>
                 </div>
             `;
+        }
+
+        function getWalletTxnTheme(t) {
+            const titleLower = (t.title || '').toLowerCase();
+            const subLower = (t.subtitle || '').toLowerCase();
+            const isShortage = t.type === 'shortage';
+            const isUndo = t.type === 'undo_refund' || titleLower.includes('undo') || titleLower.includes('refund');
+            const isExcessCleared = t.type === 'excess_cleared' || titleLower.includes('cleared excess') || subLower.includes('cleared ₹') || subLower.includes('reduced excess');
+
+            if (isShortage) {
+                return {
+                    label: 'Shortage Deduction',
+                    icon: 'fa-arrow-up-long rotate-45',
+                    sign: '-',
+                    cardAccent: '!border-l-rose-500',
+                    iconBox: 'bg-rose-500/12 text-rose-600 dark:text-rose-400',
+                    badge: 'bg-rose-50 dark:bg-rose-950/70 text-rose-700 dark:text-rose-300 border-rose-200/80 dark:border-rose-800/80',
+                    subtitleColor: 'text-rose-600 dark:text-rose-400',
+                    amountColor: 'text-rose-600 dark:text-rose-400'
+                };
+            }
+            if (isUndo) {
+                return {
+                    label: isExcessCleared ? 'Undo + Excess Cleared' : 'Undo Expense',
+                    icon: 'fa-rotate-left',
+                    sign: '+',
+                    cardAccent: '!border-l-sky-500',
+                    iconBox: 'bg-sky-500/12 text-sky-600 dark:text-sky-400',
+                    badge: 'bg-sky-50 dark:bg-sky-950/70 text-sky-700 dark:text-sky-300 border-sky-200/80 dark:border-sky-800/80',
+                    subtitleColor: 'text-sky-600 dark:text-sky-400',
+                    amountColor: 'text-sky-600 dark:text-sky-400'
+                };
+            }
+            if (isExcessCleared) {
+                return {
+                    label: 'Excess Cleared',
+                    icon: 'fa-scale-balanced',
+                    sign: '+',
+                    cardAccent: '!border-l-amber-500',
+                    iconBox: 'bg-amber-500/12 text-amber-600 dark:text-amber-400',
+                    badge: 'bg-amber-50 dark:bg-amber-950/70 text-amber-700 dark:text-amber-300 border-amber-200/80 dark:border-amber-800/80',
+                    subtitleColor: 'text-amber-600 dark:text-amber-400',
+                    amountColor: 'text-amber-600 dark:text-amber-400'
+                };
+            }
+            return {
+                label: 'Wallet Top-Up',
+                icon: 'fa-arrow-down-long rotate-45',
+                sign: '+',
+                cardAccent: '!border-l-emerald-500',
+                iconBox: 'bg-emerald-500/12 text-emerald-600 dark:text-emerald-400',
+                badge: 'bg-emerald-50 dark:bg-emerald-950/70 text-emerald-700 dark:text-emerald-300 border-emerald-200/80 dark:border-emerald-800/80',
+                subtitleColor: 'text-emerald-600 dark:text-emerald-400',
+                amountColor: 'text-emerald-600 dark:text-emerald-400'
+            };
         }
 
         function openAddWalletModal(userId) {
@@ -1718,7 +2070,7 @@
                                 </div>
                                 <p class="text-[10px] text-slate-400 mt-1">Enter positive amount to top up, or negative (e.g. -100) to adjust shortage.</p>
                             </div>
-                            <button type="submit" class="w-full py-3 bg-emerald-600 hover:bg-emerald-700 active:scale-[0.99] text-white font-semibold rounded-2xl shadow-md shadow-emerald-600/20 transition text-xs flex items-center justify-center gap-1.5">
+                            <button id="wallet-submit-btn" type="submit" class="w-full py-3 bg-emerald-600 hover:bg-emerald-700 active:scale-[0.99] text-white font-semibold rounded-2xl shadow-md shadow-emerald-600/20 transition text-xs flex items-center justify-center gap-1.5">
                                 <i class="fa-solid fa-check"></i>
                                 <span>Process Funds / Shortage</span>
                             </button>
@@ -1744,30 +2096,28 @@
                                     <span class="text-xs text-slate-500 dark:text-slate-400">No transaction records found</span>
                                 </div>
                             ` : userTxns.map(t => {
-                const isUndo = t.type === 'undo_refund' || (t.title && t.title.toLowerCase().includes('undo'));
-                const isShortage = t.type === 'shortage';
-                const badgeBg = isUndo ? 'bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400'
-                    : (isShortage ? 'bg-rose-50 dark:bg-rose-950/60 text-rose-600 dark:text-rose-400'
-                        : 'bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400');
-                const amountColor = isShortage ? 'text-rose-600 dark:text-rose-400' : 'text-emerald-600 dark:text-emerald-400';
-
+                const meta = getWalletTxnTheme(t);
                 return `
-                                    <div class="bg-white dark:bg-slate-800/80 p-3 rounded-2xl border border-slate-200/90 dark:border-slate-700/70 shadow-sm space-y-1.5 text-xs transition">
-                                        <div class="flex items-center justify-between gap-2">
-                                            <span class="font-semibold text-slate-900 dark:text-slate-100 flex items-center gap-2 min-w-0">
-                                                <span class="w-6 h-6 rounded-lg ${badgeBg} flex items-center justify-center shrink-0 text-[11px]">
-                                                    <i class="fa-solid ${isUndo ? 'fa-rotate-left' : (isShortage ? 'fa-minus' : 'fa-plus')}"></i>
+                                    <div class="bg-white dark:bg-slate-800/80 p-3.5 rounded-2xl border border-slate-200/90 dark:border-slate-700/70 border-l-4 ${meta.cardAccent} shadow-sm space-y-1.5 text-xs transition">
+                                        <div class="flex items-start justify-between gap-2.5">
+                                            <div class="flex items-start gap-2.5 min-w-0 flex-1">
+                                                <span class="w-7 h-7 rounded-xl ${meta.iconBox} flex items-center justify-center shrink-0 text-[11px] mt-0.5">
+                                                    <i class="fa-solid ${meta.icon}"></i>
                                                 </span>
-                                                <span class="truncate">${escapeHtml(t.title)}</span>
-                                            </span>
-                                            <span class="font-bold ${amountColor} shrink-0 text-sm whitespace-nowrap">
-                                                ${isShortage ? '-' : '+'}${formatCurrency(t.amount)}
+                                                <div class="min-w-0 flex-1">
+                                                    <h5 class="font-semibold text-slate-900 dark:text-slate-100 leading-snug break-words whitespace-normal">${escapeHtml(t.title)}</h5>
+                                                    <span class="inline-block mt-1 px-2 py-0.5 text-[9.5px] font-bold rounded-full border ${meta.badge}">${meta.label}</span>
+                                                </div>
+                                            </div>
+                                            <span class="font-bold ${meta.amountColor} shrink-0 text-sm whitespace-nowrap">
+                                                ${meta.sign}${formatCurrency(t.amount)}
                                             </span>
                                         </div>
-                                        ${t.subtitle ? `<p class="text-[10px] text-emerald-700 dark:text-emerald-300 font-medium pl-8 break-words">${escapeHtml(t.subtitle)}</p>` : ''}
-                                        <div class="flex items-center justify-between text-[10px] text-slate-500 dark:text-slate-400 pl-8 pt-0.5">
+                                        ${t.subtitle ? `<p class="text-[11px] ${meta.subtitleColor} font-medium pl-9 leading-relaxed break-words whitespace-normal">${escapeHtml(t.subtitle)}</p>` : ''}
+                                        <div class="flex items-center flex-wrap gap-x-2 gap-y-0.5 text-[10px] text-slate-500 dark:text-slate-400 pl-9 pt-0.5">
                                             <span>${formatTimestamp(t.timestamp)}</span>
-                                            <span class="italic text-slate-400 dark:text-slate-500">By ${escapeHtml(t.performedBy)}</span>
+                                            <span>•</span>
+                                            <span class="italic text-slate-400 dark:text-slate-500 break-words">By ${escapeHtml(t.performedBy)}</span>
                                         </div>
                                     </div>
                                 `;
@@ -1780,6 +2130,9 @@
 
         async function handleWalletAdd(e, userId) {
             e.preventDefault();
+            const submitBtn = document.getElementById('wallet-submit-btn');
+            if (submitBtn && submitBtn.disabled) return;
+
             const amountToAdd = round2(parseFloat(document.getElementById('wallet-add-amount').value));
             if (isNaN(amountToAdd) || amountToAdd === 0) {
                 showToast('Please enter a valid amount.', 'error');
@@ -1789,24 +2142,34 @@
             const user = state.users.find(u => u.id === userId);
             if (!user) return;
 
+            if (submitBtn) submitBtn.disabled = true;
+
             try {
                 const res = await adjustWallet(userId, amountToAdd);
                 const { db, doc, setDoc } = window.FB;
                 const walletPart = round2(amountToAdd - res.excessCleared);
 
                 const txnId = 'txn_' + Date.now();
+                let txnType = amountToAdd >= 0 ? 'topup' : 'shortage';
                 let txnTitle = amountToAdd >= 0 ? 'Added Wallet Funds' : 'Shortage Money Adjustment';
+                let txnSubtitle = '';
+
                 if (amountToAdd > 0 && res.excessCleared > 0 && walletPart > 0) {
-                    txnTitle = `Cleared Excess (₹${res.excessCleared}) & Added Wallet (₹${walletPart})`;
+                    txnType = 'excess_cleared';
+                    txnTitle = `Cleared Excess (${formatCurrency(res.excessCleared)}) & Added Wallet (${formatCurrency(walletPart)})`;
+                    txnSubtitle = `Settled ${formatCurrency(res.excessCleared)} excess due + credited ${formatCurrency(walletPart)} to wallet`;
                 } else if (amountToAdd > 0 && res.excessCleared > 0) {
+                    txnType = 'excess_cleared';
                     txnTitle = 'Cleared Excess Spent Due';
+                    txnSubtitle = `Settled ${formatCurrency(res.excessCleared)} excess spent due`;
                 }
 
                 await setDoc(doc(db, 'walletTransactions', txnId), {
                     id: txnId,
                     userId: userId,
-                    type: amountToAdd >= 0 ? 'topup' : 'shortage',
+                    type: txnType,
                     title: txnTitle,
+                    subtitle: txnSubtitle,
                     amount: Math.abs(amountToAdd),
                     timestamp: new Date().toISOString(),
                     performedBy: state.currentUser.name
@@ -1834,7 +2197,7 @@
                 closeModal();
                 showToast(`Successfully processed ${formatCurrency(amountToAdd)} for ${user.name}!`, 'success');
             } catch (err) {
-                console.error('Wallet update failed:', err);
+                if (submitBtn) submitBtn.disabled = false;
                 showToast('Failed to update wallet. Please try again.', 'error');
             }
         }
@@ -1848,8 +2211,7 @@
                     const { db, doc, deleteDoc } = window.FB;
                     const userTxns = state.walletTransactions.filter(t => t.userId === userId);
                     for (const t of userTxns) {
-                        try { await deleteDoc(doc(db, 'walletTransactions', t.id)); }
-                        catch (err) { console.error("Failed to delete txn:", err); }
+                        try { await deleteDoc(doc(db, 'walletTransactions', t.id)); } catch (err) { }
                     }
                     closeModal();
                     showToast(`Successfully cleared wallet history for ${userName}!`, 'success');
@@ -1887,8 +2249,7 @@
                         return;
                     }
                     for (const exp of userExpenses) {
-                        try { await deleteDoc(doc(db, 'expenses', exp.id)); }
-                        catch (err) { console.error("Failed to delete user expense:", err); }
+                        try { await deleteDoc(doc(db, 'expenses', exp.id)); } catch (err) { }
                     }
                     showToast(`Cleared expenses for ${userName}.`, 'success');
                 }
@@ -1960,6 +2321,7 @@
                 </div>
             `;
         }
+
         function syncPersistentNavbar() {
             const navWrapper = document.getElementById('persistent-nav-wrapper');
             if (!navWrapper) return;
@@ -2105,7 +2467,7 @@
 
         function fabButtonHtml() {
             return `
-                <button onclick="openNewExpenseTab()" class="fixed sm:absolute bottom-28 right-5 z-40 w-14 h-14 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 text-white rounded-full shadow-2xl flex items-center justify-center text-xl transition transform hover:scale-105 active:scale-95 border border-white/20" title="Add New Expense">
+                <button onclick="openNewExpenseTab()" class="fixed bottom-28 right-5 sm:right-8 z-40 w-14 h-14 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 text-white rounded-full shadow-2xl flex items-center justify-center text-xl transition transform hover:scale-105 active:scale-95 border border-white/20" title="Add New Expense">
                     <i class="fa-solid fa-plus"></i>
                 </button>
             `;
@@ -2384,10 +2746,10 @@
             renderMainContentOnly();
         }
 
-        function renderHomeTab() {
+        function getFilteredExpenses() {
+            if (!state.currentUser) return [];
             const isAdmin = state.currentUser.role === 'admin';
-
-            let filtered = state.expenses.filter(exp => {
+            return state.expenses.filter(exp => {
                 if (!isAdmin && exp.userId !== state.currentUser.id) return false;
                 if (isAdmin && state.filterUser !== 'All' && exp.userId !== state.filterUser) return false;
                 if (state.filterCategory !== 'All' && exp.category !== state.filterCategory) return false;
@@ -2405,14 +2767,24 @@
                 }
                 return true;
             });
+        }
 
-            filtered.sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+        function renderHomeTab() {
+            const isAdmin = state.currentUser.role === 'admin';
+            const filtered = getFilteredExpenses();
 
-            const totalAmount = filtered.reduce((sum, e) => sum + e.amount, 0);
-            const officeTotal = filtered.filter(e => e.category === 'Office').reduce((sum, e) => sum + e.amount, 0);
-            const shootTotal = filtered.filter(e => e.category === 'Shoot').reduce((sum, e) => sum + e.amount, 0);
+            filtered.sort((a, b) => {
+                const dateDiff = (b.date || '').localeCompare(a.date || '');
+                if (dateDiff !== 0) return dateDiff;
+                return (b.createdAt || '').localeCompare(a.createdAt || '');
+            });
 
-            const monthsSet = new Set(state.expenses.map(e => e.date ? e.date.substring(0, 7) : ''));
+            const totalAmount = filtered.reduce((sum, e) => sum + Number(e.amount || 0), 0);
+            const officeTotal = filtered.filter(e => e.category === 'Office').reduce((sum, e) => sum + Number(e.amount || 0), 0);
+            const shootTotal = filtered.filter(e => e.category === 'Shoot').reduce((sum, e) => sum + Number(e.amount || 0), 0);
+
+            const scopedExpenses = isAdmin ? state.expenses : state.expenses.filter(e => e.userId === state.currentUser.id);
+            const monthsSet = new Set(scopedExpenses.map(e => e.date ? e.date.substring(0, 7) : ''));
             const availableMonths = Array.from(monthsSet).filter(Boolean).sort().reverse();
             const hasDateFilterActive = state.filterStartDate || state.filterEndDate;
 
@@ -2429,7 +2801,7 @@
                 : 'ios-glass-card text-slate-600 dark:text-slate-400 border border-slate-200/80 dark:border-slate-800';
 
             return `
-                <div class="space-y-4 w-full max-w-full">
+                <div class="space-y-4 w-full max-w-2xl mx-auto">
                     <div class="bg-gradient-to-br from-indigo-600 to-violet-700 rounded-3xl p-5 sm:p-6 text-white shadow-lg shadow-indigo-500/20 relative overflow-hidden w-full border border-indigo-500/30">
                         <div class="flex justify-between items-start mb-3 gap-2">
                             <div class="min-w-0 flex-1">
@@ -2618,7 +2990,7 @@
             const newInput = document.getElementById('search-input');
             if (newInput) {
                 newInput.focus();
-                newInput.setSelectionRange(cursorPos, cursorPos);
+                try { newInput.setSelectionRange(cursorPos, cursorPos); } catch (err) { }
             }
         }
 
@@ -2659,12 +3031,12 @@
             const catBtn = (cat, icon) => `<button type="button" onclick="setFormCategory('${cat}')" id="btn-cat-${cat.toLowerCase()}" class="${catBtnClass(expense.category === cat)}"><i class="fa-solid ${icon}"></i><span>${cat}</span></button>`;
 
             return `
-                <div class="space-y-4 w-full max-w-full pb-8 pt-2">
+                <div class="space-y-4 w-full max-w-2xl mx-auto pb-8 pt-2">
                     <div class="flex items-center justify-between mb-2">
                         <div class="min-w-0 pr-2">
                             <h2 class="text-lg font-bold text-slate-900 dark:text-white truncate">${isEditing ? 'Edit Expense' : 'Add New Expense'}</h2>
                         </div>
-                        ${isEditing ? `<button type="button" onclick="cancelEdit()" class="text-xs font-medium text-slate-500 hover:text-slate-700 shrink-0">Cancel Edit</button>` : ''}
+                        <button type="button" onclick="cancelEdit()" class="text-xs font-semibold text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 shrink-0">${isEditing ? 'Cancel Edit' : 'Cancel'}</button>
                     </div>
 
                     <form onsubmit="handleExpenseSubmit(event)" class="ios-glass-card rounded-3xl p-5 sm:p-7 shadow-sm space-y-6 w-full mt-2">
@@ -2734,7 +3106,7 @@
                                     </div>
                                 </div>
 
-                                <button type="button" onclick="openCameraCaptureModal()" class="border-2 border-dashed border-slate-300 dark:border-slate-700 rounded-2xl p-4 text-center bg-slate-50/60 dark:bg-slate-800/40 hover:border-indigo-500 transition flex flex-col items-center justify-center space-x-1">
+                                <button type="button" onclick="openCameraCaptureModal()" class="border-2 border-dashed border-slate-300 dark:border-slate-700 rounded-2xl p-4 text-center bg-slate-50/60 dark:bg-slate-800/40 hover:border-indigo-500 transition flex flex-col items-center justify-center space-y-1">
                                     <div class="w-10 h-10 rounded-2xl bg-violet-50 dark:bg-violet-950/60 text-violet-600 dark:text-violet-400 flex items-center justify-center text-xs"><i class="fa-solid fa-camera"></i></div>
                                     <p class="text-[11px] font-semibold text-slate-700 dark:text-slate-300">Capture Bill</p>
                                     <p class="text-[9px] text-slate-400">Use Camera</p>
@@ -2931,11 +3303,11 @@
             try {
                 if (state.tempBillData === '') {
                     billUrl = null;
-                    if (existingExp && existingExp.billAttachment && existingExp.billAttachment.includes('firebasestorage')) {
+                    if (storage && existingExp && existingExp.billAttachment && existingExp.billAttachment.includes('firebasestorage')) {
                         try { await deleteObject(storageRef(storage, `bills/${expenseId}.jpg`)); } catch (e) { }
                     }
                 } else if (state.tempBillData !== null && state.tempBillData !== undefined) {
-                    if (!navigator.onLine) {
+                    if (!navigator.onLine || !storage) {
                         billUrl = state.tempBillData;
                     } else if (state.tempBillData.startsWith('data:image')) {
                         try {
@@ -2943,7 +3315,6 @@
                             await uploadString(fileRef, state.tempBillData, 'data_url');
                             billUrl = await getDownloadURL(fileRef);
                         } catch (storageErr) {
-                            console.warn("Storage upload failed, falling back to offline inline base64:", storageErr);
                             if (state.tempBillData.length > MAX_INLINE_BILL_CHARS) {
                                 showToast('Bill image is too large to save. Please use a smaller image.', 'error');
                                 if (submitBtn) submitBtn.disabled = false;
@@ -3007,7 +3378,6 @@
                 showToast(wasEditing ? 'Expense updated successfully!' : 'Expense saved successfully!', 'success');
                 switchTab('home');
             } catch (error) {
-                console.error("Failed:", error);
                 showToast('Failed to save. Record will sync when online.', 'error');
                 if (submitBtn) submitBtn.disabled = false;
             }
@@ -3064,7 +3434,6 @@
                         await refundExpenseToUserWallet(exp.userId, exp.amount, exp.title, exp.category);
                         showToast(`Expense undone! ${formatCurrency(exp.amount)} added back to your wallet.`, 'success');
                     } catch (err) {
-                        console.error("Undo expense error:", err);
                         showToast('Failed to undo expense.', 'error');
                     }
                 }
@@ -3072,18 +3441,31 @@
         }
 
         function confirmDeleteExpense(id) {
+            const exp = state.expenses.find(e => e.id === id);
+            if (!exp) return;
+            const owner = state.users.find(u => u.id === exp.userId);
+            const willRefund = owner && owner.role !== 'admin';
+
             showConfirmModal(
                 'Delete Expense',
-                'Are you sure you want to delete this expense record and move it to the Recycle Bin?',
+                willRefund
+                    ? `Delete "${exp.title}", move it to Recycle Bin, and refund ${formatCurrency(exp.amount)} back to ${owner.name}'s wallet?`
+                    : 'Are you sure you want to delete this expense record and move it to the Recycle Bin?',
                 async () => {
                     const { db, doc, deleteDoc, setDoc } = window.FB;
-                    const exp = state.expenses.find(e => e.id === id);
-                    if (!exp) return;
                     try {
-                        const recycleItem = { ...exp, deletedAt: new Date().toISOString(), deletedBy: state.currentUser.name };
+                        const recycleItem = {
+                            ...exp,
+                            refundedOnDelete: Boolean(willRefund),
+                            deletedAt: new Date().toISOString(),
+                            deletedBy: state.currentUser.name
+                        };
                         await setDoc(doc(db, 'recycleBin', id), recycleItem);
                         await deleteDoc(doc(db, 'expenses', id));
-                        showToast('Expense moved to Recycle Bin.', 'success');
+                        if (willRefund) {
+                            await refundExpenseToUserWallet(exp.userId, exp.amount, exp.title, exp.category);
+                        }
+                        showToast(willRefund ? 'Expense deleted & refunded to wallet.' : 'Expense moved to Recycle Bin.', 'success');
                     } catch (err) {
                         showToast('Failed to delete expense.', 'error');
                     }
@@ -3093,7 +3475,7 @@
 
         function renderRecycleBinTab() {
             return `
-                <div class="space-y-4 w-full max-w-full">
+                <div class="space-y-4 w-full max-w-2xl mx-auto">
                     <div class="flex items-center justify-between px-1">
                         <span class="text-xs text-slate-500">${state.recycleBin.length} deleted item(s)</span>
                         ${state.recycleBin.length > 0 ? `<button onclick="confirmEmptyRecycleBin()" class="px-3 py-1.5 bg-rose-50 dark:bg-rose-950/60 text-rose-600 dark:text-rose-400 text-xs font-semibold rounded-xl border border-rose-200 hover:bg-rose-100 transition"><i class="fa-solid fa-trash-can mr-1"></i>Empty Bin</button>` : ''}
@@ -3109,7 +3491,7 @@
                         ` : ''}
 
                         ${state.recycleBin.map(exp => {
-                const wasRefunded = String(exp.deletedBy || '').includes('Undo & Refunded');
+                const wasUndone = String(exp.deletedBy || '').includes('Undo & Refunded');
                 return `
                                 <div class="ios-glass-card rounded-3xl py-5 sm:py-6 px-5 sm:px-6 shadow-sm transition relative group w-full mt-3">
                                     <div class="flex items-start space-x-3.5 w-full">
@@ -3143,7 +3525,7 @@
                                             ` : ''}
 
                                             <div class="flex items-center justify-end mt-3 pt-2 border-t border-slate-200/50 dark:border-slate-800 w-full gap-2">
-                                                ${wasRefunded ? '<span class="text-[10px] text-slate-400 italic mr-auto">Refunded to wallet — cannot be restored</span>' : `
+                                                ${wasUndone ? '<span class="text-[10px] text-slate-400 italic mr-auto">Undone & refunded — cannot be restored</span>' : `
                                                 <button onclick="restoreFromRecycleBin('${exp.id}')" class="px-3.5 py-1.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 text-xs font-semibold border border-emerald-200 hover:bg-emerald-100 transition">
                                                     <i class="fa-solid fa-rotate-left mr-1"></i>Restore
                                                 </button>`}
@@ -3165,12 +3547,18 @@
             const { db, doc, deleteDoc, setDoc } = window.FB;
             const item = state.recycleBin.find(e => e.id === id);
             if (!item) return;
-            const { deletedAt, deletedBy, ...expenseData } = item;
+            const { deletedAt, deletedBy, refundedOnDelete, ...expenseData } = item;
             if (String(deletedBy || '').includes('Undo & Refunded')) {
                 showToast('This expense was undone and refunded. Add it again as a new expense instead.', 'error');
                 return;
             }
             try {
+                if (refundedOnDelete && expenseData.userId) {
+                    const owner = state.users.find(u => u.id === expenseData.userId);
+                    if (owner && owner.role !== 'admin') {
+                        await adjustWallet(expenseData.userId, -round2(expenseData.amount));
+                    }
+                }
                 await setDoc(doc(db, 'expenses', id), expenseData);
                 await deleteDoc(doc(db, 'recycleBin', id));
                 showToast('Expense restored successfully!', 'success');
@@ -3189,7 +3577,7 @@
                     const { db, doc, deleteDoc, storage, storageRef, deleteObject } = window.FB;
                     try {
                         await deleteDoc(doc(db, 'recycleBin', id));
-                        if (billUrl && billUrl.includes('firebasestorage')) {
+                        if (storage && billUrl && billUrl.includes('firebasestorage')) {
                             try { await deleteObject(storageRef(storage, `bills/${id}.jpg`)); } catch (e) { }
                         }
                         showToast('Expense permanently deleted.', 'success');
@@ -3202,7 +3590,7 @@
 
         function renderUserRecycleBinTab() {
             return `
-                <div class="space-y-4 w-full max-w-full">
+                <div class="space-y-4 w-full max-w-2xl mx-auto">
                     <div class="space-y-3.5 w-full">
                         ${state.userRecycleBin.length === 0 ? `
                             <div class="ios-glass-card rounded-3xl p-8 text-center shadow-sm w-full mt-3">
@@ -3252,19 +3640,19 @@
             state.expenses.forEach(exp => {
                 const monthKey = exp.date ? exp.date.substring(0, 7) : 'Unknown';
                 if (!monthlyMap[monthKey]) monthlyMap[monthKey] = { month: monthKey, office: 0, shoot: 0, total: 0, count: 0 };
-                if (exp.category === 'Office') monthlyMap[monthKey].office += exp.amount;
-                if (exp.category === 'Shoot') monthlyMap[monthKey].shoot += exp.amount;
-                monthlyMap[monthKey].total += exp.amount;
+                if (exp.category === 'Office') monthlyMap[monthKey].office += Number(exp.amount || 0);
+                if (exp.category === 'Shoot') monthlyMap[monthKey].shoot += Number(exp.amount || 0);
+                monthlyMap[monthKey].total += Number(exp.amount || 0);
                 monthlyMap[monthKey].count += 1;
             });
 
             const sortedMonths = Object.keys(monthlyMap).sort().reverse();
-            const grandTotal = state.expenses.reduce((s, e) => s + e.amount, 0);
-            const totalOffice = state.expenses.filter(e => e.category === 'Office').reduce((s, e) => s + e.amount, 0);
-            const totalShoot = state.expenses.filter(e => e.category === 'Shoot').reduce((s, e) => s + e.amount, 0);
+            const grandTotal = state.expenses.reduce((s, e) => s + Number(e.amount || 0), 0);
+            const totalOffice = state.expenses.filter(e => e.category === 'Office').reduce((s, e) => s + Number(e.amount || 0), 0);
+            const totalShoot = state.expenses.filter(e => e.category === 'Shoot').reduce((s, e) => s + Number(e.amount || 0), 0);
 
             return `
-                <div class="space-y-4 w-full max-w-full">
+                <div class="space-y-4 w-full max-w-2xl mx-auto">
                     <div class="bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 rounded-3xl p-5 sm:p-6 text-white shadow-xl relative overflow-hidden border border-indigo-500/30 w-full">
                         <div class="flex justify-between items-start mb-3 gap-2">
                             <div class="min-w-0 flex-1">
@@ -3292,7 +3680,9 @@
 
                     <div class="space-y-3 w-full">
                         <h3 class="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider px-1 pt-3">Month-by-Month Summary</h3>
-                        ${sortedMonths.map(monthKey => {
+                        ${sortedMonths.length === 0 ? `
+                            <div class="ios-glass-card rounded-3xl p-8 text-center shadow-sm text-xs text-slate-400">No expenses recorded yet.</div>
+                        ` : sortedMonths.map(monthKey => {
                 const data = monthlyMap[monthKey];
                 return `
                                 <div class="ios-glass-card rounded-3xl p-5 sm:p-6 shadow-sm space-y-3 w-full mt-3">
@@ -3318,7 +3708,7 @@
 
         function renderPasswordRequestsTab() {
             return `
-                <div class="space-y-4 w-full max-w-full">
+                <div class="space-y-4 w-full max-w-2xl mx-auto">
                     <div class="space-y-3 w-full">
                         ${state.passwordRequests.length === 0 ? `
                             <div class="ios-glass-card rounded-3xl p-8 text-center shadow-sm w-full mt-3">
@@ -3381,7 +3771,7 @@
                 : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white';
 
             return `
-                <div class="space-y-5 w-full max-w-full">
+                <div class="space-y-5 w-full max-w-2xl mx-auto">
                     <div class="flex items-center justify-between gap-3">
                         <div class="min-w-0 flex-1">
                             <h2 class="text-lg font-bold text-slate-900 dark:text-white leading-snug">User Management</h2>
@@ -3433,7 +3823,7 @@
             const isUserAdmin = u.role === 'admin';
             const uWallet = Number(u.wallet || 0);
             const uExcess = Number(u.excessSpent || 0);
-            const userTotalSpent = state.expenses.filter(e => e.userId === u.id).reduce((s, e) => s + e.amount, 0);
+            const userTotalSpent = state.expenses.filter(e => e.userId === u.id).reduce((s, e) => s + Number(e.amount || 0), 0);
 
             return `
                 <div class="ios-glass-card rounded-3xl p-4 sm:p-5 shadow-sm space-y-3.5 w-full mt-3">
@@ -3523,7 +3913,7 @@
                                     <option value="admin">Administrator</option>
                                 </select>
                             </div>
-                            <div class="pt-2 w-full"><button type="submit" class="w-full py-3.5 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-2xl shadow-md transition text-sm">Create User</button></div>
+                            <div class="pt-2 w-full"><button id="create-user-btn" type="submit" class="w-full py-3.5 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-2xl shadow-md transition text-sm">Create User</button></div>
                         </form>
                     </div>
                 </div>
@@ -3547,7 +3937,7 @@
                         <form onsubmit="handleEditUser(event, '${user.id}')" class="space-y-3.5 w-full">
                             <div class="w-full"><label class="${lbl}">Full Name</label><input type="text" id="edit-user-name" required value="${escapeHtml(user.name)}" class="${inputCls}"></div>
                             <div class="w-full"><label class="${lbl}">Role</label><select id="edit-user-role" class="${inputCls}"><option value="user" ${user.role === 'user' ? 'selected' : ''}>Regular User</option><option value="admin" ${user.role === 'admin' ? 'selected' : ''}>Administrator</option></select></div>
-                            <div class="pt-2 w-full"><button type="submit" class="w-full py-3.5 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-2xl shadow-md transition text-sm">Save Changes</button></div>
+                            <div class="pt-2 w-full"><button id="edit-user-btn" type="submit" class="w-full py-3.5 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-2xl shadow-md transition text-sm">Save Changes</button></div>
                         </form>
                     </div>
                 </div>
@@ -3556,6 +3946,9 @@
 
         async function handleEditUser(e, userId) {
             e.preventDefault();
+            const submitBtn = document.getElementById('edit-user-btn');
+            if (submitBtn && submitBtn.disabled) return;
+
             const name = document.getElementById('edit-user-name').value.trim();
             const role = document.getElementById('edit-user-role').value;
 
@@ -3566,6 +3959,8 @@
                 showToast('At least one administrator is required.', 'error');
                 return;
             }
+
+            if (submitBtn) submitBtn.disabled = true;
 
             try {
                 const { db, doc, updateDoc } = window.FB;
@@ -3579,12 +3974,16 @@
                 closeModal();
                 showToast('User updated successfully!', 'success');
             } catch (err) {
+                if (submitBtn) submitBtn.disabled = false;
                 showToast('Failed to update user.', 'error');
             }
         }
 
         async function handleAddNewUser(e) {
             e.preventDefault();
+            const submitBtn = document.getElementById('create-user-btn');
+            if (submitBtn && submitBtn.disabled) return;
+
             const name = document.getElementById('new-user-name').value.trim();
             const username = document.getElementById('new-user-username').value.trim().toLowerCase();
             const password = document.getElementById('new-user-password').value;
@@ -3604,6 +4003,8 @@
                 return;
             }
 
+            if (submitBtn) submitBtn.disabled = true;
+
             try {
                 const userId = 'usr_' + Date.now();
                 const newUser = { id: userId, name, username, password, role, email: `${username}@clickfactory.com`, wallet: 0, excessSpent: 0 };
@@ -3612,6 +4013,7 @@
                 closeModal();
                 showToast(`User ${name} added successfully!`, 'success');
             } catch (err) {
+                if (submitBtn) submitBtn.disabled = false;
                 showToast('Failed to add user.', 'error');
             }
         }
@@ -3653,7 +4055,6 @@
                         }
                         showToast(`User ${userName} moved to Deleted Users Bin.`, 'success');
                     } catch (err) {
-                        console.error(err);
                         showToast('Failed to remove user (data may be too large).', 'error');
                     }
                 }
@@ -3662,22 +4063,22 @@
 
         function renderUserAnalyticsTab() {
             const userExpenses = state.expenses.filter(e => e.userId === state.currentUser.id);
-            const total = userExpenses.reduce((s, e) => s + e.amount, 0);
-            const office = userExpenses.filter(e => e.category === 'Office').reduce((s, e) => s + e.amount, 0);
-            const shoot = userExpenses.filter(e => e.category === 'Shoot').reduce((s, e) => s + e.amount, 0);
+            const total = userExpenses.reduce((s, e) => s + Number(e.amount || 0), 0);
+            const office = userExpenses.filter(e => e.category === 'Office').reduce((s, e) => s + Number(e.amount || 0), 0);
+            const shoot = userExpenses.filter(e => e.category === 'Shoot').reduce((s, e) => s + Number(e.amount || 0), 0);
 
             const monthlyMap = {};
             userExpenses.forEach(exp => {
                 const monthKey = exp.date ? exp.date.substring(0, 7) : 'Unknown';
                 if (!monthlyMap[monthKey]) monthlyMap[monthKey] = { office: 0, shoot: 0, total: 0 };
-                if (exp.category === 'Office') monthlyMap[monthKey].office += exp.amount;
-                if (exp.category === 'Shoot') monthlyMap[monthKey].shoot += exp.amount;
-                monthlyMap[monthKey].total += exp.amount;
+                if (exp.category === 'Office') monthlyMap[monthKey].office += Number(exp.amount || 0);
+                if (exp.category === 'Shoot') monthlyMap[monthKey].shoot += Number(exp.amount || 0);
+                monthlyMap[monthKey].total += Number(exp.amount || 0);
             });
             const months = Object.keys(monthlyMap).sort().reverse();
 
             return `
-                <div class="space-y-4 w-full max-w-full">
+                <div class="space-y-4 w-full max-w-2xl mx-auto">
                     <div class="bg-gradient-to-br from-violet-600 to-indigo-700 rounded-3xl p-5 sm:p-6 text-white shadow-lg shadow-violet-500/20 border border-violet-500/30 w-full">
                         <p class="text-violet-200 text-xs font-semibold uppercase tracking-wider">My Expense Summary</p>
                         <h2 class="text-2xl sm:text-3xl font-bold tracking-tight mt-0.5 break-all">${formatCurrency(total)}</h2>
@@ -3692,7 +4093,9 @@
                             <h3 class="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Monthly Breakdown</h3>
                             <button onclick="exportUserCSV('${state.currentUser.id}')" class="text-xs font-semibold text-indigo-600 dark:text-indigo-400 hover:underline flex items-center space-x-1 shrink-0"><i class="fa-solid fa-download"></i><span>Export CSV</span></button>
                         </div>
-                        ${months.map(m => `
+                        ${months.length === 0 ? `
+                            <div class="ios-glass-card rounded-3xl p-8 text-center shadow-sm text-xs text-slate-400">No expenses recorded yet.</div>
+                        ` : months.map(m => `
                             <div class="ios-glass-card rounded-3xl p-6 sm:p-7 shadow-sm space-y-3 w-full mt-3">
                                 <div class="flex items-center justify-between">
                                     <span class="font-bold text-sm sm:text-base text-slate-900 dark:text-white truncate pr-2">${formatMonthName(m)}</span>
@@ -3725,7 +4128,7 @@
                 </button>`;
 
             return `
-                <div class="space-y-4 w-full max-w-full">
+                <div class="space-y-4 w-full max-w-2xl mx-auto">
                     <div class="ios-glass-card rounded-3xl p-6 sm:p-7 shadow-sm text-center w-full">
                         <div class="w-16 h-16 flex items-center justify-center mx-auto mb-3 overflow-hidden logo-container">
                             <img src="https://clickfactoryphotography.com/wp-content/uploads/2022/04/crop-logo.gif" alt="Click Factory Logo" class="w-full h-full object-contain" onerror="this.src='https://placehold.co/64x64/4f46e5/ffffff?text=CF'">
@@ -3840,7 +4243,7 @@
                                 <i class="fa-solid fa-circle-info text-indigo-500"></i>
                                 <span>System Version</span>
                             </h4>
-                            <p class="text-[10px] text-slate-500 dark:text-slate-400">Running v${CURRENT_CLIENT_APP_VERSION} (Auto-syncs with cloud)</p>
+                            <p class="text-[10px] text-slate-500 dark:text-slate-400">Running v${CURRENT_CLIENT_APP_VERSION} (${window.FB && window.FB.isLocalFallback ? 'Preview Storage Mode' : 'Cloud Synced'})</p>
                         </div>
 
                         <div class="space-y-2.5 pt-1 border-t border-slate-200/50 dark:border-slate-800">
@@ -3882,7 +4285,7 @@
                             ${field('current-pass', 'toggle-curr-pass-icon', 'Current Password')}
                             ${field('new-pass', 'toggle-new-pass-icon', 'New Password')}
                             ${field('confirm-new-pass', 'toggle-confirm-new-pass-icon', 'Confirm New Password')}
-                            <div class="pt-2 w-full"><button type="submit" class="w-full py-3.5 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-2xl shadow-md transition text-sm">Update Password</button></div>
+                            <div class="pt-2 w-full"><button id="change-pass-btn" type="submit" class="w-full py-3.5 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-2xl shadow-md transition text-sm">Update Password</button></div>
                         </form>
                     </div>
                 </div>
@@ -3891,6 +4294,9 @@
 
         async function handlePasswordChange(e) {
             e.preventDefault();
+            const submitBtn = document.getElementById('change-pass-btn');
+            if (submitBtn && submitBtn.disabled) return;
+
             const current = document.getElementById('current-pass').value;
             const newPass = document.getElementById('new-pass').value;
             const confirmNewPass = document.getElementById('confirm-new-pass').value;
@@ -3909,34 +4315,33 @@
                 return;
             }
 
+            if (submitBtn) submitBtn.disabled = true;
+
             try {
                 const { db, doc, updateDoc } = window.FB;
                 await updateDoc(doc(db, 'users', me.id), { password: newPass });
                 closeModal();
                 showToast('Password updated successfully!', 'success');
             } catch (err) {
+                if (submitBtn) submitBtn.disabled = false;
                 showToast('Failed to update password.', 'error');
             }
         }
 
         function exportUserCSV(userId) {
+            if (!state.currentUser) return;
+            if (state.currentUser.role !== 'admin' && userId !== state.currentUser.id) return;
             const userName = uName(userId) || 'user';
             downloadCSV(state.expenses.filter(e => e.userId === userId), `${userName.replace(/\s+/g, '_')}_expenses.csv`);
         }
 
         function exportFilteredCSV() {
-            const filtered = state.expenses.filter(exp => {
-                if (state.filterUser !== 'All' && exp.userId !== state.filterUser) return false;
-                if (state.filterCategory !== 'All' && exp.category !== state.filterCategory) return false;
-                if (state.filterMonth !== 'All' && !(exp.date || '').startsWith(state.filterMonth)) return false;
-                if (state.filterStartDate && exp.date < state.filterStartDate) return false;
-                if (state.filterEndDate && exp.date > state.filterEndDate) return false;
-                return true;
-            });
+            const filtered = getFilteredExpenses();
             downloadCSV(filtered, 'filtered_expenses_report.csv');
         }
 
         function exportAllCSV() {
+            if (!state.currentUser || state.currentUser.role !== 'admin') return;
             downloadCSV(state.expenses, 'all_company_expenses.csv');
         }
 
@@ -3981,7 +4386,13 @@
                     </div>
                 </div>
             `;
-            document.getElementById('modal-confirm-btn').onclick = () => { closeModal(); onConfirm(); };
+            const confirmBtn = document.getElementById('modal-confirm-btn');
+            confirmBtn.onclick = async () => {
+                if (confirmBtn.disabled) return;
+                confirmBtn.disabled = true;
+                closeModal();
+                await onConfirm();
+            };
         }
 
         function closeModal() {
@@ -3998,218 +4409,103 @@
             return String(str).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
         }
 
-        // ---------- STRICT TOP-DOWN PULL TO REFRESH ----------
-        let ptrStartX = 0;
-        let ptrStartY = 0;
-        let ptrCurrentY = 0;
-        let isPulling = false;
-        let isRefreshing = false;
-        let hasVibrated = false;
-        let gestureAxis = null;
-
-        const REFRESH_THRESHOLD = 60;
-        const MAX_PULL_DISTANCE = 140;
-        const DIRECTION_LOCK_THRESHOLD = 6;
-
-        function ptrPullDistance(rawDiff) {
-            if (rawDiff <= 0) return 0;
-            return Math.min(MAX_PULL_DISTANCE, rawDiff * 0.42 * (1 - (rawDiff / (rawDiff + 280))));
-        }
-
-        document.addEventListener('touchstart', (e) => {
-            if (!isPtrAllowed() || isRefreshing) {
-                isPulling = false;
-                return;
-            }
-
-            const mainContent = document.getElementById('main-content');
-            if (mainContent && mainContent.scrollTop <= 0) {
-                ptrStartX = e.touches[0].clientX;
-                ptrStartY = e.touches[0].clientY;
-                ptrCurrentY = ptrStartY;
-                isPulling = true;
-                hasVibrated = false;
-                gestureAxis = null;
-
-                const ptrContainer = document.getElementById('ptr-container');
-                const icon = document.getElementById('ptr-icon');
-                const text = document.getElementById('ptr-text');
-
-                if (ptrContainer) ptrContainer.style.transition = 'none';
-                if (icon) {
-                    icon.className = 'fa-solid fa-arrow-down';
-                    icon.style.transform = 'rotate(0deg)';
-                }
-                if (text) {
-                    text.textContent = 'Pull to refresh';
-                    text.style.color = '';
-                }
-            } else {
-                isPulling = false;
-            }
-        }, { passive: true });
-
-        document.addEventListener('touchmove', (e) => {
-            if (!isPulling || isRefreshing || !isPtrAllowed()) return;
-
-            const mainContent = document.getElementById('main-content');
-            if (!mainContent || mainContent.scrollTop > 0) {
-                isPulling = false;
-                resetPtrVisuals();
-                return;
-            }
-
-            const currentX = e.touches[0].clientX;
-            const currentY = e.touches[0].clientY;
-            const rawDiffX = currentX - ptrStartX;
-            const rawDiffY = currentY - ptrStartY;
-
-            if (!gestureAxis) {
-                const absX = Math.abs(rawDiffX);
-                const absY = Math.abs(rawDiffY);
-
-                if (absX > DIRECTION_LOCK_THRESHOLD || absY > DIRECTION_LOCK_THRESHOLD) {
-                    if (absX >= absY || rawDiffY <= 0) {
-                        gestureAxis = 'cancelled';
-                        isPulling = false;
-                        resetPtrVisuals();
-                        return;
-                    }
-                    gestureAxis = 'downward-pull';
-                } else {
-                    return;
-                }
-            }
-
-            if (gestureAxis !== 'downward-pull' || rawDiffY <= 0) {
-                resetPtrVisuals();
-                return;
-            }
-
-            ptrCurrentY = currentY;
-            const pullDistance = ptrPullDistance(rawDiffY);
-
-            const ptrContainer = document.getElementById('ptr-container');
-            const icon = document.getElementById('ptr-icon');
-            const text = document.getElementById('ptr-text');
-
-            if (ptrContainer) {
-                const progress = Math.min(1, pullDistance / REFRESH_THRESHOLD);
-                ptrContainer.style.opacity = progress.toString();
-                ptrContainer.style.transform = `translateY(${pullDistance}px)`;
-
-                if (pullDistance >= REFRESH_THRESHOLD) {
-                    if (icon) icon.style.transform = 'rotate(180deg)';
-                    if (text) {
-                        text.textContent = 'Release to refresh';
-                        text.style.color = '#4f46e5';
-                    }
-                    if (!hasVibrated) {
-                        if (state.soundEnabled && 'vibrate' in navigator) {
-                            try { navigator.vibrate(12); } catch (err) { }
-                        }
-                        hasVibrated = true;
-                    }
-                } else {
-                    const rotation = (pullDistance / REFRESH_THRESHOLD) * 180;
-                    if (icon) icon.style.transform = `rotate(${rotation}deg)`;
-                    if (text) {
-                        text.textContent = 'Pull to refresh';
-                        text.style.color = '';
-                    }
-                    hasVibrated = false;
-                }
-            }
-        }, { passive: true });
-
-        document.addEventListener('touchend', async () => {
-            if (!isPulling || isRefreshing || !isPtrAllowed() || gestureAxis !== 'downward-pull') {
-                isPulling = false;
-                gestureAxis = null;
-                resetPtrVisuals();
-                return;
-            }
-            isPulling = false;
-
-            const rawDiffY = ptrCurrentY - ptrStartY;
-            const ptrContainer = document.getElementById('ptr-container');
-            const icon = document.getElementById('ptr-icon');
-            const text = document.getElementById('ptr-text');
-
-            if (ptrContainer) {
-                ptrContainer.style.transition = 'transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.2s ease';
-            }
-
-            if (rawDiffY > 0 && ptrPullDistance(rawDiffY) >= REFRESH_THRESHOLD) {
-                isRefreshing = true;
-
-                if (ptrContainer) {
-                    ptrContainer.style.transform = 'translateY(42px)';
-                    ptrContainer.style.opacity = '1';
-                }
-                if (icon) {
-                    icon.className = 'fa-solid fa-circle-notch is-spinning';
-                    icon.style.transform = 'none';
-                }
-                if (text) {
-                    text.textContent = 'Updating...';
-                    text.style.color = '#4f46e5';
-                }
-
-                await new Promise(r => setTimeout(r, 650));
-                softRender();
-                showToast('Data refreshed!', 'success');
-
-                isRefreshing = false;
-            }
-
-            gestureAxis = null;
-            resetPtrVisuals();
-        });
-
-        function resetPtrVisuals() {
-            const ptrContainer = document.getElementById('ptr-container');
-            const icon = document.getElementById('ptr-icon');
-            const text = document.getElementById('ptr-text');
-
-            if (ptrContainer) {
-                ptrContainer.style.transform = 'translateY(-40px)';
-                ptrContainer.style.opacity = '0';
-            }
-            if (icon) {
-                icon.className = 'fa-solid fa-arrow-down';
-                icon.style.transform = 'rotate(0deg)';
-            }
-            if (text) {
-                text.textContent = 'Pull to refresh';
-                text.style.color = '';
-            }
-
-            ptrStartX = 0;
-            ptrStartY = 0;
-            ptrCurrentY = 0;
-            hasVibrated = false;
-            gestureAxis = null;
-        }
-
         window.addEventListener('resize', syncPersistentNavbar);
         window.addEventListener('orientationchange', () => setTimeout(syncPersistentNavbar, 100));
 
-        // Service Worker registration for PWA offline caching
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js').catch((err) => {
-                    console.warn('Service worker registration failed:', err);
-                });
-            });
-        }
-
-        document.addEventListener('DOMContentLoaded', () => {
-            render();
-            if (window.__listenersPending && typeof window.startAppListeners === 'function') {
+        // Boot synchronously on DOMContentLoaded (or immediately if already parsed)
+        function bootApp() {
+            applyDockTransparency(state.dockAlpha);
+            if (typeof window.startAppListeners === 'function') {
                 window.startAppListeners();
             }
-        });
+            render();
+        }
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', bootApp);
+        } else {
+            bootApp();
+        }
+    </script>
+
+    <!-- Optional Live Cloud Firebase Sync Upgrade (Upgrades seamlessly if network/CDN allows) -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import {
+            getFirestore,
+            enableIndexedDbPersistence,
+            collection,
+            getDocs,
+            setDoc,
+            doc,
+            deleteDoc,
+            updateDoc,
+            onSnapshot,
+            runTransaction
+        } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import {
+            getStorage,
+            ref as storageRef,
+            uploadString,
+            getDownloadURL,
+            deleteObject
+        } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDguDaGIQ8dbwLoqbXKDD4ixfPg7y3VCpg",
+            authDomain: "expensetracker-ec267.firebaseapp.com",
+            projectId: "expensetracker-ec267",
+            storageBucket: "expensetracker-ec267.firebasestorage.app",
+            messagingSenderId: "789003178398",
+            appId: "1:789003178398:web:1579e411ad728268c6468f"
+        };
+
+        async function connectLiveFirebase() {
+            try {
+                const appInstance = initializeApp(firebaseConfig);
+                const db = getFirestore(appInstance);
+                const storage = getStorage(appInstance);
+                enableIndexedDbPersistence(db).catch(() => { });
+
+                const probe = await Promise.race([
+                    getDocs(collection(db, 'users')),
+                    new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 2000))
+                ]);
+
+                if (probe.empty) {
+                    const defaultUsers = [
+                        { id: 'usr_adm', name: 'Admin Manager', username: 'admin', password: 'adminpassword', role: 'admin', email: 'admin@clickfactory.com', wallet: 0, excessSpent: 0 },
+                        { id: 'usr_1', name: 'User One', username: 'user1', password: 'password', role: 'user', email: 'user1@clickfactory.com', wallet: 0, excessSpent: 0 },
+                        { id: 'usr_2', name: 'User Two', username: 'user2', password: 'password', role: 'user', email: 'user2@clickfactory.com', wallet: 0, excessSpent: 0 }
+                    ];
+                    for (const u of defaultUsers) {
+                        await setDoc(doc(db, 'users', u.id), u);
+                    }
+                    await setDoc(doc(db, 'settings', 'app_settings'), { autoDeleteEnabled: false, currentVersion: '1.1.3' });
+                }
+
+                // Tear down local fallback listeners and attach live Firestore listeners
+                if (Array.isArray(window.activeUnsubscribers)) {
+                    window.activeUnsubscribers.forEach(unsub => { try { unsub(); } catch (e) { } });
+                    window.activeUnsubscribers.length = 0;
+                }
+                window.__listenersStarted = false;
+
+                window.FB = {
+                    db, storage, collection, getDocs, setDoc, doc, deleteDoc, updateDoc,
+                    onSnapshot, runTransaction, storageRef, uploadString, getDownloadURL, deleteObject,
+                    isLocalFallback: false
+                };
+
+                if (typeof window.startAppListeners === 'function') {
+                    window.startAppListeners();
+                }
+            } catch (e) {
+                // Keep local preview adapter active if offline or blocked by sandbox CSP
+            }
+        }
+
+        connectLiveFirebase();
     </script>
 </body>
 
