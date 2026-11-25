@@ -1198,8 +1198,47 @@
 
         const savedUser = lsGet(LOCAL_STORAGE_KEY);
         if (savedUser) {
-            try { state.currentUser = JSON.parse(savedUser); } catch (e) { }
+            try {
+                const parsedUser = JSON.parse(savedUser);
+                if (parsedUser && parsedUser.id) {
+                    state.currentUser = parsedUser;
+                }
+            } catch (e) { }
         }
+
+        // Preserve session across mobile home-screen / app-switching lifecycle events
+        function restoreSessionFromStorage() {
+            if (!state.currentUser) {
+                const stored = lsGet(LOCAL_STORAGE_KEY);
+                if (stored) {
+                    try {
+                        const parsed = JSON.parse(stored);
+                        if (parsed && parsed.id) {
+                            state.currentUser = parsed;
+                            const fresh = state.users.find(u => u.id === parsed.id);
+                            if (fresh) state.currentUser = fresh;
+                            render();
+                        }
+                    } catch (e) { }
+                }
+            } else {
+                persistCurrentUser(state.currentUser);
+            }
+        }
+
+        document.addEventListener('visibilitychange', () => {
+            if (document.visibilityState === 'hidden') {
+                if (state.currentUser) persistCurrentUser(state.currentUser);
+            } else if (document.visibilityState === 'visible') {
+                restoreSessionFromStorage();
+            }
+        });
+
+        window.addEventListener('pageshow', restoreSessionFromStorage);
+        window.addEventListener('focus', restoreSessionFromStorage);
+        window.addEventListener('pagehide', () => {
+            if (state.currentUser) persistCurrentUser(state.currentUser);
+        });
 
         // Unified Axis-Locked Touch Gesture Pipeline (Edge Back Swipe + Top-Down Pull-to-Refresh)
         let gestureStartX = 0;
@@ -1467,13 +1506,16 @@
             const { db, collection, onSnapshot, doc, setDoc, deleteDoc } = window.FB;
 
             window.activeUnsubscribers.push(onSnapshot(collection(db, 'users'), (snapshot) => {
-                state.users = snapshot.docs.map(docSnap => docSnap.data());
+                const fetchedUsers = snapshot.docs.map(docSnap => docSnap.data());
+                if (fetchedUsers.length > 0) {
+                    state.users = fetchedUsers;
+                }
                 if (state.currentUser) {
                     const freshUser = state.users.find(u => u.id === state.currentUser.id);
                     if (freshUser) {
                         state.currentUser = freshUser;
                         persistCurrentUser(freshUser);
-                    } else if (state.users.length > 0) {
+                    } else if (!snapshot.metadata?.fromCache && state.users.length > 0 && initialSyncFlags.users) {
                         forceLogoutDeletedUser();
                     }
                 }
@@ -4415,6 +4457,7 @@
         // Boot synchronously on DOMContentLoaded (or immediately if already parsed)
         function bootApp() {
             applyDockTransparency(state.dockAlpha);
+            restoreSessionFromStorage();
             if (typeof window.startAppListeners === 'function') {
                 window.startAppListeners();
             }
