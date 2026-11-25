@@ -14,6 +14,8 @@
     <link rel="manifest"
         href="data:application/manifest+json;charset=utf-8,%7B%22name%22%3A%22Expense%20tracker%22%2C%22short_name%22%3A%22ExpenseTracker%22%2C%22start_url%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22orientation%22%3A%22any%22%2C%22background_color%22%3A%22%23020617%22%2C%22theme_color%22%3A%22%23020617%22%2C%22icons%22%3A%5B%7B%22src%22%3A%22https%3A%2F%2Fclickfactoryphotography.com%2Fwp-content%2Fuploads%2F2022%2F04%2Fcrop-logo.gif%22%2C%22sizes%22%3A%22192x192%20512x512%22%2C%22type%22%3A%22image%2Fgif%22%7D%5D%7D">
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js" async defer></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script>
@@ -312,8 +314,13 @@
         }
 
         @keyframes simple-spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
         }
 
         .simple-spinner {
@@ -324,8 +331,15 @@
         }
 
         @keyframes homeZoomOut {
-            0% { opacity: 0; transform: scale(1.03); }
-            100% { opacity: 1; transform: scale(1); }
+            0% {
+                opacity: 0;
+                transform: scale(1.03);
+            }
+
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
         }
 
         .animate-fadeIn {
@@ -341,10 +355,12 @@
                 transform: scale(0.95);
                 box-shadow: 0 0 0 0 rgba(79, 70, 229, 0.7);
             }
+
             70% {
                 transform: scale(1);
                 box-shadow: 0 0 0 8px rgba(79, 70, 229, 0);
             }
+
             100% {
                 transform: scale(0.95);
                 box-shadow: 0 0 0 0 rgba(79, 70, 229, 0);
@@ -356,13 +372,27 @@
         }
 
         @keyframes slideInFromRight {
-            0% { transform: translateX(20px); opacity: 0; }
-            100% { transform: translateX(0); opacity: 1; }
+            0% {
+                transform: translateX(20px);
+                opacity: 0;
+            }
+
+            100% {
+                transform: translateX(0);
+                opacity: 1;
+            }
         }
 
         @keyframes slideInFromLeft {
-            0% { transform: translateX(-20px); opacity: 0; }
-            100% { transform: translateX(0); opacity: 1; }
+            0% {
+                transform: translateX(-20px);
+                opacity: 0;
+            }
+
+            100% {
+                transform: translateX(0);
+                opacity: 1;
+            }
         }
 
         .animate-slide-right {
@@ -626,6 +656,7 @@
 
             return {
                 users: {
+                    usr_dev: { id: 'usr_dev', name: 'Satish Kumar (Developer)', username: 'developer', password: 'devpassword', role: 'developer', email: 'developer@clickfactory.com', wallet: 0, excessSpent: 0 },
                     usr_adm: { id: 'usr_adm', name: 'Admin Manager', username: 'admin', password: 'adminpassword', role: 'admin', email: 'admin@clickfactory.com', wallet: 0, excessSpent: 0 },
                     usr_1: { id: 'usr_1', name: 'User One', username: 'user1', password: 'password', role: 'user', email: 'user1@clickfactory.com', wallet: 8500, excessSpent: 0 },
                     usr_2: { id: 'usr_2', name: 'User Two', username: 'user2', password: 'password', role: 'user', email: 'user2@clickfactory.com', wallet: 3200, excessSpent: 0 }
@@ -709,7 +740,15 @@
                 userRecycleBin: {},
                 passwordRequests: {},
                 settings: {
-                    app_settings: { autoDeleteEnabled: false, currentVersion: '1.1.3' }
+                    app_settings: {
+                        autoDeleteEnabled: false,
+                        currentVersion: '1.1.3',
+                        googleDriveClientId: '',
+                        googleDriveFolderId: '',
+                        googleDriveSharedToken: '',
+                        googleDriveTokenExpiry: 0,
+                        googleDriveConnectedEmail: ''
+                    }
                 }
             };
         }
@@ -721,10 +760,26 @@
                 if (raw) store = JSON.parse(raw);
             } catch (e) { }
 
-            if (!store || !store.users || Object.keys(store.users).length === 0) {
-                store = buildSeedDatabase();
-                try { localStorage.setItem(FALLBACK_DB_KEY, JSON.stringify(store)); } catch (e) { }
+            const seed = buildSeedDatabase();
+            if (!store || typeof store !== 'object') {
+                store = seed;
+            } else {
+                if (!store.users || Object.keys(store.users).length === 0) {
+                    store.users = seed.users;
+                } else {
+                    for (const [uid, uObj] of Object.entries(seed.users)) {
+                        if (!store.users[uid]) store.users[uid] = uObj;
+                    }
+                }
+                if (!store.settings) store.settings = seed.settings;
+                if (!store.expenses) store.expenses = {};
+                if (!store.walletTransactions) store.walletTransactions = {};
+                if (!store.notifications) store.notifications = {};
+                if (!store.recycleBin) store.recycleBin = {};
+                if (!store.userRecycleBin) store.userRecycleBin = {};
+                if (!store.passwordRequests) store.passwordRequests = {};
             }
+            try { localStorage.setItem(FALLBACK_DB_KEY, JSON.stringify(store)); } catch (e) { }
 
             const listeners = {};
             function saveStore() {
@@ -863,7 +918,17 @@
             recycleBin: [],
             userRecycleBin: [],
             passwordRequests: [],
-            appSettings: { autoDeleteEnabled: false, currentVersion: '1.1.3' },
+            appSettings: {
+                autoDeleteEnabled: false,
+                currentVersion: '1.1.3',
+                googleDriveClientId: '',
+                googleDriveFolderId: '',
+                googleDriveSharedToken: '',
+                googleDriveTokenExpiry: 0,
+                googleDriveConnectedEmail: ''
+            },
+            userDriveAccessToken: '',
+            userDriveTokenExpiry: 0,
             activeTab: 'home',
             slideDirection: 'animate-slide-right',
             filterCategory: 'All',
@@ -1427,7 +1492,6 @@
                 text.textContent = 'Pull to refresh';
                 text.style.color = '';
             }
-
             gestureStartX = 0;
             gestureStartY = 0;
             gestureCurrentY = 0;
@@ -1435,9 +1499,17 @@
             gestureMode = null;
         }
 
+        function isAdminOrDev(user = state.currentUser) {
+            return Boolean(user && (user.role === 'admin' || user.role === 'developer'));
+        }
+
+        function isDeveloper(user = state.currentUser) {
+            return Boolean(user && user.role === 'developer');
+        }
+
         function getMyNotifications() {
             if (!state.currentUser) return [];
-            const isAdmin = state.currentUser.role === 'admin';
+            const isAdmin = isAdminOrDev();
             return state.notifications
                 .filter(n => (isAdmin && n.recipientRole === 'admin') || (n.recipientId === state.currentUser.id))
                 .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
@@ -1462,13 +1534,22 @@
             const { db, doc, setDoc } = window.FB;
             const notifId = 'notif_' + Date.now() + '_' + Math.random().toString(36).substring(2, 6);
             const notifData = {
-                id: notifId, recipientId, recipientRole, type, title, message,
-                amount: Number(amount || 0), read: false,
-                timestamp: new Date().toISOString(), triggeredBy
+                id: notifId,
+                recipientId,
+                recipientRole,
+                type,
+                title,
+                message,
+                amount: Number(amount || 0),
+                read: false,
+                timestamp: new Date().toISOString(),
+                triggeredBy
             };
             try {
                 await setDoc(doc(db, 'notifications', notifId), notifData);
-            } catch (err) { }
+            } catch (err) {
+                console.error("Failed to create notification:", err);
+            }
         }
 
         function softRender() {
@@ -1501,7 +1582,8 @@
         }
 
         window.startAppListeners = function () {
-            if (!window.FB || window.__listenersStarted) return;
+            if (!window.FB) return;
+            if (window.__listenersStarted) return;
             window.__listenersStarted = true;
             const { db, collection, onSnapshot, doc, setDoc, deleteDoc } = window.FB;
 
@@ -1509,40 +1591,42 @@
                 const fetchedUsers = snapshot.docs.map(docSnap => docSnap.data());
                 if (fetchedUsers.length > 0) {
                     state.users = fetchedUsers;
-                }
-                if (state.currentUser) {
-                    const freshUser = state.users.find(u => u.id === state.currentUser.id);
-                    if (freshUser) {
-                        state.currentUser = freshUser;
-                        persistCurrentUser(freshUser);
-                    } else if (!snapshot.metadata?.fromCache && state.users.length > 0 && initialSyncFlags.users) {
-                        forceLogoutDeletedUser();
+                    if (state.currentUser) {
+                        const freshUser = state.users.find(u => u.id === state.currentUser.id);
+                        if (freshUser) {
+                            state.currentUser = freshUser;
+                            persistCurrentUser(freshUser);
+                        } else if (!snapshot.metadata?.fromCache) {
+                            forceLogoutDeletedUser();
+                        }
                     }
                 }
                 initialSyncFlags.users = true;
                 if (state.isDbLoading) checkInitialSyncComplete(); else softRender();
-            }, () => {
+            }, (err) => {
                 initialSyncFlags.users = true;
                 checkInitialSyncComplete();
             }));
 
             window.activeUnsubscribers.push(onSnapshot(collection(db, 'settings'), (snapshot) => {
                 snapshot.docs.forEach(docSnap => {
-                    if (docSnap.id === 'app_settings') state.appSettings = docSnap.data();
+                    if (docSnap.id === 'app_settings') {
+                        state.appSettings = { ...state.appSettings, ...docSnap.data() };
+                    }
                 });
                 if (!state.isDbLoading) softRender();
-            }, () => { }));
+            }));
 
             window.activeUnsubscribers.push(onSnapshot(collection(db, 'walletTransactions'), (snapshot) => {
                 state.walletTransactions = snapshot.docs.map(docSnap => docSnap.data());
                 if (!state.isDbLoading) softRender();
-            }, () => { }));
+            }));
 
             window.activeUnsubscribers.push(onSnapshot(collection(db, 'notifications'), (snapshot) => {
                 const allNotifs = snapshot.docs.map(docSnap => docSnap.data());
 
                 if (initialNotificationsLoaded && state.currentUser) {
-                    const isAdmin = state.currentUser.role === 'admin';
+                    const isAdmin = isAdminOrDev();
                     allNotifs.forEach(n => {
                         if (!knownNotificationIds.has(n.id)) {
                             const isForMe = (isAdmin && n.recipientRole === 'admin') || (n.recipientId === state.currentUser.id);
@@ -1560,12 +1644,12 @@
                 initialNotificationsLoaded = true;
                 state.notifications = allNotifs;
                 if (!state.isDbLoading) softRender();
-            }, () => { }));
+            }));
 
             window.activeUnsubscribers.push(onSnapshot(collection(db, 'expenses'), async (snapshot) => {
                 let allExpenses = snapshot.docs.map(docSnap => docSnap.data());
 
-                if (state.appSettings && state.appSettings.autoDeleteEnabled && state.currentUser && state.currentUser.role === 'admin') {
+                if (state.appSettings && state.appSettings.autoDeleteEnabled && isAdminOrDev()) {
                     const now = new Date();
                     const cutoffDate = new Date(now.getFullYear(), now.getMonth() - 2, now.getDate());
                     const expiredExpenses = allExpenses.filter(exp => exp.date && parseLocal(exp.date) < cutoffDate);
@@ -1582,7 +1666,7 @@
                 state.expenses = allExpenses;
                 initialSyncFlags.expenses = true;
                 if (state.isDbLoading) checkInitialSyncComplete(); else softRender();
-            }, () => {
+            }, (err) => {
                 initialSyncFlags.expenses = true;
                 checkInitialSyncComplete();
             }));
@@ -1590,7 +1674,7 @@
             window.activeUnsubscribers.push(onSnapshot(collection(db, 'recycleBin'), (snapshot) => {
                 state.recycleBin = snapshot.docs.map(docSnap => docSnap.data());
                 if (!state.isDbLoading) softRender();
-            }, () => { }));
+            }));
 
             window.activeUnsubscribers.push(onSnapshot(collection(db, 'userRecycleBin'), async (snapshot) => {
                 let deletedUsers = snapshot.docs.map(docSnap => docSnap.data());
@@ -1603,7 +1687,7 @@
                         const hoursDiff = (now.getTime() - new Date(item.deletedAt).getTime()) / (1000 * 60 * 60);
                         expired = hoursDiff >= 48;
                     }
-                    if (expired && state.currentUser && state.currentUser.role === 'admin') {
+                    if (expired && isAdminOrDev()) {
                         try {
                             await deleteDoc(doc(db, 'userRecycleBin', item.userId));
                             await deleteDoc(doc(db, 'users', item.userId));
@@ -1621,12 +1705,12 @@
 
                 state.userRecycleBin = stillPending;
                 if (!state.isDbLoading) softRender();
-            }, () => { }));
+            }));
 
             window.activeUnsubscribers.push(onSnapshot(collection(db, 'passwordRequests'), (snapshot) => {
                 state.passwordRequests = snapshot.docs.map(docSnap => docSnap.data());
                 if (!state.isDbLoading) softRender();
-            }, () => { }));
+            }));
         };
 
         function renderDatabaseLoadingScreen() {
@@ -1668,7 +1752,7 @@
 
             toast.className = `${bgStyle} border px-4 py-3 rounded-2xl shadow-xl flex items-center justify-between text-xs sm:text-sm font-medium transform transition-all duration-300 translate-y-[20px] opacity-0 pointer-events-auto gap-3 backdrop-blur-xl`;
 
-            const wantsUndo = undoCallback && (!state.currentUser || state.currentUser.role !== 'admin');
+            const wantsUndo = undoCallback && (!state.currentUser || !isAdminOrDev());
             const undoBtnHtml = wantsUndo
                 ? `<button id="toast-undo-btn" class="px-2.5 py-1 bg-white text-slate-900 rounded-xl font-bold text-xs hover:bg-slate-100 transition shrink-0 shadow-sm">Undo</button>`
                 : '';
@@ -1702,7 +1786,7 @@
         }
 
         function formatCurrency(amount) {
-            return '₹' + Number(amount || 0).toLocaleString('en-IN');
+            return '₹' + Number(amount).toLocaleString('en-IN');
         }
 
         function formatDate(dateString) {
@@ -1770,6 +1854,326 @@
             }
         }
 
+        // ---------- GOOGLE DRIVE API INTEGRATION FOR ALL USERS ----------
+        const GDRIVE_SCOPE = 'https://www.googleapis.com/auth/drive.file';
+
+        function isGoogleDriveConfigured() {
+            return Boolean(state.appSettings && String(state.appSettings.googleDriveClientId || '').trim());
+        }
+
+        function hasValidSharedDriveToken() {
+            const s = state.appSettings || {};
+            return Boolean(s.googleDriveSharedToken && Number(s.googleDriveTokenExpiry || 0) > Date.now() + 60000);
+        }
+
+        function hasValidPersonalDriveToken() {
+            return Boolean(state.userDriveAccessToken && Number(state.userDriveTokenExpiry || 0) > Date.now() + 60000);
+        }
+
+        function requestGoogleOAuthToken(promptMode = 'consent') {
+            return new Promise((resolve, reject) => {
+                const clientId = String(state.appSettings?.googleDriveClientId || '').trim();
+                if (!clientId) {
+                    reject(new Error('Google Drive Client ID is not configured by Admin.'));
+                    return;
+                }
+                if (!window.google || !window.google.accounts || !window.google.accounts.oauth2) {
+                    reject(new Error('Google Identity Services script is still loading or blocked.'));
+                    return;
+                }
+                try {
+                    const tokenClient = window.google.accounts.oauth2.initTokenClient({
+                        client_id: clientId,
+                        scope: GDRIVE_SCOPE,
+                        callback: (tokenResponse) => {
+                            if (tokenResponse && tokenResponse.access_token) {
+                                const expiresInMs = (Number(tokenResponse.expires_in) || 3500) * 1000;
+                                resolve({
+                                    accessToken: tokenResponse.access_token,
+                                    expiry: Date.now() + expiresInMs
+                                });
+                            } else {
+                                reject(new Error(tokenResponse?.error_description || tokenResponse?.error || 'Google Drive authorization cancelled.'));
+                            }
+                        },
+                        error_callback: (err) => {
+                            reject(new Error(err?.message || 'Google sign-in popup blocked or failed.'));
+                        }
+                    });
+                    tokenClient.requestAccessToken({ prompt: promptMode });
+                } catch (err) {
+                    reject(err);
+                }
+            });
+        }
+
+        async function getActiveDriveAccessToken(interactive = true) {
+            if (hasValidSharedDriveToken()) {
+                return state.appSettings.googleDriveSharedToken;
+            }
+            if (hasValidPersonalDriveToken()) {
+                return state.userDriveAccessToken;
+            }
+            if (!interactive) return null;
+
+            const tok = await requestGoogleOAuthToken('');
+            state.userDriveAccessToken = tok.accessToken;
+            state.userDriveTokenExpiry = tok.expiry;
+            return tok.accessToken;
+        }
+
+        async function ensureDriveBillsFolder(accessToken) {
+            const configuredFolder = String(state.appSettings?.googleDriveFolderId || '').trim();
+            if (configuredFolder) return configuredFolder;
+
+            const searchUrl = `https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent("name='Click Factory Bills' and mimeType='application/vnd.google-apps.folder' and trashed=false")}&fields=files(id,name)`;
+            const searchRes = await fetch(searchUrl, {
+                headers: { Authorization: `Bearer ${accessToken}` }
+            });
+            if (searchRes.ok) {
+                const searchData = await searchRes.json();
+                if (searchData.files && searchData.files.length > 0) {
+                    const foundId = searchData.files[0].id;
+                    if (isDeveloper() && window.FB) {
+                        const { db, doc, setDoc } = window.FB;
+                        setDoc(doc(db, 'settings', 'app_settings'), { googleDriveFolderId: foundId }, { merge: true }).catch(() => { });
+                    }
+                    return foundId;
+                }
+            }
+
+            const createRes = await fetch('https://www.googleapis.com/drive/v3/files', {
+                method: 'POST',
+                headers: {
+                    Authorization: `Bearer ${accessToken}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    name: 'Click Factory Bills',
+                    mimeType: 'application/vnd.google-apps.folder'
+                })
+            });
+            if (!createRes.ok) return null;
+            const folderData = await createRes.json();
+            if (folderData.id && isDeveloper() && window.FB) {
+                const { db, doc, setDoc } = window.FB;
+                setDoc(doc(db, 'settings', 'app_settings'), { googleDriveFolderId: folderData.id }, { merge: true }).catch(() => { });
+            }
+            return folderData.id || null;
+        }
+
+        function dataUrlToBlob(dataUrl) {
+            const parts = dataUrl.split(',');
+            const mimeMatch = parts[0].match(/:(.*?);/);
+            const mime = mimeMatch ? mimeMatch[1] : 'image/jpeg';
+            const binary = atob(parts[1]);
+            const len = binary.length;
+            const bytes = new Uint8Array(len);
+            for (let i = 0; i < len; i++) bytes[i] = binary.charCodeAt(i);
+            return new Blob([bytes], { type: mime });
+        }
+
+        async function uploadBillToGoogleDrive(dataUrl, fileName, accessToken) {
+            const blob = dataUrlToBlob(dataUrl);
+            const folderId = await ensureDriveBillsFolder(accessToken);
+
+            const metadata = {
+                name: fileName,
+                mimeType: blob.type || 'image/jpeg'
+            };
+            if (folderId) metadata.parents = [folderId];
+
+            const form = new FormData();
+            form.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
+            form.append('file', blob);
+
+            const uploadRes = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,webViewLink,webContentLink', {
+                method: 'POST',
+                headers: { Authorization: `Bearer ${accessToken}` },
+                body: form
+            });
+
+            if (!uploadRes.ok) {
+                const errText = await uploadRes.text();
+                throw new Error(`Google Drive upload failed (${uploadRes.status}): ${errText}`);
+            }
+
+            const fileInfo = await uploadRes.json();
+            const fileId = fileInfo.id;
+
+            // Grant anyone-with-link viewer access so all app users & admins can preview the bill
+            await fetch(`https://www.googleapis.com/drive/v3/files/${encodeURIComponent(fileId)}/permissions`, {
+                method: 'POST',
+                headers: {
+                    Authorization: `Bearer ${accessToken}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ role: 'reader', type: 'anyone' })
+            }).catch(() => { });
+
+            return {
+                driveFileId: fileId,
+                viewUrl: `https://drive.google.com/thumbnail?id=${fileId}&sz=w1200`,
+                webViewLink: fileInfo.webViewLink || `https://drive.google.com/file/d/${fileId}/view`
+            };
+        }
+
+        async function deleteBillFromGoogleDrive(driveFileId) {
+            if (!driveFileId || !isGoogleDriveConfigured()) return;
+            try {
+                const token = await getActiveDriveAccessToken(false);
+                if (!token) return;
+                await fetch(`https://www.googleapis.com/drive/v3/files/${encodeURIComponent(driveFileId)}`, {
+                    method: 'DELETE',
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+            } catch (e) { }
+        }
+
+        function openGoogleDriveConfigModal() {
+            if (!isDeveloper()) {
+                showToast('Google Drive configuration is restricted to Developer accounts.', 'error');
+                return;
+            }
+            const s = state.appSettings || {};
+            const sharedActive = hasValidSharedDriveToken();
+            const root = document.getElementById('modal-root');
+            const inputCls = 'w-full px-4 py-3 bg-slate-50/80 dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700 rounded-2xl text-xs text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500';
+            const lbl = 'block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1';
+
+            root.innerHTML = `
+                <div class="fixed inset-0 z-[60] bg-slate-950/65 backdrop-blur-md flex items-center justify-center p-4 animate-fadeIn">
+                    <div class="ios-glass-modal rounded-3xl p-6 max-w-md w-full shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto no-scrollbar">
+                        <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
+                            <div class="flex items-center space-x-2.5">
+                                <div class="w-9 h-9 rounded-2xl bg-sky-500/10 text-sky-600 dark:text-sky-400 flex items-center justify-center">
+                                    <i class="fa-brands fa-google-drive text-base"></i>
+                                </div>
+                                <div>
+                                    <h3 class="font-bold text-sm text-slate-900 dark:text-white">Google Drive Bill Storage</h3>
+                                    <p class="text-[11px] text-slate-500 dark:text-slate-400">Upload all user bills to Google Drive</p>
+                                </div>
+                            </div>
+                            <button onclick="closeModal()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark"></i></button>
+                        </div>
+
+                        <form onsubmit="handleSaveGoogleDriveConfig(event)" class="space-y-3.5">
+                            <div>
+                                <label class="${lbl}">Google OAuth 2.0 Client ID</label>
+                                <input type="text" id="gdrive-client-id" value="${escapeHtml(s.googleDriveClientId || '')}" placeholder="123456789-abc.apps.googleusercontent.com" class="${inputCls}">
+                                <p class="text-[10px] text-slate-400 mt-1">From Google Cloud Console (Web Application OAuth Client with Drive API enabled).</p>
+                            </div>
+
+                            <div>
+                                <label class="${lbl}">Google Drive Folder ID (Optional)</label>
+                                <input type="text" id="gdrive-folder-id" value="${escapeHtml(s.googleDriveFolderId || '')}" placeholder="Leave blank to auto-create 'Click Factory Bills'" class="${inputCls}">
+                            </div>
+
+                            <div class="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-700/70 space-y-2.5">
+                                <div class="flex items-center justify-between">
+                                    <span class="text-xs font-semibold text-slate-700 dark:text-slate-200">Shared Company Drive Session</span>
+                                    <span class="px-2 py-0.5 rounded-full text-[10px] font-bold ${sharedActive ? 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400' : 'bg-amber-500/15 text-amber-600 dark:text-amber-400'}">
+                                        ${sharedActive ? 'Connected' : 'Not Linked'}
+                                    </span>
+                                </div>
+                                <p class="text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed">
+                                    Connect a central Google Drive account here so all team members can upload bills automatically without signing into their own Google accounts.
+                                </p>
+                                <div class="flex items-center gap-2 pt-1">
+                                    <button type="button" onclick="connectSharedGoogleDrive()" class="flex-1 py-2.5 px-3 bg-sky-600 hover:bg-sky-700 text-white rounded-xl text-xs font-semibold transition flex items-center justify-center gap-1.5 shadow-sm">
+                                        <i class="fa-brands fa-google"></i>
+                                        <span>${sharedActive ? 'Refresh Drive Connection' : 'Connect Google Drive'}</span>
+                                    </button>
+                                    ${sharedActive ? `
+                                        <button type="button" onclick="disconnectSharedGoogleDrive()" class="py-2.5 px-3 bg-rose-500/10 hover:bg-rose-500/20 text-rose-600 dark:text-rose-400 rounded-xl text-xs font-semibold border border-rose-500/20 transition">
+                                            Unlink
+                                        </button>
+                                    ` : ''}
+                                </div>
+                            </div>
+
+                            <div class="pt-1 flex gap-2.5">
+                                <button type="button" onclick="closeModal()" class="flex-1 py-3 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-semibold rounded-2xl text-xs">Cancel</button>
+                                <button type="submit" class="flex-1 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-2xl shadow-md text-xs">Save Settings</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            `;
+        }
+
+        async function handleSaveGoogleDriveConfig(e) {
+            e.preventDefault();
+            if (!isDeveloper()) return;
+            const clientId = document.getElementById('gdrive-client-id').value.trim();
+            const folderId = document.getElementById('gdrive-folder-id').value.trim();
+            const { db, doc, setDoc } = window.FB;
+            try {
+                await setDoc(doc(db, 'settings', 'app_settings'), {
+                    ...state.appSettings,
+                    googleDriveClientId: clientId,
+                    googleDriveFolderId: folderId
+                }, { merge: true });
+                closeModal();
+                showToast('Google Drive settings saved!', 'success');
+            } catch (err) {
+                showToast('Failed to save Google Drive settings.', 'error');
+            }
+        }
+
+        async function connectSharedGoogleDrive() {
+            if (!isDeveloper()) {
+                showToast('Only Developer accounts can link Google Drive.', 'error');
+                return;
+            }
+            const clientIdInput = document.getElementById('gdrive-client-id');
+            const clientId = clientIdInput ? clientIdInput.value.trim() : String(state.appSettings?.googleDriveClientId || '').trim();
+            const folderIdInput = document.getElementById('gdrive-folder-id');
+            const folderId = folderIdInput ? folderIdInput.value.trim() : String(state.appSettings?.googleDriveFolderId || '').trim();
+
+            if (!clientId) {
+                showToast('Please enter your Google OAuth 2.0 Client ID first.', 'error');
+                return;
+            }
+
+            state.appSettings.googleDriveClientId = clientId;
+            state.appSettings.googleDriveFolderId = folderId;
+
+            try {
+                const tok = await requestGoogleOAuthToken('consent');
+                const ensuredFolderId = await ensureDriveBillsFolder(tok.accessToken);
+                const { db, doc, setDoc } = window.FB;
+                await setDoc(doc(db, 'settings', 'app_settings'), {
+                    ...state.appSettings,
+                    googleDriveClientId: clientId,
+                    googleDriveFolderId: ensuredFolderId || folderId,
+                    googleDriveSharedToken: tok.accessToken,
+                    googleDriveTokenExpiry: tok.expiry
+                }, { merge: true });
+
+                showToast('Google Drive connected for all users!', 'success');
+                openGoogleDriveConfigModal();
+            } catch (err) {
+                showToast(err.message || 'Could not connect Google Drive.', 'error');
+            }
+        }
+
+        async function disconnectSharedGoogleDrive() {
+            if (!isDeveloper()) return;
+            const { db, doc, setDoc } = window.FB;
+            try {
+                await setDoc(doc(db, 'settings', 'app_settings'), {
+                    ...state.appSettings,
+                    googleDriveSharedToken: '',
+                    googleDriveTokenExpiry: 0
+                }, { merge: true });
+                showToast('Shared Google Drive session unlinked.', 'info');
+                openGoogleDriveConfigModal();
+            } catch (err) {
+                showToast('Failed to unlink Google Drive.', 'error');
+            }
+        }
+
         function confirmEmptyRecycleBin() {
             if (state.recycleBin.length === 0) {
                 showToast('Recycle bin is already empty.', 'info');
@@ -1783,7 +2187,9 @@
                     for (const item of state.recycleBin) {
                         try {
                             await deleteDoc(doc(db, 'recycleBin', item.id));
-                            if (storage && item.billAttachment && item.billAttachment.includes('firebasestorage')) {
+                            if (item.driveFileId) {
+                                await deleteBillFromGoogleDrive(item.driveFileId);
+                            } else if (storage && item.billAttachment && item.billAttachment.includes('firebasestorage')) {
                                 await deleteObject(storageRef(storage, `bills/${item.id}.jpg`));
                             }
                         } catch (e) { }
@@ -2311,7 +2717,8 @@
             headerEl.classList.remove('hidden');
             headerEl.style.display = 'flex';
 
-            const isAdmin = state.currentUser.role === 'admin';
+            const isAdmin = isAdminOrDev();
+            const isDev = isDeveloper();
             const isSubTab = ['recycle', 'requests', 'userRecycle', 'notifications'].includes(state.activeTab);
             const unreadNotifCount = getMyNotifications().filter(n => !n.read).length;
 
@@ -2340,6 +2747,11 @@
                         <div class="flex items-center mt-0.5">
                             ${isSubTab ? `
                                 <p class="text-[11px] text-slate-500 dark:text-slate-400 font-medium truncate">${state.activeTab === 'notifications' ? 'Activity & Alerts' : 'Back to Profile'}</p>
+                            ` : (isDev ? `
+                                <span class="inline-flex items-center gap-1 text-[11px] font-semibold text-sky-600 dark:text-sky-400">
+                                    <i class="fa-solid fa-code text-[10px]"></i>
+                                    <span>Developer</span>
+                                </span>
                             ` : (isAdmin ? `
                                 <span class="inline-flex items-center gap-1 text-[11px] font-semibold text-indigo-600 dark:text-indigo-400">
                                     <i class="fa-solid fa-shield-halved text-[10px]"></i>
@@ -2347,7 +2759,7 @@
                                 </span>
                             ` : `
                                 <p class="text-[11px] text-slate-500 dark:text-slate-400 font-medium truncate">Expense Tracker</p>
-                            `)}
+                            `))}
                         </div>
                     </div>
                 </div>
@@ -2377,7 +2789,7 @@
             navWrapper.classList.remove('hidden');
             navWrapper.style.display = 'flex';
 
-            const isAdmin = state.currentUser.role === 'admin';
+            const isAdmin = isAdminOrDev();
             const pendingRequestsCount = state.passwordRequests.filter(r => r.status === 'pending').length;
             const totalBadges = state.recycleBin.length + pendingRequestsCount + state.userRecycleBin.length;
 
@@ -2442,7 +2854,7 @@
         function switchTab(tab, keepEditState = false) {
             const prevIndex = tabOrder.indexOf(state.activeTab);
             if (tab === 'summary') {
-                state.activeTab = (state.currentUser && state.currentUser.role === 'admin') ? 'admin' : 'analytics';
+                state.activeTab = isAdminOrDev() ? 'admin' : 'analytics';
             } else {
                 state.activeTab = tab;
             }
@@ -2730,10 +3142,21 @@
         function handleLoginSubmit(e) {
             e.preventDefault();
             unlockAudioContext();
-            const username = document.getElementById('login-username').value.trim().toLowerCase();
-            const password = document.getElementById('login-password').value;
+            const usernameInput = document.getElementById('login-username');
+            const passwordInput = document.getElementById('login-password');
+            const username = (usernameInput ? usernameInput.value : '').trim().toLowerCase();
+            const password = (passwordInput ? passwordInput.value : '').trim();
 
-            const foundUser = state.users.find(u => u.username.toLowerCase() === username && u.password === password);
+            if (!state.users || state.users.length === 0) {
+                const seed = buildSeedDatabase();
+                state.users = Object.values(seed.users);
+            }
+
+            const foundUser = state.users.find(u =>
+                String(u.username || '').trim().toLowerCase() === username &&
+                String(u.password || '').trim() === password
+            );
+
             if (foundUser) {
                 state.currentUser = foundUser;
                 state.activeTab = 'home';
@@ -2766,7 +3189,7 @@
         }
 
         function renderActiveTabContent() {
-            const isAdmin = state.currentUser.role === 'admin';
+            const isAdmin = isAdminOrDev();
             switch (state.activeTab) {
                 case 'home': return renderHomeTab();
                 case 'add': return renderAddEditTab();
@@ -2790,7 +3213,7 @@
 
         function getFilteredExpenses() {
             if (!state.currentUser) return [];
-            const isAdmin = state.currentUser.role === 'admin';
+            const isAdmin = isAdminOrDev();
             return state.expenses.filter(exp => {
                 if (!isAdmin && exp.userId !== state.currentUser.id) return false;
                 if (isAdmin && state.filterUser !== 'All' && exp.userId !== state.filterUser) return false;
@@ -2812,7 +3235,7 @@
         }
 
         function renderHomeTab() {
-            const isAdmin = state.currentUser.role === 'admin';
+            const isAdmin = isAdminOrDev();
             const filtered = getFilteredExpenses();
 
             filtered.sort((a, b) => {
@@ -2829,6 +3252,7 @@
             const monthsSet = new Set(scopedExpenses.map(e => e.date ? e.date.substring(0, 7) : ''));
             const availableMonths = Array.from(monthsSet).filter(Boolean).sort().reverse();
             const hasDateFilterActive = state.filterStartDate || state.filterEndDate;
+            const visibleFilterUsers = isDeveloper() ? state.users : state.users.filter(u => u.role !== 'developer');
 
             const groupedByDate = {};
             filtered.forEach(exp => {
@@ -2908,7 +3332,7 @@
                             ${isAdmin ? `
                             <div class="relative w-full">
                                 <select onchange="setFilterUser(this.value)" class="w-full appearance-none ios-glass-card border border-slate-200/80 dark:border-slate-800 rounded-2xl px-3.5 py-3 text-xs font-medium text-slate-700 dark:text-slate-300">
-                                    <option value="All" ${state.filterUser === 'All' ? 'selected' : ''}>All Users</option>${state.users.map(u => `<option value="${escapeHtml(u.id)}" ${state.filterUser === u.id ? 'selected' : ''}>${escapeHtml(u.name)}</option>`).join('')}
+                                    <option value="All" ${state.filterUser === 'All' ? 'selected' : ''}>All Users</option>${visibleFilterUsers.map(u => `<option value="${escapeHtml(u.id)}" ${state.filterUser === u.id ? 'selected' : ''}>${escapeHtml(u.name)}</option>`).join('')}
                                 </select>
                                 <span class="absolute inset-y-0 right-0 pr-3.5 flex items-center pointer-events-none text-slate-400 text-xs"><i class="fa-solid fa-chevron-down"></i></span>
                             </div>
@@ -3123,13 +3547,21 @@
                         </div>
 
                         <div class="w-full">
-                            <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-2.5">Bill / Receipt Attachment (Optional)</label>
+                            <div class="flex items-center justify-between mb-2.5">
+                                <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider">Bill / Receipt Attachment (Optional)</label>
+                                ${isDeveloper() ? `
+                                <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-semibold ${isGoogleDriveConfigured() ? 'bg-sky-500/10 text-sky-600 dark:text-sky-400 border border-sky-500/20' : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400'}">
+                                    <i class="fa-brands fa-google-drive"></i>
+                                    <span>${isGoogleDriveConfigured() ? 'Google Drive Upload' : 'Drive Not Configured'}</span>
+                                </span>
+                                ` : ''}
+                            </div>
 
                             ${currentBill ? `
                                 <div class="bg-indigo-50/90 dark:bg-indigo-950/80 p-4 rounded-2xl border border-indigo-200/80 dark:border-indigo-800/80 flex items-center justify-between mb-3 w-full gap-2">
                                     <div class="flex items-center space-x-2 text-indigo-600 dark:text-indigo-400 text-xs font-semibold min-w-0 flex-1">
                                         <i class="fa-solid fa-file-image text-base shrink-0"></i>
-                                        <span class="truncate">Bill attached</span>
+                                        <span class="truncate">${isDeveloper() && String(currentBill).includes('drive.google.com') ? 'Bill stored on Google Drive' : 'Bill attached'}</span>
                                     </div>
                                     <div class="flex items-center space-x-2 shrink-0">
                                         <button type="button" onclick="previewCurrentTempBill()" class="px-3 py-1.5 bg-indigo-600 text-white rounded-xl text-xs font-medium">Preview</button>
@@ -3267,33 +3699,52 @@
 
         function previewCurrentTempBill() {
             let billToPreview = state.tempBillData;
-            if ((billToPreview === null || billToPreview === undefined) && state.editingExpenseId) {
+            let driveLink = null;
+            if (state.editingExpenseId) {
                 const found = state.expenses.find(e => e.id === state.editingExpenseId);
-                if (found) billToPreview = found.billAttachment;
+                if (found) {
+                    if (billToPreview === null || billToPreview === undefined) billToPreview = found.billAttachment;
+                    driveLink = found.driveWebLink || (found.driveFileId ? `https://drive.google.com/file/d/${found.driveFileId}/view` : null);
+                }
             }
             if (!billToPreview) return;
-            openBillPreviewModal(billToPreview, 'Attached Bill Preview');
+            openBillPreviewModal(billToPreview, 'Attached Bill Preview', driveLink);
         }
 
         function viewBillModal(expenseId) {
             const exp = state.expenses.find(e => e.id === expenseId) || state.recycleBin.find(e => e.id === expenseId);
             if (!exp || !exp.billAttachment) return;
-            openBillPreviewModal(exp.billAttachment, `Bill Receipt: ${exp.title}`);
+            const driveLink = exp.driveWebLink || (exp.driveFileId ? `https://drive.google.com/file/d/${exp.driveFileId}/view` : null);
+            openBillPreviewModal(exp.billAttachment, `Bill Receipt: ${exp.title}`, driveLink);
         }
 
-        function openBillPreviewModal(imgUrl, titleText) {
+        function openBillPreviewModal(imgUrl, titleText, driveWebLink = null) {
             const root = document.getElementById('modal-root');
+            const isDev = isDeveloper();
+            const isDrive = Boolean(driveWebLink || String(imgUrl).includes('drive.google.com'));
+            const openUrl = driveWebLink || imgUrl;
             root.innerHTML = `
                 <div class="fixed inset-0 z-[60] bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4">
                     <div class="ios-glass-modal rounded-3xl p-5 max-w-md w-full shadow-2xl space-y-4">
-                        <div class="flex items-center justify-between">
-                            <h3 class="font-bold text-sm text-slate-900 dark:text-white truncate">${escapeHtml(titleText)}</h3>
-                            <button onclick="closeModal()" class="text-slate-400 hover:text-slate-600 text-lg"><i class="fa-solid fa-xmark"></i></button>
+                        <div class="flex items-center justify-between gap-2">
+                            <div class="flex items-center gap-2 min-w-0">
+                                ${isDev && isDrive ? '<i class="fa-brands fa-google-drive text-sky-500 shrink-0"></i>' : ''}
+                                <h3 class="font-bold text-sm text-slate-900 dark:text-white truncate">${escapeHtml(titleText)}</h3>
+                            </div>
+                            <button onclick="closeModal()" class="text-slate-400 hover:text-slate-600 text-lg shrink-0"><i class="fa-solid fa-xmark"></i></button>
                         </div>
                         <div class="bg-slate-100/80 dark:bg-slate-800/80 rounded-2xl overflow-hidden flex items-center justify-center max-h-[60vh]">
-                            <img src="${escapeHtml(imgUrl)}" alt="Bill" class="max-w-full max-h-[60vh] object-contain">
+                            <img src="${escapeHtml(imgUrl)}" alt="Bill" class="max-w-full max-h-[60vh] object-contain" onerror="this.src='https://placehold.co/400x300/1e293b/94a3b8?text=Bill+Preview+Unavailable'">
                         </div>
-                        <button onclick="closeModal()" class="w-full py-3 bg-slate-200/90 dark:bg-slate-800/90 hover:bg-slate-300 text-slate-800 dark:text-slate-200 font-semibold rounded-2xl text-xs transition">Close</button>
+                        <div class="flex gap-2.5">
+                            ${isDev && isDrive ? `
+                                <a href="${escapeHtml(openUrl)}" target="_blank" rel="noopener noreferrer" class="flex-1 py-3 bg-sky-600 hover:bg-sky-700 text-white font-semibold rounded-2xl text-xs transition flex items-center justify-center gap-1.5 shadow-sm">
+                                    <i class="fa-brands fa-google-drive"></i>
+                                    <span>Open in Google Drive</span>
+                                </a>
+                            ` : ''}
+                            <button onclick="closeModal()" class="${isDev && isDrive ? 'px-5' : 'w-full'} py-3 bg-slate-200/90 dark:bg-slate-800/90 hover:bg-slate-300 text-slate-800 dark:text-slate-200 font-semibold rounded-2xl text-xs transition">Close</button>
+                        </div>
                     </div>
                 </div>
             `;
@@ -3339,30 +3790,64 @@
             const expenseId = state.editingExpenseId || ('exp_' + Date.now());
             const existingExp = state.editingExpenseId ? state.expenses.find(e => e.id === expenseId) : null;
             let billUrl = null;
+            let driveFileId = existingExp ? (existingExp.driveFileId || null) : null;
+            let driveWebLink = existingExp ? (existingExp.driveWebLink || null) : null;
             let walletDelta = 0;
             let walletOwnerId = null;
 
             try {
                 if (state.tempBillData === '') {
                     billUrl = null;
-                    if (storage && existingExp && existingExp.billAttachment && existingExp.billAttachment.includes('firebasestorage')) {
+                    if (existingExp && existingExp.driveFileId) {
+                        await deleteBillFromGoogleDrive(existingExp.driveFileId);
+                    } else if (storage && existingExp && existingExp.billAttachment && existingExp.billAttachment.includes('firebasestorage')) {
                         try { await deleteObject(storageRef(storage, `bills/${expenseId}.jpg`)); } catch (e) { }
                     }
+                    driveFileId = null;
+                    driveWebLink = null;
                 } else if (state.tempBillData !== null && state.tempBillData !== undefined) {
-                    if (!navigator.onLine || !storage) {
+                    if (!navigator.onLine) {
                         billUrl = state.tempBillData;
                     } else if (state.tempBillData.startsWith('data:image')) {
-                        try {
-                            const fileRef = storageRef(storage, `bills/${expenseId}.jpg`);
-                            await uploadString(fileRef, state.tempBillData, 'data_url');
-                            billUrl = await getDownloadURL(fileRef);
-                        } catch (storageErr) {
-                            if (state.tempBillData.length > MAX_INLINE_BILL_CHARS) {
-                                showToast('Bill image is too large to save. Please use a smaller image.', 'error');
-                                if (submitBtn) submitBtn.disabled = false;
-                                return;
+                        let uploadedViaDrive = false;
+                        if (isGoogleDriveConfigured()) {
+                            try {
+                                showToast(isDeveloper() ? 'Uploading bill to Google Drive...' : 'Uploading bill receipt...', 'info');
+                                const driveToken = await getActiveDriveAccessToken(true);
+                                const safeTitle = title.replace(/[^a-zA-Z0-9_-]/g, '_').substring(0, 30);
+                                const fileName = `${date}_${safeTitle}_${expenseId}.jpg`;
+                                const driveResult = await uploadBillToGoogleDrive(state.tempBillData, fileName, driveToken);
+                                if (existingExp && existingExp.driveFileId) {
+                                    await deleteBillFromGoogleDrive(existingExp.driveFileId);
+                                }
+                                billUrl = driveResult.viewUrl;
+                                driveFileId = driveResult.driveFileId;
+                                driveWebLink = driveResult.webViewLink;
+                                uploadedViaDrive = true;
+                            } catch (driveErr) {
+                                if (isDeveloper()) {
+                                    showToast(`Google Drive upload fallback: ${driveErr.message}`, 'info');
+                                }
                             }
-                            billUrl = state.tempBillData;
+                        }
+
+                        if (!uploadedViaDrive) {
+                            if (storage) {
+                                try {
+                                    const fileRef = storageRef(storage, `bills/${expenseId}.jpg`);
+                                    await uploadString(fileRef, state.tempBillData, 'data_url');
+                                    billUrl = await getDownloadURL(fileRef);
+                                } catch (storageErr) {
+                                    if (state.tempBillData.length > MAX_INLINE_BILL_CHARS) {
+                                        showToast('Bill image is too large to save. Please use a smaller image.', 'error');
+                                        if (submitBtn) submitBtn.disabled = false;
+                                        return;
+                                    }
+                                    billUrl = state.tempBillData;
+                                }
+                            } else {
+                                billUrl = state.tempBillData;
+                            }
                         }
                     } else {
                         billUrl = state.tempBillData;
@@ -3376,7 +3861,7 @@
                 const ownerUser = state.users.find(u => u.id === expenseOwnerId) || state.currentUser;
 
                 let walletResult = null;
-                if (ownerUser.role !== 'admin') {
+                if (!isAdminOrDev(ownerUser)) {
                     const oldAmount = existingExp ? Number(existingExp.amount) : 0;
                     walletDelta = round2(-(amount - oldAmount));
                     if (walletDelta !== 0) {
@@ -3392,6 +3877,8 @@
                         userName: expenseOwnerName,
                         title, amount, category, date, clientNamePlace, notes,
                         billAttachment: billUrl,
+                        driveFileId: driveFileId,
+                        driveWebLink: driveWebLink,
                         createdAt: existingExp ? existingExp.createdAt : new Date().toISOString()
                     });
                 } catch (saveErr) {
@@ -3450,7 +3937,7 @@
         }
 
         function confirmUndoExpense(id) {
-            if (!state.currentUser || state.currentUser.role === 'admin') return;
+            if (!state.currentUser || isAdminOrDev()) return;
 
             const exp = state.expenses.find(e => e.id === id);
             if (!exp) return;
@@ -3486,7 +3973,7 @@
             const exp = state.expenses.find(e => e.id === id);
             if (!exp) return;
             const owner = state.users.find(u => u.id === exp.userId);
-            const willRefund = owner && owner.role !== 'admin';
+            const willRefund = owner && !isAdminOrDev(owner);
 
             showConfirmModal(
                 'Delete Expense',
@@ -3597,7 +4084,7 @@
             try {
                 if (refundedOnDelete && expenseData.userId) {
                     const owner = state.users.find(u => u.id === expenseData.userId);
-                    if (owner && owner.role !== 'admin') {
+                    if (owner && !isAdminOrDev(owner)) {
                         await adjustWallet(expenseData.userId, -round2(expenseData.amount));
                     }
                 }
@@ -3612,6 +4099,7 @@
         function permanentDelete(id) {
             const _it = state.recycleBin.find(e => e.id === id);
             const billUrl = _it ? (_it.billAttachment || '') : '';
+            const driveFileId = _it ? (_it.driveFileId || null) : null;
             showConfirmModal(
                 'Permanent Deletion',
                 'Are you sure you want to permanently delete this expense? This cannot be undone.',
@@ -3619,7 +4107,9 @@
                     const { db, doc, deleteDoc, storage, storageRef, deleteObject } = window.FB;
                     try {
                         await deleteDoc(doc(db, 'recycleBin', id));
-                        if (storage && billUrl && billUrl.includes('firebasestorage')) {
+                        if (driveFileId) {
+                            await deleteBillFromGoogleDrive(driveFileId);
+                        } else if (storage && billUrl && billUrl.includes('firebasestorage')) {
                             try { await deleteObject(storageRef(storage, `bills/${id}.jpg`)); } catch (e) { }
                         }
                         showToast('Expense permanently deleted.', 'success');
@@ -3631,10 +4121,13 @@
         }
 
         function renderUserRecycleBinTab() {
+            const visibleDeletedUsers = isDeveloper()
+                ? state.userRecycleBin
+                : state.userRecycleBin.filter(u => u.role !== 'developer');
             return `
                 <div class="space-y-4 w-full max-w-2xl mx-auto">
                     <div class="space-y-3.5 w-full">
-                        ${state.userRecycleBin.length === 0 ? `
+                        ${visibleDeletedUsers.length === 0 ? `
                             <div class="ios-glass-card rounded-3xl p-8 text-center shadow-sm w-full mt-3">
                                 <div class="w-14 h-14 bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 rounded-2xl flex items-center justify-center mx-auto mb-3 text-xl"><i class="fa-solid fa-user-slash"></i></div>
                                 <h4 class="font-semibold text-slate-700 dark:text-slate-300 mb-1">No Pending Deleted Users</h4>
@@ -3642,7 +4135,7 @@
                             </div>
                         ` : ''}
 
-                        ${state.userRecycleBin.map(item => `
+                        ${visibleDeletedUsers.map(item => `
                             <div class="ios-glass-card rounded-2xl py-5 px-5 sm:px-6 shadow-sm flex items-center justify-between gap-3 w-full mt-3">
                                 <div class="space-y-1 min-w-0 flex-1">
                                     <h4 class="font-semibold text-sm text-slate-900 dark:text-white truncate">${escapeHtml(item.name)} (@${escapeHtml(item.username)})</h4>
@@ -3803,8 +4296,9 @@
 
         function renderUserManagementTab() {
             const filter = state.userFilterTab;
-            const adminUsers = state.users.filter(u => u.role === 'admin');
-            const regularUsers = state.users.filter(u => u.role !== 'admin');
+            const visibleUsers = isDeveloper() ? state.users : state.users.filter(u => u.role !== 'developer');
+            const adminUsers = visibleUsers.filter(u => isAdminOrDev(u));
+            const regularUsers = visibleUsers.filter(u => !isAdminOrDev(u));
 
             const showAdmins = filter === 'all' || filter === 'admin';
             const showRegular = filter === 'all' || filter === 'user';
@@ -3825,7 +4319,7 @@
                     </div>
 
                     <div class="flex items-center space-x-2 ios-glass-card p-1.5 rounded-2xl w-full">
-                        <button onclick="setUserFilterTab('all')" class="flex-1 py-2 px-3 rounded-xl text-xs font-semibold transition ${tabCls(filter === 'all')}">All (${state.users.length})</button>
+                        <button onclick="setUserFilterTab('all')" class="flex-1 py-2 px-3 rounded-xl text-xs font-semibold transition ${tabCls(filter === 'all')}">All (${visibleUsers.length})</button>
                         <button onclick="setUserFilterTab('user')" class="flex-1 py-2 px-3 rounded-xl text-xs font-semibold transition ${tabCls(filter === 'user')}">Users (${regularUsers.length})</button>
                         <button onclick="setUserFilterTab('admin')" class="flex-1 py-2 px-3 rounded-xl text-xs font-semibold transition ${tabCls(filter === 'admin')}">Admins (${adminUsers.length})</button>
                     </div>
@@ -3862,7 +4356,7 @@
         function renderUserCard(u) {
             const expCount = state.expenses.filter(e => e.userId === u.id).length;
             const isCurrent = u.id === state.currentUser.id;
-            const isUserAdmin = u.role === 'admin';
+            const isUserAdmin = isAdminOrDev(u);
             const uWallet = Number(u.wallet || 0);
             const uExcess = Number(u.excessSpent || 0);
             const userTotalSpent = state.expenses.filter(e => e.userId === u.id).reduce((s, e) => s + Number(e.amount || 0), 0);
@@ -3871,14 +4365,14 @@
                 <div class="ios-glass-card rounded-3xl p-4 sm:p-5 shadow-sm space-y-3.5 w-full mt-3">
                     <div class="flex items-start justify-between gap-2.5">
                         <div class="flex items-start space-x-3 min-w-0 flex-1">
-                            <div class="w-10 h-10 rounded-2xl ${isUserAdmin ? 'bg-indigo-500/10 text-indigo-600 dark:text-indigo-400' : 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400'} flex items-center justify-center font-bold text-sm shrink-0 mt-0.5">${escapeHtml(u.name.charAt(0))}</div>
+                            <div class="w-10 h-10 rounded-2xl ${u.role === 'developer' ? 'bg-sky-500/10 text-sky-600 dark:text-sky-400' : (isUserAdmin ? 'bg-indigo-500/10 text-indigo-600 dark:text-indigo-400' : 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400')} flex items-center justify-center font-bold text-sm shrink-0 mt-0.5">${escapeHtml(u.name.charAt(0))}</div>
                             <div class="min-w-0 flex-1">
                                 <div class="flex items-center flex-wrap gap-1.5">
                                     <h4 class="font-semibold text-sm text-slate-900 dark:text-white break-words">${escapeHtml(u.name)}</h4>
                                     ${isCurrent ? '<span class="text-[10px] bg-emerald-500/10 text-emerald-600 font-semibold px-2 py-0.5 rounded-full shrink-0">Active</span>' : ''}
                                 </div>
                                 <p class="text-[11px] text-slate-500 dark:text-slate-400 leading-snug mt-0.5 break-words">
-                                    @${escapeHtml(u.username)} • <span class="capitalize font-medium text-indigo-600 dark:text-indigo-400">${escapeHtml(u.role)}</span> • ${expCount} exp (${formatCurrency(userTotalSpent)})
+                                    @${escapeHtml(u.username)} • <span class="capitalize font-medium ${u.role === 'developer' ? 'text-sky-600 dark:text-sky-400' : 'text-indigo-600 dark:text-indigo-400'}">${escapeHtml(u.role)}</span> • ${expCount} exp (${formatCurrency(userTotalSpent)})
                                 </p>
                             </div>
                         </div>
@@ -3889,7 +4383,7 @@
                                 <span>Wallet</span>
                             </button>
                             ` : ''}
-                            <button onclick="openEditUserModal('${u.id}')" class="w-9 h-9 rounded-xl bg-slate-100/90 dark:bg-slate-800 text-slate-500 hover:bg-indigo-50 hover:text-indigo-600 transition flex items-center justify-center text-xs" title="Edit User"><i class="fa-solid fa-pen"></i></button>
+                            ${(u.role !== 'developer' || isDeveloper()) ? `<button onclick="openEditUserModal('${u.id}')" class="w-9 h-9 rounded-xl bg-slate-100/90 dark:bg-slate-800 text-slate-500 hover:bg-indigo-50 hover:text-indigo-600 transition flex items-center justify-center text-xs" title="Edit User"><i class="fa-solid fa-pen"></i></button>` : ''}
                         </div>
                     </div>
 
@@ -3919,7 +4413,7 @@
                             <span>Clear Exp</span>
                         </button>
 
-                        ${state.users.length > 1 && !isCurrent ? `
+                        ${state.users.length > 1 && !isCurrent && (u.role !== 'developer' || isDeveloper()) ? `
                             <button onclick="confirmRemoveUser('${u.id}')" class="py-2.5 px-1.5 rounded-2xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-600 dark:text-rose-400 text-[10.5px] font-bold border border-rose-500/20 transition flex items-center justify-center space-x-1 whitespace-nowrap" title="Delete User">
                                 <i class="fa-solid fa-trash text-[10px] shrink-0"></i>
                                 <span>Delete User</span>
@@ -3953,6 +4447,7 @@
                                 <select id="new-user-role" class="${inputCls}">
                                     <option value="user">Regular User</option>
                                     <option value="admin">Administrator</option>
+                                    ${isDeveloper() ? '<option value="developer">Developer</option>' : ''}
                                 </select>
                             </div>
                             <div class="pt-2 w-full"><button id="create-user-btn" type="submit" class="w-full py-3.5 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-2xl shadow-md transition text-sm">Create User</button></div>
@@ -3965,6 +4460,10 @@
         function openEditUserModal(userId) {
             const user = state.users.find(u => u.id === userId);
             if (!user) return;
+            if (user.role === 'developer' && !isDeveloper()) {
+                showToast('Only Developer accounts can edit a Developer profile.', 'error');
+                return;
+            }
 
             const inputCls = 'w-full px-4 py-3 bg-slate-50/80 dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700 rounded-2xl text-sm text-slate-900 dark:text-white';
             const lbl = 'block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1';
@@ -3978,7 +4477,7 @@
                         </div>
                         <form onsubmit="handleEditUser(event, '${user.id}')" class="space-y-3.5 w-full">
                             <div class="w-full"><label class="${lbl}">Full Name</label><input type="text" id="edit-user-name" required value="${escapeHtml(user.name)}" class="${inputCls}"></div>
-                            <div class="w-full"><label class="${lbl}">Role</label><select id="edit-user-role" class="${inputCls}"><option value="user" ${user.role === 'user' ? 'selected' : ''}>Regular User</option><option value="admin" ${user.role === 'admin' ? 'selected' : ''}>Administrator</option></select></div>
+                            <div class="w-full"><label class="${lbl}">Role</label><select id="edit-user-role" class="${inputCls}"><option value="user" ${user.role === 'user' ? 'selected' : ''}>Regular User</option><option value="admin" ${user.role === 'admin' ? 'selected' : ''}>Administrator</option>${(isDeveloper() || user.role === 'developer') ? `<option value="developer" ${user.role === 'developer' ? 'selected' : ''}>Developer</option>` : ''}</select></div>
                             <div class="pt-2 w-full"><button id="edit-user-btn" type="submit" class="w-full py-3.5 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-2xl shadow-md transition text-sm">Save Changes</button></div>
                         </form>
                     </div>
@@ -3997,8 +4496,13 @@
             const user = state.users.find(u => u.id === userId);
             if (!user || !name) return;
 
-            if (user.role === 'admin' && role !== 'admin' && state.users.filter(u => u.role === 'admin').length <= 1) {
-                showToast('At least one administrator is required.', 'error');
+            if ((role === 'developer' || user.role === 'developer') && !isDeveloper()) {
+                showToast('Only Developer accounts can assign or modify the Developer role.', 'error');
+                return;
+            }
+
+            if (isAdminOrDev(user) && !['admin', 'developer'].includes(role) && state.users.filter(u => isAdminOrDev(u)).length <= 1) {
+                showToast('At least one administrator or developer is required.', 'error');
                 return;
             }
 
@@ -4040,6 +4544,10 @@
                 showToast('Passwords do not match!', 'error');
                 return;
             }
+            if (role === 'developer' && !isDeveloper()) {
+                showToast('Only Developer accounts can create another Developer.', 'error');
+                return;
+            }
             if (state.users.some(u => u.username.toLowerCase() === username)) {
                 showToast('Username already exists.', 'error');
                 return;
@@ -4063,7 +4571,11 @@
         function confirmRemoveUser(userId) {
             const userName = uName(userId);
             const target = state.users.find(u => u.id === userId);
-            if (target && target.role === 'admin' && state.users.filter(u => u.role === 'admin').length <= 1) {
+            if (target && target.role === 'developer' && !isDeveloper()) {
+                showToast('Only Developer accounts can remove a Developer.', 'error');
+                return;
+            }
+            if (target && isAdminOrDev(target) && state.users.filter(u => isAdminOrDev(u)).length <= 1) {
                 showToast('You cannot delete the last administrator.', 'error');
                 return;
             }
@@ -4155,7 +4667,8 @@
         }
 
         function renderProfileTab() {
-            const isAdmin = state.currentUser.role === 'admin';
+            const isAdmin = isAdminOrDev();
+            const isDev = isDeveloper();
             const pendingRequestsCount = state.passwordRequests.filter(r => r.status === 'pending').length;
             const autoDeleteOn = state.appSettings && state.appSettings.autoDeleteEnabled;
             const notifPermission = ('Notification' in window) ? Notification.permission : 'unsupported';
@@ -4169,6 +4682,13 @@
                     ${badge || '<i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i>'}
                 </button>`;
 
+            const roleBadgeClass = isDev
+                ? 'bg-sky-50 dark:bg-sky-950 text-sky-600 dark:text-sky-400 border border-sky-200 dark:border-sky-800'
+                : (isAdmin
+                    ? 'bg-indigo-50 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-800'
+                    : 'bg-emerald-50 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800');
+            const roleLabel = isDev ? 'Developer' : (isAdmin ? 'Administrator' : 'Regular User');
+
             return `
                 <div class="space-y-4 w-full max-w-2xl mx-auto">
                     <div class="ios-glass-card rounded-3xl p-6 sm:p-7 shadow-sm text-center w-full">
@@ -4177,8 +4697,8 @@
                         </div>
                         <h2 class="font-bold text-lg text-slate-900 dark:text-white truncate">${escapeHtml(state.currentUser.name)}</h2>
                         <p class="text-xs text-slate-500 dark:text-slate-400 mb-2 truncate">@${escapeHtml(state.currentUser.username)}</p>
-                        <span class="inline-block px-3.5 py-1 rounded-full text-xs font-semibold ${isAdmin ? 'bg-indigo-50 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-800' : 'bg-emerald-50 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800'}">
-                            ${isAdmin ? 'Administrator' : 'Regular User'}
+                        <span class="inline-block px-3.5 py-1 rounded-full text-xs font-semibold ${roleBadgeClass}">
+                            ${roleLabel}
                         </span>
                     </div>
 
@@ -4262,6 +4782,21 @@
                             ${navBtn('openChangePasswordModal()', '<i class="fa-solid fa-shield-halved text-indigo-500"></i>', 'Change My Password')}
                         </div>
                     </div>
+
+                    ${isDev ? `
+                    <div class="ios-glass-card rounded-3xl p-5 sm:p-6 shadow-sm space-y-3 w-full mt-3 border border-sky-500/30">
+                        <div class="flex items-center justify-between px-1">
+                            <div>
+                                <h3 class="text-xs font-semibold text-sky-600 dark:text-sky-400 uppercase tracking-wider flex items-center gap-1.5">
+                                    <i class="fa-solid fa-code"></i>
+                                    <span>Developer Console</span>
+                                </h3>
+                                <p class="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">Configure Google Drive API bill storage for all users</p>
+                            </div>
+                        </div>
+                        ${navBtn("openGoogleDriveConfigModal()", '<i class="fa-brands fa-google-drive text-sky-500"></i>', 'Google Drive Bill Upload', isGoogleDriveConfigured() ? `<span class="px-2 py-0.5 rounded-full ${hasValidSharedDriveToken() ? 'bg-emerald-500/20 text-emerald-600' : 'bg-sky-500/20 text-sky-600'} text-[10px] font-bold">${hasValidSharedDriveToken() ? 'Shared Active' : 'Client ID Set'}</span>` : '<span class="px-2 py-0.5 rounded-full bg-slate-500/15 text-slate-500 text-[10px] font-bold">Setup</span>')}
+                    </div>
+                    ` : ''}
 
                     ${isAdmin ? `
                     <div class="ios-glass-card rounded-3xl p-5 sm:p-6 shadow-sm space-y-4 w-full mt-3">
@@ -4372,7 +4907,7 @@
 
         function exportUserCSV(userId) {
             if (!state.currentUser) return;
-            if (state.currentUser.role !== 'admin' && userId !== state.currentUser.id) return;
+            if (!isAdminOrDev() && userId !== state.currentUser.id) return;
             const userName = uName(userId) || 'user';
             downloadCSV(state.expenses.filter(e => e.userId === userId), `${userName.replace(/\s+/g, '_')}_expenses.csv`);
         }
@@ -4383,16 +4918,71 @@
         }
 
         function exportAllCSV() {
-            if (!state.currentUser || state.currentUser.role !== 'admin') return;
+            if (!isAdminOrDev()) return;
             downloadCSV(state.expenses, 'all_company_expenses.csv');
         }
 
-        function downloadCSV(dataArray, filename) {
-            if (dataArray.length === 0) {
-                showToast('No records available to export.', 'error');
-                return;
+        function getBoundBillExportInfo(exp) {
+            const hasBill = Boolean(exp.billAttachment);
+            if (!hasBill) {
+                return {
+                    hasBill: 'No',
+                    billReference: '',
+                    driveFileId: '',
+                    zipFileName: ''
+                };
             }
-            const headers = ['ID', 'User', 'Title', 'Category', 'Client & Place', 'Amount (INR)', 'Date', 'Notes', 'Has Bill'];
+            const safeTitle = String(exp.title || 'bill').replace(/[^a-zA-Z0-9_-]/g, '_').substring(0, 28);
+            const safeDate = String(exp.date || 'undated').replace(/[^0-9-]/g, '');
+            const zipFileName = `bills/${safeDate}_${safeTitle}_${exp.id}.jpg`;
+
+            if (exp.driveWebLink) {
+                return {
+                    hasBill: 'Yes',
+                    billReference: exp.driveWebLink,
+                    driveFileId: exp.driveFileId || '',
+                    zipFileName
+                };
+            }
+            if (exp.driveFileId) {
+                return {
+                    hasBill: 'Yes',
+                    billReference: `https://drive.google.com/file/d/${exp.driveFileId}/view`,
+                    driveFileId: exp.driveFileId,
+                    zipFileName
+                };
+            }
+            if (String(exp.billAttachment).startsWith('http')) {
+                return {
+                    hasBill: 'Yes',
+                    billReference: exp.billAttachment,
+                    driveFileId: '',
+                    zipFileName
+                };
+            }
+            return {
+                hasBill: 'Yes',
+                billReference: zipFileName,
+                driveFileId: '',
+                zipFileName
+            };
+        }
+
+        function buildCsvContent(dataArray, useLocalZipPaths = false) {
+            const isDev = isDeveloper();
+            const headers = [
+                'ID',
+                'User',
+                'Title',
+                'Category',
+                'Client & Place',
+                'Amount (INR)',
+                'Date',
+                'Notes',
+                'Has Bill',
+                'Bound Bill Link / File',
+                ...(isDev ? ['Google Drive File ID'] : [])
+            ];
             const safe = v => {
                 let s = String(v ?? '');
                 if (/^[=+\-@\t\r]/.test(s)) s = "'" + s;
@@ -4400,9 +4990,31 @@
             };
             const lines = [
                 headers.map(safe).join(','),
-                ...dataArray.map(e => [e.id, e.userName, e.title, e.category, e.clientNamePlace, e.amount, e.date, e.notes, e.billAttachment ? 'Yes' : 'No'].map(safe).join(','))
+                ...dataArray.map(e => {
+                    const billInfo = getBoundBillExportInfo(e);
+                    const boundRef = useLocalZipPaths && billInfo.zipFileName
+                        ? `${billInfo.zipFileName}${billInfo.billReference && !billInfo.billReference.startsWith('bills/') ? ` (${billInfo.billReference})` : ''}`
+                        : billInfo.billReference;
+                    const row = [
+                        e.id,
+                        e.userName,
+                        e.title,
+                        e.category,
+                        e.clientNamePlace,
+                        e.amount,
+                        e.date,
+                        e.notes,
+                        billInfo.hasBill,
+                        boundRef
+                    ];
+                    if (isDev) row.push(billInfo.driveFileId);
+                    return row.map(safe).join(',');
+                })
             ];
-            const blob = new Blob(['\ufeff' + lines.join('\r\n')], { type: 'text/csv;charset=utf-8' });
+            return '\ufeff' + lines.join('\r\n');
+        }
+
+        function triggerBlobDownload(blob, filename) {
             const url = URL.createObjectURL(blob);
             const link = document.createElement('a');
             link.href = url;
@@ -4410,8 +5022,140 @@
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
-            setTimeout(() => URL.revokeObjectURL(url), 1000);
-            showToast(`Exported ${dataArray.length} records!`, 'success');
+            setTimeout(() => URL.revokeObjectURL(url), 1500);
+        }
+
+        async function fetchBillBlobForBundle(exp) {
+            if (!exp.billAttachment) return null;
+            const src = String(exp.billAttachment);
+            if (src.startsWith('data:')) {
+                return dataUrlToBlob(src);
+            }
+            if (exp.driveFileId && isGoogleDriveConfigured()) {
+                try {
+                    const token = await getActiveDriveAccessToken(false);
+                    if (token) {
+                        const driveRes = await fetch(`https://www.googleapis.com/drive/v3/files/${encodeURIComponent(exp.driveFileId)}?alt=media`, {
+                            headers: { Authorization: `Bearer ${token}` }
+                        });
+                        if (driveRes.ok) return await driveRes.blob();
+                    }
+                } catch (e) { }
+            }
+            try {
+                const res = await fetch(src);
+                if (res.ok) return await res.blob();
+            } catch (e) { }
+            return null;
+        }
+
+        async function downloadCsvWithBoundBillsZip(dataArray, filename) {
+            if (!window.JSZip) {
+                const csvBlob = new Blob([buildCsvContent(dataArray, false)], { type: 'text/csv;charset=utf-8' });
+                triggerBlobDownload(csvBlob, filename);
+                showToast(`Exported ${dataArray.length} records with bound bill links!`, 'success');
+                return;
+            }
+
+            showToast('Bundling CSV and attached bills into ZIP...', 'info');
+            const zip = new window.JSZip();
+            const csvText = buildCsvContent(dataArray, true);
+            zip.file(filename, csvText);
+
+            let bundledCount = 0;
+            let linkOnlyCount = 0;
+            for (const exp of dataArray) {
+                if (!exp.billAttachment) continue;
+                const billInfo = getBoundBillExportInfo(exp);
+                const blob = await fetchBillBlobForBundle(exp);
+                if (blob && billInfo.zipFileName) {
+                    zip.file(billInfo.zipFileName, blob);
+                    bundledCount++;
+                } else {
+                    linkOnlyCount++;
+                }
+            }
+
+            const zipFilename = filename.replace(/\.csv$/i, '') + '_with_bills.zip';
+            const zipBlob = await zip.generateAsync({ type: 'blob' });
+            triggerBlobDownload(zipBlob, zipFilename);
+
+            if (bundledCount > 0) {
+                showToast(`Exported ZIP with CSV + ${bundledCount} bill file(s)!`, 'success');
+            } else if (linkOnlyCount > 0) {
+                showToast(`Exported ZIP with CSV + ${linkOnlyCount} bound bill link(s)!`, 'success');
+            } else {
+                showToast(`Exported ${dataArray.length} records!`, 'success');
+            }
+        }
+
+        function downloadCSV(dataArray, filename) {
+            if (dataArray.length === 0) {
+                showToast('No records available to export.', 'error');
+                return;
+            }
+
+            const billsCount = dataArray.filter(e => Boolean(e.billAttachment)).length;
+            if (billsCount === 0) {
+                const blob = new Blob([buildCsvContent(dataArray, false)], { type: 'text/csv;charset=utf-8' });
+                triggerBlobDownload(blob, filename);
+                showToast(`Exported ${dataArray.length} records!`, 'success');
+                return;
+            }
+
+            const root = document.getElementById('modal-root');
+            root.innerHTML = `
+                <div class="fixed inset-0 z-[60] bg-slate-950/65 backdrop-blur-md flex items-center justify-center p-4 animate-fadeIn">
+                    <div class="ios-glass-modal rounded-3xl p-6 max-w-sm w-full shadow-2xl space-y-4">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-2.5">
+                                <div class="w-10 h-10 rounded-2xl bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 flex items-center justify-center">
+                                    <i class="fa-solid fa-file-zipper text-base"></i>
+                                </div>
+                                <div>
+                                    <h3 class="font-bold text-sm text-slate-900 dark:text-white">Export CSV with Bills</h3>
+                                    <p class="text-[11px] text-slate-500 dark:text-slate-400">${dataArray.length} records • ${billsCount} attached bill(s)</p>
+                                </div>
+                            </div>
+                            <button onclick="closeModal()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark"></i></button>
+                        </div>
+
+                        <p class="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
+                            Choose how you want to download your report with the uploaded bills bound to each row:
+                        </p>
+
+                        <div class="space-y-2.5 pt-1">
+                            <button id="export-zip-btn" class="w-full py-3 px-4 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-2xl shadow-md transition text-xs flex items-center justify-between">
+                                <span class="flex items-center gap-2">
+                                    <i class="fa-solid fa-box-archive"></i>
+                                    <span>CSV + Bill Files Bundle (.ZIP)</span>
+                                </span>
+                                <span class="text-[10px] bg-white/20 px-2 py-0.5 rounded-full">Recommended</span>
+                            </button>
+
+                            <button id="export-csv-links-btn" class="w-full py-3 px-4 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 font-semibold rounded-2xl border border-slate-200/80 dark:border-slate-700 transition text-xs flex items-center justify-between">
+                                <span class="flex items-center gap-2">
+                                    <i class="fa-solid fa-file-csv text-emerald-600 dark:text-emerald-400"></i>
+                                    <span>CSV Only (With Bound Bill Links)</span>
+                                </span>
+                                <i class="fa-solid fa-download text-[11px] text-slate-400"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('export-zip-btn').onclick = async () => {
+                closeModal();
+                await downloadCsvWithBoundBillsZip(dataArray, filename);
+            };
+
+            document.getElementById('export-csv-links-btn').onclick = () => {
+                closeModal();
+                const blob = new Blob([buildCsvContent(dataArray, false)], { type: 'text/csv;charset=utf-8' });
+                triggerBlobDownload(blob, filename);
+                showToast(`Exported ${dataArray.length} records with bound bill links!`, 'success');
+            };
         }
 
         function showConfirmModal(title, message, onConfirm) {
@@ -4517,6 +5261,7 @@
 
                 if (probe.empty) {
                     const defaultUsers = [
+                        { id: 'usr_dev', name: 'Satish Kumar (Developer)', username: 'developer', password: 'devpassword', role: 'developer', email: 'developer@clickfactory.com', wallet: 0, excessSpent: 0 },
                         { id: 'usr_adm', name: 'Admin Manager', username: 'admin', password: 'adminpassword', role: 'admin', email: 'admin@clickfactory.com', wallet: 0, excessSpent: 0 },
                         { id: 'usr_1', name: 'User One', username: 'user1', password: 'password', role: 'user', email: 'user1@clickfactory.com', wallet: 0, excessSpent: 0 },
                         { id: 'usr_2', name: 'User Two', username: 'user2', password: 'password', role: 'user', email: 'user2@clickfactory.com', wallet: 0, excessSpent: 0 }
@@ -4525,6 +5270,11 @@
                         await setDoc(doc(db, 'users', u.id), u);
                     }
                     await setDoc(doc(db, 'settings', 'app_settings'), { autoDeleteEnabled: false, currentVersion: '1.1.3' });
+                } else {
+                    const hasDev = probe.docs.some(d => d.data().role === 'developer');
+                    if (!hasDev) {
+                        await setDoc(doc(db, 'users', 'usr_dev'), { id: 'usr_dev', name: 'Satish Kumar (Developer)', username: 'developer', password: 'devpassword', role: 'developer', email: 'developer@clickfactory.com', wallet: 0, excessSpent: 0 });
+                    }
                 }
 
                 // Tear down local fallback listeners and attach live Firestore listeners
