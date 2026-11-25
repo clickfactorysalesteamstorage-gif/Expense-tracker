@@ -669,6 +669,33 @@
             try { document.cookie = `${name}=; path=/; max-age=0; SameSite=Lax`; } catch (e) { }
         }
 
+        async function cacheStorageSaveSession(serialized) {
+            try {
+                if (!('caches' in window)) return;
+                const cache = await caches.open('cf-auth-vault-v1');
+                await cache.put('/__cf_session__', new Response(serialized, {
+                    headers: { 'Content-Type': 'application/json' }
+                }));
+            } catch (e) { }
+        }
+
+        async function cacheStorageLoadSession() {
+            try {
+                if (!('caches' in window)) return null;
+                const cache = await caches.open('cf-auth-vault-v1');
+                const res = await cache.match('/__cf_session__');
+                if (!res) return null;
+                return await res.json();
+            } catch (e) { return null; }
+        }
+
+        async function cacheStorageClearSession() {
+            try {
+                if (!('caches' in window)) return;
+                await caches.delete('cf-auth-vault-v1');
+            } catch (e) { }
+        }
+
         function idbSaveSession(userObj) {
             try {
                 if (!window.indexedDB) return;
@@ -729,10 +756,15 @@
             lsSet(LOCAL_STORAGE_KEY, serialized);
             writePersistentCookie(LOCAL_STORAGE_KEY, serialized);
             idbSaveSession(safe);
+            cacheStorageSaveSession(serialized);
+            try { window.name = 'CF_SESSION:' + serialized; } catch (e) { }
         }
 
         function restoreSyncSessionFromStorage() {
-            const raw = lsGet(LOCAL_STORAGE_KEY) || readPersistentCookie(LOCAL_STORAGE_KEY);
+            let raw = lsGet(LOCAL_STORAGE_KEY) || readPersistentCookie(LOCAL_STORAGE_KEY);
+            if (!raw && typeof window.name === 'string' && window.name.startsWith('CF_SESSION:')) {
+                raw = window.name.slice('CF_SESSION:'.length);
+            }
             if (!raw) return null;
             try {
                 const parsed = JSON.parse(raw);
@@ -1618,6 +1650,8 @@
             lsRemove(LOCAL_STORAGE_KEY);
             clearPersistentCookie(LOCAL_STORAGE_KEY);
             idbClearSession();
+            cacheStorageClearSession();
+            try { if (typeof window.name === 'string' && window.name.startsWith('CF_SESSION:')) window.name = ''; } catch (e) { }
         }
 
         window.startAppListeners = function () {
@@ -1631,12 +1665,13 @@
                 if (fetchedUsers.length > 0) {
                     state.users = fetchedUsers;
                     if (state.currentUser) {
-                        const freshUser = state.users.find(u => u.id === state.currentUser.id);
+                        const freshUser = state.users.find(u =>
+                            u.id === state.currentUser.id ||
+                            String(u.username || '').toLowerCase() === String(state.currentUser.username || '').toLowerCase()
+                        );
                         if (freshUser) {
                             state.currentUser = freshUser;
                             persistCurrentUser(freshUser);
-                        } else if (!snapshot.metadata?.fromCache) {
-                            forceLogoutDeletedUser();
                         }
                     }
                 }
@@ -3013,6 +3048,8 @@
             lsRemove(LOCAL_STORAGE_KEY);
             clearPersistentCookie(LOCAL_STORAGE_KEY);
             idbClearSession();
+            cacheStorageClearSession();
+            try { if (typeof window.name === 'string' && window.name.startsWith('CF_SESSION:')) window.name = ''; } catch (e) { }
             showToast('Logged out successfully.', 'info');
             render();
         }
@@ -5437,11 +5474,14 @@
         async function bootApp() {
             applyDockTransparency(state.dockAlpha);
             if (!state.currentUser) {
-                const idbUser = await idbLoadSession();
-                if (idbUser && idbUser.id && idbUser.username) {
-                    state.currentUser = idbUser;
-                    persistCurrentUser(idbUser);
+                const recovered = (await idbLoadSession()) || (await cacheStorageLoadSession());
+                if (recovered && recovered.id && recovered.username) {
+                    state.currentUser = recovered;
+                    persistCurrentUser(recovered);
                 }
+            }
+            if (state.currentUser && !state.users.some(u => u.id === state.currentUser.id)) {
+                state.users.push({ ...state.currentUser });
             }
             render();
             if (typeof window.startAppListeners === 'function') {
