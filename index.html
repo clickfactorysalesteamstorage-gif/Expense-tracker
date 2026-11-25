@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="theme-color" id="meta-theme-color" content="#f8fafc">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -57,6 +57,7 @@
         ::before,
         ::after {
             box-sizing: border-box;
+            touch-action: manipulation;
         }
 
         /* Desktop thin custom scrollbars */
@@ -130,6 +131,7 @@
             font-family: 'Inter', sans-serif;
             -webkit-tap-highlight-color: transparent;
             -webkit-font-smoothing: antialiased;
+            touch-action: manipulation;
             margin: 0;
             padding: 0;
             width: 100%;
@@ -314,13 +316,8 @@
         }
 
         @keyframes simple-spin {
-            0% {
-                transform: rotate(0deg);
-            }
-
-            100% {
-                transform: rotate(360deg);
-            }
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
 
         .simple-spinner {
@@ -331,15 +328,8 @@
         }
 
         @keyframes homeZoomOut {
-            0% {
-                opacity: 0;
-                transform: scale(1.03);
-            }
-
-            100% {
-                opacity: 1;
-                transform: scale(1);
-            }
+            0% { opacity: 0; transform: scale(1.03); }
+            100% { opacity: 1; transform: scale(1); }
         }
 
         .animate-fadeIn {
@@ -355,12 +345,10 @@
                 transform: scale(0.95);
                 box-shadow: 0 0 0 0 rgba(79, 70, 229, 0.7);
             }
-
             70% {
                 transform: scale(1);
                 box-shadow: 0 0 0 8px rgba(79, 70, 229, 0);
             }
-
             100% {
                 transform: scale(0.95);
                 box-shadow: 0 0 0 0 rgba(79, 70, 229, 0);
@@ -372,27 +360,13 @@
         }
 
         @keyframes slideInFromRight {
-            0% {
-                transform: translateX(20px);
-                opacity: 0;
-            }
-
-            100% {
-                transform: translateX(0);
-                opacity: 1;
-            }
+            0% { transform: translateX(20px); opacity: 0; }
+            100% { transform: translateX(0); opacity: 1; }
         }
 
         @keyframes slideInFromLeft {
-            0% {
-                transform: translateX(-20px);
-                opacity: 0;
-            }
-
-            100% {
-                transform: translateX(0);
-                opacity: 1;
-            }
+            0% { transform: translateX(-20px); opacity: 0; }
+            100% { transform: translateX(0); opacity: 1; }
         }
 
         .animate-slide-right {
@@ -972,6 +946,20 @@
                 try { navigator.vibrate(pattern); } catch (e) { }
             }
         }
+
+        // Prevent iOS Safari & mobile browser double-tap zoom
+        let lastTouchEndTime = 0;
+        document.addEventListener('touchend', (e) => {
+            const now = Date.now();
+            if (now - lastTouchEndTime <= 300) {
+                if (e.cancelable) e.preventDefault();
+            }
+            lastTouchEndTime = now;
+        }, { passive: false });
+
+        document.addEventListener('dblclick', (e) => {
+            e.preventDefault();
+        }, { passive: false });
 
         document.addEventListener('click', (e) => {
             if (e.target.closest('button, [onclick], input[type="submit"], select')) {
