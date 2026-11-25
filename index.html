@@ -787,7 +787,10 @@
                             gdriveFolderId: '',
                             gdriveSharedToken: '',
                             gdriveSharedExpiry: 0,
-                            gdriveConnectedEmail: ''
+                            gdriveConnectedEmail: '',
+                            maintenanceMode: false,
+                            maintenanceHours: 2,
+                            maintenanceUpdatedAt: ''
                         }
                     },
                     expenses: {
@@ -959,7 +962,10 @@
                 gdriveFolderId: '',
                 gdriveSharedToken: '',
                 gdriveSharedExpiry: 0,
-                gdriveConnectedEmail: ''
+                gdriveConnectedEmail: '',
+                maintenanceMode: false,
+                maintenanceHours: 2,
+                maintenanceUpdatedAt: ''
             },
             activeTab: 'home',
             slideDirection: 'animate-slide-right',
@@ -1629,7 +1635,7 @@
                         if (freshUser) {
                             state.currentUser = freshUser;
                             persistCurrentUser(freshUser);
-                        } else if (!snapshot.metadata?.fromCache && state.users.length >= 2) {
+                        } else if (!snapshot.metadata?.fromCache) {
                             forceLogoutDeletedUser();
                         }
                     }
@@ -1653,7 +1659,6 @@
 
             window.activeUnsubscribers.push(onSnapshot(collection(db, 'notifications'), (snapshot) => {
                 const allNotifs = snapshot.docs.map(docSnap => docSnap.data());
-
                 if (initialNotificationsLoaded && state.currentUser) {
                     const isPrivileged = isAdminOrDev(state.currentUser);
                     allNotifs.forEach(n => {
@@ -1668,7 +1673,6 @@
                         }
                     });
                 }
-
                 knownNotificationIds = new Set(allNotifs.map(n => n.id));
                 initialNotificationsLoaded = true;
                 state.notifications = allNotifs;
@@ -1676,13 +1680,11 @@
             }, () => { }));
 
             window.activeUnsubscribers.push(onSnapshot(collection(db, 'expenses'), async (snapshot) => {
-                let allExpenses = snapshot.docs.map(docSnap => docSnap.data());
-
+                const allExpenses = snapshot.docs.map(docSnap => docSnap.data());
                 if (state.appSettings && state.appSettings.autoDeleteEnabled && isAdminOrDev(state.currentUser)) {
                     const now = new Date();
                     const cutoffDate = new Date(now.getFullYear(), now.getMonth() - 2, now.getDate());
                     const expiredExpenses = allExpenses.filter(exp => exp.date && parseLocal(exp.date) < cutoffDate);
-
                     for (const exp of expiredExpenses) {
                         try {
                             const recycleItem = { ...exp, deletedAt: new Date().toISOString(), deletedBy: 'Auto-Delete System (2-Month Limit)' };
@@ -1691,7 +1693,6 @@
                         } catch (err) { }
                     }
                 }
-
                 state.expenses = allExpenses;
                 if (!state.isDbLoading) softRender();
             }, () => { }));
@@ -1702,10 +1703,9 @@
             }, () => { }));
 
             window.activeUnsubscribers.push(onSnapshot(collection(db, 'userRecycleBin'), async (snapshot) => {
-                let deletedUsers = snapshot.docs.map(docSnap => docSnap.data());
+                const deletedUsers = snapshot.docs.map(docSnap => docSnap.data());
                 const now = new Date();
                 const stillPending = [];
-
                 for (const item of deletedUsers) {
                     let expired = false;
                     if (item.deletedAt) {
@@ -1727,7 +1727,6 @@
                     }
                     stillPending.push(item);
                 }
-
                 state.userRecycleBin = stillPending;
                 if (!state.isDbLoading) softRender();
             }, () => { }));
@@ -1791,6 +1790,21 @@
             }
         }
 
+        // ============================================================
+        // 7. LOADING, TOASTS, FORMATTING & AUTO-DELETE HELPERS
+        // ============================================================
+        function renderDatabaseLoadingScreen() {
+            return `
+                <div class="flex-1 flex flex-col items-center justify-center p-6 text-center select-none">
+                    <div class="relative w-16 h-16 flex items-center justify-center mx-auto mb-4">
+                        <div class="absolute inset-0 simple-spinner"></div>
+                        <img src="https://clickfactoryphotography.com/wp-content/uploads/2022/04/crop-logo.gif" alt="Click Factory Logo" class="w-9 h-9 object-contain" onerror="this.src='https://placehold.co/40x40/4f46e5/ffffff?text=CF'">
+                    </div>
+                    <p class="text-sm font-semibold text-slate-600 dark:text-slate-300 tracking-tight">Loading Expense...</p>
+                </div>
+            `;
+        }
+
         function triggerZoomOutEntrance() {
             const main = document.getElementById('main-content');
             if (!main) return;
@@ -1848,11 +1862,11 @@
             setTimeout(() => {
                 toast.classList.add('translate-y-[20px]', 'opacity-0');
                 setTimeout(() => toast.remove(), 300);
-            }, 3800);
+            }, 4000);
         }
 
         function formatCurrency(amount) {
-            return '₹' + Number(amount).toLocaleString('en-IN');
+            return '₹' + Number(amount || 0).toLocaleString('en-IN');
         }
 
         function formatDate(dateString) {
@@ -1946,7 +1960,7 @@
         }
 
         // ============================================================
-        // 7. NOTIFICATIONS & WALLET TABS
+        // 8. NOTIFICATIONS & USER WALLET TABS
         // ============================================================
         function renderNotificationsTab() {
             const myNotifs = getMyNotifications();
@@ -2121,7 +2135,7 @@
                             <span class="text-xs text-slate-400">${userTxns.length} Records</span>
                         </div>
 
-                        <div class="flex flex-wrap items-center gap-2 px-1 text-[10px] font-semibold">
+                        <div class="flex items-center flex-wrap gap-2 px-1 text-[10px] font-semibold">
                             <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-700 dark:text-emerald-300"><span class="w-2 h-2 rounded-full bg-emerald-500"></span>Wallet Top-Up</span>
                             <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-amber-500/10 text-amber-700 dark:text-amber-300"><span class="w-2 h-2 rounded-full bg-amber-500"></span>Excess Cleared</span>
                             <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-sky-500/10 text-sky-700 dark:text-sky-300"><span class="w-2 h-2 rounded-full bg-sky-500"></span>Undo Expense</span>
@@ -2139,24 +2153,24 @@
                         ` : userTxns.map(t => {
                 const theme = getWalletTxnTheme(t);
                 return `
-                                <div class="ios-glass-card ${theme.borderAccent} rounded-3xl p-5 shadow-sm flex flex-col gap-2.5 w-full">
-                                    <div class="flex items-start justify-between gap-3 w-full">
-                                        <div class="flex items-start space-x-3 min-w-0 flex-1">
-                                            <div class="w-10 h-10 rounded-2xl ${theme.iconWrap} flex items-center justify-center shrink-0 mt-0.5">
+                                <div class="ios-glass-card ${theme.borderAccent} rounded-3xl p-4 sm:p-5 shadow-sm w-full space-y-2">
+                                    <div class="flex items-center justify-between gap-2">
+                                        <div class="flex items-center gap-2.5 min-w-0">
+                                            <div class="w-9 h-9 rounded-2xl ${theme.iconWrap} flex items-center justify-center shrink-0">
                                                 <i class="fa-solid ${theme.icon}"></i>
                                             </div>
-                                            <div class="min-w-0 flex-1">
-                                                <span class="inline-block px-2.5 py-0.5 text-[10px] font-bold rounded-full border ${theme.badgeCls} mb-1.5">${theme.badgeLabel}</span>
-                                                <h4 class="font-semibold text-sm sm:text-base text-slate-900 dark:text-white break-words whitespace-normal leading-snug">${escapeHtml(t.title)}</h4>
-                                            </div>
+                                            <span class="px-2.5 py-0.5 text-[10px] font-bold rounded-full border ${theme.badgeCls}">${theme.badgeLabel}</span>
                                         </div>
                                         <span class="font-bold text-base sm:text-lg ${theme.amountCls} whitespace-nowrap shrink-0">${theme.prefix}${formatCurrency(t.amount)}</span>
                                     </div>
-                                    ${t.subtitle ? `<p class="text-xs ${theme.subtitleCls} font-medium pl-13 break-words whitespace-normal leading-relaxed">${escapeHtml(t.subtitle)}</p>` : ''}
-                                    <div class="flex items-center flex-wrap gap-1.5 text-xs text-slate-500 dark:text-slate-400 pt-2 border-t border-slate-200/50 dark:border-slate-800">
-                                        <span><i class="fa-regular fa-clock mr-1"></i>${formatTimestamp(t.timestamp)}</span>
-                                        <span>•</span>
-                                        <span class="italic break-words">By ${escapeHtml(t.performedBy)}</span>
+                                    <div class="pl-0.5 space-y-1">
+                                        <h4 class="font-semibold text-sm sm:text-base text-slate-900 dark:text-white break-words whitespace-normal leading-snug">${escapeHtml(t.title)}</h4>
+                                        ${t.subtitle ? `<p class="text-xs ${theme.subtitleCls} font-medium break-words whitespace-normal leading-relaxed">${escapeHtml(t.subtitle)}</p>` : ''}
+                                        <div class="flex items-center flex-wrap gap-1.5 text-xs text-slate-500 dark:text-slate-400 pt-1">
+                                            <span><i class="fa-regular fa-clock mr-1"></i>${formatTimestamp(t.timestamp)}</span>
+                                            <span>•</span>
+                                            <span class="italic break-words whitespace-normal">By ${escapeHtml(t.performedBy)}</span>
+                                        </div>
                                     </div>
                                 </div>
                             `;
@@ -2228,25 +2242,23 @@
                             ` : userTxns.map(t => {
                 const theme = getWalletTxnTheme(t);
                 return `
-                                    <div class="bg-white dark:bg-slate-800/80 ${theme.borderAccent} p-3.5 rounded-2xl border border-slate-200/90 dark:border-slate-700/70 shadow-sm space-y-1.5 text-xs transition">
-                                        <div class="flex items-start justify-between gap-2">
-                                            <div class="flex items-start gap-2 min-w-0 flex-1">
-                                                <span class="w-6 h-6 rounded-lg ${theme.iconWrap} flex items-center justify-center shrink-0 text-[11px] mt-0.5">
+                                    <div class="bg-white dark:bg-slate-800/80 ${theme.borderAccent} p-3 rounded-2xl border border-slate-200/90 dark:border-slate-700/70 shadow-sm space-y-1.5 text-xs transition">
+                                        <div class="flex items-center justify-between gap-2">
+                                            <div class="flex items-center gap-1.5">
+                                                <span class="w-6 h-6 rounded-lg ${theme.iconWrap} flex items-center justify-center shrink-0 text-[11px]">
                                                     <i class="fa-solid ${theme.icon}"></i>
                                                 </span>
-                                                <div class="min-w-0 flex-1">
-                                                    <span class="inline-block px-2 py-0.5 text-[9px] font-bold rounded-full border ${theme.badgeCls} mb-1">${theme.badgeLabel}</span>
-                                                    <p class="font-semibold text-slate-900 dark:text-slate-100 break-words whitespace-normal leading-snug">${escapeHtml(t.title)}</p>
-                                                </div>
+                                                <span class="px-2 py-0.5 text-[9.5px] font-bold rounded-full border ${theme.badgeCls}">${theme.badgeLabel}</span>
                                             </div>
                                             <span class="font-bold ${theme.amountCls} shrink-0 text-sm whitespace-nowrap">
                                                 ${theme.prefix}${formatCurrency(t.amount)}
                                             </span>
                                         </div>
-                                        ${t.subtitle ? `<p class="text-[11px] ${theme.subtitleCls} font-medium pl-8 break-words whitespace-normal leading-snug">${escapeHtml(t.subtitle)}</p>` : ''}
-                                        <div class="flex items-center justify-between flex-wrap gap-1 text-[10px] text-slate-500 dark:text-slate-400 pl-8 pt-0.5">
+                                        <p class="font-semibold text-slate-900 dark:text-slate-100 break-words whitespace-normal leading-snug">${escapeHtml(t.title)}</p>
+                                        ${t.subtitle ? `<p class="text-[11px] ${theme.subtitleCls} font-medium break-words whitespace-normal leading-snug">${escapeHtml(t.subtitle)}</p>` : ''}
+                                        <div class="flex items-center justify-between flex-wrap gap-1 text-[10px] text-slate-500 dark:text-slate-400 pt-0.5">
                                             <span>${formatTimestamp(t.timestamp)}</span>
-                                            <span class="italic text-slate-400 dark:text-slate-500 break-words">By ${escapeHtml(t.performedBy)}</span>
+                                            <span class="italic text-slate-400 dark:text-slate-500 break-words whitespace-normal">By ${escapeHtml(t.performedBy)}</span>
                                         </div>
                                     </div>
                                 `;
@@ -2259,8 +2271,8 @@
 
         async function handleWalletAdd(e, userId) {
             e.preventDefault();
-            const btn = document.getElementById('wallet-submit-btn');
-            if (btn && btn.disabled) return;
+            const submitBtn = document.getElementById('wallet-submit-btn');
+            if (submitBtn && submitBtn.disabled) return;
             const amountToAdd = round2(parseFloat(document.getElementById('wallet-add-amount').value));
             if (isNaN(amountToAdd) || amountToAdd === 0) {
                 showToast('Please enter a valid amount.', 'error');
@@ -2269,7 +2281,7 @@
 
             const user = state.users.find(u => u.id === userId);
             if (!user) return;
-            if (btn) btn.disabled = true;
+            if (submitBtn) submitBtn.disabled = true;
 
             try {
                 const res = await adjustWallet(userId, amountToAdd);
@@ -2278,13 +2290,10 @@
 
                 const txnId = 'txn_' + Date.now();
                 let txnTitle = amountToAdd >= 0 ? 'Added Wallet Funds' : 'Shortage Money Adjustment';
-                let txnSubtitle = '';
                 if (amountToAdd > 0 && res.excessCleared > 0 && walletPart > 0) {
                     txnTitle = `Cleared Excess (₹${res.excessCleared}) & Added Wallet (₹${walletPart})`;
-                    txnSubtitle = `Total deposited ${formatCurrency(amountToAdd)} — settled ${formatCurrency(res.excessCleared)} excess due`;
                 } else if (amountToAdd > 0 && res.excessCleared > 0) {
                     txnTitle = 'Cleared Excess Spent Due';
-                    txnSubtitle = `Settled ${formatCurrency(res.excessCleared)} of outstanding excess due`;
                 }
 
                 await setDoc(doc(db, 'walletTransactions', txnId), {
@@ -2292,7 +2301,6 @@
                     userId: userId,
                     type: amountToAdd >= 0 ? 'topup' : 'shortage',
                     title: txnTitle,
-                    subtitle: txnSubtitle,
                     amount: Math.abs(amountToAdd),
                     timestamp: new Date().toISOString(),
                     performedBy: state.currentUser.name
@@ -2320,7 +2328,7 @@
                 closeModal();
                 showToast(`Successfully processed ${formatCurrency(amountToAdd)} for ${user.name}!`, 'success');
             } catch (err) {
-                if (btn) btn.disabled = false;
+                if (submitBtn) submitBtn.disabled = false;
                 showToast('Failed to update wallet. Please try again.', 'error');
             }
         }
@@ -2334,8 +2342,7 @@
                     const { db, doc, deleteDoc } = window.FB;
                     const userTxns = state.walletTransactions.filter(t => t.userId === userId);
                     for (const t of userTxns) {
-                        try { await deleteDoc(doc(db, 'walletTransactions', t.id)); }
-                        catch (err) { }
+                        try { await deleteDoc(doc(db, 'walletTransactions', t.id)); } catch (err) { }
                     }
                     closeModal();
                     showToast(`Successfully cleared wallet history for ${userName}!`, 'success');
@@ -2373,8 +2380,7 @@
                         return;
                     }
                     for (const exp of userExpenses) {
-                        try { await deleteDoc(doc(db, 'expenses', exp.id)); }
-                        catch (err) { }
+                        try { await deleteDoc(doc(db, 'expenses', exp.id)); } catch (err) { }
                     }
                     showToast(`Cleared expenses for ${userName}.`, 'success');
                 }
@@ -2382,13 +2388,14 @@
         }
 
         // ============================================================
-        // 8. PERSISTENT HEADER, LIQUID NAVBAR & CORE RENDERER
+        // 9. PERSISTENT HEADER, NAVIGATION DOCK & AUTH VIEWS
         // ============================================================
         function syncPersistentHeader() {
             const headerEl = document.getElementById('persistent-header');
             if (!headerEl) return;
 
-            if (!state.currentUser || state.isDbLoading) {
+            const isLockedByMaint = Boolean(state.appSettings?.maintenanceMode && state.currentUser && !isDeveloper(state.currentUser));
+            if (!state.currentUser || state.isDbLoading || isLockedByMaint) {
                 headerEl.classList.add('hidden');
                 headerEl.style.display = 'none';
                 return;
@@ -2398,7 +2405,7 @@
             headerEl.style.display = 'flex';
 
             const isDev = isDeveloper(state.currentUser);
-            const isAdmin = state.currentUser.role === 'admin';
+            const isPrivileged = isAdminOrDev(state.currentUser);
             const isSubTab = ['recycle', 'requests', 'userRecycle', 'notifications'].includes(state.activeTab);
             const unreadNotifCount = getMyNotifications().filter(n => !n.read).length;
 
@@ -2432,7 +2439,7 @@
                                     <i class="fa-solid fa-code text-[10px]"></i>
                                     <span>Developer</span>
                                 </span>
-                            ` : (isAdmin ? `
+                            ` : (isPrivileged ? `
                                 <span class="inline-flex items-center gap-1 text-[11px] font-semibold text-indigo-600 dark:text-indigo-400">
                                     <i class="fa-solid fa-shield-halved text-[10px]"></i>
                                     <span>Admin</span>
@@ -2460,7 +2467,8 @@
             const navWrapper = document.getElementById('persistent-nav-wrapper');
             if (!navWrapper) return;
 
-            if (!state.currentUser || state.isDbLoading) {
+            const isLockedByMaint = Boolean(state.appSettings?.maintenanceMode && state.currentUser && !isDeveloper(state.currentUser));
+            if (!state.currentUser || state.isDbLoading || isLockedByMaint) {
                 navWrapper.classList.add('hidden');
                 navWrapper.style.display = 'none';
                 return;
@@ -2561,10 +2569,27 @@
 
             applyTheme();
 
+            if (state.isDbLoading) {
+                syncPersistentHeader();
+                syncPersistentNavbar();
+                app.innerHTML = renderDatabaseLoadingScreen();
+                return;
+            }
+
+            const shouldPlayZoomEntrance = state.justFinishedLoading;
+            if (state.justFinishedLoading) state.justFinishedLoading = false;
+
             if (!state.currentUser) {
                 syncPersistentHeader();
                 syncPersistentNavbar();
                 app.innerHTML = state.authView === 'forgot' ? renderForgotPasswordPage() : renderLoginPage();
+                return;
+            }
+
+            if (state.appSettings && state.appSettings.maintenanceMode && !isDeveloper(state.currentUser)) {
+                syncPersistentHeader();
+                syncPersistentNavbar();
+                app.innerHTML = renderMaintenanceScreen();
                 return;
             }
 
@@ -2588,10 +2613,7 @@
                 </div>
             `;
 
-            if (state.justFinishedLoading) {
-                state.justFinishedLoading = false;
-                triggerZoomOutEntrance();
-            }
+            if (shouldPlayZoomEntrance) triggerZoomOutEntrance();
             syncPersistentNavbar();
         }
 
@@ -2602,6 +2624,8 @@
                 </button>
             `;
         }
+
+        window.renderApp = render;
 
         function renderMainContentOnly() {
             const main = document.getElementById('main-content');
@@ -2627,10 +2651,113 @@
             if (fab) fab.innerHTML = state.activeTab !== 'add' ? fabButtonHtml() : '';
         }
 
-        // ============================================================
-        // 9. AUTHENTICATION & PASSWORD RECOVERY
-        // ============================================================
+        function renderMaintenanceScreen() {
+            const hrs = Number(state.appSettings?.maintenanceHours || 2);
+            const hourLabel = hrs === 1 ? '1 hour' : `${hrs} hours`;
+            return `
+                <div class="flex-1 overflow-y-auto no-scrollbar flex flex-col justify-center items-center px-6 py-10 max-w-md mx-auto w-full text-center select-none animate-fadeIn">
+                    <div class="ios-glass-card rounded-3xl p-7 sm:p-8 shadow-2xl space-y-5 w-full border border-amber-500/30">
+                        <div class="relative w-16 h-16 mx-auto flex items-center justify-center">
+                            <div class="w-16 h-16 rounded-3xl bg-amber-500/15 text-amber-600 dark:text-amber-400 flex items-center justify-center text-2xl shadow-sm border border-amber-500/25">
+                                <i class="fa-solid fa-screwdriver-wrench"></i>
+                            </div>
+                        </div>
+
+                        <div class="space-y-2">
+                            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider bg-amber-500/15 text-amber-700 dark:text-amber-300 border border-amber-500/25">
+                                <span class="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
+                                Under Maintenance
+                            </span>
+                            <h2 class="text-xl font-bold text-slate-900 dark:text-white tracking-tight pt-1">Scheduled System Maintenance</h2>
+                            <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
+                                Maintenance issue will be solved within <span class="font-bold text-amber-600 dark:text-amber-400">${escapeHtml(hourLabel)}</span>. Please check back shortly.
+                            </p>
+                        </div>
+
+                        <div class="bg-slate-50/90 dark:bg-slate-800/70 rounded-2xl p-3.5 border border-slate-200/70 dark:border-slate-700/70 text-xs text-slate-500 dark:text-slate-400 flex items-center justify-between">
+                            <span class="font-medium flex items-center gap-1.5">
+                                <i class="fa-regular fa-clock text-amber-500"></i>
+                                <span>Estimated Resolution</span>
+                            </span>
+                            <span class="font-bold text-slate-800 dark:text-slate-200">Within ${escapeHtml(hourLabel)}</span>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-2.5 pt-1">
+                            <button type="button" onclick="checkMaintenanceStatus()" class="py-3 px-4 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold shadow-md transition flex items-center justify-center gap-1.5">
+                                <i class="fa-solid fa-rotate"></i>
+                                <span>Check Again</span>
+                            </button>
+                            <button type="button" onclick="handleLogout()" class="py-3 px-4 rounded-2xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-xs font-semibold border border-slate-200/80 dark:border-slate-700 transition flex items-center justify-center gap-1.5">
+                                <i class="fa-solid fa-arrow-right-from-bracket"></i>
+                                <span>Sign Out</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        async function checkMaintenanceStatus() {
+            showToast('Checking system status...', 'info');
+            await forceRefreshAllData();
+            if (!state.appSettings?.maintenanceMode) {
+                showToast('Maintenance completed! Welcome back.', 'success');
+            } else {
+                const hrs = Number(state.appSettings?.maintenanceHours || 2);
+                showToast(`Still under maintenance (~${hrs} ${hrs === 1 ? 'hour' : 'hours'} remaining).`, 'info');
+            }
+            render();
+        }
+
+        async function toggleMaintenanceMode() {
+            if (!isDeveloper(state.currentUser)) {
+                showToast('Only a Developer can toggle Maintenance Mode.', 'error');
+                return;
+            }
+            const nextState = !(state.appSettings && state.appSettings.maintenanceMode);
+            const hrsInput = document.getElementById('dev-maintenance-hours');
+            const parsedHrs = hrsInput ? Math.max(0.5, Math.min(72, parseFloat(hrsInput.value) || 2)) : Number(state.appSettings?.maintenanceHours || 2);
+
+            const { db, doc, setDoc } = window.FB;
+            try {
+                await setDoc(doc(db, 'settings', 'app_settings'), {
+                    ...state.appSettings,
+                    maintenanceMode: nextState,
+                    maintenanceHours: parsedHrs,
+                    maintenanceUpdatedAt: new Date().toISOString()
+                }, { merge: true });
+                showToast(
+                    nextState
+                        ? `Maintenance Mode ON (${parsedHrs} ${parsedHrs === 1 ? 'hr' : 'hrs'}) — Admins & Users locked out.`
+                        : 'Maintenance Mode OFF — App is live for all users!',
+                    nextState ? 'info' : 'success'
+                );
+                render();
+            } catch (err) {
+                showToast('Failed to update Maintenance Mode.', 'error');
+            }
+        }
+
+        async function saveMaintenanceHours() {
+            if (!isDeveloper(state.currentUser)) return;
+            const hrsInput = document.getElementById('dev-maintenance-hours');
+            const parsedHrs = Math.max(0.5, Math.min(72, parseFloat(hrsInput ? hrsInput.value : '2') || 2));
+            const { db, doc, setDoc } = window.FB;
+            try {
+                await setDoc(doc(db, 'settings', 'app_settings'), {
+                    ...state.appSettings,
+                    maintenanceHours: parsedHrs
+                }, { merge: true });
+                showToast(`Maintenance duration updated to ${parsedHrs} ${parsedHrs === 1 ? 'hour' : 'hours'}.`, 'success');
+                renderMainContentOnly();
+            } catch (err) {
+                showToast('Failed to update maintenance duration.', 'error');
+            }
+        }
+
         function renderLoginPage() {
+            const isMaintActive = Boolean(state.appSettings && state.appSettings.maintenanceMode);
+            const maintHrs = Number(state.appSettings?.maintenanceHours || 2);
             return `
                 <div class="flex-1 overflow-y-auto no-scrollbar flex flex-col justify-center px-4 py-8 max-w-sm mx-auto w-full relative">
                     <div class="text-center mb-6">
@@ -2640,6 +2767,16 @@
                         <h2 class="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">Click Factory</h2>
                         <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Expense Management Portal</p>
                     </div>
+
+                    ${isMaintActive ? `
+                        <div class="mb-4 p-3.5 rounded-2xl bg-amber-500/15 border border-amber-500/30 text-amber-800 dark:text-amber-300 text-xs flex items-start gap-2.5">
+                            <i class="fa-solid fa-screwdriver-wrench mt-0.5 text-amber-600 dark:text-amber-400 shrink-0"></i>
+                            <div>
+                                <p class="font-bold">Maintenance Mode Active</p>
+                                <p class="text-[11px] opacity-90 mt-0.5">Maintenance issue will solve within ${maintHrs} ${maintHrs === 1 ? 'hour' : 'hours'}. Only Developer access is open.</p>
+                            </div>
+                        </div>
+                    ` : ''}
 
                     <div class="ios-glass-card py-8 px-6 shadow-2xl rounded-3xl space-y-5 w-full">
                         <form onsubmit="handleLoginSubmit(event)" class="space-y-4">
@@ -4511,7 +4648,7 @@
                     </div>
 
                     ${isDev ? `
-                    <div class="ios-glass-card rounded-3xl p-5 sm:p-6 shadow-sm space-y-3 w-full border border-violet-500/30">
+                    <div class="ios-glass-card rounded-3xl p-5 sm:p-6 shadow-sm space-y-3.5 w-full border border-violet-500/30">
                         <div class="flex items-center justify-between px-1">
                             <h3 class="text-xs font-semibold text-violet-600 dark:text-violet-400 uppercase tracking-wider flex items-center gap-1.5">
                                 <i class="fa-solid fa-code"></i><span>Developer Console</span>
@@ -4520,6 +4657,28 @@
                                 ${state.appSettings?.gdriveEnabled ? 'Drive Active' : 'Drive Off'}
                             </span>
                         </div>
+
+                        <div class="p-3.5 rounded-2xl bg-slate-50/80 dark:bg-slate-800/50 border border-slate-200/70 dark:border-slate-700/60 space-y-3">
+                            <div class="flex items-center justify-between gap-2">
+                                <div class="min-w-0">
+                                    <h4 class="font-semibold text-xs text-slate-900 dark:text-white flex items-center gap-1.5">
+                                        <i class="fa-solid fa-screwdriver-wrench text-amber-500"></i>
+                                        <span>App Maintenance Mode</span>
+                                    </h4>
+                                    <p class="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">Blocks all Admins & Users temporarily</p>
+                                </div>
+                                <button type="button" onclick="toggleMaintenanceMode()" class="relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${state.appSettings?.maintenanceMode ? 'bg-amber-500' : 'bg-slate-300 dark:bg-slate-700'}">
+                                    <span class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-lg ring-0 transition duration-200 ease-in-out ${state.appSettings?.maintenanceMode ? 'translate-x-5' : 'translate-x-0'}"></span>
+                                </button>
+                            </div>
+
+                            <div class="flex items-center gap-2 pt-2 border-t border-slate-200/60 dark:border-slate-700/60">
+                                <label for="dev-maintenance-hours" class="text-[11px] font-medium text-slate-600 dark:text-slate-300 shrink-0">Solve Within (Hours):</label>
+                                <input type="number" id="dev-maintenance-hours" min="0.5" max="72" step="0.5" value="${Number(state.appSettings?.maintenanceHours || 2)}" class="w-20 px-2.5 py-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold text-center text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-amber-500">
+                                <button type="button" onclick="saveMaintenanceHours()" class="ml-auto px-3 py-1.5 bg-amber-500/15 hover:bg-amber-500/25 text-amber-700 dark:text-amber-300 rounded-xl text-[11px] font-semibold border border-amber-500/25 transition">Set Hours</button>
+                            </div>
+                        </div>
+
                         ${navBtn('openGoogleDriveConfigModal()', '<i class="fa-brands fa-google-drive text-violet-500"></i>', 'Google Drive Bill Storage Setup')}
                     </div>
                     ` : ''}
@@ -4898,7 +5057,14 @@
             }
         }, { passive: false });
 
-        // Unified Axis-Locked Touch Pipeline (Edge Swipe-Back + Pull-to-Refresh)
+        // ============================================================
+        // UNIFIED TOUCH GESTURE ENGINE
+        // 1. Horizontal Swipe to Switch Main Tabs (with live drag offset)
+        // 2. Left-Edge Swipe-Back on Sub-Views & Add/Edit Form
+        // 3. Interactive Liquid Dock Slide-to-Select Gesture
+        // 4. Swipe-Down to Dismiss Modals
+        // 5. Top-Down Pull-to-Refresh
+        // ============================================================
         let ptrStartX = 0;
         let ptrStartY = 0;
         let ptrCurrentY = 0;
@@ -4907,14 +5073,55 @@
         let isRefreshing = false;
         let hasVibrated = false;
         let gestureAxis = null;
+        let isDockScrubbing = false;
+        let lastDockScrubTarget = null;
+        let modalSwipeTarget = null;
 
         const REFRESH_THRESHOLD = 60;
         const MAX_PULL_DISTANCE = 140;
-        const DIRECTION_LOCK_THRESHOLD = 8;
+        const DIRECTION_LOCK_THRESHOLD = 10;
+        const TAB_SWIPE_THRESHOLD = 55;
 
         function ptrPullDistance(rawDiff) {
             if (rawDiff <= 0) return 0;
             return Math.min(MAX_PULL_DISTANCE, rawDiff * 0.42 * (1 - (rawDiff / (rawDiff + 280))));
+        }
+
+        function getPrimaryNavOrder() {
+            const isPrivileged = isAdminOrDev(state.currentUser);
+            return ['home', isPrivileged ? 'admin' : 'analytics', isPrivileged ? 'users' : 'wallet', 'profile'];
+        }
+
+        function handleDockScrubMove(clientX) {
+            const nav = document.getElementById('liquid-nav');
+            const bubble = document.getElementById('liquid-bubble');
+            if (!nav || !bubble) return;
+
+            const buttons = Array.from(nav.querySelectorAll('.liquid-nav-btn'));
+            let matchedBtn = null;
+            for (const btn of buttons) {
+                const rect = btn.getBoundingClientRect();
+                if (clientX >= rect.left && clientX <= rect.right) {
+                    matchedBtn = btn;
+                    break;
+                }
+            }
+            if (!matchedBtn && buttons.length > 0) {
+                const firstRect = buttons[0].getBoundingClientRect();
+                matchedBtn = clientX < firstRect.left ? buttons[0] : buttons[buttons.length - 1];
+            }
+
+            if (matchedBtn) {
+                bubble.style.transition = 'transform 0.12s ease-out, width 0.12s ease-out';
+                bubble.style.width = `${matchedBtn.offsetWidth}px`;
+                bubble.style.transform = `translateX(${matchedBtn.offsetLeft}px)`;
+
+                const targetTab = matchedBtn.id.replace('nav-btn-', '');
+                if (targetTab !== lastDockScrubTarget) {
+                    lastDockScrubTarget = targetTab;
+                    triggerHaptic(10);
+                }
+            }
         }
 
         document.addEventListener('touchstart', (e) => {
@@ -4925,6 +5132,36 @@
             ptrCurrentY = ptrStartY;
             hasVibrated = false;
             gestureAxis = null;
+            isDockScrubbing = false;
+            lastDockScrubTarget = null;
+            modalSwipeTarget = null;
+
+            // Check if touch started on the bottom Liquid Glass Dock
+            const dockEl = e.target.closest('#liquid-nav');
+            if (dockEl && state.currentUser && !state.isDbLoading) {
+                isDockScrubbing = true;
+                isPulling = false;
+                return;
+            }
+
+            // Check if a modal is open for swipe-down dismissal
+            const modalOverlay = document.getElementById('modal-root')?.firstElementChild;
+            if (modalOverlay) {
+                const modalCard = modalOverlay.querySelector('.ios-glass-modal, .bg-slate-900');
+                const scrollableModal = e.target.closest('.overflow-y-auto');
+                if (modalCard && (!scrollableModal || scrollableModal.scrollTop <= 0)) {
+                    modalSwipeTarget = modalCard;
+                    modalSwipeTarget.style.transition = 'none';
+                }
+                isPulling = false;
+                return;
+            }
+
+            // Ignore horizontal swipes inside horizontally scrollable pill bars
+            if (e.target.closest('.overflow-x-auto')) {
+                isPulling = false;
+                return;
+            }
 
             const mainContent = document.getElementById('main-content');
             if (isPtrAllowed() && !isRefreshing && mainContent && mainContent.scrollTop <= 0) {
@@ -4955,15 +5192,33 @@
             const rawDiffX = currentX - ptrStartX;
             const rawDiffY = currentY - ptrStartY;
 
+            // Handle interactive Liquid Dock scrubbing
+            if (isDockScrubbing) {
+                handleDockScrubMove(currentX);
+                return;
+            }
+
+            // Handle Modal Swipe-Down gesture
+            if (modalSwipeTarget) {
+                if (!gestureAxis && (Math.abs(rawDiffX) > DIRECTION_LOCK_THRESHOLD || Math.abs(rawDiffY) > DIRECTION_LOCK_THRESHOLD)) {
+                    gestureAxis = Math.abs(rawDiffY) > Math.abs(rawDiffX) && rawDiffY > 0 ? 'modal-dismiss' : 'cancelled';
+                }
+                if (gestureAxis === 'modal-dismiss' && rawDiffY > 0) {
+                    const dampedY = rawDiffY * 0.65;
+                    modalSwipeTarget.style.transform = `translateY(${dampedY}px)`;
+                    modalSwipeTarget.style.opacity = String(Math.max(0.45, 1 - dampedY / 320));
+                }
+                return;
+            }
+
             if (!gestureAxis) {
                 const absX = Math.abs(rawDiffX);
                 const absY = Math.abs(rawDiffY);
                 if (absX > DIRECTION_LOCK_THRESHOLD || absY > DIRECTION_LOCK_THRESHOLD) {
-                    if (absX >= absY) {
+                    if (absX > absY * 1.15) {
                         gestureAxis = 'horizontal';
                         isPulling = false;
                         resetPtrVisuals();
-                        return;
                     } else if (rawDiffY > 0 && isPulling) {
                         gestureAxis = 'downward-pull';
                     } else {
@@ -4974,6 +5229,17 @@
                 } else {
                     return;
                 }
+            }
+
+            // Live subtle horizontal drag feedback on main content
+            if (gestureAxis === 'horizontal' && state.currentUser && !state.isDbLoading) {
+                const mainContent = document.getElementById('main-content');
+                if (mainContent) {
+                    mainContent.style.transition = 'none';
+                    const dampedX = Math.max(-75, Math.min(75, rawDiffX * 0.28));
+                    mainContent.style.transform = `translateX(${dampedX}px)`;
+                }
+                return;
             }
 
             if (!isPulling || isRefreshing || !isPtrAllowed() || gestureAxis !== 'downward-pull') return;
@@ -5020,13 +5286,76 @@
         }, { passive: true });
 
         document.addEventListener('touchend', async () => {
+            // Complete Liquid Dock scrub selection
+            if (isDockScrubbing) {
+                isDockScrubbing = false;
+                const bubble = document.getElementById('liquid-bubble');
+                if (bubble) bubble.style.transition = '';
+                if (lastDockScrubTarget) {
+                    const mapTarget = lastDockScrubTarget === 'users' && !isAdminOrDev(state.currentUser) ? 'wallet' : lastDockScrubTarget;
+                    switchTab(mapTarget);
+                } else {
+                    syncPersistentNavbar();
+                }
+                lastDockScrubTarget = null;
+                return;
+            }
+
+            // Complete Modal Swipe-Down dismissal
+            if (modalSwipeTarget) {
+                const diffY = ptrCurrentY - ptrStartY;
+                const card = modalSwipeTarget;
+                modalSwipeTarget = null;
+                if (gestureAxis === 'modal-dismiss' && diffY > 85) {
+                    triggerHaptic(14);
+                    closeModal();
+                } else {
+                    card.style.transition = 'transform 0.22s ease, opacity 0.22s ease';
+                    card.style.transform = '';
+                    card.style.opacity = '';
+                }
+                gestureAxis = null;
+                return;
+            }
+
+            // Complete Horizontal Swipe Navigation
             if (gestureAxis === 'horizontal' && state.currentUser && !state.isDbLoading) {
+                const mainContent = document.getElementById('main-content');
+                if (mainContent) {
+                    mainContent.style.transition = 'transform 0.22s cubic-bezier(0.16, 1, 0.3, 1)';
+                    mainContent.style.transform = 'translateX(0px)';
+                }
+
                 const diffX = ptrEndX - ptrStartX;
-                if (ptrStartX < 50 && diffX > 80) {
-                    if (['recycle', 'requests', 'userRecycle', 'notifications'].includes(state.activeTab)) {
-                        switchTab(state.activeTab === 'notifications' ? 'home' : 'profile');
+                const subTabs = ['recycle', 'requests', 'userRecycle', 'notifications', 'add'];
+
+                // 1. Swipe right on sub-pages or Add/Edit form to go back
+                if (subTabs.includes(state.activeTab)) {
+                    if (diffX > TAB_SWIPE_THRESHOLD) {
+                        triggerHaptic(14);
+                        if (state.activeTab === 'add') {
+                            cancelEdit();
+                        } else {
+                            switchTab(state.activeTab === 'notifications' ? 'home' : 'profile');
+                        }
+                    }
+                } else {
+                    // 2. Swipe left/right across the 4 primary tabs (Home <-> Summary <-> Users/Wallet <-> Account)
+                    const primaryTabs = getPrimaryNavOrder();
+                    const currIdx = primaryTabs.indexOf(state.activeTab);
+                    if (currIdx !== -1) {
+                        if (diffX < -TAB_SWIPE_THRESHOLD && currIdx < primaryTabs.length - 1) {
+                            triggerHaptic(14);
+                            switchTab(primaryTabs[currIdx + 1]);
+                        } else if (diffX > TAB_SWIPE_THRESHOLD && currIdx > 0) {
+                            triggerHaptic(14);
+                            switchTab(primaryTabs[currIdx - 1]);
+                        }
                     }
                 }
+
+                gestureAxis = null;
+                return;
             }
 
             if (!isPulling || isRefreshing || !isPtrAllowed() || gestureAxis !== 'downward-pull') {
@@ -5179,7 +5508,9 @@
                         currentVersion: CURRENT_CLIENT_APP_VERSION,
                         gdriveEnabled: false,
                         gdriveClientId: '',
-                        gdriveFolderId: ''
+                        gdriveFolderId: '',
+                        maintenanceMode: false,
+                        maintenanceHours: 2
                     });
                 }
 
