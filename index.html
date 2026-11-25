@@ -22,11 +22,20 @@
             theme: {
                 extend: {
                     fontFamily: { sans: ['Inter', 'sans-serif'] },
-                    colors: { brand: { 50: '#eef2ff', 100: '#e0e7ff', 500: '#6366f1', 600: '#4f46e5', 700: '#4338ca' } }
+                    colors: {
+                        brand: {
+                            50: '#eef2ff',
+                            100: '#e0e7ff',
+                            500: '#6366f1',
+                            600: '#4f46e5',
+                            700: '#4338ca'
+                        }
+                    }
                 }
             }
         };
 
+        // Immediately sync theme class before paint to avoid flash
         (function () {
             let savedTheme = 'system';
             try { savedTheme = localStorage.getItem('click_factory_theme_v1') || 'system'; } catch (e) { }
@@ -48,6 +57,7 @@
             box-sizing: border-box;
         }
 
+        /* Desktop thin custom scrollbars */
         @media (min-width: 769px) and (hover: hover) {
             * {
                 scrollbar-width: thin;
@@ -89,6 +99,7 @@
             }
         }
 
+        /* Mobile / touch hidden scrollbars */
         @media (max-width: 768px),
         (hover: none) {
             * {
@@ -159,7 +170,7 @@
 
         .ios-header {
             flex-shrink: 0;
-            padding-top: calc(env(safe-area-inset-top, 0px) + 16px);
+            padding-top: calc(env(safe-area-inset-top, 0px) + 14px);
             padding-bottom: 12px;
             background-color: #f8fafc;
             position: relative;
@@ -181,6 +192,7 @@
             padding-bottom: 140px;
         }
 
+        /* Pull-to-Refresh Pill */
         #ptr-container {
             position: absolute;
             top: 12px;
@@ -202,7 +214,7 @@
             gap: 8px;
             padding: 6px 14px;
             border-radius: 9999px;
-            background: rgba(255, 255, 255, 0.9);
+            background: rgba(255, 255, 255, 0.92);
             border: 1px solid rgba(226, 232, 240, 0.8);
             box-shadow: 0 4px 14px -2px rgba(0, 0, 0, 0.08), 0 2px 6px -1px rgba(0, 0, 0, 0.04);
             backdrop-filter: blur(16px);
@@ -211,7 +223,7 @@
         }
 
         .dark .ptr-pill {
-            background: rgba(15, 23, 42, 0.85);
+            background: rgba(15, 23, 42, 0.88);
             border-color: rgba(51, 65, 85, 0.7);
             box-shadow: 0 4px 16px -2px rgba(0, 0, 0, 0.5);
         }
@@ -243,7 +255,7 @@
 
         #toast-container {
             position: fixed;
-            bottom: 92px;
+            bottom: 96px;
             left: 50%;
             transform: translateX(-50%);
             z-index: 70;
@@ -300,13 +312,8 @@
         }
 
         @keyframes simple-spin {
-            0% {
-                transform: rotate(0deg);
-            }
-
-            100% {
-                transform: rotate(360deg);
-            }
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
 
         .simple-spinner {
@@ -317,15 +324,8 @@
         }
 
         @keyframes homeZoomOut {
-            0% {
-                opacity: 0;
-                transform: scale(1.04);
-            }
-
-            100% {
-                opacity: 1;
-                transform: scale(1);
-            }
+            0% { opacity: 0; transform: scale(1.03); }
+            100% { opacity: 1; transform: scale(1); }
         }
 
         .animate-fadeIn {
@@ -341,12 +341,10 @@
                 transform: scale(0.95);
                 box-shadow: 0 0 0 0 rgba(79, 70, 229, 0.7);
             }
-
             70% {
                 transform: scale(1);
                 box-shadow: 0 0 0 8px rgba(79, 70, 229, 0);
             }
-
             100% {
                 transform: scale(0.95);
                 box-shadow: 0 0 0 0 rgba(79, 70, 229, 0);
@@ -358,37 +356,24 @@
         }
 
         @keyframes slideInFromRight {
-            0% {
-                transform: translateX(24px);
-                opacity: 0;
-            }
-
-            100% {
-                transform: translateX(0);
-                opacity: 1;
-            }
+            0% { transform: translateX(20px); opacity: 0; }
+            100% { transform: translateX(0); opacity: 1; }
         }
 
         @keyframes slideInFromLeft {
-            0% {
-                transform: translateX(-24px);
-                opacity: 0;
-            }
-
-            100% {
-                transform: translateX(0);
-                opacity: 1;
-            }
+            0% { transform: translateX(-20px); opacity: 0; }
+            100% { transform: translateX(0); opacity: 1; }
         }
 
         .animate-slide-right {
-            animation: slideInFromRight 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+            animation: slideInFromRight 0.26s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
         .animate-slide-left {
-            animation: slideInFromLeft 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+            animation: slideInFromLeft 0.26s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
+        /* iOS Liquid Glass Floating Navigation Dock */
         .liquid-nav-container {
             position: fixed;
             bottom: max(env(safe-area-inset-bottom, 14px), 18px);
@@ -571,9 +556,12 @@
 <body
     class="bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-100 flex flex-col items-stretch h-full selection:bg-indigo-500 selection:text-white">
 
-    <header id="persistent-header" class="ios-header px-4 sm:px-6 flex items-center justify-between w-full hidden"
+    <!-- Persistent Top Header -->
+    <header id="persistent-header"
+        class="ios-header px-4 sm:px-6 flex items-center justify-between w-full max-w-2xl mx-auto hidden"
         style="display: none;"></header>
 
+    <!-- Main App Viewport -->
     <div id="app" class="app-container w-full flex flex-col relative transition-colors duration-200">
         <div class="flex-1 flex flex-col items-center justify-center p-6 text-center select-none">
             <div class="relative w-16 h-16 flex items-center justify-center mx-auto mb-4">
@@ -586,6 +574,7 @@
         </div>
     </div>
 
+    <!-- Floating iOS Liquid Glass Bottom Navigation -->
     <div id="persistent-nav-wrapper" class="liquid-nav-container hidden" style="display: none;">
         <nav id="liquid-nav" class="liquid-dock">
             <div id="liquid-bubble" class="liquid-bubble"></div>
@@ -618,87 +607,220 @@
     <div id="modal-root" class="relative z-[60]"></div>
     <div id="toast-container" class="fixed z-[70]"></div>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import {
-            getFirestore,
-            enableIndexedDbPersistence,
-            collection,
-            getDocs,
-            setDoc,
-            doc,
-            deleteDoc,
-            updateDoc,
-            onSnapshot,
-            query,
-            orderBy,
-            runTransaction
-        } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-        import { getStorage, ref as storageRef, uploadString, getDownloadURL, deleteObject } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
-
-        const firebaseConfig = {
-            apiKey: "AIzaSyDguDaGIQ8dbwLoqbXKDD4ixfPg7y3VCpg",
-            authDomain: "expensetracker-ec267.firebaseapp.com",
-            projectId: "expensetracker-ec267",
-            storageBucket: "expensetracker-ec267.firebasestorage.app",
-            messagingSenderId: "789003178398",
-            appId: "1:789003178398:web:1579e411ad728268c6468f"
-        };
-
-        const appInstance = initializeApp(firebaseConfig);
-        const db = getFirestore(appInstance);
-        const storage = getStorage(appInstance);
-
-        // Enable IndexedDB offline persistence for Firestore
-        enableIndexedDbPersistence(db).catch((err) => {
-            if (err.code === 'failed-precondition') {
-                console.warn("Firestore persistence failed: Multiple tabs open.");
-            } else if (err.code === 'unimplemented') {
-                console.warn("Firestore persistence not supported in this browser.");
-            }
-        });
-
-        window.FB = { db, storage, collection, getDocs, setDoc, doc, deleteDoc, updateDoc, onSnapshot, query, orderBy, runTransaction, storageRef, uploadString, getDownloadURL, deleteObject };
-
-        async function initializeData() {
-            try {
-                const usersSnap = await getDocs(collection(db, 'users'));
-                if (usersSnap.empty) {
-                    const defaultUsers = [
-                        { id: 'usr_adm', name: 'Admin Manager', username: 'admin', password: 'adminpassword', role: 'admin', email: 'admin@clickfactory.com', wallet: 0, excessSpent: 0 },
-                        { id: 'usr_1', name: 'User One', username: 'user1', password: 'password', role: 'user', email: 'user1@clickfactory.com', wallet: 0, excessSpent: 0 },
-                        { id: 'usr_2', name: 'User Two', username: 'user2', password: 'password', role: 'user', email: 'user2@clickfactory.com', wallet: 0, excessSpent: 0 }
-                    ];
-                    for (const u of defaultUsers) {
-                        await setDoc(doc(db, 'users', u.id), u);
-                    }
-                    await setDoc(doc(db, 'settings', 'admin_pass'), { password: 'adminpassword' });
-                }
-
-                const settingsSnap = await getDocs(collection(db, 'settings'));
-                if (settingsSnap.empty || !settingsSnap.docs.some(d => d.id === 'app_settings')) {
-                    await setDoc(doc(db, 'settings', 'app_settings'), { autoDeleteEnabled: false, currentVersion: '1.1.3' });
-                }
-            } catch (err) {
-                console.warn("Database initialization skipped or offline:", err);
-            }
-        }
-
-        initializeData().finally(() => {
-            if (typeof window.startAppListeners === 'function') {
-                window.startAppListeners();
-            } else {
-                window.__listenersPending = true;
-            }
-        });
-    </script>
+    <!-- Main Application Logic + Instant Preview & Firebase Sync Engine -->
     <script>
         const LOCAL_STORAGE_KEY = 'click_factory_current_user_v23';
         const THEME_STORAGE_KEY = 'click_factory_theme_v1';
         const SOUND_STORAGE_KEY = 'click_factory_sound_v1';
         const SOUND_VOL_STORAGE_KEY = 'click_factory_sound_vol_v1';
         const DOCK_ALPHA_STORAGE_KEY = 'click_factory_dock_alpha_v1';
+        const FALLBACK_DB_KEY = 'click_factory_local_fallback_db_v1';
         const CURRENT_CLIENT_APP_VERSION = '1.1.3';
+
+        function buildSeedDatabase() {
+            const today = new Date();
+            const fmt = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+            const d0 = fmt(today);
+            const d1 = fmt(new Date(today.getTime() - 86400000));
+            const d2 = fmt(new Date(today.getTime() - 2 * 86400000));
+
+            return {
+                users: {
+                    usr_adm: { id: 'usr_adm', name: 'Admin Manager', username: 'admin', password: 'adminpassword', role: 'admin', email: 'admin@clickfactory.com', wallet: 0, excessSpent: 0 },
+                    usr_1: { id: 'usr_1', name: 'User One', username: 'user1', password: 'password', role: 'user', email: 'user1@clickfactory.com', wallet: 8500, excessSpent: 0 },
+                    usr_2: { id: 'usr_2', name: 'User Two', username: 'user2', password: 'password', role: 'user', email: 'user2@clickfactory.com', wallet: 3200, excessSpent: 0 }
+                },
+                expenses: {
+                    exp_seed_1: {
+                        id: 'exp_seed_1',
+                        userId: 'usr_1',
+                        userName: 'User One',
+                        title: 'LED Light & Softbox Rental',
+                        amount: 1500,
+                        category: 'Shoot',
+                        date: d0,
+                        clientNamePlace: 'Velvet Weddings / ECR Beach Villa',
+                        notes: 'Full day rental with extra battery packs',
+                        billAttachment: null,
+                        createdAt: new Date(today.getTime() - 3600000).toISOString()
+                    },
+                    exp_seed_2: {
+                        id: 'exp_seed_2',
+                        userId: 'usr_2',
+                        userName: 'User Two',
+                        title: 'Studio Coffee & Client Refreshments',
+                        amount: 800,
+                        category: 'Office',
+                        date: d1,
+                        clientNamePlace: '',
+                        notes: 'Monthly pantry restock & snacks',
+                        billAttachment: null,
+                        createdAt: new Date(today.getTime() - 86400000).toISOString()
+                    },
+                    exp_seed_3: {
+                        id: 'exp_seed_3',
+                        userId: 'usr_1',
+                        userName: 'User One',
+                        title: 'Outdoor Crew Cab & Fuel',
+                        amount: 1200,
+                        category: 'Shoot',
+                        date: d2,
+                        clientNamePlace: 'Nakshatra Jewels / Anna Nagar',
+                        notes: 'Round trip crew transport',
+                        billAttachment: null,
+                        createdAt: new Date(today.getTime() - 2 * 86400000).toISOString()
+                    }
+                },
+                walletTransactions: {
+                    txn_seed_1: {
+                        id: 'txn_seed_1',
+                        userId: 'usr_1',
+                        type: 'topup',
+                        title: 'Added Wallet Funds',
+                        amount: 11200,
+                        timestamp: new Date(today.getTime() - 3 * 86400000).toISOString(),
+                        performedBy: 'Admin Manager'
+                    },
+                    txn_seed_2: {
+                        id: 'txn_seed_2',
+                        userId: 'usr_2',
+                        type: 'topup',
+                        title: 'Added Wallet Funds',
+                        amount: 4000,
+                        timestamp: new Date(today.getTime() - 3 * 86400000).toISOString(),
+                        performedBy: 'Admin Manager'
+                    }
+                },
+                notifications: {
+                    notif_seed_1: {
+                        id: 'notif_seed_1',
+                        recipientId: 'usr_1',
+                        recipientRole: 'user',
+                        type: 'wallet_credit',
+                        title: 'Wallet Credited!',
+                        message: 'Admin Manager added ₹11,200 to your wallet.',
+                        amount: 11200,
+                        read: false,
+                        timestamp: new Date(today.getTime() - 3 * 86400000).toISOString(),
+                        triggeredBy: 'Admin Manager'
+                    }
+                },
+                recycleBin: {},
+                userRecycleBin: {},
+                passwordRequests: {},
+                settings: {
+                    app_settings: { autoDeleteEnabled: false, currentVersion: '1.1.3' }
+                }
+            };
+        }
+
+        function createLocalFallbackAdapter() {
+            let store = null;
+            try {
+                const raw = localStorage.getItem(FALLBACK_DB_KEY);
+                if (raw) store = JSON.parse(raw);
+            } catch (e) { }
+
+            if (!store || !store.users || Object.keys(store.users).length === 0) {
+                store = buildSeedDatabase();
+                try { localStorage.setItem(FALLBACK_DB_KEY, JSON.stringify(store)); } catch (e) { }
+            }
+
+            const listeners = {};
+            function saveStore() {
+                try { localStorage.setItem(FALLBACK_DB_KEY, JSON.stringify(store)); } catch (e) { }
+            }
+            function notifyCollection(colName) {
+                const colObj = store[colName] || {};
+                const docs = Object.keys(colObj).map(id => ({
+                    id,
+                    data: () => JSON.parse(JSON.stringify(colObj[id]))
+                }));
+                (listeners[colName] || []).forEach(cb => {
+                    try { cb({ docs, empty: docs.length === 0 }); } catch (e) { }
+                });
+            }
+
+            return {
+                db: { __isLocalFallback: true },
+                storage: null,
+                isLocalFallback: true,
+                collection: (_db, colName) => ({ colName }),
+                doc: (_db, colName, docId) => ({ colName, docId }),
+                getDocs: async ({ colName }) => {
+                    const colObj = store[colName] || {};
+                    const docs = Object.keys(colObj).map(id => ({
+                        id,
+                        data: () => JSON.parse(JSON.stringify(colObj[id]))
+                    }));
+                    return { docs, empty: docs.length === 0 };
+                },
+                setDoc: async ({ colName, docId }, data, opts) => {
+                    if (!store[colName]) store[colName] = {};
+                    if (opts && opts.merge && store[colName][docId]) {
+                        store[colName][docId] = { ...store[colName][docId], ...JSON.parse(JSON.stringify(data)) };
+                    } else {
+                        store[colName][docId] = JSON.parse(JSON.stringify(data));
+                    }
+                    saveStore();
+                    notifyCollection(colName);
+                },
+                updateDoc: async ({ colName, docId }, patch) => {
+                    if (!store[colName]) store[colName] = {};
+                    if (!store[colName][docId]) throw new Error('Document does not exist');
+                    store[colName][docId] = { ...store[colName][docId], ...JSON.parse(JSON.stringify(patch)) };
+                    saveStore();
+                    notifyCollection(colName);
+                },
+                deleteDoc: async ({ colName, docId }) => {
+                    if (store[colName]) {
+                        delete store[colName][docId];
+                        saveStore();
+                        notifyCollection(colName);
+                    }
+                },
+                onSnapshot: ({ colName }, onNext) => {
+                    if (!listeners[colName]) listeners[colName] = [];
+                    listeners[colName].push(onNext);
+                    notifyCollection(colName);
+                    return () => {
+                        listeners[colName] = (listeners[colName] || []).filter(fn => fn !== onNext);
+                    };
+                },
+                runTransaction: async (_db, updateFn) => {
+                    const pendingUpdates = [];
+                    const tx = {
+                        get: async ({ colName, docId }) => {
+                            const item = store[colName] && store[colName][docId];
+                            return {
+                                exists: () => Boolean(item),
+                                data: () => JSON.parse(JSON.stringify(item))
+                            };
+                        },
+                        update: ({ colName, docId }, patch) => {
+                            pendingUpdates.push({ colName, docId, patch });
+                        }
+                    };
+                    const res = await updateFn(tx);
+                    const touchedCols = new Set();
+                    for (const u of pendingUpdates) {
+                        if (!store[u.colName]) store[u.colName] = {};
+                        store[u.colName][u.docId] = { ...store[u.colName][u.docId], ...JSON.parse(JSON.stringify(u.patch)) };
+                        touchedCols.add(u.colName);
+                    }
+                    saveStore();
+                    touchedCols.forEach(c => notifyCollection(c));
+                    return res;
+                },
+                storageRef: (_st, path) => ({ path }),
+                uploadString: async (_ref, dataUrl) => ({ dataUrl }),
+                getDownloadURL: async (ref) => ref.dataUrl || '',
+                deleteObject: async () => { }
+            };
+        }
+
+        // Initialize the instant local data adapter immediately so the UI never hangs
+        window.FB = createLocalFallbackAdapter();
 
         function lsGet(key, fallback = null) {
             try { const v = localStorage.getItem(key); return v === null ? fallback : v; } catch (e) { return fallback; }
@@ -718,10 +840,12 @@
             const d = new Date();
             return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
         }
+
         function parseLocal(s) {
             const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(s || '');
             return m ? new Date(+m[1], +m[2] - 1, +m[3]) : new Date(s);
         }
+
         function uName(id) {
             const u = state.users.find(x => x.id === id);
             return u ? u.name : '';
@@ -760,15 +884,14 @@
             editingExpenseId: null,
             tempBillData: null,
             tempFormCache: null,
-            authView: 'login',
-            lastClearedExpensesCache: null
+            authView: 'login'
         };
 
         const tabOrder = ['home', 'summary', 'admin', 'analytics', 'users', 'wallet', 'add', 'profile', 'recycle', 'userRecycle', 'requests', 'notifications'];
         const PTR_ALLOWED_TABS = ['home', 'admin', 'analytics', 'users', 'wallet', 'profile'];
 
         function isPtrAllowed() {
-            return state.currentUser && !state.isDbLoading && PTR_ALLOWED_TABS.includes(state.activeTab);
+            return Boolean(state.currentUser && !state.isDbLoading && PTR_ALLOWED_TABS.includes(state.activeTab));
         }
 
         let knownNotificationIds = new Set();
@@ -776,7 +899,7 @@
         let sharedAudioCtx = null;
         let lastHapticAlphaStep = state.dockAlpha;
         let lastHapticSoundStep = state.soundVolume;
-        let activeUnsubscribers = [];
+        window.activeUnsubscribers = [];
 
         function triggerHaptic(pattern = 12) {
             if (!state.soundEnabled) return;
@@ -827,10 +950,6 @@
             `;
         }
 
-        document.addEventListener('DOMContentLoaded', () => {
-            applyDockTransparency(state.dockAlpha);
-        });
-
         function unlockAudioContext() {
             try {
                 const AudioCtx = window.AudioContext || window.webkitAudioContext;
@@ -880,9 +999,7 @@
                     osc.start(startTime);
                     osc.stop(startTime + decay + 0.02);
                 });
-            } catch (err) {
-                console.warn("Audio chime skipped:", err);
-            }
+            } catch (err) { }
         }
 
         function toggleSoundPanel() {
@@ -1020,13 +1137,14 @@
                 id: txnId,
                 userId: userId,
                 type: 'undo_refund',
-                title: `Undo Expense: ${reasonTitle}${catLabel}`,
+                title: `Refund: ${reasonTitle}${catLabel}`,
                 subtitle: breakdownNote,
                 amount: refundAmt,
                 timestamp: new Date().toISOString(),
                 performedBy: state.currentUser ? state.currentUser.name : targetUser.name
             });
         }
+
         function applyTheme() {
             const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
             const isDark = state.themeMode === 'dark' || (state.themeMode === 'system' && prefersDark);
@@ -1076,58 +1194,228 @@
                 state.justFinishedLoading = true;
                 render();
             }
-        }, 5000);
+        }, 2500);
 
         const savedUser = lsGet(LOCAL_STORAGE_KEY);
         if (savedUser) {
             try { state.currentUser = JSON.parse(savedUser); } catch (e) { }
         }
 
-        let touchStartX = 0;
-        let touchStartY = 0;
+        // Unified Axis-Locked Touch Gesture Pipeline (Edge Back Swipe + Top-Down Pull-to-Refresh)
+        let gestureStartX = 0;
+        let gestureStartY = 0;
+        let gestureCurrentY = 0;
+        let gestureMode = null; // null | 'edge-back' | 'ptr' | 'ignored'
+        let isRefreshing = false;
+        let hasVibrated = false;
+
+        const REFRESH_THRESHOLD = 60;
+        const MAX_PULL_DISTANCE = 140;
+        const DIRECTION_LOCK_THRESHOLD = 8;
+
+        function ptrPullDistance(rawDiff) {
+            if (rawDiff <= 0) return 0;
+            return Math.min(MAX_PULL_DISTANCE, rawDiff * 0.42 * (1 - (rawDiff / (rawDiff + 280))));
+        }
 
         document.addEventListener('touchstart', (e) => {
-            touchStartX = e.changedTouches[0].screenX;
-            touchStartY = e.changedTouches[0].screenY;
-        }, false);
+            if (!state.currentUser || state.isDbLoading || isRefreshing || !e.touches || !e.touches.length) {
+                gestureMode = null;
+                return;
+            }
+            const t = e.touches[0];
+            gestureStartX = t.clientX;
+            gestureStartY = t.clientY;
+            gestureCurrentY = gestureStartY;
+            hasVibrated = false;
+            gestureMode = null;
 
-        document.addEventListener('touchend', (e) => {
-            if (!state.currentUser || state.isDbLoading) return;
-            const touchEndX = e.changedTouches[0].screenX;
-            const touchEndY = e.changedTouches[0].screenY;
-            const diffX = touchEndX - touchStartX;
-            const diffY = Math.abs(touchEndY - touchStartY);
-
-            if (touchStartX < 50 && diffX > 80 && diffY < 100) {
-                if (['recycle', 'requests', 'userRecycle', 'notifications'].includes(state.activeTab)) {
-                    switchTab(state.activeTab === 'notifications' ? 'home' : 'profile');
+            const mainContent = document.getElementById('main-content');
+            if (isPtrAllowed() && mainContent && mainContent.scrollTop <= 0) {
+                const ptrContainer = document.getElementById('ptr-container');
+                const icon = document.getElementById('ptr-icon');
+                const text = document.getElementById('ptr-text');
+                if (ptrContainer) ptrContainer.style.transition = 'none';
+                if (icon) {
+                    icon.className = 'fa-solid fa-arrow-down';
+                    icon.style.transform = 'rotate(0deg)';
+                }
+                if (text) {
+                    text.textContent = 'Pull to refresh';
+                    text.style.color = '';
                 }
             }
-        }, false);
+        }, { passive: true });
+
+        document.addEventListener('touchmove', (e) => {
+            if (!state.currentUser || state.isDbLoading || isRefreshing || gestureMode === 'ignored' || !e.touches || !e.touches.length) return;
+
+            const t = e.touches[0];
+            const rawDiffX = t.clientX - gestureStartX;
+            const rawDiffY = t.clientY - gestureStartY;
+
+            if (!gestureMode) {
+                const absX = Math.abs(rawDiffX);
+                const absY = Math.abs(rawDiffY);
+                if (absX < DIRECTION_LOCK_THRESHOLD && absY < DIRECTION_LOCK_THRESHOLD) return;
+
+                if (absX >= absY) {
+                    gestureMode = (gestureStartX < 44 && rawDiffX > 0) ? 'edge-back' : 'ignored';
+                    return;
+                }
+
+                const mainContent = document.getElementById('main-content');
+                if (isPtrAllowed() && mainContent && mainContent.scrollTop <= 0 && rawDiffY > 0) {
+                    gestureMode = 'ptr';
+                } else {
+                    gestureMode = 'ignored';
+                    return;
+                }
+            }
+
+            if (gestureMode !== 'ptr') return;
+
+            const mainContent = document.getElementById('main-content');
+            if (!mainContent || mainContent.scrollTop > 0 || rawDiffY <= 0) {
+                gestureMode = 'ignored';
+                resetPtrVisuals();
+                return;
+            }
+
+            gestureCurrentY = t.clientY;
+            const pullDistance = ptrPullDistance(rawDiffY);
+            const ptrContainer = document.getElementById('ptr-container');
+            const icon = document.getElementById('ptr-icon');
+            const text = document.getElementById('ptr-text');
+
+            if (ptrContainer) {
+                const progress = Math.min(1, pullDistance / REFRESH_THRESHOLD);
+                ptrContainer.style.opacity = progress.toString();
+                ptrContainer.style.transform = `translateY(${pullDistance}px)`;
+
+                if (pullDistance >= REFRESH_THRESHOLD) {
+                    if (icon) icon.style.transform = 'rotate(180deg)';
+                    if (text) {
+                        text.textContent = 'Release to refresh';
+                        text.style.color = '#4f46e5';
+                    }
+                    if (!hasVibrated) {
+                        triggerHaptic(12);
+                        hasVibrated = true;
+                    }
+                } else {
+                    const rotation = (pullDistance / REFRESH_THRESHOLD) * 180;
+                    if (icon) icon.style.transform = `rotate(${rotation}deg)`;
+                    if (text) {
+                        text.textContent = 'Pull to refresh';
+                        text.style.color = '';
+                    }
+                    hasVibrated = false;
+                }
+            }
+        }, { passive: true });
+
+        document.addEventListener('touchend', async (e) => {
+            if (!state.currentUser || state.isDbLoading || isRefreshing) {
+                gestureMode = null;
+                return;
+            }
+
+            const endX = (e.changedTouches && e.changedTouches[0]) ? e.changedTouches[0].clientX : gestureStartX;
+            const mode = gestureMode;
+            gestureMode = null;
+
+            if (mode === 'edge-back') {
+                if ((endX - gestureStartX) > 75 && ['recycle', 'requests', 'userRecycle', 'notifications'].includes(state.activeTab)) {
+                    switchTab(state.activeTab === 'notifications' ? 'home' : 'profile');
+                }
+                return;
+            }
+
+            if (mode !== 'ptr' || !isPtrAllowed()) {
+                resetPtrVisuals();
+                return;
+            }
+
+            const rawDiffY = gestureCurrentY - gestureStartY;
+            const ptrContainer = document.getElementById('ptr-container');
+            const icon = document.getElementById('ptr-icon');
+            const text = document.getElementById('ptr-text');
+
+            if (ptrContainer) {
+                ptrContainer.style.transition = 'transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.2s ease';
+            }
+
+            if (rawDiffY > 0 && ptrPullDistance(rawDiffY) >= REFRESH_THRESHOLD) {
+                isRefreshing = true;
+
+                if (ptrContainer) {
+                    ptrContainer.style.transform = 'translateY(42px)';
+                    ptrContainer.style.opacity = '1';
+                }
+                if (icon) {
+                    icon.className = 'fa-solid fa-circle-notch is-spinning';
+                    icon.style.transform = 'none';
+                }
+                if (text) {
+                    text.textContent = 'Updating...';
+                    text.style.color = '#4f46e5';
+                }
+
+                await new Promise(r => setTimeout(r, 550));
+                softRender();
+                showToast('Data refreshed!', 'success');
+                isRefreshing = false;
+            }
+
+            resetPtrVisuals();
+        }, { passive: true });
+
+        function resetPtrVisuals() {
+            const ptrContainer = document.getElementById('ptr-container');
+            const icon = document.getElementById('ptr-icon');
+            const text = document.getElementById('ptr-text');
+
+            if (ptrContainer) {
+                ptrContainer.style.transform = 'translateY(-40px)';
+                ptrContainer.style.opacity = '0';
+            }
+            if (icon) {
+                icon.className = 'fa-solid fa-arrow-down';
+                icon.style.transform = 'rotate(0deg)';
+            }
+            if (text) {
+                text.textContent = 'Pull to refresh';
+                text.style.color = '';
+            }
+
+            gestureStartX = 0;
+            gestureStartY = 0;
+            gestureCurrentY = 0;
+            hasVibrated = false;
+            gestureMode = null;
+        }
 
         function getMyNotifications() {
             if (!state.currentUser) return [];
             const isAdmin = state.currentUser.role === 'admin';
             return state.notifications
-                .filter(n => {
-                    if (isAdmin && n.recipientRole === 'admin') return true;
-                    if (n.recipientId === state.currentUser.id) return true;
-                    return false;
-                })
+                .filter(n => (isAdmin && n.recipientRole === 'admin') || (n.recipientId === state.currentUser.id))
                 .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
         }
 
         function sendBrowserNotification(title, body, type = 'wallet_credit') {
             if (!state.soundEnabled) return;
             if (!('Notification' in window) || Notification.permission !== 'granted') return;
-            const options = {
-                body: body,
-                icon: 'https://clickfactoryphotography.com/wp-content/uploads/2022/04/crop-logo.gif',
-                vibrate: type === 'excess_spent' ? [200, 100, 250] : [150, 80, 150],
-                silent: false,
-                tag: 'cf-notif-' + Date.now()
-            };
-            try { new Notification(title, options); } catch (e) { }
+            try {
+                new Notification(title, {
+                    body: body,
+                    icon: 'https://clickfactoryphotography.com/wp-content/uploads/2022/04/crop-logo.gif',
+                    vibrate: type === 'excess_spent' ? [200, 100, 250] : [150, 80, 150],
+                    silent: false,
+                    tag: 'cf-notif-' + Date.now()
+                });
+            } catch (e) { }
         }
 
         async function createAppNotification({ recipientId = null, recipientRole = null, type, title, message, amount = 0, triggeredBy = '' }) {
@@ -1141,9 +1429,7 @@
             };
             try {
                 await setDoc(doc(db, 'notifications', notifId), notifData);
-            } catch (err) {
-                console.error("Failed to create notification:", err);
-            }
+            } catch (err) { }
         }
 
         function softRender() {
@@ -1176,12 +1462,11 @@
         }
 
         window.startAppListeners = function () {
-            if (!window.FB) return;
-            if (window.__listenersStarted) return;
+            if (!window.FB || window.__listenersStarted) return;
             window.__listenersStarted = true;
             const { db, collection, onSnapshot, doc, setDoc, deleteDoc } = window.FB;
 
-            activeUnsubscribers.push(onSnapshot(collection(db, 'users'), (snapshot) => {
+            window.activeUnsubscribers.push(onSnapshot(collection(db, 'users'), (snapshot) => {
                 state.users = snapshot.docs.map(docSnap => docSnap.data());
                 if (state.currentUser) {
                     const freshUser = state.users.find(u => u.id === state.currentUser.id);
@@ -1194,25 +1479,24 @@
                 }
                 initialSyncFlags.users = true;
                 if (state.isDbLoading) checkInitialSyncComplete(); else softRender();
-            }, (err) => {
-                console.warn("Users listener notice:", err);
+            }, () => {
                 initialSyncFlags.users = true;
                 checkInitialSyncComplete();
             }));
 
-            activeUnsubscribers.push(onSnapshot(collection(db, 'settings'), (snapshot) => {
+            window.activeUnsubscribers.push(onSnapshot(collection(db, 'settings'), (snapshot) => {
                 snapshot.docs.forEach(docSnap => {
                     if (docSnap.id === 'app_settings') state.appSettings = docSnap.data();
                 });
                 if (!state.isDbLoading) softRender();
-            }, (err) => console.warn("Settings listener notice:", err)));
+            }, () => { }));
 
-            activeUnsubscribers.push(onSnapshot(collection(db, 'walletTransactions'), (snapshot) => {
+            window.activeUnsubscribers.push(onSnapshot(collection(db, 'walletTransactions'), (snapshot) => {
                 state.walletTransactions = snapshot.docs.map(docSnap => docSnap.data());
                 if (!state.isDbLoading) softRender();
-            }, (err) => console.warn("Transactions listener notice:", err)));
+            }, () => { }));
 
-            activeUnsubscribers.push(onSnapshot(collection(db, 'notifications'), (snapshot) => {
+            window.activeUnsubscribers.push(onSnapshot(collection(db, 'notifications'), (snapshot) => {
                 const allNotifs = snapshot.docs.map(docSnap => docSnap.data());
 
                 if (initialNotificationsLoaded && state.currentUser) {
@@ -1234,9 +1518,9 @@
                 initialNotificationsLoaded = true;
                 state.notifications = allNotifs;
                 if (!state.isDbLoading) softRender();
-            }, (err) => console.warn("Notifications listener notice:", err)));
+            }, () => { }));
 
-            activeUnsubscribers.push(onSnapshot(collection(db, 'expenses'), async (snapshot) => {
+            window.activeUnsubscribers.push(onSnapshot(collection(db, 'expenses'), async (snapshot) => {
                 let allExpenses = snapshot.docs.map(docSnap => docSnap.data());
 
                 if (state.appSettings && state.appSettings.autoDeleteEnabled && state.currentUser && state.currentUser.role === 'admin') {
@@ -1249,27 +1533,24 @@
                             const recycleItem = { ...exp, deletedAt: new Date().toISOString(), deletedBy: 'Auto-Delete System (2-Month Limit)' };
                             await setDoc(doc(db, 'recycleBin', exp.id), recycleItem);
                             await deleteDoc(doc(db, 'expenses', exp.id));
-                        } catch (err) {
-                            console.error("Auto-delete sync error:", err);
-                        }
+                        } catch (err) { }
                     }
                 }
 
                 state.expenses = allExpenses;
                 initialSyncFlags.expenses = true;
                 if (state.isDbLoading) checkInitialSyncComplete(); else softRender();
-            }, (err) => {
-                console.warn("Expenses listener notice:", err);
+            }, () => {
                 initialSyncFlags.expenses = true;
                 checkInitialSyncComplete();
             }));
 
-            activeUnsubscribers.push(onSnapshot(collection(db, 'recycleBin'), (snapshot) => {
+            window.activeUnsubscribers.push(onSnapshot(collection(db, 'recycleBin'), (snapshot) => {
                 state.recycleBin = snapshot.docs.map(docSnap => docSnap.data());
                 if (!state.isDbLoading) softRender();
-            }, (err) => console.warn("Recycle bin listener notice:", err)));
+            }, () => { }));
 
-            activeUnsubscribers.push(onSnapshot(collection(db, 'userRecycleBin'), async (snapshot) => {
+            window.activeUnsubscribers.push(onSnapshot(collection(db, 'userRecycleBin'), async (snapshot) => {
                 let deletedUsers = snapshot.docs.map(docSnap => docSnap.data());
                 const now = new Date();
                 const stillPending = [];
@@ -1289,7 +1570,6 @@
                                 await deleteDoc(doc(db, 'expenses', ue.id));
                             }
                         } catch (e) {
-                            console.error("Permanent wipe error:", e);
                             stillPending.push(item);
                         }
                         continue;
@@ -1299,12 +1579,12 @@
 
                 state.userRecycleBin = stillPending;
                 if (!state.isDbLoading) softRender();
-            }, (err) => console.warn("User recycle bin listener notice:", err)));
+            }, () => { }));
 
-            activeUnsubscribers.push(onSnapshot(collection(db, 'passwordRequests'), (snapshot) => {
+            window.activeUnsubscribers.push(onSnapshot(collection(db, 'passwordRequests'), (snapshot) => {
                 state.passwordRequests = snapshot.docs.map(docSnap => docSnap.data());
                 if (!state.isDbLoading) softRender();
-            }, (err) => console.warn("Requests listener notice:", err)));
+            }, () => { }));
         };
 
         function renderDatabaseLoadingScreen() {
@@ -1380,7 +1660,7 @@
         }
 
         function formatCurrency(amount) {
-            return '₹' + Number(amount).toLocaleString('en-IN');
+            return '₹' + Number(amount || 0).toLocaleString('en-IN');
         }
 
         function formatDate(dateString) {
@@ -1431,7 +1711,6 @@
                 await setDoc(doc(db, 'settings', 'app_settings'), { ...state.appSettings, autoDeleteEnabled: newState }, { merge: true });
                 showToast(newState ? '2-Month Auto-Delete Enabled' : '2-Month Auto-Delete Disabled', 'success');
             } catch (err) {
-                console.error("Failed to update setting:", err);
                 showToast('Failed to update setting.', 'error');
             }
         }
@@ -1462,7 +1741,7 @@
                     for (const item of state.recycleBin) {
                         try {
                             await deleteDoc(doc(db, 'recycleBin', item.id));
-                            if (item.billAttachment && item.billAttachment.includes('firebasestorage')) {
+                            if (storage && item.billAttachment && item.billAttachment.includes('firebasestorage')) {
                                 await deleteObject(storageRef(storage, `bills/${item.id}.jpg`));
                             }
                         } catch (e) { }
@@ -1477,7 +1756,7 @@
             const unreadCount = myNotifs.filter(n => !n.read).length;
 
             return `
-                <div class="space-y-4 w-full max-w-full">
+                <div class="space-y-4 w-full max-w-2xl mx-auto">
                     <div class="flex items-center justify-between px-1">
                         <div>
                             <h2 class="text-base font-bold text-slate-900 dark:text-white">Activity & Alerts</h2>
@@ -1514,7 +1793,7 @@
                     : (isDebit ? 'bg-amber-500/10 text-amber-600 dark:text-amber-400 fa-wallet' : 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 fa-wallet');
 
                 return `
-                                <div onclick="markNotificationRead('${n.id}')" class="cursor-pointer ios-glass-card rounded-3xl p-5 border ${!n.read ? 'border-indigo-500/60 dark:border-indigo-500/60 ring-1 ring-indigo-500/20' : 'border-slate-200/80 dark:border-slate-750'} shadow-sm transition relative w-full flex items-start space-x-3.5">
+                                <div onclick="markNotificationRead('${n.id}')" class="cursor-pointer ios-glass-card rounded-3xl p-5 border ${!n.read ? 'border-indigo-500/60 dark:border-indigo-500/60 ring-1 ring-indigo-500/20' : 'border-slate-200/80 dark:border-slate-800'} shadow-sm transition relative w-full flex items-start space-x-3.5">
                                     <div class="w-10 h-10 rounded-2xl ${iconClass.split(' ').slice(0, 3).join(' ')} flex items-center justify-center shrink-0 mt-0.5">
                                         <i class="fa-solid ${iconClass.split(' ').pop()}"></i>
                                     </div>
@@ -1594,7 +1873,7 @@
                 .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
 
             return `
-                <div class="space-y-4 w-full max-w-full">
+                <div class="space-y-4 w-full max-w-2xl mx-auto">
                     <div class="bg-gradient-to-br from-emerald-600 to-teal-700 rounded-3xl p-5 sm:p-6 text-white shadow-lg shadow-emerald-500/20 relative overflow-hidden w-full border border-emerald-500/30">
                         <div class="flex justify-between items-start mb-3 gap-2">
                             <div class="min-w-0 flex-1">
@@ -1634,7 +1913,7 @@
                             </div>
                             <div class="min-w-0 flex-1">
                                 <h4 class="text-xs font-bold text-rose-700 dark:text-rose-300 uppercase tracking-wider">Excess Spent Due: ${formatCurrency(userExcessSpent)}</h4>
-                                <p class="text-xs text-rose-600 dark:text-rose-300/90 mt-0.5">Your expenses exceeded your wallet balance. This amount will be automatically settled on your next wallet top-up or expense undo.</p>
+                                <p class="text-xs text-rose-600 dark:text-rose-300/90 mt-0.5">Your expenses exceeded your wallet balance. This amount will be automatically settled on your next wallet top-up or expense refund.</p>
                             </div>
                         </div>
                     ` : ''}
@@ -1645,43 +1924,116 @@
                             <span class="text-xs text-slate-400">${userTxns.length} Records</span>
                         </div>
 
+                        <div class="flex items-center flex-wrap gap-1.5 px-1">
+                            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-semibold bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border border-emerald-500/20">
+                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>Top-Up
+                            </span>
+                            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-semibold bg-amber-500/10 text-amber-700 dark:text-amber-300 border border-amber-500/20">
+                                <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>Excess Cleared
+                            </span>
+                            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-semibold bg-sky-500/10 text-sky-700 dark:text-sky-300 border border-sky-500/20">
+                                <span class="w-1.5 h-1.5 rounded-full bg-sky-500"></span>Undo Expense
+                            </span>
+                            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-semibold bg-rose-500/10 text-rose-700 dark:text-rose-300 border border-rose-500/20">
+                                <span class="w-1.5 h-1.5 rounded-full bg-rose-500"></span>Shortage
+                            </span>
+                        </div>
+
                         ${userTxns.length === 0 ? `
                             <div class="ios-glass-card rounded-3xl p-8 text-center shadow-sm w-full">
                                 <div class="w-14 h-14 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 rounded-2xl flex items-center justify-center mx-auto mb-3 text-xl">
                                     <i class="fa-solid fa-wallet"></i>
                                 </div>
                                 <h4 class="font-semibold text-slate-700 dark:text-slate-300 mb-1">No Wallet History Yet</h4>
-                                <p class="text-xs text-slate-500">Top-ups, undo expense refunds, and balance adjustments will appear here.</p>
+                                <p class="text-xs text-slate-500">Top-ups, expense refunds, and balance adjustments will appear here.</p>
                             </div>
                         ` : userTxns.map(t => {
-                const isUndo = t.type === 'undo_refund' || (t.title && t.title.toLowerCase().includes('undo'));
-                const isShortage = t.type === 'shortage';
+                const meta = getWalletTxnTheme(t);
                 return `
-                                <div class="ios-glass-card rounded-3xl p-5 shadow-sm flex items-center justify-between gap-3 w-full">
-                                    <div class="flex items-start space-x-3.5 min-w-0 flex-1">
-                                        <div class="w-10 h-10 rounded-2xl ${isUndo ? 'bg-indigo-500/10 text-indigo-600 dark:text-indigo-400' : (isShortage ? 'bg-rose-500/10 text-rose-600 dark:text-rose-400' : 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400')} flex items-center justify-center shrink-0 mt-0.5">
-                                            <i class="fa-solid ${isUndo ? 'fa-rotate-left' : (isShortage ? 'fa-arrow-up-long rotate-45' : 'fa-arrow-down-long rotate-45')}"></i>
+                                <div class="ios-glass-card rounded-3xl p-4 sm:p-5 shadow-sm flex flex-col gap-2 w-full border-l-4 ${meta.cardAccent}">
+                                    <div class="flex items-start justify-between gap-3 w-full">
+                                        <div class="flex items-start space-x-3 min-w-0 flex-1">
+                                            <div class="w-10 h-10 rounded-2xl ${meta.iconBox} flex items-center justify-center shrink-0 mt-0.5">
+                                                <i class="fa-solid ${meta.icon}"></i>
+                                            </div>
+                                            <div class="min-w-0 flex-1">
+                                                <h4 class="font-semibold text-sm sm:text-base text-slate-900 dark:text-white leading-snug break-words whitespace-normal">${escapeHtml(t.title)}</h4>
+                                                <div class="mt-1">
+                                                    <span class="inline-block px-2 py-0.5 text-[10px] font-bold rounded-full border ${meta.badge}">${meta.label}</span>
+                                                </div>
+                                            </div>
                                         </div>
-                                        <div class="min-w-0 flex-1">
-                                            <div class="flex items-center flex-wrap gap-1.5">
-                                                <h4 class="font-semibold text-sm sm:text-base text-slate-900 dark:text-white break-words">${escapeHtml(t.title)}</h4>
-                                                ${isUndo ? '<span class="px-2 py-0.5 text-[10px] font-bold rounded-full bg-indigo-50 dark:bg-indigo-950/80 text-indigo-600 dark:text-indigo-400 border border-indigo-200/60 dark:border-indigo-800">Undo Refund</span>' : ''}
-                                            </div>
-                                            ${t.subtitle ? `<p class="text-xs text-emerald-600 dark:text-emerald-400 font-medium mt-0.5 break-words">${escapeHtml(t.subtitle)}</p>` : ''}
-                                            <div class="flex items-center flex-wrap gap-1.5 text-xs text-slate-500 dark:text-slate-400 mt-1">
-                                                <span><i class="fa-regular fa-clock mr-1"></i>${formatTimestamp(t.timestamp)}</span>
-                                                <span>•</span>
-                                                <span class="italic">By ${escapeHtml(t.performedBy)}</span>
-                                            </div>
+                                        <span class="font-bold text-base sm:text-lg ${meta.amountColor} whitespace-nowrap shrink-0">${meta.sign}${formatCurrency(t.amount)}</span>
+                                    </div>
+                                    <div class="pl-[52px] space-y-1">
+                                        ${t.subtitle ? `<p class="text-xs ${meta.subtitleColor} font-medium leading-relaxed break-words whitespace-normal">${escapeHtml(t.subtitle)}</p>` : ''}
+                                        <div class="flex items-center flex-wrap gap-1.5 text-xs text-slate-500 dark:text-slate-400">
+                                            <span><i class="fa-regular fa-clock mr-1"></i>${formatTimestamp(t.timestamp)}</span>
+                                            <span>•</span>
+                                            <span class="italic break-words">By ${escapeHtml(t.performedBy)}</span>
                                         </div>
                                     </div>
-                                    <span class="font-bold text-base sm:text-lg ${isShortage ? 'text-rose-600 dark:text-rose-400' : 'text-emerald-600 dark:text-emerald-400'} whitespace-nowrap shrink-0">${isShortage ? '-' : '+'}${formatCurrency(t.amount)}</span>
                                 </div>
                             `;
             }).join('')}
                     </div>
                 </div>
             `;
+        }
+
+        function getWalletTxnTheme(t) {
+            const titleLower = (t.title || '').toLowerCase();
+            const subLower = (t.subtitle || '').toLowerCase();
+            const isShortage = t.type === 'shortage';
+            const isUndo = t.type === 'undo_refund' || titleLower.includes('undo') || titleLower.includes('refund');
+            const isExcessCleared = t.type === 'excess_cleared' || titleLower.includes('cleared excess') || subLower.includes('cleared ₹') || subLower.includes('reduced excess');
+
+            if (isShortage) {
+                return {
+                    label: 'Shortage Deduction',
+                    icon: 'fa-arrow-up-long rotate-45',
+                    sign: '-',
+                    cardAccent: '!border-l-rose-500',
+                    iconBox: 'bg-rose-500/12 text-rose-600 dark:text-rose-400',
+                    badge: 'bg-rose-50 dark:bg-rose-950/70 text-rose-700 dark:text-rose-300 border-rose-200/80 dark:border-rose-800/80',
+                    subtitleColor: 'text-rose-600 dark:text-rose-400',
+                    amountColor: 'text-rose-600 dark:text-rose-400'
+                };
+            }
+            if (isUndo) {
+                return {
+                    label: isExcessCleared ? 'Undo + Excess Cleared' : 'Undo Expense',
+                    icon: 'fa-rotate-left',
+                    sign: '+',
+                    cardAccent: '!border-l-sky-500',
+                    iconBox: 'bg-sky-500/12 text-sky-600 dark:text-sky-400',
+                    badge: 'bg-sky-50 dark:bg-sky-950/70 text-sky-700 dark:text-sky-300 border-sky-200/80 dark:border-sky-800/80',
+                    subtitleColor: 'text-sky-600 dark:text-sky-400',
+                    amountColor: 'text-sky-600 dark:text-sky-400'
+                };
+            }
+            if (isExcessCleared) {
+                return {
+                    label: 'Excess Cleared',
+                    icon: 'fa-scale-balanced',
+                    sign: '+',
+                    cardAccent: '!border-l-amber-500',
+                    iconBox: 'bg-amber-500/12 text-amber-600 dark:text-amber-400',
+                    badge: 'bg-amber-50 dark:bg-amber-950/70 text-amber-700 dark:text-amber-300 border-amber-200/80 dark:border-amber-800/80',
+                    subtitleColor: 'text-amber-600 dark:text-amber-400',
+                    amountColor: 'text-amber-600 dark:text-amber-400'
+                };
+            }
+            return {
+                label: 'Wallet Top-Up',
+                icon: 'fa-arrow-down-long rotate-45',
+                sign: '+',
+                cardAccent: '!border-l-emerald-500',
+                iconBox: 'bg-emerald-500/12 text-emerald-600 dark:text-emerald-400',
+                badge: 'bg-emerald-50 dark:bg-emerald-950/70 text-emerald-700 dark:text-emerald-300 border-emerald-200/80 dark:border-emerald-800/80',
+                subtitleColor: 'text-emerald-600 dark:text-emerald-400',
+                amountColor: 'text-emerald-600 dark:text-emerald-400'
+            };
         }
 
         function openAddWalletModal(userId) {
@@ -1718,7 +2070,7 @@
                                 </div>
                                 <p class="text-[10px] text-slate-400 mt-1">Enter positive amount to top up, or negative (e.g. -100) to adjust shortage.</p>
                             </div>
-                            <button type="submit" class="w-full py-3 bg-emerald-600 hover:bg-emerald-700 active:scale-[0.99] text-white font-semibold rounded-2xl shadow-md shadow-emerald-600/20 transition text-xs flex items-center justify-center gap-1.5">
+                            <button id="wallet-submit-btn" type="submit" class="w-full py-3 bg-emerald-600 hover:bg-emerald-700 active:scale-[0.99] text-white font-semibold rounded-2xl shadow-md shadow-emerald-600/20 transition text-xs flex items-center justify-center gap-1.5">
                                 <i class="fa-solid fa-check"></i>
                                 <span>Process Funds / Shortage</span>
                             </button>
@@ -1744,30 +2096,28 @@
                                     <span class="text-xs text-slate-500 dark:text-slate-400">No transaction records found</span>
                                 </div>
                             ` : userTxns.map(t => {
-                const isUndo = t.type === 'undo_refund' || (t.title && t.title.toLowerCase().includes('undo'));
-                const isShortage = t.type === 'shortage';
-                const badgeBg = isUndo ? 'bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400'
-                    : (isShortage ? 'bg-rose-50 dark:bg-rose-950/60 text-rose-600 dark:text-rose-400'
-                        : 'bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400');
-                const amountColor = isShortage ? 'text-rose-600 dark:text-rose-400' : 'text-emerald-600 dark:text-emerald-400';
-
+                const meta = getWalletTxnTheme(t);
                 return `
-                                    <div class="bg-white dark:bg-slate-800/80 p-3 rounded-2xl border border-slate-200/90 dark:border-slate-700/70 shadow-sm space-y-1.5 text-xs transition">
-                                        <div class="flex items-center justify-between gap-2">
-                                            <span class="font-semibold text-slate-900 dark:text-slate-100 flex items-center gap-2 min-w-0">
-                                                <span class="w-6 h-6 rounded-lg ${badgeBg} flex items-center justify-center shrink-0 text-[11px]">
-                                                    <i class="fa-solid ${isUndo ? 'fa-rotate-left' : (isShortage ? 'fa-minus' : 'fa-plus')}"></i>
+                                    <div class="bg-white dark:bg-slate-800/80 p-3.5 rounded-2xl border border-slate-200/90 dark:border-slate-700/70 border-l-4 ${meta.cardAccent} shadow-sm space-y-1.5 text-xs transition">
+                                        <div class="flex items-start justify-between gap-2.5">
+                                            <div class="flex items-start gap-2.5 min-w-0 flex-1">
+                                                <span class="w-7 h-7 rounded-xl ${meta.iconBox} flex items-center justify-center shrink-0 text-[11px] mt-0.5">
+                                                    <i class="fa-solid ${meta.icon}"></i>
                                                 </span>
-                                                <span class="truncate">${escapeHtml(t.title)}</span>
-                                            </span>
-                                            <span class="font-bold ${amountColor} shrink-0 text-sm whitespace-nowrap">
-                                                ${isShortage ? '-' : '+'}${formatCurrency(t.amount)}
+                                                <div class="min-w-0 flex-1">
+                                                    <h5 class="font-semibold text-slate-900 dark:text-slate-100 leading-snug break-words whitespace-normal">${escapeHtml(t.title)}</h5>
+                                                    <span class="inline-block mt-1 px-2 py-0.5 text-[9.5px] font-bold rounded-full border ${meta.badge}">${meta.label}</span>
+                                                </div>
+                                            </div>
+                                            <span class="font-bold ${meta.amountColor} shrink-0 text-sm whitespace-nowrap">
+                                                ${meta.sign}${formatCurrency(t.amount)}
                                             </span>
                                         </div>
-                                        ${t.subtitle ? `<p class="text-[10px] text-emerald-700 dark:text-emerald-300 font-medium pl-8 break-words">${escapeHtml(t.subtitle)}</p>` : ''}
-                                        <div class="flex items-center justify-between text-[10px] text-slate-500 dark:text-slate-400 pl-8 pt-0.5">
+                                        ${t.subtitle ? `<p class="text-[11px] ${meta.subtitleColor} font-medium pl-9 leading-relaxed break-words whitespace-normal">${escapeHtml(t.subtitle)}</p>` : ''}
+                                        <div class="flex items-center flex-wrap gap-x-2 gap-y-0.5 text-[10px] text-slate-500 dark:text-slate-400 pl-9 pt-0.5">
                                             <span>${formatTimestamp(t.timestamp)}</span>
-                                            <span class="italic text-slate-400 dark:text-slate-500">By ${escapeHtml(t.performedBy)}</span>
+                                            <span>•</span>
+                                            <span class="italic text-slate-400 dark:text-slate-500 break-words">By ${escapeHtml(t.performedBy)}</span>
                                         </div>
                                     </div>
                                 `;
@@ -1780,6 +2130,9 @@
 
         async function handleWalletAdd(e, userId) {
             e.preventDefault();
+            const submitBtn = document.getElementById('wallet-submit-btn');
+            if (submitBtn && submitBtn.disabled) return;
+
             const amountToAdd = round2(parseFloat(document.getElementById('wallet-add-amount').value));
             if (isNaN(amountToAdd) || amountToAdd === 0) {
                 showToast('Please enter a valid amount.', 'error');
@@ -1789,24 +2142,34 @@
             const user = state.users.find(u => u.id === userId);
             if (!user) return;
 
+            if (submitBtn) submitBtn.disabled = true;
+
             try {
                 const res = await adjustWallet(userId, amountToAdd);
                 const { db, doc, setDoc } = window.FB;
                 const walletPart = round2(amountToAdd - res.excessCleared);
 
                 const txnId = 'txn_' + Date.now();
+                let txnType = amountToAdd >= 0 ? 'topup' : 'shortage';
                 let txnTitle = amountToAdd >= 0 ? 'Added Wallet Funds' : 'Shortage Money Adjustment';
+                let txnSubtitle = '';
+
                 if (amountToAdd > 0 && res.excessCleared > 0 && walletPart > 0) {
-                    txnTitle = `Cleared Excess (₹${res.excessCleared}) & Added Wallet (₹${walletPart})`;
+                    txnType = 'excess_cleared';
+                    txnTitle = `Cleared Excess (${formatCurrency(res.excessCleared)}) & Added Wallet (${formatCurrency(walletPart)})`;
+                    txnSubtitle = `Settled ${formatCurrency(res.excessCleared)} excess due + credited ${formatCurrency(walletPart)} to wallet`;
                 } else if (amountToAdd > 0 && res.excessCleared > 0) {
+                    txnType = 'excess_cleared';
                     txnTitle = 'Cleared Excess Spent Due';
+                    txnSubtitle = `Settled ${formatCurrency(res.excessCleared)} excess spent due`;
                 }
 
                 await setDoc(doc(db, 'walletTransactions', txnId), {
                     id: txnId,
                     userId: userId,
-                    type: amountToAdd >= 0 ? 'topup' : 'shortage',
+                    type: txnType,
                     title: txnTitle,
+                    subtitle: txnSubtitle,
                     amount: Math.abs(amountToAdd),
                     timestamp: new Date().toISOString(),
                     performedBy: state.currentUser.name
@@ -1834,7 +2197,7 @@
                 closeModal();
                 showToast(`Successfully processed ${formatCurrency(amountToAdd)} for ${user.name}!`, 'success');
             } catch (err) {
-                console.error('Wallet update failed:', err);
+                if (submitBtn) submitBtn.disabled = false;
                 showToast('Failed to update wallet. Please try again.', 'error');
             }
         }
@@ -1848,8 +2211,7 @@
                     const { db, doc, deleteDoc } = window.FB;
                     const userTxns = state.walletTransactions.filter(t => t.userId === userId);
                     for (const t of userTxns) {
-                        try { await deleteDoc(doc(db, 'walletTransactions', t.id)); }
-                        catch (err) { console.error("Failed to delete txn:", err); }
+                        try { await deleteDoc(doc(db, 'walletTransactions', t.id)); } catch (err) { }
                     }
                     closeModal();
                     showToast(`Successfully cleared wallet history for ${userName}!`, 'success');
@@ -1887,8 +2249,7 @@
                         return;
                     }
                     for (const exp of userExpenses) {
-                        try { await deleteDoc(doc(db, 'expenses', exp.id)); }
-                        catch (err) { console.error("Failed to delete user expense:", err); }
+                        try { await deleteDoc(doc(db, 'expenses', exp.id)); } catch (err) { }
                     }
                     showToast(`Cleared expenses for ${userName}.`, 'success');
                 }
@@ -1960,6 +2321,7 @@
                 </div>
             `;
         }
+
         function syncPersistentNavbar() {
             const navWrapper = document.getElementById('persistent-nav-wrapper');
             if (!navWrapper) return;
@@ -2105,7 +2467,7 @@
 
         function fabButtonHtml() {
             return `
-                <button onclick="openNewExpenseTab()" class="fixed sm:absolute bottom-28 right-5 z-40 w-14 h-14 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 text-white rounded-full shadow-2xl flex items-center justify-center text-xl transition transform hover:scale-105 active:scale-95 border border-white/20" title="Add New Expense">
+                <button onclick="openNewExpenseTab()" class="fixed bottom-28 right-5 sm:right-8 z-40 w-14 h-14 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 text-white rounded-full shadow-2xl flex items-center justify-center text-xl transition transform hover:scale-105 active:scale-95 border border-white/20" title="Add New Expense">
                     <i class="fa-solid fa-plus"></i>
                 </button>
             `;
@@ -2182,1354 +2544,6 @@
             `;
         }
 
-        function pwField(id, iconId, label, placeholder) {
-            return `
-                <div class="w-full">
-                    <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">${label}</label>
-                    <div class="relative w-full">
-                        <input type="password" id="${id}" required placeholder="${placeholder}" class="w-full pl-4 pr-12 py-3.5 bg-slate-50/80 dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 text-slate-900 dark:text-white">
-                        <button type="button" onclick="togglePasswordVisibility('${id}', '${iconId}')" class="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 focus:outline-none">
-                            <i id="${iconId}" class="fa-solid fa-eye text-sm"></i>
-                        </button>
-                    </div>
-                </div>
-            `;
-        }
-
-        function renderForgotPasswordPage() {
-            return `
-                <div class="flex-1 overflow-y-auto no-scrollbar flex flex-col justify-center px-4 py-8 max-w-sm mx-auto w-full">
-                    <div class="text-center mb-6">
-                        <div class="w-12 h-12 bg-indigo-50 dark:bg-indigo-950/60 rounded-2xl flex items-center justify-center mx-auto mb-4 text-indigo-600 dark:text-indigo-400 text-xl shadow-sm border border-indigo-200 dark:border-indigo-800">
-                            <i class="fa-solid fa-key"></i>
-                        </div>
-                        <h2 class="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">Password Recovery</h2>
-                        <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Request a recovery code from Admin</p>
-                    </div>
-
-                    <div class="ios-glass-card py-8 px-6 shadow-2xl rounded-3xl space-y-4 w-full">
-                        <form onsubmit="handleForgotPasswordSubmit(event)" class="space-y-4">
-                            <div class="w-full">
-                                <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">Username</label>
-                                <input type="text" id="forgot-username" required placeholder="Enter your username" class="w-full px-4 py-3.5 bg-slate-50/80 dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 text-slate-900 dark:text-white">
-                            </div>
-
-                            <div class="w-full">
-                                <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">Admin Auth Code (6-digit)</label>
-                                <input type="text" id="forgot-auth-code" maxlength="6" placeholder="Enter code provided by Admin" class="w-full px-4 py-3.5 bg-slate-50/80 dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700 rounded-2xl text-sm tracking-widest text-center font-bold focus:outline-none focus:ring-2 focus:ring-indigo-500 text-slate-900 dark:text-white">
-                            </div>
-
-                            ${pwField('forgot-new-password', 'toggle-forgot-pass-icon', 'New Password', 'Enter new password')}
-                            ${pwField('forgot-confirm-password', 'toggle-forgot-confirm-pass-icon', 'Confirm New Password', 'Re-enter new password')}
-
-                            <div class="flex flex-col gap-2.5 pt-1 w-full">
-                                <button type="button" onclick="requestAdminAuthCode()" class="w-full py-3 bg-slate-100/90 dark:bg-slate-800/90 hover:bg-slate-200 text-indigo-600 dark:text-indigo-400 font-semibold rounded-2xl transition text-xs border border-slate-200/80 dark:border-slate-700">
-                                    <i class="fa-solid fa-paper-plane mr-1.5"></i> Request Code from Admin
-                                </button>
-                                <button type="submit" class="w-full py-3.5 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-2xl shadow-lg shadow-indigo-500/25 transition text-sm">
-                                    Reset Password with Code
-                                </button>
-                            </div>
-                        </form>
-
-                        <div class="text-center pt-2">
-                            <button type="button" onclick="setAuthView('login')" class="text-xs font-semibold text-indigo-600 dark:text-indigo-400 hover:underline">
-                                <i class="fa-solid fa-arrow-left mr-1"></i> Back to Sign In
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            `;
-        }
-
-        function setAuthView(view) {
-            state.authView = view;
-            render();
-        }
-
-        async function requestAdminAuthCode() {
-            const usernameInput = document.getElementById('forgot-username');
-            const username = usernameInput ? usernameInput.value.trim().toLowerCase() : '';
-            if (!username) {
-                showToast('Please enter your username first.', 'error');
-                return;
-            }
-
-            const user = state.users.find(u => u.username.toLowerCase() === username);
-            if (!user) {
-                showToast('Username not found in system.', 'error');
-                return;
-            }
-
-            try {
-                const existingReq = state.passwordRequests.find(r => r.username.toLowerCase() === username && r.status === 'pending');
-                const arr = new Uint32Array(1);
-                crypto.getRandomValues(arr);
-                const code = existingReq ? existingReq.code : String(100000 + (arr[0] % 900000));
-                const reqId = existingReq ? existingReq.id : 'req_' + Date.now();
-
-                const { db, doc, setDoc } = window.FB;
-                await setDoc(doc(db, 'passwordRequests', reqId), {
-                    id: reqId,
-                    username: user.username,
-                    name: user.name,
-                    code: code,
-                    status: 'pending',
-                    createdAt: existingReq ? existingReq.createdAt : new Date().toISOString()
-                });
-                showToast('Code requested successfully! Contact Admin for your 6-digit code.', 'success');
-            } catch (err) {
-                showToast('Could not send request. Check your connection.', 'error');
-            }
-        }
-
-        async function handleForgotPasswordSubmit(e) {
-            e.preventDefault();
-            const username = document.getElementById('forgot-username').value.trim().toLowerCase();
-            const authCode = document.getElementById('forgot-auth-code').value.trim();
-            const newPassword = document.getElementById('forgot-new-password').value;
-            const confirmPassword = document.getElementById('forgot-confirm-password').value;
-
-            const user = state.users.find(u => u.username.toLowerCase() === username);
-            if (!user) {
-                showToast('Username not found.', 'error');
-                return;
-            }
-
-            const req = state.passwordRequests.find(r => r.username.toLowerCase() === username && r.status === 'pending');
-            if (!req || req.code !== authCode) {
-                showToast('Invalid or unapproved code.', 'error');
-                return;
-            }
-
-            if (!newPassword || newPassword.length < 4) {
-                showToast('Password must be at least 4 characters.', 'error');
-                return;
-            }
-
-            if (newPassword !== confirmPassword) {
-                showToast('Passwords do not match.', 'error');
-                return;
-            }
-
-            try {
-                const { db, doc, updateDoc } = window.FB;
-                await updateDoc(doc(db, 'users', user.id), { password: newPassword });
-                await updateDoc(doc(db, 'passwordRequests', req.id), { status: 'approved' });
-                showToast('Password reset successfully! Please sign in.', 'success');
-                setAuthView('login');
-            } catch (err) {
-                showToast('Password reset failed. Try again.', 'error');
-            }
-        }
-
-        function handleLoginSubmit(e) {
-            e.preventDefault();
-            unlockAudioContext();
-            const username = document.getElementById('login-username').value.trim().toLowerCase();
-            const password = document.getElementById('login-password').value;
-
-            const foundUser = state.users.find(u => u.username.toLowerCase() === username && u.password === password);
-            if (foundUser) {
-                state.currentUser = foundUser;
-                state.activeTab = 'home';
-                state.justFinishedLoading = true;
-                persistCurrentUser(foundUser);
-                if ('Notification' in window && Notification.permission === 'default') {
-                    Notification.requestPermission().catch(() => { });
-                }
-                showToast(`Welcome back, ${foundUser.name}!`, 'success');
-                render();
-            } else {
-                showToast('Invalid username or password.', 'error');
-            }
-        }
-
-        function confirmLogout() {
-            showConfirmModal(
-                'Sign Out',
-                'Are you sure you want to sign out from your account?',
-                () => handleLogout()
-            );
-        }
-
-        function handleLogout() {
-            state.currentUser = null;
-            state.tempFormCache = null;
-            lsRemove(LOCAL_STORAGE_KEY);
-            showToast('Logged out successfully.', 'info');
-            render();
-        }
-
-        function renderActiveTabContent() {
-            const isAdmin = state.currentUser.role === 'admin';
-            switch (state.activeTab) {
-                case 'home': return renderHomeTab();
-                case 'add': return renderAddEditTab();
-                case 'notifications': return renderNotificationsTab();
-                case 'admin': return isAdmin ? renderAdminTab() : renderHomeTab();
-                case 'recycle': return isAdmin ? renderRecycleBinTab() : renderHomeTab();
-                case 'userRecycle': return isAdmin ? renderUserRecycleBinTab() : renderHomeTab();
-                case 'requests': return isAdmin ? renderPasswordRequestsTab() : renderHomeTab();
-                case 'users': return isAdmin ? renderUserManagementTab() : renderUserWalletTab();
-                case 'wallet': return renderUserWalletTab();
-                case 'analytics': return renderUserAnalyticsTab();
-                case 'profile': return renderProfileTab();
-                default: return renderHomeTab();
-            }
-        }
-
-        function toggleDateFilter() {
-            state.showDateFilter = !state.showDateFilter;
-            renderMainContentOnly();
-        }
-
-        function renderHomeTab() {
-            const isAdmin = state.currentUser.role === 'admin';
-
-            let filtered = state.expenses.filter(exp => {
-                if (!isAdmin && exp.userId !== state.currentUser.id) return false;
-                if (isAdmin && state.filterUser !== 'All' && exp.userId !== state.filterUser) return false;
-                if (state.filterCategory !== 'All' && exp.category !== state.filterCategory) return false;
-                if (state.filterMonth !== 'All' && !(exp.date || '').startsWith(state.filterMonth)) return false;
-                if (state.filterStartDate && exp.date < state.filterStartDate) return false;
-                if (state.filterEndDate && exp.date > state.filterEndDate) return false;
-
-                if (state.searchQuery.trim() !== '') {
-                    const q = state.searchQuery.toLowerCase();
-                    const matchTitle = (exp.title || '').toLowerCase().includes(q);
-                    const matchNotes = exp.notes && exp.notes.toLowerCase().includes(q);
-                    const matchUser = (exp.userName || '').toLowerCase().includes(q);
-                    const matchClient = exp.clientNamePlace && exp.clientNamePlace.toLowerCase().includes(q);
-                    if (!matchTitle && !matchNotes && !matchUser && !matchClient) return false;
-                }
-                return true;
-            });
-
-            filtered.sort((a, b) => (b.date || '').localeCompare(a.date || ''));
-
-            const totalAmount = filtered.reduce((sum, e) => sum + e.amount, 0);
-            const officeTotal = filtered.filter(e => e.category === 'Office').reduce((sum, e) => sum + e.amount, 0);
-            const shootTotal = filtered.filter(e => e.category === 'Shoot').reduce((sum, e) => sum + e.amount, 0);
-
-            const monthsSet = new Set(state.expenses.map(e => e.date ? e.date.substring(0, 7) : ''));
-            const availableMonths = Array.from(monthsSet).filter(Boolean).sort().reverse();
-            const hasDateFilterActive = state.filterStartDate || state.filterEndDate;
-
-            const groupedByDate = {};
-            filtered.forEach(exp => {
-                const dKey = exp.date || 'Unknown';
-                if (!groupedByDate[dKey]) groupedByDate[dKey] = [];
-                groupedByDate[dKey].push(exp);
-            });
-            const sortedDates = Object.keys(groupedByDate).sort((a, b) => b.localeCompare(a));
-
-            const pillCls = (active) => active
-                ? 'bg-indigo-600 text-white shadow-md'
-                : 'ios-glass-card text-slate-600 dark:text-slate-400 border border-slate-200/80 dark:border-slate-800';
-
-            return `
-                <div class="space-y-4 w-full max-w-full">
-                    <div class="bg-gradient-to-br from-indigo-600 to-violet-700 rounded-3xl p-5 sm:p-6 text-white shadow-lg shadow-indigo-500/20 relative overflow-hidden w-full border border-indigo-500/30">
-                        <div class="flex justify-between items-start mb-3 gap-2">
-                            <div class="min-w-0 flex-1">
-                                <p class="text-indigo-200 text-xs font-medium uppercase tracking-wider truncate">
-                                    ${isAdmin ? 'Total Filtered Expenses' : 'My Total Expenses'}
-                                </p>
-                                <h2 class="text-2xl sm:text-3xl font-bold tracking-tight mt-0.5 break-all">${formatCurrency(totalAmount)}</h2>
-                            </div>
-                            <span class="bg-white/20 backdrop-blur-md text-white text-xs font-semibold px-3 py-1 rounded-full shrink-0 border border-white/20">
-                                ${filtered.length} Items
-                            </span>
-                        </div>
-
-                        <div class="grid grid-cols-2 gap-3 mt-4 pt-4 border-t border-white/20">
-                            <div class="bg-black/15 backdrop-blur-sm rounded-2xl p-3 min-w-0 border border-white/10">
-                                <div class="flex items-center space-x-1.5 text-indigo-200 text-xs mb-1 min-w-0">
-                                    <i class="fa-solid fa-briefcase shrink-0"></i>
-                                    <span class="truncate">Office</span>
-                                </div>
-                                <p class="font-bold text-sm sm:text-base break-all">${formatCurrency(officeTotal)}</p>
-                            </div>
-                            <div class="bg-black/15 backdrop-blur-sm rounded-2xl p-3 min-w-0 border border-white/10">
-                                <div class="flex items-center space-x-1.5 text-indigo-200 text-xs mb-1 min-w-0">
-                                    <i class="fa-solid fa-clapperboard shrink-0"></i>
-                                    <span class="truncate">Shoot</span>
-                                </div>
-                                <p class="font-bold text-sm sm:text-base break-all">${formatCurrency(shootTotal)}</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="space-y-3 w-full">
-                        <div class="flex items-center space-x-2 w-full">
-                            <div class="relative flex-1">
-                                <span class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-500 dark:text-slate-400 z-10">
-                                    <i class="fa-solid fa-magnifying-glass text-sm"></i>
-                                </span>
-                                <input type="text" id="search-input" value="${escapeHtml(state.searchQuery)}" oninput="handleSearchInput(event)" placeholder="Search expenses, notes, client, user..." class="w-full pl-10 pr-10 py-3.5 ios-glass-card border border-slate-200/80 dark:border-slate-800 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 shadow-sm text-slate-900 dark:text-white placeholder:text-slate-400">
-                                ${state.searchQuery ? `<button onclick="clearSearch()" class="absolute inset-y-0 right-0 pr-4 flex items-center text-slate-400 hover:text-slate-600 z-10"><i class="fa-solid fa-xmark"></i></button>` : ''}
-                            </div>
-                            <button onclick="toggleDateFilter()" class="w-12 h-12 rounded-2xl ${state.showDateFilter || hasDateFilterActive ? 'bg-indigo-600 text-white shadow-md' : 'ios-glass-card text-slate-600 dark:text-slate-400 border border-slate-200/80 dark:border-slate-800'} flex items-center justify-center shrink-0 relative" title="Toggle Date Filter">
-                                <i class="fa-solid fa-calendar-days text-sm"></i>
-                                ${hasDateFilterActive ? '<span class="absolute top-2 right-2 w-2 h-2 rounded-full bg-amber-400"></span>' : ''}
-                            </button>
-                        </div>
-
-                        <div class="flex items-center space-x-2 overflow-x-auto pb-1 no-scrollbar w-full">
-                            <button onclick="setFilterCategory('All')" class="px-4 py-2 rounded-2xl text-xs font-medium whitespace-nowrap transition shrink-0 ${pillCls(state.filterCategory === 'All')}">All Categories</button>
-                            <button onclick="setFilterCategory('Office')" class="px-4 py-2 rounded-2xl text-xs font-medium whitespace-nowrap transition shrink-0 ${pillCls(state.filterCategory === 'Office')}">Office Expense</button>
-                            <button onclick="setFilterCategory('Shoot')" class="px-4 py-2 rounded-2xl text-xs font-medium whitespace-nowrap transition shrink-0 ${pillCls(state.filterCategory === 'Shoot')}">Shoot Expense</button>
-                        </div>
-
-                        <div class="grid grid-cols-${isAdmin ? '2' : '1'} gap-2.5 w-full">
-                            <div class="relative w-full">
-                                <select onchange="setFilterMonth(this.value)" class="w-full appearance-none ios-glass-card border border-slate-200/80 dark:border-slate-800 rounded-2xl px-3.5 py-3 text-xs font-medium text-slate-700 dark:text-slate-300">
-                                    <option value="All" ${state.filterMonth === 'All' && !state.filterStartDate && !state.filterEndDate ? 'selected' : ''}>All Months</option>
-                                    ${availableMonths.map(m => `<option value="${m}" ${state.filterMonth === m ? 'selected' : ''}>${formatMonthName(m)}</option>`).join('')}
-                                </select>
-                                <span class="absolute inset-y-0 right-0 pr-3.5 flex items-center pointer-events-none text-slate-400 text-xs"><i class="fa-solid fa-chevron-down"></i></span>
-                            </div>
-
-                            ${isAdmin ? `
-                            <div class="relative w-full">
-                                <select onchange="setFilterUser(this.value)" class="w-full appearance-none ios-glass-card border border-slate-200/80 dark:border-slate-800 rounded-2xl px-3.5 py-3 text-xs font-medium text-slate-700 dark:text-slate-300">
-                                    <option value="All" ${state.filterUser === 'All' ? 'selected' : ''}>All Users</option>${state.users.map(u => `<option value="${escapeHtml(u.id)}" ${state.filterUser === u.id ? 'selected' : ''}>${escapeHtml(u.name)}</option>`).join('')}
-                                </select>
-                                <span class="absolute inset-y-0 right-0 pr-3.5 flex items-center pointer-events-none text-slate-400 text-xs"><i class="fa-solid fa-chevron-down"></i></span>
-                            </div>
-                            ` : ''}
-                        </div>
-
-                        ${state.showDateFilter ? `
-                        <div class="ios-glass-card p-2.5 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-sm space-y-1.5 w-full">
-                            <div class="flex items-center justify-between text-[11px] font-semibold text-slate-700 dark:text-slate-300 px-1">
-                                <span><i class="fa-solid fa-calendar-days mr-1 text-indigo-500"></i>Date Range Filter</span>
-                                ${(state.filterStartDate || state.filterEndDate) ? `<button onclick="clearDateRange()" class="text-indigo-600 dark:text-indigo-400 hover:underline">Clear</button>` : ''}
-                            </div>
-                            <div class="grid grid-cols-2 gap-1.5 w-full">
-                                <div class="custom-date-wrapper rounded-xl border border-slate-200/80 dark:border-slate-700 overflow-hidden">
-                                    <input type="date" id="filter-start-date" value="${state.filterStartDate}" onchange="setFilterStartDate(this.value)" required class="w-full px-2.5 py-1.5 bg-transparent text-[11px] text-slate-900 dark:text-white min-h-[36px] focus:outline-none">
-                                    <span class="custom-date-placeholder">dd-mm-yy</span>
-                                </div>
-                                <div class="custom-date-wrapper rounded-xl border border-slate-200/80 dark:border-slate-700 overflow-hidden">
-                                    <input type="date" id="filter-end-date" value="${state.filterEndDate}" onchange="setFilterEndDate(this.value)" required class="w-full px-2.5 py-1.5 bg-transparent text-[11px] text-slate-900 dark:text-white min-h-[36px] focus:outline-none">
-                                    <span class="custom-date-placeholder">dd-mm-yy</span>
-                                </div>
-                            </div>
-                        </div>
-                        ` : ''}
-                    </div>
-
-                    <div class="space-y-3.5 mt-4 w-full">
-                        <div class="flex items-center justify-between px-1 pt-3">
-                            <h3 class="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Expense Records</h3>
-                            ${isAdmin ? `<button onclick="exportFilteredCSV()" class="text-xs font-semibold text-indigo-600 dark:text-indigo-400 hover:underline flex items-center space-x-1 shrink-0"><i class="fa-solid fa-download"></i><span>Export CSV</span></button>` : ''}
-                        </div>
-
-                        ${filtered.length === 0 ? `
-                            <div class="ios-glass-card rounded-3xl p-8 text-center shadow-sm mt-3 w-full">
-                                <div class="w-14 h-14 bg-slate-100 dark:bg-slate-800 text-slate-400 rounded-2xl flex items-center justify-center mx-auto mb-3 text-xl"><i class="fa-solid fa-receipt"></i></div>
-                                <h4 class="font-semibold text-slate-700 dark:text-slate-300 mb-1">No expenses found</h4>
-                                <p class="text-xs text-slate-500 mb-4">Try changing filters or add a new expense record.</p>
-                                <button onclick="openNewExpenseTab()" class="px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl text-xs font-medium shadow-md transition"><i class="fa-solid fa-plus mr-1.5"></i>Add Expense</button>
-                            </div>
-                        ` : ''}
-
-                        ${sortedDates.map(dateKey => {
-                const dayExpenses = groupedByDate[dateKey];
-                const formattedDateHeader = parseLocal(dateKey).toLocaleDateString('en-US', {
-                    month: 'long', day: 'numeric', year: 'numeric'
-                }).toUpperCase();
-
-                return `
-                                <div class="space-y-2.5 mt-4">
-                                    <h4 class="text-xs font-bold text-slate-400 dark:text-slate-400 uppercase tracking-wider px-1">${escapeHtml(formattedDateHeader)}</h4>
-                                    ${dayExpenses.map(exp => {
-                    const isOffice = exp.category === 'Office';
-                    const isOwner = exp.userId === state.currentUser.id;
-                    return `
-                                            <div class="ios-glass-card rounded-3xl py-5 sm:py-6 px-5 sm:px-6 shadow-sm transition relative group w-full mt-3">
-                                                <div class="flex items-start space-x-3.5 w-full">
-                                                    <div class="w-10 h-10 rounded-2xl ${isOffice ? 'bg-amber-500/10 text-amber-600 dark:text-amber-400' : 'bg-indigo-500/10 text-indigo-600 dark:text-indigo-400'} flex items-center justify-center shrink-0 mt-0.5">
-                                                        <i class="fa-solid ${isOffice ? 'fa-briefcase' : 'fa-clapperboard'}"></i>
-                                                    </div>
-                                                    <div class="min-w-0 flex-1">
-                                                        <div class="flex items-start justify-between gap-3 w-full">
-                                                            <h4 class="font-semibold text-sm sm:text-base text-slate-900 dark:text-white leading-snug break-words flex-1 pr-1">${escapeHtml(exp.title)}</h4>
-                                                            <span class="font-bold text-base sm:text-lg text-slate-900 dark:text-white whitespace-nowrap shrink-0">${formatCurrency(exp.amount)}</span>
-                                                        </div>
-
-                                                        <div class="flex items-center flex-wrap gap-1.5 text-xs text-slate-500 dark:text-slate-400 mt-2 w-full">
-                                                            <span class="font-medium text-indigo-600 dark:text-indigo-400">${escapeHtml(exp.category)}</span>
-                                                            <span>•</span>
-                                                            <span class="italic text-slate-600 dark:text-slate-300 break-all">${escapeHtml(exp.userName)}</span>
-                                                        </div>
-
-                                                        ${!isOffice && exp.clientNamePlace ? `
-                                                            <div class="mt-1.5 text-xs font-medium text-violet-600 dark:text-violet-400 flex items-center space-x-1.5 min-w-0">
-                                                                <i class="fa-solid fa-location-dot shrink-0"></i>
-                                                                <span class="break-words">Client/Place: ${escapeHtml(exp.clientNamePlace)}</span>
-                                                            </div>
-                                                        ` : ''}
-
-                                                        ${exp.notes ? `<p class="text-xs text-slate-600 dark:text-slate-400 mt-2.5 bg-slate-50/80 dark:bg-slate-800/60 p-3 rounded-2xl border border-slate-200/60 dark:border-slate-700/60 break-words">${escapeHtml(exp.notes)}</p>` : ''}
-
-                                                        <div class="flex items-center justify-between mt-3 pt-2 border-t border-slate-200/50 dark:border-slate-800 w-full gap-2">
-                                                            <div>
-                                                                ${exp.billAttachment ? `
-                                                                    <button onclick="viewBillModal('${exp.id}')" class="inline-flex items-center space-x-1.5 px-3.5 py-1.5 rounded-xl bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 text-xs font-medium border border-indigo-200/60 hover:bg-indigo-100 transition">
-                                                                        <i class="fa-solid fa-paperclip"></i><span>View Attached Bill</span>
-                                                                    </button>
-                                                                ` : '<span class="text-[11px] text-slate-400 italic">No bill attached</span>'}
-                                                            </div>
-
-                                                            ${isOwner ? `
-                                                                <div class="flex items-center space-x-1.5 shrink-0">
-                                                                    ${!isAdmin ? `
-                                                                        <button onclick="confirmUndoExpense('${exp.id}')" class="px-2.5 h-8 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/20 border border-emerald-500/20 transition flex items-center justify-center space-x-1 text-xs font-semibold" title="Undo Expense & Refund to Wallet">
-                                                                            <i class="fa-solid fa-rotate-left"></i>
-                                                                            <span>Undo</span>
-                                                                        </button>
-                                                                    ` : ''}
-                                                                    <button onclick="startEditExpense('${exp.id}')" class="w-8 h-8 rounded-xl bg-slate-100/80 dark:bg-slate-800/80 text-slate-600 dark:text-slate-300 hover:bg-indigo-50 hover:text-indigo-600 transition flex items-center justify-center text-xs" title="Edit"><i class="fa-solid fa-pen"></i></button>
-                                                                    <button onclick="confirmDeleteExpense('${exp.id}')" class="w-8 h-8 rounded-xl bg-slate-100/80 dark:bg-slate-800/80 text-slate-600 dark:text-slate-300 hover:bg-rose-50 hover:text-rose-600 transition flex items-center justify-center text-xs" title="Delete"><i class="fa-solid fa-trash"></i></button>
-                                                                </div>
-                                                            ` : ''}
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        `;
-                }).join('')}
-                                </div>
-                            `;
-            }).join('')}
-                    </div>
-                </div>
-            `;
-        }
-
-        function handleSearchInput(e) {
-            state.searchQuery = e.target.value;
-            const input = document.getElementById('search-input');
-            const cursorPos = input ? input.selectionStart : 0;
-            renderMainContentOnly();
-            const newInput = document.getElementById('search-input');
-            if (newInput) {
-                newInput.focus();
-                newInput.setSelectionRange(cursorPos, cursorPos);
-            }
-        }
-
-        function clearSearch() { state.searchQuery = ''; renderMainContentOnly(); }
-        function setFilterCategory(cat) { state.filterCategory = cat; renderMainContentOnly(); }
-        function setFilterMonth(month) {
-            state.filterMonth = month;
-            if (month !== 'All') {
-                state.filterStartDate = '';
-                state.filterEndDate = '';
-            }
-            renderMainContentOnly();
-        }
-        function setFilterUser(userId) { state.filterUser = userId; renderMainContentOnly(); }
-        function setFilterStartDate(date) { state.filterStartDate = date; state.filterMonth = 'All'; renderMainContentOnly(); }
-        function setFilterEndDate(date) { state.filterEndDate = date; state.filterMonth = 'All'; renderMainContentOnly(); }
-        function clearDateRange() { state.filterStartDate = ''; state.filterEndDate = ''; renderMainContentOnly(); }
-
-        function renderAddEditTab() {
-            const isEditing = Boolean(state.editingExpenseId);
-            let expense = {
-                title: '', amount: '', category: 'Office', date: todayStr(),
-                clientNamePlace: '', notes: '', billAttachment: null
-            };
-
-            if (isEditing) {
-                const found = state.expenses.find(e => e.id === state.editingExpenseId);
-                if (found) expense = { ...found };
-            }
-            if (state.tempFormCache) {
-                expense = { ...expense, ...state.tempFormCache };
-            }
-
-            const currentBill = (state.tempBillData !== null && state.tempBillData !== undefined)
-                ? state.tempBillData
-                : expense.billAttachment;
-
-            const catBtn = (cat, icon) => `<button type="button" onclick="setFormCategory('${cat}')" id="btn-cat-${cat.toLowerCase()}" class="${catBtnClass(expense.category === cat)}"><i class="fa-solid ${icon}"></i><span>${cat}</span></button>`;
-
-            return `
-                <div class="space-y-4 w-full max-w-full pb-8 pt-2">
-                    <div class="flex items-center justify-between mb-2">
-                        <div class="min-w-0 pr-2">
-                            <h2 class="text-lg font-bold text-slate-900 dark:text-white truncate">${isEditing ? 'Edit Expense' : 'Add New Expense'}</h2>
-                        </div>
-                        ${isEditing ? `<button type="button" onclick="cancelEdit()" class="text-xs font-medium text-slate-500 hover:text-slate-700 shrink-0">Cancel Edit</button>` : ''}
-                    </div>
-
-                    <form onsubmit="handleExpenseSubmit(event)" class="ios-glass-card rounded-3xl p-5 sm:p-7 shadow-sm space-y-6 w-full mt-2">
-                        <div class="w-full">
-                            <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-2.5">Expense Type</label>
-                            <div class="grid grid-cols-2 gap-3 w-full">
-                                ${catBtn('Office', 'fa-briefcase')}
-                                ${catBtn('Shoot', 'fa-clapperboard')}
-                            </div>
-                            <input type="hidden" id="expense-category" value="${escapeHtml(expense.category)}">
-                        </div>
-
-                        <div id="client-input-container" class="${expense.category === 'Shoot' ? '' : 'hidden'} w-full">
-                            <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-2.5">Client Name & Place</label>
-                            <div class="relative w-full">
-                                <span class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400"><i class="fa-solid fa-location-dot text-sm"></i></span>
-                                <input type="text" id="expense-client" value="${escapeHtml(expense.clientNamePlace || '')}" oninput="updateFormCache()" placeholder="e.g., Acme Corp / Studio Location" class="w-full pl-10 pr-4 py-3.5 bg-slate-50/80 dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 text-slate-900 dark:text-white">
-                            </div>
-                        </div>
-
-                        <div class="w-full">
-                            <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-2.5">Amount (₹)</label>
-                            <div class="relative w-full">
-                                <span class="absolute inset-y-0 left-0 pl-4 flex items-center font-bold text-slate-400">₹</span>
-                                <input type="number" id="expense-amount" value="${escapeHtml(expense.amount)}" oninput="updateFormCache()" required min="0.01" step="any" placeholder="0.00" class="w-full pl-9 pr-4 py-3.5 bg-slate-50/80 dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700 rounded-2xl text-base font-semibold focus:outline-none focus:ring-2 focus:ring-indigo-500 text-slate-900 dark:text-white">
-                            </div>
-                        </div>
-
-                        <div class="w-full">
-                            <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-2.5">Title / Description</label>
-                            <input type="text" id="expense-title" value="${escapeHtml(expense.title)}" oninput="updateFormCache()" required placeholder="e.g., Studio Rent, Camera Rental" class="w-full px-4 py-3.5 bg-slate-50/80 dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 text-slate-900 dark:text-white">
-                        </div>
-
-                        <div class="w-full">
-                            <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-2.5">Date</label>
-                            <input type="date" id="expense-date" value="${escapeHtml(expense.date)}" oninput="updateFormCache()" required class="w-full px-4 py-3.5 bg-slate-50/80 dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 text-slate-900 dark:text-white">
-                        </div>
-
-                        <div class="w-full">
-                            <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-2.5">Notes / Receipt details (Optional)</label>
-                            <textarea id="expense-notes" rows="3" oninput="updateFormCache()" placeholder="Vendor invoice number or remarks..." class="w-full px-4 py-3.5 bg-slate-50/80 dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 text-slate-900 dark:text-white">${escapeHtml(expense.notes)}</textarea>
-                        </div>
-
-                        <div class="w-full">
-                            <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-2.5">Bill / Receipt Attachment (Optional)</label>
-
-                            ${currentBill ? `
-                                <div class="bg-indigo-50/90 dark:bg-indigo-950/80 p-4 rounded-2xl border border-indigo-200/80 dark:border-indigo-800/80 flex items-center justify-between mb-3 w-full gap-2">
-                                    <div class="flex items-center space-x-2 text-indigo-600 dark:text-indigo-400 text-xs font-semibold min-w-0 flex-1">
-                                        <i class="fa-solid fa-file-image text-base shrink-0"></i>
-                                        <span class="truncate">Bill attached</span>
-                                    </div>
-                                    <div class="flex items-center space-x-2 shrink-0">
-                                        <button type="button" onclick="previewCurrentTempBill()" class="px-3 py-1.5 bg-indigo-600 text-white rounded-xl text-xs font-medium">Preview</button>
-                                        <button type="button" onclick="removeBillAttachment(event)" class="px-3 py-1.5 bg-rose-600 text-white rounded-xl text-xs font-medium">Remove</button>
-                                    </div>
-                                </div>
-                            ` : ''}
-
-                            <div class="grid grid-cols-2 gap-3 w-full">
-                                <div class="relative border-2 border-dashed border-slate-300 dark:border-slate-700 rounded-2xl p-4 text-center bg-slate-50/60 dark:bg-slate-800/40 hover:border-indigo-500 transition cursor-pointer">
-                                    <input type="file" id="bill-file-input" accept="image/*" onchange="handleBillUpload(event)" class="absolute inset-0 opacity-0 cursor-pointer w-full h-full">
-                                    <div class="flex flex-col items-center justify-center space-y-1">
-                                        <div class="w-10 h-10 rounded-2xl bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 flex items-center justify-center text-xs"><i class="fa-solid fa-cloud-arrow-up"></i></div>
-                                        <p class="text-[11px] font-semibold text-slate-700 dark:text-slate-300">Upload File</p>
-                                        <p class="text-[9px] text-slate-400">PNG, JPG</p>
-                                    </div>
-                                </div>
-
-                                <button type="button" onclick="openCameraCaptureModal()" class="border-2 border-dashed border-slate-300 dark:border-slate-700 rounded-2xl p-4 text-center bg-slate-50/60 dark:bg-slate-800/40 hover:border-indigo-500 transition flex flex-col items-center justify-center space-x-1">
-                                    <div class="w-10 h-10 rounded-2xl bg-violet-50 dark:bg-violet-950/60 text-violet-600 dark:text-violet-400 flex items-center justify-center text-xs"><i class="fa-solid fa-camera"></i></div>
-                                    <p class="text-[11px] font-semibold text-slate-700 dark:text-slate-300">Capture Bill</p>
-                                    <p class="text-[9px] text-slate-400">Use Camera</p>
-                                </button>
-                            </div>
-                        </div>
-
-                        <button id="expense-submit-btn" type="submit" class="w-full py-4 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 text-white font-semibold rounded-2xl shadow-lg shadow-indigo-500/25 transition flex items-center justify-center space-x-2 mt-4">
-                            <i class="fa-solid ${isEditing ? 'fa-floppy-disk' : 'fa-circle-plus'}"></i>
-                            <span>${isEditing ? 'Save Changes' : 'Submit'}</span>
-                        </button>
-                    </form>
-                </div>
-            `;
-        }
-
-        function catBtnClass(active) {
-            const base = 'py-3.5 px-3 rounded-2xl border font-medium text-xs sm:text-sm flex items-center justify-center space-x-2 transition truncate';
-            return active
-                ? `${base} bg-indigo-600 text-white border-indigo-600 shadow-md`
-                : `${base} bg-slate-50/80 dark:bg-slate-800/80 text-slate-700 dark:text-slate-300 border-slate-200/80 dark:border-slate-700`;
-        }
-
-        function resizeImageToDataUrl(source, srcW, srcH) {
-            const maxDim = 800;
-            let width = srcW, height = srcH;
-            if (width >= height && width > maxDim) {
-                height = Math.round((height * maxDim) / width);
-                width = maxDim;
-            } else if (height > maxDim) {
-                width = Math.round((width * maxDim) / height);
-                height = maxDim;
-            }
-            const canvas = document.createElement('canvas');
-            canvas.width = width;
-            canvas.height = height;
-            canvas.getContext('2d').drawImage(source, 0, 0, width, height);
-            return canvas.toDataURL('image/jpeg', 0.8);
-        }
-
-        function handleBillUpload(event) {
-            updateFormCache();
-            const file = event.target.files[0];
-            if (!file) return;
-
-            const reader = new FileReader();
-            reader.onload = function (uploadEvent) {
-                const img = new Image();
-                img.onload = function () {
-                    state.tempBillData = resizeImageToDataUrl(img, img.width, img.height);
-                    showToast('Bill attached successfully!', 'success');
-                    renderMainContentOnly();
-                };
-                img.onerror = () => showToast('Could not read that image.', 'error');
-                img.src = uploadEvent.target.result;
-            };
-            reader.readAsDataURL(file);
-        }
-
-        function openCameraCaptureModal() {
-            updateFormCache();
-            const root = document.getElementById('modal-root');
-            root.innerHTML = `
-                <div class="fixed inset-0 z-[60] bg-slate-950/90 backdrop-blur-md flex flex-col items-center justify-center p-4">
-                    <div class="w-full max-w-md bg-slate-900 rounded-3xl overflow-hidden border border-slate-800 shadow-2xl flex flex-col">
-                        <div class="p-4 bg-slate-800/80 flex items-center justify-between border-b border-slate-700">
-                            <h3 class="font-bold text-sm text-white flex items-center space-x-2"><i class="fa-solid fa-camera text-indigo-400"></i><span>Capture Bill Receipt</span></h3>
-                            <button onclick="closeModal()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
-                        </div>
-                        <div class="relative bg-black flex-1 flex items-center justify-center min-h-[300px]">
-                            <video id="camera-stream" autoplay playsinline class="w-full h-full object-cover max-h-[50vh]"></video>
-                            <canvas id="camera-canvas" class="hidden"></canvas>
-                        </div>
-                        <div class="p-5 bg-slate-900 flex items-center justify-around">
-                            <button type="button" onclick="closeModal()" class="px-5 py-3 rounded-2xl bg-slate-800 text-slate-300 text-xs font-semibold">Cancel</button>
-                            <button type="button" onclick="takeSnapshot()" class="w-14 h-14 rounded-full bg-indigo-600 hover:bg-indigo-700 text-white flex items-center justify-center shadow-lg text-xl"><i class="fa-solid fa-camera"></i></button>
-                        </div>
-                    </div>
-                </div>
-            `;
-
-            if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-                showToast('Camera is not available on this device.', 'error');
-                closeModal();
-                return;
-            }
-
-            navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' }, audio: false })
-                .then(stream => {
-                    window.activeCameraStream = stream;
-                    const v = document.getElementById('camera-stream');
-                    if (v) v.srcObject = stream; else stream.getTracks().forEach(t => t.stop());
-                })
-                .catch(() => {
-                    showToast('Unable to access device camera.', 'error');
-                    closeModal();
-                });
-        }
-
-        function takeSnapshot() {
-            const videoElement = document.getElementById('camera-stream');
-            if (!videoElement) return;
-            state.tempBillData = resizeImageToDataUrl(videoElement, videoElement.videoWidth || 640, videoElement.videoHeight || 480);
-            closeModal();
-            showToast('Bill captured!', 'success');
-            renderMainContentOnly();
-        }
-
-        function removeBillAttachment(event) {
-            if (event) event.stopPropagation();
-            updateFormCache();
-            state.tempBillData = '';
-            showToast('Bill removed.', 'info');
-            renderMainContentOnly();
-        }
-
-        function previewCurrentTempBill() {
-            let billToPreview = state.tempBillData;
-            if ((billToPreview === null || billToPreview === undefined) && state.editingExpenseId) {
-                const found = state.expenses.find(e => e.id === state.editingExpenseId);
-                if (found) billToPreview = found.billAttachment;
-            }
-            if (!billToPreview) return;
-            openBillPreviewModal(billToPreview, 'Attached Bill Preview');
-        }
-
-        function viewBillModal(expenseId) {
-            const exp = state.expenses.find(e => e.id === expenseId) || state.recycleBin.find(e => e.id === expenseId);
-            if (!exp || !exp.billAttachment) return;
-            openBillPreviewModal(exp.billAttachment, `Bill Receipt: ${exp.title}`);
-        }
-
-        function openBillPreviewModal(imgUrl, titleText) {
-            const root = document.getElementById('modal-root');
-            root.innerHTML = `
-                <div class="fixed inset-0 z-[60] bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4">
-                    <div class="ios-glass-modal rounded-3xl p-5 max-w-md w-full shadow-2xl space-y-4">
-                        <div class="flex items-center justify-between">
-                            <h3 class="font-bold text-sm text-slate-900 dark:text-white truncate">${escapeHtml(titleText)}</h3>
-                            <button onclick="closeModal()" class="text-slate-400 hover:text-slate-600 text-lg"><i class="fa-solid fa-xmark"></i></button>
-                        </div>
-                        <div class="bg-slate-100/80 dark:bg-slate-800/80 rounded-2xl overflow-hidden flex items-center justify-center max-h-[60vh]">
-                            <img src="${escapeHtml(imgUrl)}" alt="Bill" class="max-w-full max-h-[60vh] object-contain">
-                        </div>
-                        <button onclick="closeModal()" class="w-full py-3 bg-slate-200/90 dark:bg-slate-800/90 hover:bg-slate-300 text-slate-800 dark:text-slate-200 font-semibold rounded-2xl text-xs transition">Close</button>
-                    </div>
-                </div>
-            `;
-        }
-
-        function setFormCategory(cat) {
-            updateFormCache();
-            document.getElementById('expense-category').value = cat;
-            if (state.tempFormCache) state.tempFormCache.category = cat;
-
-            const btnOffice = document.getElementById('btn-cat-office');
-            const btnShoot = document.getElementById('btn-cat-shoot');
-            const clientContainer = document.getElementById('client-input-container');
-
-            btnOffice.className = catBtnClass(cat === 'Office');
-            btnShoot.className = catBtnClass(cat === 'Shoot');
-            if (clientContainer) clientContainer.classList.toggle('hidden', cat === 'Office');
-        }
-
-        const MAX_INLINE_BILL_CHARS = 900000;
-
-        async function handleExpenseSubmit(event) {
-            event.preventDefault();
-            const submitBtn = document.getElementById('expense-submit-btn');
-            if (submitBtn && submitBtn.disabled) return;
-
-            const category = document.getElementById('expense-category').value;
-            const amount = round2(parseFloat(document.getElementById('expense-amount').value));
-            const title = document.getElementById('expense-title').value.trim();
-            const date = document.getElementById('expense-date').value;
-            const clientNamePlace = category === 'Shoot' ? document.getElementById('expense-client').value.trim() : '';
-            const notes = document.getElementById('expense-notes').value.trim();
-
-            if (!title || isNaN(amount) || amount <= 0 || !date) {
-                showToast('Please fill in all required fields.', 'error');
-                return;
-            }
-
-            if (submitBtn) submitBtn.disabled = true;
-            showToast('Processing expense & wallet balance...', 'info');
-            const { db, storage, doc, setDoc, storageRef, uploadString, getDownloadURL, deleteObject } = window.FB;
-
-            const expenseId = state.editingExpenseId || ('exp_' + Date.now());
-            const existingExp = state.editingExpenseId ? state.expenses.find(e => e.id === expenseId) : null;
-            let billUrl = null;
-            let walletDelta = 0;
-            let walletOwnerId = null;
-
-            try {
-                if (state.tempBillData === '') {
-                    billUrl = null;
-                    if (existingExp && existingExp.billAttachment && existingExp.billAttachment.includes('firebasestorage')) {
-                        try { await deleteObject(storageRef(storage, `bills/${expenseId}.jpg`)); } catch (e) { }
-                    }
-                } else if (state.tempBillData !== null && state.tempBillData !== undefined) {
-                    if (!navigator.onLine) {
-                        billUrl = state.tempBillData;
-                    } else if (state.tempBillData.startsWith('data:image')) {
-                        try {
-                            const fileRef = storageRef(storage, `bills/${expenseId}.jpg`);
-                            await uploadString(fileRef, state.tempBillData, 'data_url');
-                            billUrl = await getDownloadURL(fileRef);
-                        } catch (storageErr) {
-                            console.warn("Storage upload failed, falling back to offline inline base64:", storageErr);
-                            if (state.tempBillData.length > MAX_INLINE_BILL_CHARS) {
-                                showToast('Bill image is too large to save. Please use a smaller image.', 'error');
-                                if (submitBtn) submitBtn.disabled = false;
-                                return;
-                            }
-                            billUrl = state.tempBillData;
-                        }
-                    } else {
-                        billUrl = state.tempBillData;
-                    }
-                } else if (existingExp) {
-                    billUrl = existingExp.billAttachment || null;
-                }
-
-                const expenseOwnerId = existingExp ? existingExp.userId : state.currentUser.id;
-                const expenseOwnerName = existingExp ? existingExp.userName : state.currentUser.name;
-                const ownerUser = state.users.find(u => u.id === expenseOwnerId) || state.currentUser;
-
-                let walletResult = null;
-                if (ownerUser.role !== 'admin') {
-                    const oldAmount = existingExp ? Number(existingExp.amount) : 0;
-                    walletDelta = round2(-(amount - oldAmount));
-                    if (walletDelta !== 0) {
-                        walletOwnerId = ownerUser.id;
-                        walletResult = await adjustWallet(walletOwnerId, walletDelta);
-                    }
-                }
-
-                try {
-                    await setDoc(doc(db, 'expenses', expenseId), {
-                        id: expenseId,
-                        userId: expenseOwnerId,
-                        userName: expenseOwnerName,
-                        title, amount, category, date, clientNamePlace, notes,
-                        billAttachment: billUrl,
-                        createdAt: existingExp ? existingExp.createdAt : new Date().toISOString()
-                    });
-                } catch (saveErr) {
-                    if (walletOwnerId) {
-                        try { await adjustWallet(walletOwnerId, -walletDelta); } catch (e) { }
-                    }
-                    throw saveErr;
-                }
-
-                if (walletResult && walletResult.excessAdded > 0) {
-                    await createAppNotification({
-                        recipientId: null,
-                        recipientRole: 'admin',
-                        type: 'excess_spent',
-                        title: `Excess Spent Alert: ${ownerUser.name}`,
-                        message: `${ownerUser.name} spent ${formatCurrency(walletResult.excessAdded)} over wallet balance on "${title}" (${category}). Total Excess Due: ${formatCurrency(walletResult.excess)}.`,
-                        amount: walletResult.excessAdded,
-                        triggeredBy: ownerUser.name
-                    });
-                }
-
-                const wasEditing = Boolean(state.editingExpenseId);
-                state.editingExpenseId = null;
-                state.tempBillData = null;
-                state.tempFormCache = null;
-                showToast(wasEditing ? 'Expense updated successfully!' : 'Expense saved successfully!', 'success');
-                switchTab('home');
-            } catch (error) {
-                console.error("Failed:", error);
-                showToast('Failed to save. Record will sync when online.', 'error');
-                if (submitBtn) submitBtn.disabled = false;
-            }
-        }
-
-        function startEditExpense(id) {
-            const exp = state.expenses.find(e => e.id === id);
-            if (!exp) return;
-
-            state.editingExpenseId = id;
-            state.tempBillData = exp.billAttachment || null;
-            state.tempFormCache = {
-                category: exp.category || 'Office',
-                clientNamePlace: exp.clientNamePlace || '',
-                amount: exp.amount || '',
-                title: exp.title || '',
-                date: exp.date || todayStr(),
-                notes: exp.notes || ''
-            };
-            switchTab('add', true);
-        }
-
-        function cancelEdit() {
-            state.editingExpenseId = null;
-            state.tempBillData = null;
-            state.tempFormCache = null;
-            switchTab('home');
-        }
-
-        function confirmUndoExpense(id) {
-            if (!state.currentUser || state.currentUser.role === 'admin') return;
-
-            const exp = state.expenses.find(e => e.id === id);
-            if (!exp) return;
-
-            if (exp.userId !== state.currentUser.id) {
-                showToast('Only the user who created this expense can undo it.', 'error');
-                return;
-            }
-
-            showConfirmModal(
-                'Undo Expense & Refund Wallet',
-                `Undo "${exp.title}" and return ${formatCurrency(exp.amount)} back to your wallet? This will also be recorded in your Wallet Transaction History.`,
-                async () => {
-                    const { db, doc, deleteDoc, setDoc } = window.FB;
-                    try {
-                        const recycleItem = {
-                            ...exp,
-                            deletedAt: new Date().toISOString(),
-                            deletedBy: `${state.currentUser.name} (Undo & Refunded)`
-                        };
-                        await setDoc(doc(db, 'recycleBin', id), recycleItem);
-                        await deleteDoc(doc(db, 'expenses', id));
-                        await refundExpenseToUserWallet(exp.userId, exp.amount, exp.title, exp.category);
-                        showToast(`Expense undone! ${formatCurrency(exp.amount)} added back to your wallet.`, 'success');
-                    } catch (err) {
-                        console.error("Undo expense error:", err);
-                        showToast('Failed to undo expense.', 'error');
-                    }
-                }
-            );
-        }
-
-        function confirmDeleteExpense(id) {
-            showConfirmModal(
-                'Delete Expense',
-                'Are you sure you want to delete this expense record and move it to the Recycle Bin?',
-                async () => {
-                    const { db, doc, deleteDoc, setDoc } = window.FB;
-                    const exp = state.expenses.find(e => e.id === id);
-                    if (!exp) return;
-                    try {
-                        const recycleItem = { ...exp, deletedAt: new Date().toISOString(), deletedBy: state.currentUser.name };
-                        await setDoc(doc(db, 'recycleBin', id), recycleItem);
-                        await deleteDoc(doc(db, 'expenses', id));
-                        showToast('Expense moved to Recycle Bin.', 'success');
-                    } catch (err) {
-                        showToast('Failed to delete expense.', 'error');
-                    }
-                }
-            );
-        }
-
-        function renderRecycleBinTab() {
-            return `
-                <div class="space-y-4 w-full max-w-full">
-                    <div class="flex items-center justify-between px-1">
-                        <span class="text-xs text-slate-500">${state.recycleBin.length} deleted item(s)</span>
-                        ${state.recycleBin.length > 0 ? `<button onclick="confirmEmptyRecycleBin()" class="px-3 py-1.5 bg-rose-50 dark:bg-rose-950/60 text-rose-600 dark:text-rose-400 text-xs font-semibold rounded-xl border border-rose-200 hover:bg-rose-100 transition"><i class="fa-solid fa-trash-can mr-1"></i>Empty Bin</button>` : ''}
-                    </div>
-
-                    <div class="space-y-3.5 w-full">
-                        ${state.recycleBin.length === 0 ? `
-                            <div class="ios-glass-card rounded-3xl p-8 text-center shadow-sm w-full mt-3">
-                                <div class="w-14 h-14 bg-amber-500/10 text-amber-600 rounded-2xl flex items-center justify-center mx-auto mb-3 text-xl"><i class="fa-solid fa-trash-can"></i></div>
-                                <h4 class="font-semibold text-slate-700 dark:text-slate-300 mb-1">Recycle Bin is Empty</h4>
-                                <p class="text-xs text-slate-500">Deleted expenses will appear here.</p>
-                            </div>
-                        ` : ''}
-
-                        ${state.recycleBin.map(exp => {
-                const wasRefunded = String(exp.deletedBy || '').includes('Undo & Refunded');
-                return `
-                                <div class="ios-glass-card rounded-3xl py-5 sm:py-6 px-5 sm:px-6 shadow-sm transition relative group w-full mt-3">
-                                    <div class="flex items-start space-x-3.5 w-full">
-                                        <div class="w-10 h-10 rounded-2xl bg-amber-500/10 text-amber-600 flex items-center justify-center shrink-0 mt-0.5">
-                                            <i class="fa-solid fa-trash-can"></i>
-                                        </div>
-                                        <div class="min-w-0 flex-1">
-                                            <div class="flex items-start justify-between gap-2 w-full">
-                                                <h4 class="font-semibold text-sm sm:text-base text-slate-900 dark:text-white leading-snug break-words flex-1 pr-1">${escapeHtml(exp.title)}</h4>
-                                                <span class="font-bold text-base sm:text-lg text-slate-900 dark:text-white whitespace-nowrap shrink-0">${formatCurrency(exp.amount)}</span>
-                                            </div>
-
-                                            <div class="flex items-center flex-wrap gap-1.5 text-xs text-slate-500 dark:text-slate-400 mt-2 w-full">
-                                                <span><i class="fa-regular fa-calendar mr-1"></i>${formatDate(exp.date)}</span>
-                                                <span>•</span>
-                                                <span class="font-medium text-indigo-600 dark:text-indigo-400">${escapeHtml(exp.category)}</span>
-                                                <span>•</span>
-                                                <span class="italic text-slate-600 dark:text-slate-300 break-all">By: ${escapeHtml(exp.userName)}</span>
-                                            </div>
-
-                                            <div class="mt-1.5 text-[11px] text-rose-500 font-medium">
-                                                Deleted on ${formatDate(exp.deletedAt)} by ${escapeHtml(exp.deletedBy || 'Admin')}
-                                            </div>
-
-                                            ${exp.billAttachment ? `
-                                                <div class="mt-2.5">
-                                                    <button onclick="viewBillModal('${exp.id}')" class="inline-flex items-center space-x-1.5 px-3.5 py-1.5 rounded-xl bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 text-xs font-medium border border-indigo-200/60 hover:bg-indigo-100 transition">
-                                                        <i class="fa-solid fa-paperclip"></i><span>View Attached Bill</span>
-                                                    </button>
-                                                </div>
-                                            ` : ''}
-
-                                            <div class="flex items-center justify-end mt-3 pt-2 border-t border-slate-200/50 dark:border-slate-800 w-full gap-2">
-                                                ${wasRefunded ? '<span class="text-[10px] text-slate-400 italic mr-auto">Refunded to wallet — cannot be restored</span>' : `
-                                                <button onclick="restoreFromRecycleBin('${exp.id}')" class="px-3.5 py-1.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 text-xs font-semibold border border-emerald-200 hover:bg-emerald-100 transition">
-                                                    <i class="fa-solid fa-rotate-left mr-1"></i>Restore
-                                                </button>`}
-                                                <button onclick="permanentDelete('${exp.id}')" class="px-3.5 py-1.5 rounded-xl bg-rose-50 dark:bg-rose-950/60 text-rose-600 dark:text-rose-400 text-xs font-semibold border border-rose-200 hover:bg-rose-100 transition">
-                                                    <i class="fa-solid fa-xmark mr-1"></i>Delete Permanently
-                                                </button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            `;
-            }).join('')}
-                    </div>
-                </div>
-            `;
-        }
-
-        async function restoreFromRecycleBin(id) {
-            const { db, doc, deleteDoc, setDoc } = window.FB;
-            const item = state.recycleBin.find(e => e.id === id);
-            if (!item) return;
-            const { deletedAt, deletedBy, ...expenseData } = item;
-            if (String(deletedBy || '').includes('Undo & Refunded')) {
-                showToast('This expense was undone and refunded. Add it again as a new expense instead.', 'error');
-                return;
-            }
-            try {
-                await setDoc(doc(db, 'expenses', id), expenseData);
-                await deleteDoc(doc(db, 'recycleBin', id));
-                showToast('Expense restored successfully!', 'success');
-            } catch (err) {
-                showToast('Failed to restore expense.', 'error');
-            }
-        }
-
-        function permanentDelete(id) {
-            const _it = state.recycleBin.find(e => e.id === id);
-            const billUrl = _it ? (_it.billAttachment || '') : '';
-            showConfirmModal(
-                'Permanent Deletion',
-                'Are you sure you want to permanently delete this expense? This cannot be undone.',
-                async () => {
-                    const { db, doc, deleteDoc, storage, storageRef, deleteObject } = window.FB;
-                    try {
-                        await deleteDoc(doc(db, 'recycleBin', id));
-                        if (billUrl && billUrl.includes('firebasestorage')) {
-                            try { await deleteObject(storageRef(storage, `bills/${id}.jpg`)); } catch (e) { }
-                        }
-                        showToast('Expense permanently deleted.', 'success');
-                    } catch (err) {
-                        showToast('Failed to delete expense.', 'error');
-                    }
-                }
-            );
-        }
-
-        function renderUserRecycleBinTab() {
-            return `
-                <div class="space-y-4 w-full max-w-full">
-                    <div class="space-y-3.5 w-full">
-                        ${state.userRecycleBin.length === 0 ? `
-                            <div class="ios-glass-card rounded-3xl p-8 text-center shadow-sm w-full mt-3">
-                                <div class="w-14 h-14 bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 rounded-2xl flex items-center justify-center mx-auto mb-3 text-xl"><i class="fa-solid fa-user-slash"></i></div>
-                                <h4 class="font-semibold text-slate-700 dark:text-slate-300 mb-1">No Pending Deleted Users</h4>
-                                <p class="text-xs text-slate-500">Users scheduled for deletion within 48 hours will appear here for recovery.</p>
-                            </div>
-                        ` : ''}
-
-                        ${state.userRecycleBin.map(item => `
-                            <div class="ios-glass-card rounded-2xl py-5 px-5 sm:px-6 shadow-sm flex items-center justify-between gap-3 w-full mt-3">
-                                <div class="space-y-1 min-w-0 flex-1">
-                                    <h4 class="font-semibold text-sm text-slate-900 dark:text-white truncate">${escapeHtml(item.name)} (@${escapeHtml(item.username)})</h4>
-                                    <p class="text-[11px] text-rose-500 font-medium">Deleted on ${formatDate(item.deletedAt)}. Permanent wipe in 48 hrs.</p>
-                                </div>
-                                <button onclick="undoDeleteUser('${item.userId}')" class="px-3.5 py-1.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 text-xs font-semibold border border-emerald-200 hover:bg-emerald-100 transition shrink-0">
-                                    <i class="fa-solid fa-rotate-left mr-1"></i>Restore User
-                                </button>
-                            </div>
-                        `).join('')}
-                    </div>
-                </div>
-            `;
-        }
-
-        async function undoDeleteUser(userId) {
-            const { db, doc, deleteDoc, setDoc } = window.FB;
-            const item = state.userRecycleBin.find(i => i.userId === userId);
-            if (!item) return;
-            try {
-                const { userId: uid, name, username, password, role, email, wallet, excessSpent, expenses } = item;
-                await setDoc(doc(db, 'users', uid), { id: uid, name, username, password, role, email, wallet: Number(wallet || 0), excessSpent: Number(excessSpent || 0) });
-                if (expenses && expenses.length > 0) {
-                    for (const exp of expenses) {
-                        await setDoc(doc(db, 'expenses', exp.id), exp);
-                    }
-                }
-                await deleteDoc(doc(db, 'userRecycleBin', userId));
-                showToast(`User ${name} restored successfully!`, 'success');
-            } catch (err) {
-                showToast('Failed to restore user.', 'error');
-            }
-        }
-
-        function renderAdminTab() {
-            const monthlyMap = {};
-            state.expenses.forEach(exp => {
-                const monthKey = exp.date ? exp.date.substring(0, 7) : 'Unknown';
-                if (!monthlyMap[monthKey]) monthlyMap[monthKey] = { month: monthKey, office: 0, shoot: 0, total: 0, count: 0 };
-                if (exp.category === 'Office') monthlyMap[monthKey].office += exp.amount;
-                if (exp.category === 'Shoot') monthlyMap[monthKey].shoot += exp.amount;
-                monthlyMap[monthKey].total += exp.amount;
-                monthlyMap[monthKey].count += 1;
-            });
-
-            const sortedMonths = Object.keys(monthlyMap).sort().reverse();
-            const grandTotal = state.expenses.reduce((s, e) => s + e.amount, 0);
-            const totalOffice = state.expenses.filter(e => e.category === 'Office').reduce((s, e) => s + e.amount, 0);
-            const totalShoot = state.expenses.filter(e => e.category === 'Shoot').reduce((s, e) => s + e.amount, 0);
-
-            return `
-                <div class="space-y-4 w-full max-w-full">
-                    <div class="bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 rounded-3xl p-5 sm:p-6 text-white shadow-xl relative overflow-hidden border border-indigo-500/30 w-full">
-                        <div class="flex justify-between items-start mb-3 gap-2">
-                            <div class="min-w-0 flex-1">
-                                <p class="text-indigo-300 text-xs font-semibold uppercase tracking-wider flex items-center truncate">
-                                    <i class="fa-solid fa-shield-halved mr-1.5 shrink-0"></i><span class="truncate">Admin Summary</span>
-                                </p>
-                                <h2 class="text-2xl sm:text-3xl font-bold tracking-tight mt-0.5 break-all">${formatCurrency(grandTotal)}</h2>
-                            </div>
-                            <button onclick="exportAllCSV()" class="bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold px-4 py-2.5 rounded-2xl shadow-md transition flex items-center space-x-1.5 shrink-0">
-                                <i class="fa-solid fa-file-arrow-down"></i><span>Export All CSV</span>
-                            </button>
-                        </div>
-
-                        <div class="grid grid-cols-2 gap-3 mt-4 pt-4 border-t border-white/10">
-                            <div class="min-w-0">
-                                <span class="text-xs text-slate-400 truncate block">Total Office</span>
-                                <p class="font-bold text-sm sm:text-base text-amber-400 break-all">${formatCurrency(totalOffice)}</p>
-                            </div>
-                            <div class="min-w-0">
-                                <span class="text-xs text-slate-400 truncate block">Total Shoot</span>
-                                <p class="font-bold text-sm sm:text-base text-indigo-400 break-all">${formatCurrency(totalShoot)}</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="space-y-3 w-full">
-                        <h3 class="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider px-1 pt-3">Month-by-Month Summary</h3>
-                        ${sortedMonths.map(monthKey => {
-                const data = monthlyMap[monthKey];
-                return `
-                                <div class="ios-glass-card rounded-3xl p-5 sm:p-6 shadow-sm space-y-3 w-full mt-3">
-                                    <div class="flex items-center justify-between">
-                                        <div class="flex items-center space-x-2 min-w-0 pr-2">
-                                            <div class="w-8 h-8 rounded-xl bg-violet-500/10 text-violet-600 dark:text-violet-400 flex items-center justify-center text-xs font-bold shrink-0"><i class="fa-solid fa-calendar-days"></i></div>
-                                            <h4 class="font-bold text-sm text-slate-900 dark:text-white truncate">${formatMonthName(monthKey)}</h4>
-                                        </div>
-                                        <span class="text-xs font-semibold bg-slate-100/90 dark:bg-slate-800 text-slate-600 dark:text-slate-300 px-3 py-1 rounded-full shrink-0 border border-slate-200/60 dark:border-slate-700">${data.count} Expenses</span>
-                                    </div>
-                                    <div class="grid grid-cols-3 gap-2.5 pt-2 border-t border-slate-200/50 dark:border-slate-800">
-                                        <div class="bg-slate-50/90 dark:bg-slate-800/60 p-2.5 rounded-2xl text-center min-w-0 border border-slate-200/50 dark:border-slate-700/50"><span class="text-[10px] uppercase font-semibold text-slate-400 block mb-0.5 truncate">Office</span><span class="font-bold text-xs sm:text-sm text-slate-800 dark:text-slate-200 break-all block">${formatCurrency(data.office)}</span></div>
-                                        <div class="bg-slate-50/90 dark:bg-slate-800/60 p-2.5 rounded-2xl text-center min-w-0 border border-slate-200/50 dark:border-slate-700/50"><span class="text-[10px] uppercase font-semibold text-slate-400 block mb-0.5 truncate">Shoot</span><span class="font-bold text-xs sm:text-sm text-slate-800 dark:text-slate-200 break-all block">${formatCurrency(data.shoot)}</span></div>
-                                        <div class="bg-indigo-50/90 dark:bg-indigo-950/60 p-2.5 rounded-2xl text-center border border-indigo-200/60 dark:border-indigo-900 min-w-0"><span class="text-[10px] uppercase font-semibold text-indigo-600 dark:text-indigo-400 block mb-0.5 truncate">Total</span><span class="font-bold text-xs sm:text-sm text-indigo-600 dark:text-indigo-400 break-all block">${formatCurrency(data.total)}</span></div>
-                                    </div>
-                                </div>
-                            `;
-            }).join('')}
-                    </div>
-                </div>
-            `;
-        }
-
-        function renderPasswordRequestsTab() {
-            return `
-                <div class="space-y-4 w-full max-w-full">
-                    <div class="space-y-3 w-full">
-                        ${state.passwordRequests.length === 0 ? `
-                            <div class="ios-glass-card rounded-3xl p-8 text-center shadow-sm w-full mt-3">
-                                <div class="w-14 h-14 bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 rounded-2xl flex items-center justify-center mx-auto mb-3 text-xl"><i class="fa-solid fa-key"></i></div>
-                                <h4 class="font-semibold text-slate-700 dark:text-slate-300 mb-1">No pending requests</h4>
-                                <p class="text-xs text-slate-500">When users request password resets, their 6-digit codes will appear here.</p>
-                            </div>
-                        ` : ''}
-
-                        ${state.passwordRequests.map(req => {
-                const isPending = req.status === 'pending';
-                return `
-                                <div class="ios-glass-card rounded-2xl py-5 px-5 sm:px-6 shadow-sm flex items-center justify-between gap-3 w-full mt-3">
-                                    <div class="space-y-1 min-w-0 flex-1">
-                                        <div class="flex items-center space-x-2 truncate">
-                                            <h4 class="font-semibold text-sm text-slate-900 dark:text-white truncate">${escapeHtml(req.name)}</h4>
-                                            <span class="text-xs text-slate-400 shrink-0">(@${escapeHtml(req.username)})</span>
-                                        </div>
-                                        <div class="flex items-center space-x-2 truncate">
-                                            <span class="text-xs text-slate-500 shrink-0">Code:</span>
-                                            <span class="px-2.5 py-0.5 bg-indigo-50 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-400 font-mono font-bold text-sm tracking-widest rounded-xl border border-indigo-200/50">${escapeHtml(req.code)}</span>
-                                        </div>
-                                    </div>
-                                    <div class="flex items-center space-x-2 shrink-0">
-                                        <span class="px-3 py-1 rounded-full text-xs font-semibold ${isPending ? 'bg-amber-500/10 text-amber-600' : 'bg-emerald-500/10 text-emerald-600'}">${isPending ? 'Pending' : 'Approved'}</span>
-                                        ${isPending ? `<button onclick="dismissRequest('${req.id}')" class="w-8 h-8 rounded-xl bg-slate-100/90 dark:bg-slate-800 text-slate-400 hover:text-rose-600 flex items-center justify-center text-xs" title="Dismiss"><i class="fa-solid fa-xmark"></i></button>` : ''}
-                                    </div>
-                                </div>
-                            `;
-            }).join('')}
-                    </div>
-                </div>
-            `;
-        }
-
-        async function dismissRequest(reqId) {
-            const { db, doc, deleteDoc } = window.FB;
-            try {
-                await deleteDoc(doc(db, 'passwordRequests', reqId));
-                showToast('Request dismissed.', 'info');
-            } catch (e) {
-                showToast('Failed to dismiss request.', 'error');
-            }
-        }
-
-        function setUserFilterTab(tab) {
-            state.userFilterTab = tab;
-            renderMainContentOnly();
-        }
-
-        function renderUserManagementTab() {
-            const filter = state.userFilterTab;
-            const adminUsers = state.users.filter(u => u.role === 'admin');
-            const regularUsers = state.users.filter(u => u.role !== 'admin');
-
-            const showAdmins = filter === 'all' || filter === 'admin';
-            const showRegular = filter === 'all' || filter === 'user';
-            const tabCls = (active) => active
-                ? 'bg-slate-100 dark:bg-slate-800 text-indigo-600 dark:text-indigo-400 shadow-sm border border-slate-200/60 dark:border-slate-700'
-                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white';
-
-            return `
-                <div class="space-y-5 w-full max-w-full">
-                    <div class="flex items-center justify-between gap-3">
-                        <div class="min-w-0 flex-1">
-                            <h2 class="text-lg font-bold text-slate-900 dark:text-white leading-snug">User Management</h2>
-                            <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed mt-0.5">Manage user accounts & wallets</p>
-                        </div>
-                        <button onclick="openAddUserModal()" class="px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl text-xs font-semibold shadow-md transition flex items-center space-x-1.5 shrink-0">
-                            <i class="fa-solid fa-user-plus"></i><span>Add User</span>
-                        </button>
-                    </div>
-
-                    <div class="flex items-center space-x-2 ios-glass-card p-1.5 rounded-2xl w-full">
-                        <button onclick="setUserFilterTab('all')" class="flex-1 py-2 px-3 rounded-xl text-xs font-semibold transition ${tabCls(filter === 'all')}">All (${state.users.length})</button>
-                        <button onclick="setUserFilterTab('user')" class="flex-1 py-2 px-3 rounded-xl text-xs font-semibold transition ${tabCls(filter === 'user')}">Users (${regularUsers.length})</button>
-                        <button onclick="setUserFilterTab('admin')" class="flex-1 py-2 px-3 rounded-xl text-xs font-semibold transition ${tabCls(filter === 'admin')}">Admins (${adminUsers.length})</button>
-                    </div>
-
-                    ${showRegular ? `
-                        <div class="space-y-3 w-full">
-                            <div class="flex items-center justify-between px-1">
-                                <h3 class="text-xs font-semibold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
-                                    <i class="fa-solid fa-users text-emerald-500"></i>
-                                    <span>Regular Users (${regularUsers.length})</span>
-                                </h3>
-                            </div>
-                            ${regularUsers.length === 0 ? `
-                                <div class="ios-glass-card rounded-3xl p-6 text-center shadow-sm text-xs text-slate-400">No regular users found.</div>
-                            ` : regularUsers.map(u => renderUserCard(u)).join('')}
-                        </div>
-                    ` : ''}
-
-                    ${showAdmins ? `
-                        <div class="space-y-3 w-full pt-2">
-                            <div class="flex items-center justify-between px-1">
-                                <h3 class="text-xs font-semibold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
-                                    <i class="fa-solid fa-shield-halved text-indigo-500"></i>
-                                    <span>Administrators (${adminUsers.length})</span>
-                                </h3>
-                            </div>
-                            ${adminUsers.length === 0 ? `<div class="ios-glass-card rounded-3xl p-6 text-center shadow-sm text-xs text-slate-400">No admins found.</div>` : adminUsers.map(u => renderUserCard(u)).join('')}
-                        </div>
-                    ` : ''}
-                </div>
-            `;
-        }
-
-        function renderUserCard(u) {
-            const expCount = state.expenses.filter(e => e.userId === u.id).length;
-            const isCurrent = u.id === state.currentUser.id;
-            const isUserAdmin = u.role === 'admin';
-            const uWallet = Number(u.wallet || 0);
-            const uExcess = Number(u.excessSpent || 0);
-            const userTotalSpent = state.expenses.filter(e => e.userId === u.id).reduce((s, e) => s + e.amount, 0);
-
-            return `
-                <div class="ios-glass-card rounded-3xl p-4 sm:p-5 shadow-sm space-y-3.5 w-full mt-3">
-                    <div class="flex items-start justify-between gap-2.5">
-                        <div class="flex items-start space-x-3 min-w-0 flex-1">
-                            <div class="w-10 h-10 rounded-2xl ${isUserAdmin ? 'bg-indigo-500/10 text-indigo-600 dark:text-indigo-400' : 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400'} flex items-center justify-center font-bold text-sm shrink-0 mt-0.5">${escapeHtml(u.name.charAt(0))}</div>
-                            <div class="min-w-0 flex-1">
-                                <div class="flex items-center flex-wrap gap-1.5">
-                                    <h4 class="font-semibold text-sm text-slate-900 dark:text-white break-words">${escapeHtml(u.name)}</h4>
-                                    ${isCurrent ? '<span class="text-[10px] bg-emerald-500/10 text-emerald-600 font-semibold px-2 py-0.5 rounded-full shrink-0">Active</span>' : ''}
-                                </div>
-                                <p class="text-[11px] text-slate-500 dark:text-slate-400 leading-snug mt-0.5 break-words">
-                                    @${escapeHtml(u.username)} • <span class="capitalize font-medium text-indigo-600 dark:text-indigo-400">${escapeHtml(u.role)}</span> • ${expCount} exp (${formatCurrency(userTotalSpent)})
-                                </p>
-                            </div>
-                        </div>
-                        <div class="flex items-center space-x-1.5 shrink-0">
-                            ${!isUserAdmin ? `
-                            <button onclick="openAddWalletModal('${u.id}')" class="px-3 py-2 rounded-2xl bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-xs font-bold border border-emerald-500/20 transition flex items-center space-x-1.5" title="Wallet">
-                                <i class="fa-solid fa-wallet text-xs"></i>
-                                <span>Wallet</span>
-                            </button>
-                            ` : ''}
-                            <button onclick="openEditUserModal('${u.id}')" class="w-9 h-9 rounded-xl bg-slate-100/90 dark:bg-slate-800 text-slate-500 hover:bg-indigo-50 hover:text-indigo-600 transition flex items-center justify-center text-xs" title="Edit User"><i class="fa-solid fa-pen"></i></button>
-                        </div>
-                    </div>
-
-                    ${!isUserAdmin ? `
-                    <div class="grid grid-cols-2 gap-2.5 pt-3 border-t border-slate-200/50 dark:border-slate-800 text-xs">
-                        <div class="bg-slate-50/90 dark:bg-slate-800/60 p-3 rounded-2xl border border-slate-200/50 dark:border-slate-700/50">
-                            <span class="text-slate-400 block text-[10px] uppercase font-semibold mb-0.5">Wallet Balance</span>
-                            <span class="font-bold text-sm text-emerald-600 dark:text-emerald-400 break-all">${formatCurrency(uWallet)}</span>
-                        </div>
-                        <div class="bg-slate-50/90 dark:bg-slate-800/60 p-3 rounded-2xl border border-slate-200/50 dark:border-slate-700/50">
-                            <span class="text-slate-400 block text-[10px] uppercase font-semibold mb-0.5">Excess Spent Due</span>
-                            <span class="font-bold text-sm text-rose-600 dark:text-rose-400 break-all">${formatCurrency(uExcess)}</span>
-                        </div>
-                    </div>
-                    ` : ''}
-
-                    <div class="grid grid-cols-${!isUserAdmin ? '3' : '2'} gap-2 pt-0.5 w-full">
-                        ${!isUserAdmin ? `
-                        <button onclick="confirmResetUserWallet('${u.id}')" class="py-2.5 px-1.5 rounded-2xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-600 dark:text-amber-400 text-[10.5px] font-bold border border-amber-500/20 transition flex items-center justify-center space-x-1 whitespace-nowrap" title="Reset Wallet">
-                            <i class="fa-solid fa-rotate-right text-[10px] shrink-0"></i>
-                            <span>Reset Wallet</span>
-                        </button>
-                        ` : ''}
-
-                        <button onclick="confirmClearUserExpenses('${u.id}')" class="py-2.5 px-1.5 rounded-2xl bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-600 dark:text-indigo-400 text-[10.5px] font-bold border border-indigo-500/20 transition flex items-center justify-center space-x-1 whitespace-nowrap" title="Clear Expenses">
-                            <i class="fa-solid fa-receipt text-[10px] shrink-0"></i>
-                            <span>Clear Exp</span>
-                        </button>
-
-                        ${state.users.length > 1 && !isCurrent ? `
-                            <button onclick="confirmRemoveUser('${u.id}')" class="py-2.5 px-1.5 rounded-2xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-600 dark:text-rose-400 text-[10.5px] font-bold border border-rose-500/20 transition flex items-center justify-center space-x-1 whitespace-nowrap" title="Delete User">
-                                <i class="fa-solid fa-trash text-[10px] shrink-0"></i>
-                                <span>Delete User</span>
-                            </button>
-                        ` : '<div class="hidden"></div>'}
-                    </div>
-                </div>
-            `;
-        }
-
-        function openAddUserModal() {
-            const root = document.getElementById('modal-root');
-            const inputCls = 'w-full px-4 py-3 bg-slate-50/80 dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700 rounded-2xl text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500';
-            const pwCls = 'w-full pl-4 pr-12 py-3 bg-slate-50/80 dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700 rounded-2xl text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500';
-            const eyeBtn = (id, icon) => `<button type="button" onclick="togglePasswordVisibility('${id}', '${icon}')" class="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 focus:outline-none"><i id="${icon}" class="fa-solid fa-eye text-sm"></i></button>`;
-            const lbl = 'block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1';
-            root.innerHTML = `
-                <div class="fixed inset-0 z-[60] bg-slate-950/65 backdrop-blur-md flex items-center justify-center p-4">
-                    <div class="ios-glass-modal rounded-3xl p-6 max-w-sm w-full shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto no-scrollbar">
-                        <div class="flex items-center justify-between">
-                            <h3 class="font-bold text-base text-slate-900 dark:text-white">Add User</h3>
-                            <button onclick="closeModal()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark"></i></button>
-                        </div>
-                        <form onsubmit="handleAddNewUser(event)" class="space-y-3.5 w-full">
-                            <div class="w-full"><label class="${lbl}">Full Name</label><input type="text" id="new-user-name" required placeholder="Priya Sharma" class="${inputCls}"></div>
-                            <div class="w-full"><label class="${lbl}">Username</label><input type="text" id="new-user-username" required placeholder="user3" class="${inputCls}"></div>
-                            <div class="w-full"><label class="${lbl}">Password</label><div class="relative w-full"><input type="password" id="new-user-password" required placeholder="••••••••" class="${pwCls}">${eyeBtn('new-user-password', 'toggle-create-pass-icon')}</div></div>
-                            <div class="w-full"><label class="${lbl}">Confirm Password</label><div class="relative w-full"><input type="password" id="new-user-confirm-password" required placeholder="••••••••" class="${pwCls}">${eyeBtn('new-user-confirm-password', 'toggle-create-confirm-pass-icon')}</div></div>
-                            <div class="w-full">
-                                <label class="${lbl}">Role</label>
-                                <select id="new-user-role" class="${inputCls}">
-                                    <option value="user">Regular User</option>
-                                    <option value="admin">Administrator</option>
-                                </select>
-                            </div>
-                            <div class="pt-2 w-full"><button type="submit" class="w-full py-3.5 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-2xl shadow-md transition text-sm">Create User</button></div>
-                        </form>
-                    </div>
-                </div>
-            `;
-        }
-
         function openEditUserModal(userId) {
             const user = state.users.find(u => u.id === userId);
             if (!user) return;
@@ -3547,7 +2561,7 @@
                         <form onsubmit="handleEditUser(event, '${user.id}')" class="space-y-3.5 w-full">
                             <div class="w-full"><label class="${lbl}">Full Name</label><input type="text" id="edit-user-name" required value="${escapeHtml(user.name)}" class="${inputCls}"></div>
                             <div class="w-full"><label class="${lbl}">Role</label><select id="edit-user-role" class="${inputCls}"><option value="user" ${user.role === 'user' ? 'selected' : ''}>Regular User</option><option value="admin" ${user.role === 'admin' ? 'selected' : ''}>Administrator</option></select></div>
-                            <div class="pt-2 w-full"><button type="submit" class="w-full py-3.5 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-2xl shadow-md transition text-sm">Save Changes</button></div>
+                            <div class="pt-2 w-full"><button id="edit-user-btn" type="submit" class="w-full py-3.5 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-2xl shadow-md transition text-sm">Save Changes</button></div>
                         </form>
                     </div>
                 </div>
@@ -3556,6 +2570,9 @@
 
         async function handleEditUser(e, userId) {
             e.preventDefault();
+            const submitBtn = document.getElementById('edit-user-btn');
+            if (submitBtn && submitBtn.disabled) return;
+
             const name = document.getElementById('edit-user-name').value.trim();
             const role = document.getElementById('edit-user-role').value;
 
@@ -3566,6 +2583,8 @@
                 showToast('At least one administrator is required.', 'error');
                 return;
             }
+
+            if (submitBtn) submitBtn.disabled = true;
 
             try {
                 const { db, doc, updateDoc } = window.FB;
@@ -3579,12 +2598,16 @@
                 closeModal();
                 showToast('User updated successfully!', 'success');
             } catch (err) {
+                if (submitBtn) submitBtn.disabled = false;
                 showToast('Failed to update user.', 'error');
             }
         }
 
         async function handleAddNewUser(e) {
             e.preventDefault();
+            const submitBtn = document.getElementById('create-user-btn');
+            if (submitBtn && submitBtn.disabled) return;
+
             const name = document.getElementById('new-user-name').value.trim();
             const username = document.getElementById('new-user-username').value.trim().toLowerCase();
             const password = document.getElementById('new-user-password').value;
@@ -3604,6 +2627,8 @@
                 return;
             }
 
+            if (submitBtn) submitBtn.disabled = true;
+
             try {
                 const userId = 'usr_' + Date.now();
                 const newUser = { id: userId, name, username, password, role, email: `${username}@clickfactory.com`, wallet: 0, excessSpent: 0 };
@@ -3612,6 +2637,7 @@
                 closeModal();
                 showToast(`User ${name} added successfully!`, 'success');
             } catch (err) {
+                if (submitBtn) submitBtn.disabled = false;
                 showToast('Failed to add user.', 'error');
             }
         }
@@ -3653,7 +2679,6 @@
                         }
                         showToast(`User ${userName} moved to Deleted Users Bin.`, 'success');
                     } catch (err) {
-                        console.error(err);
                         showToast('Failed to remove user (data may be too large).', 'error');
                     }
                 }
@@ -3662,22 +2687,22 @@
 
         function renderUserAnalyticsTab() {
             const userExpenses = state.expenses.filter(e => e.userId === state.currentUser.id);
-            const total = userExpenses.reduce((s, e) => s + e.amount, 0);
-            const office = userExpenses.filter(e => e.category === 'Office').reduce((s, e) => s + e.amount, 0);
-            const shoot = userExpenses.filter(e => e.category === 'Shoot').reduce((s, e) => s + e.amount, 0);
+            const total = userExpenses.reduce((s, e) => s + Number(e.amount || 0), 0);
+            const office = userExpenses.filter(e => e.category === 'Office').reduce((s, e) => s + Number(e.amount || 0), 0);
+            const shoot = userExpenses.filter(e => e.category === 'Shoot').reduce((s, e) => s + Number(e.amount || 0), 0);
 
             const monthlyMap = {};
             userExpenses.forEach(exp => {
                 const monthKey = exp.date ? exp.date.substring(0, 7) : 'Unknown';
                 if (!monthlyMap[monthKey]) monthlyMap[monthKey] = { office: 0, shoot: 0, total: 0 };
-                if (exp.category === 'Office') monthlyMap[monthKey].office += exp.amount;
-                if (exp.category === 'Shoot') monthlyMap[monthKey].shoot += exp.amount;
-                monthlyMap[monthKey].total += exp.amount;
+                if (exp.category === 'Office') monthlyMap[monthKey].office += Number(exp.amount || 0);
+                if (exp.category === 'Shoot') monthlyMap[monthKey].shoot += Number(exp.amount || 0);
+                monthlyMap[monthKey].total += Number(exp.amount || 0);
             });
             const months = Object.keys(monthlyMap).sort().reverse();
 
             return `
-                <div class="space-y-4 w-full max-w-full">
+                <div class="space-y-4 w-full max-w-2xl mx-auto">
                     <div class="bg-gradient-to-br from-violet-600 to-indigo-700 rounded-3xl p-5 sm:p-6 text-white shadow-lg shadow-violet-500/20 border border-violet-500/30 w-full">
                         <p class="text-violet-200 text-xs font-semibold uppercase tracking-wider">My Expense Summary</p>
                         <h2 class="text-2xl sm:text-3xl font-bold tracking-tight mt-0.5 break-all">${formatCurrency(total)}</h2>
@@ -3692,7 +2717,9 @@
                             <h3 class="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Monthly Breakdown</h3>
                             <button onclick="exportUserCSV('${state.currentUser.id}')" class="text-xs font-semibold text-indigo-600 dark:text-indigo-400 hover:underline flex items-center space-x-1 shrink-0"><i class="fa-solid fa-download"></i><span>Export CSV</span></button>
                         </div>
-                        ${months.map(m => `
+                        ${months.length === 0 ? `
+                            <div class="ios-glass-card rounded-3xl p-8 text-center shadow-sm text-xs text-slate-400">No expenses recorded yet.</div>
+                        ` : months.map(m => `
                             <div class="ios-glass-card rounded-3xl p-6 sm:p-7 shadow-sm space-y-3 w-full mt-3">
                                 <div class="flex items-center justify-between">
                                     <span class="font-bold text-sm sm:text-base text-slate-900 dark:text-white truncate pr-2">${formatMonthName(m)}</span>
@@ -3725,7 +2752,7 @@
                 </button>`;
 
             return `
-                <div class="space-y-4 w-full max-w-full">
+                <div class="space-y-4 w-full max-w-2xl mx-auto">
                     <div class="ios-glass-card rounded-3xl p-6 sm:p-7 shadow-sm text-center w-full">
                         <div class="w-16 h-16 flex items-center justify-center mx-auto mb-3 overflow-hidden logo-container">
                             <img src="https://clickfactoryphotography.com/wp-content/uploads/2022/04/crop-logo.gif" alt="Click Factory Logo" class="w-full h-full object-contain" onerror="this.src='https://placehold.co/64x64/4f46e5/ffffff?text=CF'">
@@ -3840,7 +2867,7 @@
                                 <i class="fa-solid fa-circle-info text-indigo-500"></i>
                                 <span>System Version</span>
                             </h4>
-                            <p class="text-[10px] text-slate-500 dark:text-slate-400">Running v${CURRENT_CLIENT_APP_VERSION} (Auto-syncs with cloud)</p>
+                            <p class="text-[10px] text-slate-500 dark:text-slate-400">Running v${CURRENT_CLIENT_APP_VERSION} (${window.FB && window.FB.isLocalFallback ? 'Preview Storage Mode' : 'Cloud Synced'})</p>
                         </div>
 
                         <div class="space-y-2.5 pt-1 border-t border-slate-200/50 dark:border-slate-800">
@@ -3882,7 +2909,7 @@
                             ${field('current-pass', 'toggle-curr-pass-icon', 'Current Password')}
                             ${field('new-pass', 'toggle-new-pass-icon', 'New Password')}
                             ${field('confirm-new-pass', 'toggle-confirm-new-pass-icon', 'Confirm New Password')}
-                            <div class="pt-2 w-full"><button type="submit" class="w-full py-3.5 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-2xl shadow-md transition text-sm">Update Password</button></div>
+                            <div class="pt-2 w-full"><button id="change-pass-btn" type="submit" class="w-full py-3.5 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-2xl shadow-md transition text-sm">Update Password</button></div>
                         </form>
                     </div>
                 </div>
@@ -3891,6 +2918,9 @@
 
         async function handlePasswordChange(e) {
             e.preventDefault();
+            const submitBtn = document.getElementById('change-pass-btn');
+            if (submitBtn && submitBtn.disabled) return;
+
             const current = document.getElementById('current-pass').value;
             const newPass = document.getElementById('new-pass').value;
             const confirmNewPass = document.getElementById('confirm-new-pass').value;
@@ -3909,34 +2939,33 @@
                 return;
             }
 
+            if (submitBtn) submitBtn.disabled = true;
+
             try {
                 const { db, doc, updateDoc } = window.FB;
                 await updateDoc(doc(db, 'users', me.id), { password: newPass });
                 closeModal();
                 showToast('Password updated successfully!', 'success');
             } catch (err) {
+                if (submitBtn) submitBtn.disabled = false;
                 showToast('Failed to update password.', 'error');
             }
         }
 
         function exportUserCSV(userId) {
+            if (!state.currentUser) return;
+            if (state.currentUser.role !== 'admin' && userId !== state.currentUser.id) return;
             const userName = uName(userId) || 'user';
             downloadCSV(state.expenses.filter(e => e.userId === userId), `${userName.replace(/\s+/g, '_')}_expenses.csv`);
         }
 
         function exportFilteredCSV() {
-            const filtered = state.expenses.filter(exp => {
-                if (state.filterUser !== 'All' && exp.userId !== state.filterUser) return false;
-                if (state.filterCategory !== 'All' && exp.category !== state.filterCategory) return false;
-                if (state.filterMonth !== 'All' && !(exp.date || '').startsWith(state.filterMonth)) return false;
-                if (state.filterStartDate && exp.date < state.filterStartDate) return false;
-                if (state.filterEndDate && exp.date > state.filterEndDate) return false;
-                return true;
-            });
+            const filtered = getFilteredExpenses();
             downloadCSV(filtered, 'filtered_expenses_report.csv');
         }
 
         function exportAllCSV() {
+            if (!state.currentUser || state.currentUser.role !== 'admin') return;
             downloadCSV(state.expenses, 'all_company_expenses.csv');
         }
 
@@ -3981,7 +3010,13 @@
                     </div>
                 </div>
             `;
-            document.getElementById('modal-confirm-btn').onclick = () => { closeModal(); onConfirm(); };
+            const confirmBtn = document.getElementById('modal-confirm-btn');
+            confirmBtn.onclick = async () => {
+                if (confirmBtn.disabled) return;
+                confirmBtn.disabled = true;
+                closeModal();
+                await onConfirm();
+            };
         }
 
         function closeModal() {
@@ -3998,218 +3033,103 @@
             return String(str).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
         }
 
-        // ---------- STRICT TOP-DOWN PULL TO REFRESH ----------
-        let ptrStartX = 0;
-        let ptrStartY = 0;
-        let ptrCurrentY = 0;
-        let isPulling = false;
-        let isRefreshing = false;
-        let hasVibrated = false;
-        let gestureAxis = null;
-
-        const REFRESH_THRESHOLD = 60;
-        const MAX_PULL_DISTANCE = 140;
-        const DIRECTION_LOCK_THRESHOLD = 6;
-
-        function ptrPullDistance(rawDiff) {
-            if (rawDiff <= 0) return 0;
-            return Math.min(MAX_PULL_DISTANCE, rawDiff * 0.42 * (1 - (rawDiff / (rawDiff + 280))));
-        }
-
-        document.addEventListener('touchstart', (e) => {
-            if (!isPtrAllowed() || isRefreshing) {
-                isPulling = false;
-                return;
-            }
-
-            const mainContent = document.getElementById('main-content');
-            if (mainContent && mainContent.scrollTop <= 0) {
-                ptrStartX = e.touches[0].clientX;
-                ptrStartY = e.touches[0].clientY;
-                ptrCurrentY = ptrStartY;
-                isPulling = true;
-                hasVibrated = false;
-                gestureAxis = null;
-
-                const ptrContainer = document.getElementById('ptr-container');
-                const icon = document.getElementById('ptr-icon');
-                const text = document.getElementById('ptr-text');
-
-                if (ptrContainer) ptrContainer.style.transition = 'none';
-                if (icon) {
-                    icon.className = 'fa-solid fa-arrow-down';
-                    icon.style.transform = 'rotate(0deg)';
-                }
-                if (text) {
-                    text.textContent = 'Pull to refresh';
-                    text.style.color = '';
-                }
-            } else {
-                isPulling = false;
-            }
-        }, { passive: true });
-
-        document.addEventListener('touchmove', (e) => {
-            if (!isPulling || isRefreshing || !isPtrAllowed()) return;
-
-            const mainContent = document.getElementById('main-content');
-            if (!mainContent || mainContent.scrollTop > 0) {
-                isPulling = false;
-                resetPtrVisuals();
-                return;
-            }
-
-            const currentX = e.touches[0].clientX;
-            const currentY = e.touches[0].clientY;
-            const rawDiffX = currentX - ptrStartX;
-            const rawDiffY = currentY - ptrStartY;
-
-            if (!gestureAxis) {
-                const absX = Math.abs(rawDiffX);
-                const absY = Math.abs(rawDiffY);
-
-                if (absX > DIRECTION_LOCK_THRESHOLD || absY > DIRECTION_LOCK_THRESHOLD) {
-                    if (absX >= absY || rawDiffY <= 0) {
-                        gestureAxis = 'cancelled';
-                        isPulling = false;
-                        resetPtrVisuals();
-                        return;
-                    }
-                    gestureAxis = 'downward-pull';
-                } else {
-                    return;
-                }
-            }
-
-            if (gestureAxis !== 'downward-pull' || rawDiffY <= 0) {
-                resetPtrVisuals();
-                return;
-            }
-
-            ptrCurrentY = currentY;
-            const pullDistance = ptrPullDistance(rawDiffY);
-
-            const ptrContainer = document.getElementById('ptr-container');
-            const icon = document.getElementById('ptr-icon');
-            const text = document.getElementById('ptr-text');
-
-            if (ptrContainer) {
-                const progress = Math.min(1, pullDistance / REFRESH_THRESHOLD);
-                ptrContainer.style.opacity = progress.toString();
-                ptrContainer.style.transform = `translateY(${pullDistance}px)`;
-
-                if (pullDistance >= REFRESH_THRESHOLD) {
-                    if (icon) icon.style.transform = 'rotate(180deg)';
-                    if (text) {
-                        text.textContent = 'Release to refresh';
-                        text.style.color = '#4f46e5';
-                    }
-                    if (!hasVibrated) {
-                        if (state.soundEnabled && 'vibrate' in navigator) {
-                            try { navigator.vibrate(12); } catch (err) { }
-                        }
-                        hasVibrated = true;
-                    }
-                } else {
-                    const rotation = (pullDistance / REFRESH_THRESHOLD) * 180;
-                    if (icon) icon.style.transform = `rotate(${rotation}deg)`;
-                    if (text) {
-                        text.textContent = 'Pull to refresh';
-                        text.style.color = '';
-                    }
-                    hasVibrated = false;
-                }
-            }
-        }, { passive: true });
-
-        document.addEventListener('touchend', async () => {
-            if (!isPulling || isRefreshing || !isPtrAllowed() || gestureAxis !== 'downward-pull') {
-                isPulling = false;
-                gestureAxis = null;
-                resetPtrVisuals();
-                return;
-            }
-            isPulling = false;
-
-            const rawDiffY = ptrCurrentY - ptrStartY;
-            const ptrContainer = document.getElementById('ptr-container');
-            const icon = document.getElementById('ptr-icon');
-            const text = document.getElementById('ptr-text');
-
-            if (ptrContainer) {
-                ptrContainer.style.transition = 'transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.2s ease';
-            }
-
-            if (rawDiffY > 0 && ptrPullDistance(rawDiffY) >= REFRESH_THRESHOLD) {
-                isRefreshing = true;
-
-                if (ptrContainer) {
-                    ptrContainer.style.transform = 'translateY(42px)';
-                    ptrContainer.style.opacity = '1';
-                }
-                if (icon) {
-                    icon.className = 'fa-solid fa-circle-notch is-spinning';
-                    icon.style.transform = 'none';
-                }
-                if (text) {
-                    text.textContent = 'Updating...';
-                    text.style.color = '#4f46e5';
-                }
-
-                await new Promise(r => setTimeout(r, 650));
-                softRender();
-                showToast('Data refreshed!', 'success');
-
-                isRefreshing = false;
-            }
-
-            gestureAxis = null;
-            resetPtrVisuals();
-        });
-
-        function resetPtrVisuals() {
-            const ptrContainer = document.getElementById('ptr-container');
-            const icon = document.getElementById('ptr-icon');
-            const text = document.getElementById('ptr-text');
-
-            if (ptrContainer) {
-                ptrContainer.style.transform = 'translateY(-40px)';
-                ptrContainer.style.opacity = '0';
-            }
-            if (icon) {
-                icon.className = 'fa-solid fa-arrow-down';
-                icon.style.transform = 'rotate(0deg)';
-            }
-            if (text) {
-                text.textContent = 'Pull to refresh';
-                text.style.color = '';
-            }
-
-            ptrStartX = 0;
-            ptrStartY = 0;
-            ptrCurrentY = 0;
-            hasVibrated = false;
-            gestureAxis = null;
-        }
-
         window.addEventListener('resize', syncPersistentNavbar);
         window.addEventListener('orientationchange', () => setTimeout(syncPersistentNavbar, 100));
 
-        // Service Worker registration for PWA offline caching
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js').catch((err) => {
-                    console.warn('Service worker registration failed:', err);
-                });
-            });
-        }
-
-        document.addEventListener('DOMContentLoaded', () => {
-            render();
-            if (window.__listenersPending && typeof window.startAppListeners === 'function') {
+        // Boot synchronously on DOMContentLoaded (or immediately if already parsed)
+        function bootApp() {
+            applyDockTransparency(state.dockAlpha);
+            if (typeof window.startAppListeners === 'function') {
                 window.startAppListeners();
             }
-        });
+            render();
+        }
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', bootApp);
+        } else {
+            bootApp();
+        }
+    </script>
+
+    <!-- Optional Live Cloud Firebase Sync Upgrade (Upgrades seamlessly if network/CDN allows) -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import {
+            getFirestore,
+            enableIndexedDbPersistence,
+            collection,
+            getDocs,
+            setDoc,
+            doc,
+            deleteDoc,
+            updateDoc,
+            onSnapshot,
+            runTransaction
+        } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import {
+            getStorage,
+            ref as storageRef,
+            uploadString,
+            getDownloadURL,
+            deleteObject
+        } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDguDaGIQ8dbwLoqbXKDD4ixfPg7y3VCpg",
+            authDomain: "expensetracker-ec267.firebaseapp.com",
+            projectId: "expensetracker-ec267",
+            storageBucket: "expensetracker-ec267.firebasestorage.app",
+            messagingSenderId: "789003178398",
+            appId: "1:789003178398:web:1579e411ad728268c6468f"
+        };
+
+        async function connectLiveFirebase() {
+            try {
+                const appInstance = initializeApp(firebaseConfig);
+                const db = getFirestore(appInstance);
+                const storage = getStorage(appInstance);
+                enableIndexedDbPersistence(db).catch(() => { });
+
+                const probe = await Promise.race([
+                    getDocs(collection(db, 'users')),
+                    new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 2000))
+                ]);
+
+                if (probe.empty) {
+                    const defaultUsers = [
+                        { id: 'usr_adm', name: 'Admin Manager', username: 'admin', password: 'adminpassword', role: 'admin', email: 'admin@clickfactory.com', wallet: 0, excessSpent: 0 },
+                        { id: 'usr_1', name: 'User One', username: 'user1', password: 'password', role: 'user', email: 'user1@clickfactory.com', wallet: 0, excessSpent: 0 },
+                        { id: 'usr_2', name: 'User Two', username: 'user2', password: 'password', role: 'user', email: 'user2@clickfactory.com', wallet: 0, excessSpent: 0 }
+                    ];
+                    for (const u of defaultUsers) {
+                        await setDoc(doc(db, 'users', u.id), u);
+                    }
+                    await setDoc(doc(db, 'settings', 'app_settings'), { autoDeleteEnabled: false, currentVersion: '1.1.3' });
+                }
+
+                // Tear down local fallback listeners and attach live Firestore listeners
+                if (Array.isArray(window.activeUnsubscribers)) {
+                    window.activeUnsubscribers.forEach(unsub => { try { unsub(); } catch (e) { } });
+                    window.activeUnsubscribers.length = 0;
+                }
+                window.__listenersStarted = false;
+
+                window.FB = {
+                    db, storage, collection, getDocs, setDoc, doc, deleteDoc, updateDoc,
+                    onSnapshot, runTransaction, storageRef, uploadString, getDownloadURL, deleteObject,
+                    isLocalFallback: false
+                };
+
+                if (typeof window.startAppListeners === 'function') {
+                    window.startAppListeners();
+                }
+            } catch (e) {
+                // Keep local preview adapter active if offline or blocked by sandbox CSP
+            }
+        }
+
+        connectLiveFirebase();
     </script>
 </body>
 
