@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta name="theme-color" id="meta-theme-color" content="#f8fafc">
+    <meta name="theme-color" id="meta-theme-color" content="#ffffff">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <title>Click Factory Expense Tracker</title>
@@ -12,7 +12,7 @@
         href="https://clickfactoryphotography.com/wp-content/uploads/2022/04/crop-logo.gif">
     <link rel="apple-touch-icon" href="https://clickfactoryphotography.com/wp-content/uploads/2022/04/crop-logo.gif">
     <link rel="manifest"
-        href="data:application/manifest+json;charset=utf-8,%7B%22name%22%3A%22Expense%20tracker%22%2C%22short_name%22%3A%22ExpenseTracker%22%2C%22start_url%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22orientation%22%3A%22any%22%2C%22background_color%22%3A%22%23020617%22%2C%22theme_color%22%3A%22%23020617%22%2C%22icons%22%3A%5B%7B%22src%22%3A%22https%3A%2F%2Fclickfactoryphotography.com%2Fwp-content%2Fuploads%2F2022%2F04%2Fcrop-logo.gif%22%2C%22sizes%22%3A%22192x192%20512x512%22%2C%22type%22%3A%22image%2Fgif%22%7D%5D%7D">
+        href="data:application/manifest+json;charset=utf-8,%7B%22name%22%3A%22Expense%20tracker%22%2C%22short_name%22%3A%22ExpenseTracker%22%2C%22start_url%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22orientation%22%3A%22any%22%2C%22background_color%22%3A%22%23000000%22%2C%22theme_color%22%3A%22%23000000%22%2C%22icons%22%3A%5B%7B%22src%22%3A%22https%3A%2F%2Fclickfactoryphotography.com%2Fwp-content%2Fuploads%2F2022%2F04%2Fcrop-logo.gif%22%2C%22sizes%22%3A%22192x192%20512x512%22%2C%22type%22%3A%22image%2Fgif%22%7D%5D%7D">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -35,10 +35,10 @@
             const isDark = savedTheme === 'dark' || (savedTheme === 'system' && prefersDark);
             if (isDark) {
                 document.documentElement.classList.add('dark');
-                document.getElementById('meta-theme-color')?.setAttribute('content', '#020617');
+                document.getElementById('meta-theme-color')?.setAttribute('content', '#000000');
             } else {
                 document.documentElement.classList.remove('dark');
-                document.getElementById('meta-theme-color')?.setAttribute('content', '#f8fafc');
+                document.getElementById('meta-theme-color')?.setAttribute('content', '#ffffff');
             }
         })();
     </script>
@@ -128,13 +128,13 @@
             overflow: hidden;
             word-wrap: break-word;
             overflow-wrap: break-word;
-            background-color: #f8fafc;
+            background-color: #ffffff;
             transition: background-color 0.25s ease, color 0.25s ease;
         }
 
         html.dark,
         .dark body {
-            background-color: #020617;
+            background-color: #000000;
         }
 
         input[type="date"],
@@ -149,7 +149,11 @@
             flex: 1;
             min-height: 0;
             overflow: hidden;
-            background-color: #f8fafc;
+            background-color: #ffffff;
+            background-image:
+                radial-gradient(at 15% 8%, rgba(99, 102, 241, 0.06) 0px, transparent 52%),
+                radial-gradient(at 88% 18%, rgba(168, 85, 247, 0.05) 0px, transparent 48%),
+                radial-gradient(at 50% 92%, rgba(56, 189, 248, 0.05) 0px, transparent 55%);
             display: flex;
             flex-direction: column;
             padding-top: 0;
@@ -157,21 +161,31 @@
         }
 
         .dark .app-container {
-            background-color: #020617;
+            background-color: #000000;
+            background-image:
+                radial-gradient(at 15% 6%, rgba(99, 102, 241, 0.14) 0px, transparent 50%),
+                radial-gradient(at 88% 20%, rgba(139, 92, 246, 0.11) 0px, transparent 48%),
+                radial-gradient(at 50% 95%, rgba(14, 165, 233, 0.09) 0px, transparent 52%);
         }
 
         .ios-header {
             flex-shrink: 0;
-            padding-top: calc(env(safe-area-inset-top, 0px) + 16px);
+            padding-top: calc(env(safe-area-inset-top, 0px) + 14px);
             padding-bottom: 12px;
-            background-color: #f8fafc;
+            background: rgba(255, 255, 255, 0.55);
+            backdrop-filter: blur(22px) saturate(1.65);
+            -webkit-backdrop-filter: blur(22px) saturate(1.65);
+            border-bottom: 1px solid rgba(15, 23, 42, 0.07);
+            box-shadow: inset 0 -1px 0 rgba(255, 255, 255, 0.65), 0 6px 20px -10px rgba(15, 23, 42, 0.08);
             position: relative;
             z-index: 45;
-            transition: background-color 0.25s ease;
+            transition: background 0.25s ease, border-color 0.25s ease;
         }
 
         .dark .ios-header {
-            background-color: #020617;
+            background: rgba(0, 0, 0, 0.62);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+            box-shadow: inset 0 -1px 0 rgba(255, 255, 255, 0.08), 0 10px 28px -12px rgba(0, 0, 0, 0.85);
         }
 
         #main-content {
@@ -182,6 +196,7 @@
             position: relative;
             padding-top: 8px;
             padding-bottom: 140px;
+            will-change: transform, opacity;
         }
 
         #ptr-container {
@@ -205,18 +220,18 @@
             gap: 8px;
             padding: 6px 14px;
             border-radius: 9999px;
-            background: rgba(255, 255, 255, 0.9);
-            border: 1px solid rgba(226, 232, 240, 0.8);
-            box-shadow: 0 4px 14px -2px rgba(0, 0, 0, 0.08), 0 2px 6px -1px rgba(0, 0, 0, 0.04);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
+            background: rgba(255, 255, 255, 0.45);
+            border: 1px solid rgba(255, 255, 255, 0.75);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9), 0 8px 20px -4px rgba(15, 23, 42, 0.12);
+            backdrop-filter: blur(20px) saturate(1.65);
+            -webkit-backdrop-filter: blur(20px) saturate(1.65);
             transition: all 0.2s ease;
         }
 
         .dark .ptr-pill {
-            background: rgba(15, 23, 42, 0.85);
-            border-color: rgba(51, 65, 85, 0.7);
-            box-shadow: 0 4px 16px -2px rgba(0, 0, 0, 0.5);
+            background: rgba(18, 18, 22, 0.55);
+            border-color: rgba(255, 255, 255, 0.2);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2), 0 10px 24px -4px rgba(0, 0, 0, 0.7);
         }
 
         #ptr-icon {
@@ -269,11 +284,13 @@
 
         .custom-date-wrapper {
             position: relative;
-            background: #f8fafc;
+            background: rgba(255, 255, 255, 0.45);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
         }
 
         .dark .custom-date-wrapper {
-            background: #1e293b;
+            background: rgba(24, 24, 28, 0.55);
         }
 
         .custom-date-wrapper input[type="date"] {
@@ -322,7 +339,7 @@
         @keyframes homeZoomOut {
             0% {
                 opacity: 0;
-                transform: scale(1.04);
+                transform: scale(1.03);
             }
 
             100% {
@@ -336,7 +353,7 @@
         }
 
         .animate-zoom-out-enter {
-            animation: homeZoomOut 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+            animation: homeZoomOut 0.36s cubic-bezier(0.22, 1, 0.36, 1);
         }
 
         @keyframes pulse-ring {
@@ -360,9 +377,9 @@
             animation: pulse-ring 1.2s infinite;
         }
 
-        @keyframes slideInFromRight {
+        @keyframes tabSlideForward {
             0% {
-                transform: translate3d(22px, 0, 0) scale(0.985);
+                transform: translate3d(28px, 0, 0) scale(0.985);
                 opacity: 0;
             }
 
@@ -372,9 +389,9 @@
             }
         }
 
-        @keyframes slideInFromLeft {
+        @keyframes tabSlideBackward {
             0% {
-                transform: translate3d(-22px, 0, 0) scale(0.985);
+                transform: translate3d(-28px, 0, 0) scale(0.985);
                 opacity: 0;
             }
 
@@ -384,9 +401,9 @@
             }
         }
 
-        @keyframes slideInUpSubtle {
+        @keyframes tabLiftUp {
             0% {
-                transform: translate3d(0, 14px, 0) scale(0.985);
+                transform: translate3d(0, 22px, 0) scale(0.97);
                 opacity: 0;
             }
 
@@ -397,24 +414,22 @@
         }
 
         .animate-slide-right {
-            will-change: transform, opacity;
-            animation: slideInFromRight 0.34s cubic-bezier(0.22, 1, 0.36, 1) both;
+            animation: tabSlideForward 0.34s cubic-bezier(0.22, 1, 0.36, 1) both;
         }
 
         .animate-slide-left {
-            will-change: transform, opacity;
-            animation: slideInFromLeft 0.34s cubic-bezier(0.22, 1, 0.36, 1) both;
+            animation: tabSlideBackward 0.34s cubic-bezier(0.22, 1, 0.36, 1) both;
         }
 
         .animate-slide-up {
-            will-change: transform, opacity;
-            animation: slideInUpSubtle 0.32s cubic-bezier(0.22, 1, 0.36, 1) both;
+            animation: tabLiftUp 0.34s cubic-bezier(0.22, 1, 0.36, 1) both;
         }
 
         @media (prefers-reduced-motion: reduce) {
             .animate-slide-right,
             .animate-slide-left,
-            .animate-slide-up {
+            .animate-slide-up,
+            .animate-zoom-out-enter {
                 animation: none !important;
             }
         }
@@ -446,11 +461,11 @@
             pointer-events: auto;
             user-select: none;
             -webkit-user-select: none;
-            background: rgba(255, 255, 255, 0.01);
-            backdrop-filter: blur(8px) saturate(1.25);
-            -webkit-backdrop-filter: blur(8px) saturate(1.25);
-            border: 1px solid rgba(15, 23, 42, 0.08);
-            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.65), 0 10px 24px -8px rgba(15, 23, 42, 0.12), 0 2px 8px -2px rgba(15, 23, 42, 0.05);
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(10px) saturate(1.2);
+            -webkit-backdrop-filter: blur(10px) saturate(1.2);
+            border: 1px solid rgba(15, 23, 42, 0.07);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.45), 0 8px 20px -8px rgba(15, 23, 42, 0.08);
             transition: background 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
         }
 
@@ -470,10 +485,10 @@
             pointer-events: none;
             will-change: transform, width;
             transform: translateX(0);
-            background: linear-gradient(135deg, rgba(99, 102, 241, 0.10), rgba(255, 255, 255, 0.18));
-            border: 1px solid rgba(99, 102, 241, 0.24);
-            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9), 0 4px 12px -2px rgba(79, 70, 229, 0.14);
-            transition: transform 0.46s cubic-bezier(0.22, 1.35, 0.36, 1), width 0.46s cubic-bezier(0.22, 1.35, 0.36, 1);
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.08), rgba(255, 255, 255, 0.18));
+            border: 1px solid rgba(99, 102, 241, 0.16);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.65), 0 2px 8px -2px rgba(79, 70, 229, 0.08);
+            transition: transform 0.44s cubic-bezier(0.25, 1.35, 0.45, 1), width 0.44s cubic-bezier(0.25, 1.35, 0.45, 1);
         }
 
         .dark .liquid-bubble {
@@ -528,7 +543,7 @@
             font-size: 16px;
             margin-bottom: 2px;
             color: #475569;
-            transition: transform 0.34s cubic-bezier(0.22, 1.35, 0.36, 1), color 0.22s ease;
+            transition: transform 0.28s cubic-bezier(0.34, 1.56, 0.64, 1), color 0.2s ease;
         }
 
         .dark .liquid-icon-wrap {
@@ -583,98 +598,74 @@
             box-shadow: 0 2px 6px rgba(239, 68, 68, 0.45);
         }
 
-        .ios-glass-card {
-            background: rgba(255, 255, 255, 0.86);
-            backdrop-filter: blur(20px) saturate(160%);
-            -webkit-backdrop-filter: blur(20px) saturate(160%);
-            border: 1px solid rgba(226, 232, 240, 0.85);
-            transition: background-color 0.25s ease, border-color 0.25s ease;
-        }
-
-        .dark .ios-glass-card {
-            background: rgba(15, 23, 42, 0.78);
-            border: 1px solid rgba(51, 65, 85, 0.65);
-        }
-
-        .ios-glass-modal {
-            background: rgba(255, 255, 255, 0.96);
-            backdrop-filter: blur(24px) saturate(180%);
-            -webkit-backdrop-filter: blur(24px) saturate(180%);
-            border: 1px solid rgba(226, 232, 240, 0.9);
-            transition: background-color 0.25s ease, border-color 0.25s ease;
-        }
-
-        .dark .ios-glass-modal {
-            background: rgba(15, 23, 42, 0.94);
-            border: 1px solid rgba(51, 65, 85, 0.8);
-        }
-
+        /* Users Sub-Tab Liquid Glass Segmented Control */
         .liquid-sub-dock {
             position: relative;
             display: flex;
             align-items: center;
             gap: 4px;
-            padding: 5px;
-            border-radius: 1rem;
+            width: 100%;
+            height: 44px;
+            padding: 4px;
+            border-radius: 9999px;
             isolation: isolate;
             user-select: none;
             -webkit-user-select: none;
-            background: rgba(255, 255, 255, 0.01);
-            backdrop-filter: blur(8px) saturate(1.25);
-            -webkit-backdrop-filter: blur(8px) saturate(1.25);
-            border: 1px solid rgba(15, 23, 42, 0.07);
-            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35), 0 6px 16px -6px rgba(15, 23, 42, 0.08);
+            background: rgba(255, 255, 255, 0.04);
+            backdrop-filter: blur(10px) saturate(1.25);
+            -webkit-backdrop-filter: blur(10px) saturate(1.25);
+            border: 1px solid rgba(15, 23, 42, 0.08);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.55), 0 6px 18px -6px rgba(15, 23, 42, 0.08);
             transition: background 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
         }
 
         .dark .liquid-sub-dock {
-            background: rgba(15, 23, 42, 0.14);
-            border: 1px solid rgba(255, 255, 255, 0.18);
-            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.22), 0 10px 24px -12px rgba(0, 0, 0, 0.65);
+            background: rgba(15, 23, 42, 0.16);
+            border: 1px solid rgba(255, 255, 255, 0.20);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25), 0 12px 28px -12px rgba(0, 0, 0, 0.75);
         }
 
         .liquid-sub-bubble {
             position: absolute;
-            top: 5px;
-            bottom: 5px;
+            top: 4px;
+            bottom: 4px;
             left: 0;
-            border-radius: 0.75rem;
+            border-radius: 9999px;
             z-index: 0;
             pointer-events: none;
             will-change: transform, width;
             transform: translateX(0);
-            background: linear-gradient(135deg, rgba(99, 102, 241, 0.08), rgba(255, 255, 255, 0.14));
-            border: 1px solid rgba(99, 102, 241, 0.16);
-            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5), 0 4px 12px -2px rgba(79, 70, 229, 0.14);
-            transition: transform 0.46s cubic-bezier(0.34, 1.56, 0.5, 1), width 0.46s cubic-bezier(0.34, 1.56, 0.5, 1);
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.12), rgba(255, 255, 255, 0.32));
+            border: 1px solid rgba(99, 102, 241, 0.22);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8), 0 3px 10px -2px rgba(79, 70, 229, 0.12);
+            transition: transform 0.44s cubic-bezier(0.25, 1.35, 0.45, 1), width 0.44s cubic-bezier(0.25, 1.35, 0.45, 1);
         }
 
         .dark .liquid-sub-bubble {
-            background: rgba(255, 255, 255, 0.12);
+            background: rgba(255, 255, 255, 0.14);
             border: 1px solid rgba(255, 255, 255, 0.32);
-            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.45), 0 8px 20px -4px rgba(0, 0, 0, 0.38);
-        }
-
-        @media (prefers-reduced-motion: reduce) {
-            .liquid-sub-bubble {
-                transition: none !important;
-            }
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.42), 0 6px 16px -4px rgba(0, 0, 0, 0.4);
         }
 
         .liquid-sub-btn {
             position: relative;
             z-index: 1;
             flex: 1;
-            padding: 8px 12px;
-            border-radius: 0.75rem;
+            height: 100%;
+            border-radius: 9999px;
             background: transparent;
             border: none;
             outline: none;
             cursor: pointer;
             font-size: 12px;
             font-weight: 600;
+            letter-spacing: -0.01em;
             color: #475569;
-            transition: transform 0.15s ease, color 0.22s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+            transition: transform 0.15s ease, color 0.2s ease;
         }
 
         .dark .liquid-sub-btn {
@@ -694,21 +685,86 @@
             color: #ffffff;
         }
 
+        @media (prefers-reduced-motion: reduce) {
+            .liquid-sub-bubble {
+                transition: none !important;
+            }
+        }
+
+        /* Liquid Glass Floating Action Button (+) */
         .liquid-fab {
-            background: linear-gradient(135deg, rgba(99, 102, 241, 0.14), rgba(255, 255, 255, 0.22));
-            backdrop-filter: blur(8px) saturate(1.25);
-            -webkit-backdrop-filter: blur(8px) saturate(1.25);
-            border: 1px solid rgba(99, 102, 241, 0.28);
-            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.85), 0 12px 26px -6px rgba(79, 70, 229, 0.24), 0 4px 10px -2px rgba(15, 23, 42, 0.08);
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.14), rgba(255, 255, 255, 0.42));
+            backdrop-filter: blur(14px) saturate(1.45);
+            -webkit-backdrop-filter: blur(14px) saturate(1.45);
+            border: 1px solid rgba(99, 102, 241, 0.24);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.85), 0 12px 28px -6px rgba(79, 70, 229, 0.22), 0 4px 12px -2px rgba(15, 23, 42, 0.08);
             color: #4f46e5;
-            transition: transform 0.28s cubic-bezier(0.22, 1.35, 0.36, 1), background 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+            transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), background 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
         }
 
         .dark .liquid-fab {
-            background: rgba(15, 23, 42, 0.22);
-            border: 1px solid rgba(255, 255, 255, 0.26);
-            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35), 0 16px 32px -10px rgba(0, 0, 0, 0.75), 0 6px 16px -4px rgba(0, 0, 0, 0.4);
-            color: #a5b4fc;
+            background: rgba(255, 255, 255, 0.11);
+            border: 1px solid rgba(255, 255, 255, 0.28);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.42), 0 16px 36px -8px rgba(0, 0, 0, 0.72), 0 6px 16px -4px rgba(0, 0, 0, 0.45);
+            color: #ffffff;
+        }
+
+        .ios-glass-card {
+            background: rgba(255, 255, 255, 0.56);
+            backdrop-filter: blur(22px) saturate(1.65);
+            -webkit-backdrop-filter: blur(22px) saturate(1.65);
+            border: 1px solid rgba(255, 255, 255, 0.85);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9), 0 8px 24px -8px rgba(15, 23, 42, 0.07), 0 2px 6px -1px rgba(15, 23, 42, 0.03);
+            transition: background-color 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+        }
+
+        .dark .ios-glass-card {
+            background: rgba(20, 20, 24, 0.56);
+            border: 1px solid rgba(255, 255, 255, 0.14);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.16), 0 12px 32px -10px rgba(0, 0, 0, 0.75);
+        }
+
+        .ios-glass-modal {
+            background: rgba(255, 255, 255, 0.80);
+            backdrop-filter: blur(28px) saturate(1.85);
+            -webkit-backdrop-filter: blur(28px) saturate(1.85);
+            border: 1px solid rgba(255, 255, 255, 0.92);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 1), 0 24px 60px -12px rgba(15, 23, 42, 0.22);
+            transition: background-color 0.25s ease, border-color 0.25s ease;
+        }
+
+        .dark .ios-glass-modal {
+            background: rgba(18, 18, 22, 0.82);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2), 0 28px 64px -12px rgba(0, 0, 0, 0.92);
+        }
+
+        .liquid-hero-card {
+            background: linear-gradient(135deg, rgba(15, 23, 42, 0.88), rgba(49, 46, 129, 0.84), rgba(15, 23, 42, 0.90));
+            backdrop-filter: blur(24px) saturate(1.7);
+            -webkit-backdrop-filter: blur(24px) saturate(1.7);
+            border: 1px solid rgba(255, 255, 255, 0.22);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.28), 0 16px 36px -10px rgba(30, 27, 75, 0.35);
+        }
+
+        .dark .liquid-hero-card {
+            background: linear-gradient(135deg, rgba(16, 16, 22, 0.86), rgba(49, 46, 129, 0.65), rgba(12, 12, 18, 0.92));
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.22), 0 20px 44px -12px rgba(0, 0, 0, 0.85);
+        }
+
+        .liquid-input {
+            background: rgba(255, 255, 255, 0.48) !important;
+            backdrop-filter: blur(14px) saturate(1.4);
+            -webkit-backdrop-filter: blur(14px) saturate(1.4);
+            border: 1px solid rgba(15, 23, 42, 0.09) !important;
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.75);
+        }
+
+        .dark .liquid-input {
+            background: rgba(26, 26, 32, 0.56) !important;
+            border: 1px solid rgba(255, 255, 255, 0.14) !important;
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.10);
         }
     </style>
 </head>
@@ -763,7 +819,6 @@
         const DOCK_ALPHA_STORAGE_KEY = 'click_factory_dock_alpha_v1';
         const LOCAL_DATA_STORAGE_KEY = 'click_factory_data_v1';
         const GDRIVE_TOKEN_CACHE_KEY = 'click_factory_gdrive_token_v1';
-        const CURRENT_CLIENT_APP_VERSION = '2.9.0';
         const tabOrder = ['home', 'add', 'notifications', 'admin', 'analytics', 'users', 'wallet', 'profile', 'recycle', 'userRecycle', 'requests'];
 
         const DEFAULT_SEED_USERS = [
@@ -808,7 +863,7 @@
                     settings: {
                         app_settings: {
                             autoDeleteEnabled: false,
-                            currentVersion: CURRENT_CLIENT_APP_VERSION,
+                            currentVersion: '2.9.0',
                             gdriveEnabled: false,
                             gdriveClientId: '',
                             gdriveFolderId: '',
@@ -949,7 +1004,7 @@
             passwordRequests: [],
             appSettings: {
                 autoDeleteEnabled: false,
-                currentVersion: CURRENT_CLIENT_APP_VERSION,
+                currentVersion: '2.9.0',
                 gdriveEnabled: false,
                 gdriveClientId: '',
                 gdriveFolderId: '',
@@ -1159,7 +1214,6 @@
             return u ? u.name : '';
         }
 
-        // Google Identity Services + Drive API Helpers (Silent for Users/Admins, Configurable by Developer)
         let gisScriptPromise = null;
         function loadGoogleIdentityScript() {
             if (window.google && window.google.accounts && window.google.accounts.oauth2) {
@@ -1465,28 +1519,54 @@
                 document.head.appendChild(styleTag);
             }
 
-            const lightAlpha = Math.min(0.65, state.dockAlpha * 0.45).toFixed(3);
+            const lightAlpha = (state.dockAlpha * 0.45).toFixed(3);
             const darkAlpha = Math.min(0.90, state.dockAlpha + 0.04).toFixed(2);
-            const bubbleLightTint = Math.min(0.20, Math.max(0.08, (state.dockAlpha * 0.2) + 0.08)).toFixed(2);
-            const bubbleLightWhite = Math.min(0.45, Math.max(0.14, (state.dockAlpha * 0.4) + 0.14)).toFixed(2);
+            const bubbleLightTint = Math.min(0.16, Math.max(0.06, (state.dockAlpha * 0.16) + 0.055)).toFixed(3);
+            const bubbleLightWhite = Math.min(0.52, Math.max(0.14, (state.dockAlpha * 0.65) + 0.13)).toFixed(3);
             const bubbleDark = Math.min(0.32, Math.max(0.10, (state.dockAlpha * 0.45) + 0.08)).toFixed(2);
+            const cardLightAlpha = Math.min(0.88, Math.max(0.42, 0.44 + state.dockAlpha * 0.48)).toFixed(2);
+            const cardDarkAlpha = Math.min(0.86, Math.max(0.44, 0.46 + state.dockAlpha * 0.44)).toFixed(2);
+            const headerLightAlpha = Math.min(0.84, Math.max(0.36, 0.38 + state.dockAlpha * 0.48)).toFixed(2);
+            const headerDarkAlpha = Math.min(0.84, Math.max(0.42, 0.44 + state.dockAlpha * 0.44)).toFixed(2);
 
             styleTag.innerHTML = `
-                .liquid-dock, .liquid-sub-dock {
+                .liquid-dock,
+                .liquid-sub-dock {
                     background: rgba(255, 255, 255, ${lightAlpha}) !important;
-                    backdrop-filter: blur(8px) saturate(1.25) !important;
-                    -webkit-backdrop-filter: blur(8px) saturate(1.25) !important;
+                    backdrop-filter: blur(10px) saturate(1.25) !important;
+                    -webkit-backdrop-filter: blur(10px) saturate(1.25) !important;
                 }
-                .dark .liquid-dock, .dark .liquid-sub-dock {
+                .dark .liquid-dock,
+                .dark .liquid-sub-dock {
                     background: rgba(15, 23, 42, ${darkAlpha}) !important;
-                    backdrop-filter: blur(8px) saturate(1.25) !important;
-                    -webkit-backdrop-filter: blur(8px) saturate(1.25) !important;
+                    backdrop-filter: blur(10px) saturate(1.25) !important;
+                    -webkit-backdrop-filter: blur(10px) saturate(1.25) !important;
                 }
-                .liquid-bubble, .liquid-sub-bubble, .liquid-fab {
+                .liquid-bubble,
+                .liquid-sub-bubble,
+                .liquid-fab {
                     background: linear-gradient(135deg, rgba(99, 102, 241, ${bubbleLightTint}), rgba(255, 255, 255, ${bubbleLightWhite})) !important;
+                    backdrop-filter: blur(14px) saturate(1.4) !important;
+                    -webkit-backdrop-filter: blur(14px) saturate(1.4) !important;
                 }
-                .dark .liquid-bubble, .dark .liquid-sub-bubble, .dark .liquid-fab {
+                .dark .liquid-bubble,
+                .dark .liquid-sub-bubble,
+                .dark .liquid-fab {
                     background: rgba(255, 255, 255, ${bubbleDark}) !important;
+                    backdrop-filter: blur(14px) saturate(1.4) !important;
+                    -webkit-backdrop-filter: blur(14px) saturate(1.4) !important;
+                }
+                .ios-glass-card {
+                    background: rgba(255, 255, 255, ${cardLightAlpha}) !important;
+                }
+                .dark .ios-glass-card {
+                    background: rgba(20, 20, 24, ${cardDarkAlpha}) !important;
+                }
+                .ios-header {
+                    background: rgba(255, 255, 255, ${headerLightAlpha}) !important;
+                }
+                .dark .ios-header {
+                    background: rgba(0, 0, 0, ${headerDarkAlpha}) !important;
                 }
             `;
         }
@@ -1755,10 +1835,10 @@
             const metaThemeColor = document.getElementById('meta-theme-color');
             if (isDark) {
                 document.documentElement.classList.add('dark');
-                if (metaThemeColor) metaThemeColor.setAttribute('content', '#020617');
+                if (metaThemeColor) metaThemeColor.setAttribute('content', '#000000');
             } else {
                 document.documentElement.classList.remove('dark');
-                if (metaThemeColor) metaThemeColor.setAttribute('content', '#f8fafc');
+                if (metaThemeColor) metaThemeColor.setAttribute('content', '#ffffff');
             }
         }
 
@@ -2907,7 +2987,8 @@
         }
 
         function switchTab(tab, keepEditState = false) {
-            const prevIndex = tabOrder.indexOf(state.activeTab);
+            const prevTab = state.activeTab;
+            const prevIndex = tabOrder.indexOf(prevTab);
             if (tab === 'summary') {
                 state.activeTab = isAdminOrDev(state.currentUser) ? 'admin' : 'analytics';
             } else {
@@ -2916,6 +2997,8 @@
             const nextIndex = tabOrder.indexOf(state.activeTab);
             if (state.activeTab === 'add' || state.activeTab === 'notifications') {
                 state.slideDirection = 'animate-slide-up';
+            } else if (prevTab === 'add' || prevTab === 'notifications') {
+                state.slideDirection = 'animate-zoom-out-enter';
             } else {
                 state.slideDirection = nextIndex >= prevIndex ? 'animate-slide-right' : 'animate-slide-left';
             }
@@ -2929,14 +3012,6 @@
             syncPersistentHeader();
             syncPersistentNavbar();
             render();
-
-            const mainEl = document.getElementById('main-content');
-            if (mainEl && state.slideDirection && state.slideDirection !== 'no-anim') {
-                const animClass = state.slideDirection;
-                mainEl.classList.remove('animate-slide-right', 'animate-slide-left', 'animate-slide-up');
-                void mainEl.offsetWidth;
-                mainEl.classList.add(animClass);
-            }
         }
 
         function render() {
@@ -2991,14 +3066,15 @@
 
             if (shouldPlayZoomEntrance) triggerZoomOutEntrance();
             syncPersistentNavbar();
-            syncUserFilterBubble(false);
-            syncHomeCategoryBubble(false);
+            if (typeof syncHomeCategoryBubble === 'function') syncHomeCategoryBubble(false);
+            if (typeof syncUserFilterBubble === 'function') syncUserFilterBubble(false);
+            if (typeof syncFormCategoryBubble === 'function') syncFormCategoryBubble(false);
         }
 
         function fabButtonHtml() {
             return `
-                <button onclick="openNewExpenseTab()" class="fixed sm:absolute bottom-28 right-5 z-40 group w-14 h-14 rounded-full liquid-fab flex items-center justify-center hover:scale-105 active:scale-95" title="Add New Expense" aria-label="Add New Expense">
-                    <i class="fa-solid fa-plus text-lg transition-transform duration-300 group-hover:rotate-90"></i>
+                <button onclick="openNewExpenseTab()" class="liquid-fab fixed sm:absolute bottom-28 right-5 z-40 w-14 h-14 rounded-full flex items-center justify-center text-xl hover:scale-105 active:scale-90 group" title="Add New Expense" aria-label="Add New Expense">
+                    <i class="fa-solid fa-plus transition-transform duration-300 group-hover:rotate-90"></i>
                 </button>
             `;
         }
@@ -3027,8 +3103,9 @@
 
             const fab = document.getElementById('add-fab-container');
             if (fab) fab.innerHTML = state.activeTab !== 'add' ? fabButtonHtml() : '';
-            syncUserFilterBubble(false);
-            syncHomeCategoryBubble(false);
+            if (typeof syncHomeCategoryBubble === 'function') syncHomeCategoryBubble(false);
+            if (typeof syncUserFilterBubble === 'function') syncUserFilterBubble(false);
+            if (typeof syncFormCategoryBubble === 'function') syncFormCategoryBubble(false);
         }
 
         function renderLoginPage() {
@@ -3351,40 +3428,42 @@
 
             return `
                 <div class="space-y-4 w-full max-w-full">
-                    <div class="relative overflow-hidden rounded-[2rem] p-5 sm:p-6 bg-gradient-to-br from-slate-900 via-indigo-950 to-violet-950 text-white shadow-xl shadow-indigo-950/25 border border-white/10 w-full">
-                        <div class="pointer-events-none absolute -top-12 -right-12 w-40 h-40 rounded-full bg-indigo-500/25 blur-2xl"></div>
-                        <div class="pointer-events-none absolute -bottom-14 -left-10 w-36 h-36 rounded-full bg-violet-500/20 blur-2xl"></div>
+                    <div class="liquid-hero-card rounded-[28px] p-5 sm:p-6 text-white relative overflow-hidden w-full">
+                        <div class="pointer-events-none absolute -top-14 -right-14 w-44 h-44 rounded-full bg-indigo-500/25 blur-2xl"></div>
+                        <div class="pointer-events-none absolute -bottom-16 -left-10 w-40 h-40 rounded-full bg-violet-500/20 blur-2xl"></div>
 
-                        <div class="relative flex justify-between items-start gap-2">
+                        <div class="relative flex justify-between items-start gap-3">
                             <div class="min-w-0 flex-1">
-                                <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/10 border border-white/10 text-[10px] font-semibold uppercase tracking-widest text-indigo-200 mb-2">
+                                <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/10 border border-white/10 text-[10px] font-semibold uppercase tracking-wider text-indigo-200 mb-2">
                                     <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
                                     <span class="truncate">${isAdmin ? 'Total Filtered Expenses' : 'My Total Expenses'}</span>
                                 </div>
-                                <h2 class="text-3xl sm:text-4xl font-extrabold tracking-tight text-white break-all">${formatCurrency(totalAmount)}</h2>
+                                <h2 class="text-3xl sm:text-4xl font-bold tracking-tight text-white break-all">${formatCurrency(totalAmount)}</h2>
                             </div>
-                            <span class="bg-white/10 backdrop-blur-md text-indigo-100 text-xs font-semibold px-3 py-1.5 rounded-2xl shrink-0 border border-white/15 shadow-sm">
-                                ${filtered.length} ${filtered.length === 1 ? 'Item' : 'Items'}
-                            </span>
+                            <div class="flex flex-col items-end shrink-0">
+                                <span class="bg-white/12 backdrop-blur-md text-white text-xs font-semibold px-3 py-1.5 rounded-2xl border border-white/15 shadow-sm">
+                                    ${filtered.length} ${filtered.length === 1 ? 'Item' : 'Items'}
+                                </span>
+                            </div>
                         </div>
 
                         <div class="relative grid grid-cols-2 gap-3 mt-5">
-                            <div class="bg-white/[0.07] backdrop-blur-md rounded-2xl p-3.5 min-w-0 border border-white/10 flex items-center gap-3">
-                                <div class="w-9 h-9 rounded-xl bg-amber-400/20 text-amber-300 border border-amber-400/25 flex items-center justify-center shrink-0">
-                                    <i class="fa-solid fa-briefcase text-sm"></i>
+                            <div class="bg-white/[0.07] hover:bg-white/[0.11] transition backdrop-blur-md rounded-2xl p-3.5 min-w-0 border border-white/10 flex items-center gap-3">
+                                <div class="w-9 h-9 rounded-xl bg-amber-400/20 border border-amber-300/25 text-amber-300 flex items-center justify-center shrink-0">
+                                    <i class="fa-solid fa-briefcase text-xs"></i>
                                 </div>
                                 <div class="min-w-0 flex-1">
                                     <span class="text-[11px] font-medium text-slate-300 block truncate">Office</span>
-                                    <p class="font-bold text-sm sm:text-base text-white break-all leading-tight mt-0.5">${formatCurrency(officeTotal)}</p>
+                                    <p class="font-bold text-sm sm:text-base text-white break-all mt-0.5">${formatCurrency(officeTotal)}</p>
                                 </div>
                             </div>
-                            <div class="bg-white/[0.07] backdrop-blur-md rounded-2xl p-3.5 min-w-0 border border-white/10 flex items-center gap-3">
-                                <div class="w-9 h-9 rounded-xl bg-indigo-400/20 text-indigo-300 border border-indigo-400/25 flex items-center justify-center shrink-0">
-                                    <i class="fa-solid fa-clapperboard text-sm"></i>
+                            <div class="bg-white/[0.07] hover:bg-white/[0.11] transition backdrop-blur-md rounded-2xl p-3.5 min-w-0 border border-white/10 flex items-center gap-3">
+                                <div class="w-9 h-9 rounded-xl bg-indigo-400/25 border border-indigo-300/25 text-indigo-200 flex items-center justify-center shrink-0">
+                                    <i class="fa-solid fa-clapperboard text-xs"></i>
                                 </div>
                                 <div class="min-w-0 flex-1">
                                     <span class="text-[11px] font-medium text-slate-300 block truncate">Shoot</span>
-                                    <p class="font-bold text-sm sm:text-base text-white break-all leading-tight mt-0.5">${formatCurrency(shootTotal)}</p>
+                                    <p class="font-bold text-sm sm:text-base text-white break-all mt-0.5">${formatCurrency(shootTotal)}</p>
                                 </div>
                             </div>
                         </div>
@@ -3404,11 +3483,18 @@
                                 ${hasDateFilterActive ? '<span class="absolute top-2 right-2 w-2 h-2 rounded-full bg-amber-400"></span>' : ''}
                             </button>
                         </div>
-                        <div id="home-category-dock" class="liquid-sub-dock w-full" role="group" aria-label="Filter expenses by category">
-                            <div id="home-category-bubble" class="liquid-sub-bubble" aria-hidden="true"></div>
-                            <button type="button" data-home-cat="All" onclick="setFilterCategory('All')" class="liquid-sub-btn px-2 whitespace-nowrap truncate ${state.filterCategory === 'All' ? 'is-active' : ''}" aria-pressed="${state.filterCategory === 'All'}">All Categories</button>
-                            <button type="button" data-home-cat="Office" onclick="setFilterCategory('Office')" class="liquid-sub-btn px-2 whitespace-nowrap truncate ${state.filterCategory === 'Office' ? 'is-active' : ''}" aria-pressed="${state.filterCategory === 'Office'}">Office Expense</button>
-                            <button type="button" data-home-cat="Shoot" onclick="setFilterCategory('Shoot')" class="liquid-sub-btn px-2 whitespace-nowrap truncate ${state.filterCategory === 'Shoot' ? 'is-active' : ''}" aria-pressed="${state.filterCategory === 'Shoot'}">Shoot Expense</button>
+
+                        <div id="home-cat-dock" class="liquid-sub-dock w-full" role="tablist" aria-label="Filter expenses by category">
+                            <div id="home-cat-bubble" class="liquid-sub-bubble" aria-hidden="true"></div>
+                            <button type="button" id="home-cat-btn-All" onclick="setFilterCategory('All')" class="liquid-sub-btn ${state.filterCategory === 'All' ? 'is-active' : ''}" role="tab" aria-selected="${state.filterCategory === 'All'}">
+                                <span class="truncate">All Categories</span>
+                            </button>
+                            <button type="button" id="home-cat-btn-Office" onclick="setFilterCategory('Office')" class="liquid-sub-btn ${state.filterCategory === 'Office' ? 'is-active' : ''}" role="tab" aria-selected="${state.filterCategory === 'Office'}">
+                                <span class="truncate">Office Expense</span>
+                            </button>
+                            <button type="button" id="home-cat-btn-Shoot" onclick="setFilterCategory('Shoot')" class="liquid-sub-btn ${state.filterCategory === 'Shoot' ? 'is-active' : ''}" role="tab" aria-selected="${state.filterCategory === 'Shoot'}">
+                                <span class="truncate">Shoot Expense</span>
+                            </button>
                         </div>
 
                         <div class="grid grid-cols-${isAdmin ? '2' : '1'} gap-2.5 w-full">
@@ -3473,62 +3559,67 @@
 
                 return `
                                 <div class="space-y-2.5 mt-4">
-                                    <h4 class="text-xs font-bold text-slate-400 dark:text-slate-400 uppercase tracking-wider px-1">${escapeHtml(formattedDateHeader)}</h4>
+                                    <div class="flex items-center justify-between px-1">
+                                        <h4 class="text-[11px] font-bold text-slate-400 dark:text-slate-400 uppercase tracking-wider">${escapeHtml(formattedDateHeader)}</h4>
+                                        <span class="text-[11px] font-semibold text-slate-400 dark:text-slate-500">${formatCurrency(dayExpenses.reduce((s, x) => s + x.amount, 0))}</span>
+                                    </div>
                                     ${dayExpenses.map(exp => {
                     const isOffice = exp.category === 'Office';
                     const isOwner = exp.userId === state.currentUser.id;
                     return `
-                                            <div class="ios-glass-card rounded-[1.75rem] p-4 sm:p-5 shadow-sm hover:shadow-md transition-all relative overflow-hidden group w-full mt-3 border-l-4 ${isOffice ? 'border-l-amber-500' : 'border-l-indigo-500'}">
-                                                <div class="flex items-start gap-3.5 w-full">
-                                                    <div class="w-11 h-11 rounded-2xl ${isOffice ? 'bg-gradient-to-br from-amber-500/20 to-orange-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20' : 'bg-gradient-to-br from-indigo-500/20 to-violet-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20'} flex items-center justify-center shrink-0 mt-0.5 shadow-inner">
-                                                        <i class="fa-solid ${isOffice ? 'fa-briefcase' : 'fa-clapperboard'} text-sm"></i>
-                                                    </div>
-                                                    <div class="min-w-0 flex-1">
-                                                        <div class="flex items-start justify-between gap-2.5 w-full">
-                                                            <div class="min-w-0 flex-1">
-                                                                <div class="flex items-center flex-wrap gap-1.5 mb-1">
-                                                                    <span class="px-2 py-0.5 rounded-lg text-[10px] font-bold uppercase tracking-wider ${isOffice ? 'bg-amber-500/10 text-amber-700 dark:text-amber-300 border border-amber-500/20' : 'bg-indigo-500/10 text-indigo-700 dark:text-indigo-300 border border-indigo-500/20'}">${escapeHtml(exp.category)}</span>
-                                                                    <span class="text-[11px] font-medium text-slate-500 dark:text-slate-400 truncate"><i class="fa-regular fa-user text-[9px] mr-1 opacity-75"></i>${escapeHtml(exp.userName)}</span>
-                                                                </div>
-                                                                <h4 class="font-bold text-sm sm:text-base text-slate-900 dark:text-white leading-snug break-words">${escapeHtml(exp.title)}</h4>
-                                                            </div>
-                                                            <div class="px-3 py-1.5 rounded-2xl bg-slate-100/90 dark:bg-slate-800/90 border border-slate-200/70 dark:border-slate-700/70 shrink-0">
-                                                                <span class="font-extrabold text-sm sm:text-base text-slate-900 dark:text-white whitespace-nowrap">${formatCurrency(exp.amount)}</span>
+                                            <div class="ios-glass-card rounded-[26px] p-4 sm:p-5 shadow-sm hover:shadow-md transition-all relative group w-full mt-2.5 border-l-4 ${isOffice ? 'border-l-amber-500' : 'border-l-indigo-500'}">
+                                                <div class="flex items-start justify-between gap-3 w-full">
+                                                    <div class="flex items-start space-x-3 min-w-0 flex-1">
+                                                        <div class="w-11 h-11 rounded-2xl ${isOffice ? 'bg-gradient-to-br from-amber-500/15 to-orange-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20' : 'bg-gradient-to-br from-indigo-500/15 to-violet-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20'} flex items-center justify-center shrink-0 mt-0.5">
+                                                            <i class="fa-solid ${isOffice ? 'fa-briefcase' : 'fa-clapperboard'} text-sm"></i>
+                                                        </div>
+                                                        <div class="min-w-0 flex-1">
+                                                            <h4 class="font-bold text-sm sm:text-base text-slate-900 dark:text-white leading-snug break-words">${escapeHtml(exp.title)}</h4>
+                                                            <div class="flex items-center flex-wrap gap-1.5 mt-1.5">
+                                                                <span class="inline-flex items-center px-2 py-0.5 rounded-lg text-[10px] font-bold uppercase tracking-wide ${isOffice ? 'bg-amber-500/10 text-amber-700 dark:text-amber-300 border border-amber-500/20' : 'bg-indigo-500/10 text-indigo-700 dark:text-indigo-300 border border-indigo-500/20'}">${escapeHtml(exp.category)}</span>
+                                                                <span class="text-[11px] font-medium text-slate-500 dark:text-slate-400 truncate max-w-[160px]"><i class="fa-regular fa-user mr-1 text-[10px]"></i>${escapeHtml(exp.userName)}</span>
                                                             </div>
                                                         </div>
+                                                    </div>
 
+                                                    <div class="px-3 py-1.5 rounded-2xl bg-slate-100/90 dark:bg-slate-800/90 border border-slate-200/70 dark:border-slate-700/80 shrink-0 text-right">
+                                                        <span class="font-extrabold text-sm sm:text-base text-slate-900 dark:text-white whitespace-nowrap">${formatCurrency(exp.amount)}</span>
+                                                    </div>
+                                                </div>
+
+                                                ${(!isOffice && exp.clientNamePlace) || exp.notes ? `
+                                                    <div class="mt-3 space-y-2">
                                                         ${!isOffice && exp.clientNamePlace ? `
-                                                            <div class="mt-2 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-violet-500/10 border border-violet-500/20 text-[11px] font-semibold text-violet-700 dark:text-violet-300 max-w-full">
+                                                            <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-violet-500/10 border border-violet-500/20 text-[11px] font-semibold text-violet-700 dark:text-violet-300 max-w-full">
                                                                 <i class="fa-solid fa-location-dot shrink-0 text-[10px]"></i>
                                                                 <span class="break-words">${escapeHtml(exp.clientNamePlace)}</span>
                                                             </div>
                                                         ` : ''}
-
-                                                        ${exp.notes ? `<p class="text-xs text-slate-600 dark:text-slate-400 mt-2.5 bg-slate-50/80 dark:bg-slate-800/60 p-3 rounded-2xl border border-slate-200/60 dark:border-slate-700/60 break-words">${escapeHtml(exp.notes)}</p>` : ''}
-
-                                                        <div class="flex items-center justify-between mt-3 pt-2.5 border-t border-slate-200/60 dark:border-slate-800 w-full gap-2">
-                                                            <div>
-                                                                ${exp.billAttachment ? `
-                                                                    <button onclick="viewBillModal('${exp.id}')" class="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-xl bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 text-xs font-semibold border border-indigo-200/70 dark:border-indigo-800/70 hover:bg-indigo-100 transition">
-                                                                        <i class="fa-solid fa-paperclip"></i><span>View Bill</span>
-                                                                    </button>
-                                                                ` : '<span class="text-[11px] text-slate-400 italic">No bill attached</span>'}
-                                                            </div>
-
-                                                            ${isOwner ? `
-                                                                <div class="flex items-center space-x-1.5 shrink-0">
-                                                                    ${!isAdmin ? `
-                                                                        <button onclick="confirmUndoExpense('${exp.id}')" class="px-2.5 h-8 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/20 border border-emerald-500/20 transition flex items-center justify-center space-x-1 text-xs font-semibold" title="Undo Expense & Refund to Wallet">
-                                                                            <i class="fa-solid fa-rotate-left"></i>
-                                                                            <span>Undo</span>
-                                                                        </button>
-                                                                    ` : ''}
-                                                                    <button onclick="startEditExpense('${exp.id}')" class="w-8 h-8 rounded-xl bg-slate-100/90 dark:bg-slate-800/90 text-slate-600 dark:text-slate-300 hover:bg-indigo-50 hover:text-indigo-600 transition flex items-center justify-center text-xs" title="Edit"><i class="fa-solid fa-pen"></i></button>
-                                                                    <button onclick="confirmDeleteExpense('${exp.id}')" class="w-8 h-8 rounded-xl bg-slate-100/90 dark:bg-slate-800/90 text-slate-600 dark:text-slate-300 hover:bg-rose-50 hover:text-rose-600 transition flex items-center justify-center text-xs" title="Delete"><i class="fa-solid fa-trash"></i></button>
-                                                                </div>
-                                                            ` : ''}
-                                                        </div>
+                                                        ${exp.notes ? `<p class="text-xs text-slate-600 dark:text-slate-300 bg-slate-50/75 dark:bg-slate-800/50 px-3 py-2.5 rounded-2xl border border-slate-200/60 dark:border-slate-700/60 break-words leading-relaxed">${escapeHtml(exp.notes)}</p>` : ''}
                                                     </div>
+                                                ` : ''}
+
+                                                <div class="flex items-center justify-between mt-3 pt-2.5 border-t border-slate-200/60 dark:border-slate-800/80 w-full gap-2">
+                                                    <div>
+                                                        ${exp.billAttachment ? `
+                                                            <button onclick="viewBillModal('${exp.id}')" class="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-xl bg-indigo-50/90 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 text-[11px] font-semibold border border-indigo-200/70 dark:border-indigo-800/60 hover:bg-indigo-100 transition">
+                                                                <i class="fa-solid fa-paperclip"></i><span>View Bill</span>
+                                                            </button>
+                                                        ` : '<span class="text-[11px] text-slate-400 dark:text-slate-500 italic">No receipt</span>'}
+                                                    </div>
+
+                                                    ${isOwner ? `
+                                                        <div class="flex items-center space-x-1.5 shrink-0">
+                                                            ${!isAdmin ? `
+                                                                <button onclick="confirmUndoExpense('${exp.id}')" class="px-2.5 h-8 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/20 border border-emerald-500/20 transition flex items-center justify-center space-x-1 text-xs font-semibold" title="Undo Expense & Refund to Wallet">
+                                                                    <i class="fa-solid fa-rotate-left"></i>
+                                                                    <span>Undo</span>
+                                                                </button>
+                                                            ` : ''}
+                                                            <button onclick="startEditExpense('${exp.id}')" class="w-8 h-8 rounded-xl bg-slate-100/90 dark:bg-slate-800/90 text-slate-600 dark:text-slate-300 hover:bg-indigo-50 hover:text-indigo-600 transition flex items-center justify-center text-xs border border-slate-200/60 dark:border-slate-700/60" title="Edit"><i class="fa-solid fa-pen"></i></button>
+                                                            <button onclick="confirmDeleteExpense('${exp.id}')" class="w-8 h-8 rounded-xl bg-slate-100/90 dark:bg-slate-800/90 text-slate-600 dark:text-slate-300 hover:bg-rose-50 hover:text-rose-600 transition flex items-center justify-center text-xs border border-slate-200/60 dark:border-slate-700/60" title="Delete"><i class="fa-solid fa-trash"></i></button>
+                                                        </div>
+                                                    ` : ''}
                                                 </div>
                                             </div>
                                         `;
@@ -3554,49 +3645,58 @@
         }
 
         function clearSearch() { state.searchQuery = ''; renderMainContentOnly(); }
+
+        function syncHomeCategoryBubble(animate = true) {
+            const dock = document.getElementById('home-cat-dock');
+            const bubble = document.getElementById('home-cat-bubble');
+            const activeBtn = document.getElementById(`home-cat-btn-${state.filterCategory}`);
+            if (!dock || !bubble || !activeBtn) return;
+
+            if (!animate) bubble.style.transition = 'none';
+            bubble.style.width = `${activeBtn.offsetWidth}px`;
+            bubble.style.transform = `translateX(${activeBtn.offsetLeft}px)`;
+
+            dock.querySelectorAll('.liquid-sub-btn').forEach(btn => {
+                const isActive = btn.id === activeBtn.id;
+                btn.classList.toggle('is-active', isActive);
+                btn.setAttribute('aria-selected', String(isActive));
+            });
+
+            if (!animate) {
+                requestAnimationFrame(() => {
+                    bubble.style.transition = '';
+                });
+            }
+        }
+
         function setFilterCategory(cat) {
-            if (state.filterCategory === cat) return;
-            const prevBubble = document.getElementById('home-category-bubble');
-            const prevLeft = prevBubble ? prevBubble.style.transform : '';
-            const prevWidth = prevBubble ? prevBubble.style.width : '';
+            if (state.filterCategory === cat) {
+                syncHomeCategoryBubble(true);
+                return;
+            }
+            const dock = document.getElementById('home-cat-dock');
+            const bubble = document.getElementById('home-cat-bubble');
+            const prevLeft = bubble ? bubble.style.transform : '';
+            const prevWidth = bubble ? bubble.style.width : '';
 
             state.filterCategory = cat;
             renderMainContentOnly();
 
-            const newBubble = document.getElementById('home-category-bubble');
-            if (newBubble && prevLeft && prevWidth) {
-                newBubble.style.transition = 'none';
-                newBubble.style.width = prevWidth;
-                newBubble.style.transform = prevLeft;
-                void newBubble.offsetWidth;
-                newBubble.style.transition = '';
-            }
-            syncHomeCategoryBubble(true);
-        }
-
-        function syncHomeCategoryBubble(animate = true) {
-            const dock = document.getElementById('home-category-dock');
-            const bubble = document.getElementById('home-category-bubble');
-            if (!dock || !bubble) return;
-
-            const activeBtn = dock.querySelector(`[data-home-cat="${state.filterCategory}"]`);
-            if (!activeBtn) return;
-
-            if (!animate) bubble.style.transition = 'none';
-            dock.querySelectorAll('.liquid-sub-btn').forEach(btn => {
-                if (btn === activeBtn) {
-                    btn.classList.add('is-active');
-                    btn.setAttribute('aria-pressed', 'true');
-                } else {
-                    btn.classList.remove('is-active');
-                    btn.setAttribute('aria-pressed', 'false');
+            const newDock = document.getElementById('home-cat-dock');
+            const newBubble = document.getElementById('home-cat-bubble');
+            const targetBtn = document.getElementById(`home-cat-btn-${cat}`);
+            if (newDock && newBubble && targetBtn) {
+                if (prevLeft && prevWidth) {
+                    newBubble.style.transition = 'none';
+                    newBubble.style.width = prevWidth;
+                    newBubble.style.transform = prevLeft;
+                    void newBubble.offsetWidth;
+                    newBubble.style.transition = '';
                 }
-            });
-            bubble.style.width = `${activeBtn.offsetWidth}px`;
-            bubble.style.transform = `translateX(${activeBtn.offsetLeft}px)`;
-            if (!animate) {
-                void bubble.offsetWidth;
-                bubble.style.transition = '';
+                requestAnimationFrame(() => {
+                    newBubble.style.width = `${targetBtn.offsetWidth}px`;
+                    newBubble.style.transform = `translateX(${targetBtn.offsetLeft}px)`;
+                });
             }
         }
         function setFilterMonth(month) {
@@ -3631,7 +3731,7 @@
                 ? state.tempBillData
                 : expense.billAttachment;
 
-            const catBtn = (cat, icon) => `<button type="button" onclick="setFormCategory('${cat}')" id="btn-cat-${cat.toLowerCase()}" class="${catBtnClass(expense.category === cat)}"><i class="fa-solid ${icon}"></i><span>${cat}</span></button>`;
+            const catBtn = (cat, icon) => `<button type="button" onclick="setFormCategory('${cat}')" id="btn-cat-${cat.toLowerCase()}" class="liquid-sub-btn ${expense.category === cat ? 'is-active' : ''}" role="tab" aria-selected="${expense.category === cat}"><i class="fa-solid ${icon}"></i><span>${cat}</span></button>`;
 
             return `
                 <div class="space-y-4 w-full max-w-full pb-8 pt-2">
@@ -3645,7 +3745,8 @@
                     <form onsubmit="handleExpenseSubmit(event)" class="ios-glass-card rounded-3xl p-5 sm:p-7 shadow-sm space-y-6 w-full mt-2">
                         <div class="w-full">
                             <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-2.5">Expense Type</label>
-                            <div class="grid grid-cols-2 gap-3 w-full">
+                            <div id="form-category-dock" class="liquid-sub-dock w-full" role="tablist" aria-label="Select expense type">
+                                <div id="form-category-bubble" class="liquid-sub-bubble" aria-hidden="true"></div>
                                 ${catBtn('Office', 'fa-briefcase')}
                                 ${catBtn('Shoot', 'fa-clapperboard')}
                             </div>
@@ -3726,11 +3827,40 @@
             `;
         }
 
-        function catBtnClass(active) {
-            const base = 'py-3.5 px-3 rounded-2xl border font-medium text-xs sm:text-sm flex items-center justify-center space-x-2 transition truncate';
-            return active
-                ? `${base} bg-indigo-600 text-white border-indigo-600 shadow-md`
-                : `${base} bg-slate-50/80 dark:bg-slate-800/80 text-slate-700 dark:text-slate-300 border-slate-200/80 dark:border-slate-700`;
+        function syncFormCategoryBubble(animate = true) {
+            const dock = document.getElementById('form-category-dock');
+            const bubble = document.getElementById('form-category-bubble');
+            const catInput = document.getElementById('expense-category');
+            const currentCat = catInput ? catInput.value : 'Office';
+            const activeBtn = document.getElementById(`btn-cat-${currentCat.toLowerCase()}`);
+            if (!dock || !bubble || !activeBtn) return;
+
+            if (!animate) bubble.style.transition = 'none';
+            bubble.style.width = `${activeBtn.offsetWidth}px`;
+            bubble.style.transform = `translateX(${activeBtn.offsetLeft}px)`;
+
+            dock.querySelectorAll('.liquid-sub-btn').forEach(btn => {
+                const isActive = btn.id === activeBtn.id;
+                btn.classList.toggle('is-active', isActive);
+                btn.setAttribute('aria-selected', String(isActive));
+            });
+
+            if (!animate) {
+                requestAnimationFrame(() => {
+                    bubble.style.transition = '';
+                });
+            }
+        }
+
+        function setFormCategory(cat) {
+            updateFormCache();
+            const catInput = document.getElementById('expense-category');
+            if (catInput) catInput.value = cat;
+            if (state.tempFormCache) state.tempFormCache.category = cat;
+
+            const clientContainer = document.getElementById('client-input-container');
+            if (clientContainer) clientContainer.classList.toggle('hidden', cat === 'Office');
+            syncFormCategoryBubble(true);
         }
 
         function resizeImageToDataUrl(source, srcW, srcH) {
@@ -3858,20 +3988,6 @@
                     </div>
                 </div>
             `;
-        }
-
-        function setFormCategory(cat) {
-            updateFormCache();
-            document.getElementById('expense-category').value = cat;
-            if (state.tempFormCache) state.tempFormCache.category = cat;
-
-            const btnOffice = document.getElementById('btn-cat-office');
-            const btnShoot = document.getElementById('btn-cat-shoot');
-            const clientContainer = document.getElementById('client-input-container');
-
-            btnOffice.className = catBtnClass(cat === 'Office');
-            btnShoot.className = catBtnClass(cat === 'Shoot');
-            if (clientContainer) clientContainer.classList.toggle('hidden', cat === 'Office');
         }
 
         const MAX_INLINE_BILL_CHARS = 900000;
@@ -4402,50 +4518,57 @@
             }
         }
 
+        function syncUserFilterBubble(animate = true) {
+            const dock = document.getElementById('user-sub-dock');
+            const bubble = document.getElementById('user-sub-bubble');
+            const activeBtn = document.getElementById(`user-sub-btn-${state.userFilterTab}`);
+            if (!dock || !bubble || !activeBtn) return;
+
+            if (!animate) bubble.style.transition = 'none';
+            bubble.style.width = `${activeBtn.offsetWidth}px`;
+            bubble.style.transform = `translateX(${activeBtn.offsetLeft}px)`;
+
+            dock.querySelectorAll('.liquid-sub-btn').forEach(btn => {
+                const isActive = btn.id === activeBtn.id;
+                btn.classList.toggle('is-active', isActive);
+                btn.setAttribute('aria-selected', String(isActive));
+            });
+
+            if (!animate) {
+                requestAnimationFrame(() => {
+                    bubble.style.transition = '';
+                });
+            }
+        }
+
         function setUserFilterTab(tab) {
-            if (state.userFilterTab === tab) return;
-            const dock = document.getElementById('user-filter-dock');
-            const prevBubble = document.getElementById('user-filter-bubble');
-            const prevLeft = prevBubble ? prevBubble.style.transform : '';
-            const prevWidth = prevBubble ? prevBubble.style.width : '';
+            if (state.userFilterTab === tab) {
+                syncUserFilterBubble(true);
+                return;
+            }
+            const dock = document.getElementById('user-sub-dock');
+            const bubble = document.getElementById('user-sub-bubble');
+            const prevLeft = bubble ? bubble.style.transform : '';
+            const prevWidth = bubble ? bubble.style.width : '';
 
             state.userFilterTab = tab;
             renderMainContentOnly();
 
-            const newBubble = document.getElementById('user-filter-bubble');
-            if (dock && newBubble && prevLeft && prevWidth) {
-                newBubble.style.transition = 'none';
-                newBubble.style.width = prevWidth;
-                newBubble.style.transform = prevLeft;
-                void newBubble.offsetWidth;
-                newBubble.style.transition = '';
-            }
-            syncUserFilterBubble(true);
-        }
-
-        function syncUserFilterBubble(animate = true) {
-            const dock = document.getElementById('user-filter-dock');
-            const bubble = document.getElementById('user-filter-bubble');
-            if (!dock || !bubble) return;
-
-            const activeBtn = dock.querySelector(`[data-user-filter="${state.userFilterTab}"]`);
-            if (!activeBtn) return;
-
-            if (!animate) bubble.style.transition = 'none';
-            dock.querySelectorAll('.liquid-sub-btn').forEach(btn => {
-                if (btn === activeBtn) {
-                    btn.classList.add('is-active');
-                    btn.setAttribute('aria-pressed', 'true');
-                } else {
-                    btn.classList.remove('is-active');
-                    btn.setAttribute('aria-pressed', 'false');
+            const newDock = document.getElementById('user-sub-dock');
+            const newBubble = document.getElementById('user-sub-bubble');
+            const targetBtn = document.getElementById(`user-sub-btn-${tab}`);
+            if (newDock && newBubble && targetBtn) {
+                if (prevLeft && prevWidth) {
+                    newBubble.style.transition = 'none';
+                    newBubble.style.width = prevWidth;
+                    newBubble.style.transform = prevLeft;
+                    void newBubble.offsetWidth;
+                    newBubble.style.transition = '';
                 }
-            });
-            bubble.style.width = `${activeBtn.offsetWidth}px`;
-            bubble.style.transform = `translateX(${activeBtn.offsetLeft}px)`;
-            if (!animate) {
-                void bubble.offsetWidth;
-                bubble.style.transition = '';
+                requestAnimationFrame(() => {
+                    newBubble.style.width = `${targetBtn.offsetWidth}px`;
+                    newBubble.style.transform = `translateX(${targetBtn.offsetLeft}px)`;
+                });
             }
         }
 
@@ -4471,11 +4594,17 @@
                         </button>
                     </div>
 
-                    <div id="user-filter-dock" class="liquid-sub-dock w-full" role="group" aria-label="Filter users by role">
-                        <div id="user-filter-bubble" class="liquid-sub-bubble" aria-hidden="true"></div>
-                        <button type="button" data-user-filter="all" onclick="setUserFilterTab('all')" class="liquid-sub-btn ${filter === 'all' ? 'is-active' : ''}" aria-pressed="${filter === 'all'}">All (${visibleUsers.length})</button>
-                        <button type="button" data-user-filter="user" onclick="setUserFilterTab('user')" class="liquid-sub-btn ${filter === 'user' ? 'is-active' : ''}" aria-pressed="${filter === 'user'}">Users (${regularUsers.length})</button>
-                        <button type="button" data-user-filter="admin" onclick="setUserFilterTab('admin')" class="liquid-sub-btn ${filter === 'admin' ? 'is-active' : ''}" aria-pressed="${filter === 'admin'}">Admins (${adminUsers.length})</button>
+                    <div id="user-sub-dock" class="liquid-sub-dock w-full" role="tablist" aria-label="Filter users by role">
+                        <div id="user-sub-bubble" class="liquid-sub-bubble" aria-hidden="true"></div>
+                        <button type="button" id="user-sub-btn-all" onclick="setUserFilterTab('all')" class="liquid-sub-btn ${filter === 'all' ? 'is-active' : ''}" role="tab" aria-selected="${filter === 'all'}">
+                            <span>All (${visibleUsers.length})</span>
+                        </button>
+                        <button type="button" id="user-sub-btn-user" onclick="setUserFilterTab('user')" class="liquid-sub-btn ${filter === 'user' ? 'is-active' : ''}" role="tab" aria-selected="${filter === 'user'}">
+                            <span>Users (${regularUsers.length})</span>
+                        </button>
+                        <button type="button" id="user-sub-btn-admin" onclick="setUserFilterTab('admin')" class="liquid-sub-btn ${filter === 'admin' ? 'is-active' : ''}" role="tab" aria-selected="${filter === 'admin'}">
+                            <span>Admins (${adminUsers.length})</span>
+                        </button>
                     </div>
 
                     ${showRegular ? `
@@ -5326,15 +5455,7 @@
                             </button>
                         </div>
 
-                        <div class="pt-3 border-t border-slate-200/50 dark:border-slate-800 space-y-1">
-                            <h4 class="font-semibold text-xs text-slate-900 dark:text-white flex items-center space-x-2">
-                                <i class="fa-solid fa-circle-info text-indigo-500"></i>
-                                <span>System Version</span>
-                            </h4>
-                            <p class="text-[10px] text-slate-500 dark:text-slate-400">Running v${CURRENT_CLIENT_APP_VERSION} (Auto-syncs with cloud)</p>
-                        </div>
-
-                        <div class="space-y-2.5 pt-1 border-t border-slate-200/50 dark:border-slate-800">
+                        <div class="space-y-2.5 pt-2 border-t border-slate-200/50 dark:border-slate-800">
                             ${navBtn("switchTab('recycle')", '<i class="fa-solid fa-trash-can text-amber-500"></i>', 'Recycle Bin', state.recycleBin.length > 0 ? `<span class="px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-600 text-[10px] font-bold">${state.recycleBin.length}</span>` : '')}
                             ${navBtn("switchTab('userRecycle')", '<i class="fa-solid fa-user-slash text-rose-500"></i>', 'Deleted Users Bin', visibleDeletedUsers.length > 0 ? `<span class="px-2 py-0.5 rounded-full bg-rose-500/20 text-rose-600 text-[10px] font-bold">${visibleDeletedUsers.length}</span>` : '')}
                             ${navBtn("switchTab('requests')", '<i class="fa-solid fa-key text-amber-500"></i>', 'Password Requests', pendingRequestsCount > 0 ? `<span class="px-2 py-0.5 rounded-full bg-rose-500/20 text-rose-600 text-[10px] font-bold">${pendingRequestsCount} Pending</span>` : '')}
@@ -5609,6 +5730,7 @@
             return String(str).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
         }
 
+        // ---------- PREVENT DOUBLE-TAP ZOOM ----------
         let lastGlobalTouchEnd = 0;
         document.addEventListener('touchend', (e) => {
             const now = Date.now();
@@ -5626,6 +5748,7 @@
             }
         }, { passive: false });
 
+        // ---------- UNIFIED TOUCH GESTURES (PULL-TO-REFRESH, TAB SWIPE, EDGE BACK & MODAL DISMISS) ----------
         let gestureStartX = 0;
         let gestureStartY = 0;
         let gestureCurrentX = 0;
@@ -5683,7 +5806,7 @@
                 return;
             }
 
-            if (e.target.closest('#liquid-nav, #user-filter-dock, #home-category-dock, input[type="range"], .overflow-x-auto')) {
+            if (e.target.closest('#liquid-nav, #user-sub-dock, #home-cat-dock, #form-category-dock, input[type="range"], .overflow-x-auto')) {
                 gestureMode = 'cancelled';
                 return;
             }
@@ -5815,7 +5938,7 @@
             }
 
             if (mainContent && (activeMode === 'tab-swipe' || activeMode === 'edge-back')) {
-                mainContent.style.transition = 'transform 0.28s cubic-bezier(0.22, 1, 0.36, 1)';
+                mainContent.style.transition = 'transform 0.22s cubic-bezier(0.16, 1, 0.3, 1)';
                 mainContent.style.transform = 'translateX(0)';
             }
 
@@ -5891,6 +6014,7 @@
             hasVibrated = false;
         }
 
+        // ---------- INTERACTIVE LIQUID DOCK DRAG SCRUBBING ----------
         (function setupLiquidDockGesture() {
             let isDockDragging = false;
             let lastHoveredTab = null;
@@ -5970,68 +6094,90 @@
             });
         })();
 
-        (function setupUserFilterDockGesture() {
-            let isSubDockDragging = false;
-            let lastHoveredFilter = null;
+        // ---------- INTERACTIVE LIQUID SUB-DOCK GESTURES (USERS, HOME CATEGORY & EXPENSE TYPE) ----------
+        (function setupLiquidSubDocksGesture() {
+            let activeDockId = null;
+            let lastHoveredKey = null;
 
-            function getSubDockHitFromX(clientX) {
-                const dock = document.getElementById('user-filter-dock');
-                if (!dock) return null;
+            const dockConfigs = {
+                'user-sub-dock': {
+                    bubbleId: 'user-sub-bubble',
+                    prefix: 'user-sub-btn-',
+                    apply: (key) => setUserFilterTab(key),
+                    reset: () => syncUserFilterBubble(true)
+                },
+                'home-cat-dock': {
+                    bubbleId: 'home-cat-bubble',
+                    prefix: 'home-cat-btn-',
+                    apply: (key) => setFilterCategory(key),
+                    reset: () => syncHomeCategoryBubble(true)
+                },
+                'form-category-dock': {
+                    bubbleId: 'form-category-bubble',
+                    prefix: 'btn-cat-',
+                    apply: (key) => setFormCategory(key === 'shoot' ? 'Shoot' : 'Office'),
+                    reset: () => syncFormCategoryBubble(true)
+                }
+            };
+
+            function getSubDockHit(dock, cfg, clientX) {
                 const buttons = Array.from(dock.querySelectorAll('.liquid-sub-btn'));
                 for (const btn of buttons) {
                     const rect = btn.getBoundingClientRect();
-                    if (clientX >= rect.left && clientX <= rect.right) {
-                        return { btn, filter: btn.getAttribute('data-user-filter') };
+                    if (clientX >= rect.left && clientX <= rect.right && btn.id.startsWith(cfg.prefix)) {
+                        return { btn, key: btn.id.slice(cfg.prefix.length) };
                     }
                 }
                 return null;
             }
 
             document.addEventListener('touchstart', (e) => {
-                if (e.target.closest('#user-filter-dock') && e.touches.length === 1) {
-                    isSubDockDragging = true;
-                    lastHoveredFilter = null;
+                if (e.touches.length !== 1) return;
+                const dock = e.target.closest('#user-sub-dock, #home-cat-dock, #form-category-dock');
+                if (dock) {
+                    activeDockId = dock.id;
+                    lastHoveredKey = null;
                 }
             }, { passive: true });
 
             document.addEventListener('touchmove', (e) => {
-                if (!isSubDockDragging || e.touches.length !== 1) return;
-                const hit = getSubDockHitFromX(e.touches[0].clientX);
-                const bubble = document.getElementById('user-filter-bubble');
-                if (hit && bubble) {
+                if (!activeDockId || e.touches.length !== 1) return;
+                const dock = document.getElementById(activeDockId);
+                const cfg = dockConfigs[activeDockId];
+                const bubble = cfg ? document.getElementById(cfg.bubbleId) : null;
+                if (!dock || !cfg || !bubble) return;
+
+                const hit = getSubDockHit(dock, cfg, e.touches[0].clientX);
+                if (hit) {
                     bubble.style.width = `${hit.btn.offsetWidth}px`;
                     bubble.style.transform = `translateX(${hit.btn.offsetLeft}px)`;
-                    if (lastHoveredFilter !== hit.filter) {
+                    if (lastHoveredKey !== hit.key) {
                         triggerHaptic(8);
-                        lastHoveredFilter = hit.filter;
+                        lastHoveredKey = hit.key;
                     }
                 }
             }, { passive: true });
 
             document.addEventListener('touchend', () => {
-                if (!isSubDockDragging) return;
-                isSubDockDragging = false;
-                if (lastHoveredFilter) {
-                    setUserFilterTab(lastHoveredFilter);
-                    lastHoveredFilter = null;
-                } else {
-                    syncUserFilterBubble(true);
+                if (!activeDockId) return;
+                const cfg = dockConfigs[activeDockId];
+                activeDockId = null;
+                if (cfg) {
+                    if (lastHoveredKey) {
+                        cfg.apply(lastHoveredKey);
+                        lastHoveredKey = null;
+                    } else {
+                        cfg.reset();
+                    }
                 }
             }, { passive: true });
 
             document.addEventListener('pointerover', (e) => {
                 if (e.pointerType === 'touch') return;
-                const btn = e.target.closest('#user-filter-dock .liquid-sub-btn');
-                const bubble = document.getElementById('user-filter-bubble');
-                if (btn && bubble) {
-                    bubble.style.width = `${btn.offsetWidth}px`;
-                    bubble.style.transform = `translateX(${btn.offsetLeft}px)`;
-                }
-            });
-
-            document.addEventListener('focusin', (e) => {
-                const btn = e.target.closest('#user-filter-dock .liquid-sub-btn');
-                const bubble = document.getElementById('user-filter-bubble');
+                const btn = e.target.closest('#user-sub-dock .liquid-sub-btn, #home-cat-dock .liquid-sub-btn, #form-category-dock .liquid-sub-btn');
+                const dock = btn ? btn.parentElement : null;
+                const cfg = dock ? dockConfigs[dock.id] : null;
+                const bubble = cfg ? document.getElementById(cfg.bubbleId) : null;
                 if (btn && bubble) {
                     bubble.style.width = `${btn.offsetWidth}px`;
                     bubble.style.transform = `translateX(${btn.offsetLeft}px)`;
@@ -6039,89 +6185,15 @@
             });
 
             document.addEventListener('pointerout', (e) => {
-                const dock = document.getElementById('user-filter-dock');
-                if (dock && e.target.closest('#user-filter-dock') && (!e.relatedTarget || !dock.contains(e.relatedTarget))) {
-                    syncUserFilterBubble(true);
+                const dock = e.target.closest('#user-sub-dock, #home-cat-dock, #form-category-dock');
+                if (dock && (!e.relatedTarget || !dock.contains(e.relatedTarget))) {
+                    const cfg = dockConfigs[dock.id];
+                    if (cfg) cfg.reset();
                 }
             });
         })();
 
-        (function setupHomeCategoryDockGesture() {
-            let isCatDockDragging = false;
-            let lastHoveredCat = null;
-
-            function getCatDockHitFromX(clientX) {
-                const dock = document.getElementById('home-category-dock');
-                if (!dock) return null;
-                const buttons = Array.from(dock.querySelectorAll('.liquid-sub-btn'));
-                for (const btn of buttons) {
-                    const rect = btn.getBoundingClientRect();
-                    if (clientX >= rect.left && clientX <= rect.right) {
-                        return { btn, cat: btn.getAttribute('data-home-cat') };
-                    }
-                }
-                return null;
-            }
-
-            document.addEventListener('touchstart', (e) => {
-                if (e.target.closest('#home-category-dock') && e.touches.length === 1) {
-                    isCatDockDragging = true;
-                    lastHoveredCat = null;
-                }
-            }, { passive: true });
-
-            document.addEventListener('touchmove', (e) => {
-                if (!isCatDockDragging || e.touches.length !== 1) return;
-                const hit = getCatDockHitFromX(e.touches[0].clientX);
-                const bubble = document.getElementById('home-category-bubble');
-                if (hit && bubble) {
-                    bubble.style.width = `${hit.btn.offsetWidth}px`;
-                    bubble.style.transform = `translateX(${hit.btn.offsetLeft}px)`;
-                    if (lastHoveredCat !== hit.cat) {
-                        triggerHaptic(8);
-                        lastHoveredCat = hit.cat;
-                    }
-                }
-            }, { passive: true });
-
-            document.addEventListener('touchend', () => {
-                if (!isCatDockDragging) return;
-                isCatDockDragging = false;
-                if (lastHoveredCat) {
-                    setFilterCategory(lastHoveredCat);
-                    lastHoveredCat = null;
-                } else {
-                    syncHomeCategoryBubble(true);
-                }
-            }, { passive: true });
-
-            document.addEventListener('pointerover', (e) => {
-                if (e.pointerType === 'touch') return;
-                const btn = e.target.closest('#home-category-dock .liquid-sub-btn');
-                const bubble = document.getElementById('home-category-bubble');
-                if (btn && bubble) {
-                    bubble.style.width = `${btn.offsetWidth}px`;
-                    bubble.style.transform = `translateX(${btn.offsetLeft}px)`;
-                }
-            });
-
-            document.addEventListener('focusin', (e) => {
-                const btn = e.target.closest('#home-category-dock .liquid-sub-btn');
-                const bubble = document.getElementById('home-category-bubble');
-                if (btn && bubble) {
-                    bubble.style.width = `${btn.offsetWidth}px`;
-                    bubble.style.transform = `translateX(${btn.offsetLeft}px)`;
-                }
-            });
-
-            document.addEventListener('pointerout', (e) => {
-                const dock = document.getElementById('home-category-dock');
-                if (dock && e.target.closest('#home-category-dock') && (!e.relatedTarget || !dock.contains(e.relatedTarget))) {
-                    syncHomeCategoryBubble(true);
-                }
-            });
-        })();
-
+        // Persist session across app switching, backgrounding, and reopening
         document.addEventListener('visibilitychange', () => {
             if (document.visibilityState === 'hidden') {
                 if (state.currentUser) persistCurrentUser(state.currentUser);
@@ -6160,13 +6232,15 @@
 
         window.addEventListener('resize', () => {
             syncPersistentNavbar();
-            syncUserFilterBubble(false);
             syncHomeCategoryBubble(false);
+            syncUserFilterBubble(false);
+            syncFormCategoryBubble(false);
         });
         window.addEventListener('orientationchange', () => setTimeout(() => {
             syncPersistentNavbar();
-            syncUserFilterBubble(false);
             syncHomeCategoryBubble(false);
+            syncUserFilterBubble(false);
+            syncFormCategoryBubble(false);
         }, 100));
 
         async function bootApp() {
@@ -6247,7 +6321,7 @@
             if (settingsSnap.empty || !settingsSnap.docs.some(d => d.id === 'app_settings')) {
                 await setDoc(doc(db, 'settings', 'app_settings'), {
                     autoDeleteEnabled: false,
-                    currentVersion: CURRENT_CLIENT_APP_VERSION,
+                    currentVersion: '2.9.0',
                     gdriveEnabled: false,
                     gdriveClientId: '',
                     gdriveFolderId: '',
