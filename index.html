@@ -4589,12 +4589,24 @@
 }`;
 
         function copyAppsScriptCode() {
+            const ta = document.getElementById('apps-script-code-box');
+            if (ta) {
+                ta.classList.remove('hidden');
+                ta.focus();
+                ta.select();
+                try {
+                    if (document.execCommand('copy')) {
+                        showToast('Apps Script code copied to clipboard!', 'success');
+                        return;
+                    }
+                } catch (e) { }
+            }
             if (navigator.clipboard && navigator.clipboard.writeText) {
                 navigator.clipboard.writeText(APPS_SCRIPT_TEMPLATE)
                     .then(() => showToast('Apps Script code copied to clipboard!', 'success'))
-                    .catch(() => showToast('Could not copy automatically. Select the code box manually.', 'info'));
+                    .catch(() => showToast('Script box opened below — press Ctrl+C / Copy.', 'info'));
             } else {
-                showToast('Select and copy the script code from the box.', 'info');
+                showToast('Script box opened below — press Ctrl+C / Copy.', 'info');
             }
         }
 
@@ -4691,6 +4703,7 @@
                                     </button>
                                 </div>
                                 <input type="url" id="gdrive-bridge-url" value="${escapeHtml(s.gdriveBridgeUrl || '')}" placeholder="https://script.google.com/macros/s/.../exec" class="${inputCls}">
+                                <textarea id="apps-script-code-box" readonly rows="5" onclick="this.select()" class="hidden mt-2 w-full p-2.5 bg-slate-950 text-emerald-300 font-mono text-[10px] rounded-xl border border-slate-700 focus:outline-none">${escapeHtml(APPS_SCRIPT_TEMPLATE)}</textarea>
                                 <p class="text-[10px] text-slate-400 mt-1">Deploy at script.google.com as Web App (Execute as: Me, Access: Anyone). Works for all users forever.</p>
                             </div>
 
@@ -4788,10 +4801,83 @@
             const connectBtn = document.getElementById('gdrive-connect-btn');
 
             if (bridgeUrl && !/^https:\/\/script\.google\.com\/macros\/s\/[^/]+\/exec(\?.*)?$/i.test(bridgeUrl)) {
-                showToast('Option A requires a Google Apps Script URL (https://script.google.com/macros/s/.../exec), not your Vercel URL.', 'error');
+                showToast('Option A requires a Google Apps Script URL (https://script.google.com/macros/s/.../exec).', 'error');
                 return;
             }
 
+            if (!bridgeUrl && !clientId && !manualToken) {
+                showToast('Enter an Apps Script URL, OAuth Client ID, or Access Token first.', 'error');
+                return;
+            }
+
+            const { db, doc, setDoc } = window.FB;
+            if (connectBtn) {
+                connectBtn.disabled = true;
+                connectBtn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i><span>Connecting...</span>';
+            }
+
+            try {
+                if (bridgeUrl) {
+                    const updated = {
+                        ...state.appSettings,
+                        gdriveBridgeUrl: bridgeUrl,
+                        gdriveClientId: clientId,
+                        gdriveFolderId: folderId,
+                        gdriveEnabled: true,
+                        gdriveLastError: ''
+                    };
+                    await setDoc(doc(db, 'settings', 'app_settings'), updated, { merge: true });
+                    state.appSettings = updated;
+                    showToast('Connected via Permanent Apps Script Bridge!', 'success');
+                    openGoogleDriveConfigModal();
+                    return;
+                }
+
+                if (manualToken) {
+                    const updated = {
+                        ...state.appSettings,
+                        gdriveClientId: clientId,
+                        gdriveFolderId: folderId,
+                        gdriveSharedToken: manualToken,
+                        gdriveSharedExpiry: Date.now() + (55 * 60 * 1000),
+                        gdriveEnabled: true,
+                        gdriveLastError: ''
+                    };
+                    await setDoc(doc(db, 'settings', 'app_settings'), updated, { merge: true });
+                    state.appSettings = updated;
+                    showToast('Connected using Direct OAuth Token!', 'success');
+                    openGoogleDriveConfigModal();
+                    return;
+                }
+
+                // Option B: Google OAuth 2.0 Client ID popup flow
+                state.appSettings.gdriveClientId = clientId;
+                state.appSettings.gdriveFolderId = folderId;
+                const auth = await requestGoogleDriveAccessToken('consent');
+                const updated = {
+                    ...state.appSettings,
+                    gdriveClientId: clientId,
+                    gdriveFolderId: folderId,
+                    gdriveSharedToken: auth.token,
+                    gdriveSharedExpiry: auth.expiry,
+                    gdriveEnabled: true,
+                    gdriveLastError: ''
+                };
+                await setDoc(doc(db, 'settings', 'app_settings'), updated, { merge: true });
+                state.appSettings = updated;
+                showToast('Google Drive connected via OAuth 2.0!', 'success');
+                openGoogleDriveConfigModal();
+            } catch (err) {
+                const msg = err?.message || 'Could not connect Google Drive.';
+                state.appSettings.gdriveLastError = msg;
+                showToast(msg, 'error');
+                openGoogleDriveConfigModal();
+            }
+        }
+
+        async function disconnectSharedGoogleDrive() {
+            if (!isDeveloper(state.currentUser)) return;
+            lsRemove(GDRIVE_TOKEN_CACHE_KEY);
             const { db, doc, setDoc } = window.FB;
             const updated = {
                 ...state.appSettings,
