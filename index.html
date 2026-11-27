@@ -957,25 +957,28 @@
         async function uploadBillViaAppsScriptBridge(dataUrl, fileName) {
             const bridgeUrl = (state.appSettings?.gdriveBridgeUrl || '').trim();
             if (!/^https:\/\/script\.google\.com\/macros\/s\/[^/]+\/exec(\?.*)?$/i.test(bridgeUrl)) {
-                throw new Error('Option A must be a Google Apps Script Web App URL starting with https://script.google.com/macros/s/.../exec (not your Vercel app URL).');
+                throw new Error('Option A must be a Google Apps Script Web App URL starting with https://script.google.com/macros/s/.../exec.');
             }
             const folderId = (state.appSettings?.gdriveFolderId || '').trim();
+            const payloadStr = JSON.stringify({
+                action: 'upload',
+                fileName,
+                folderId,
+                mimeType: 'image/jpeg',
+                base64Data: dataUrl.split(',')[1]
+            });
+
+            // Omit custom headers so browser sends a pure simple POST without CORS preflight on 302 redirect
             const res = await fetch(bridgeUrl, {
                 method: 'POST',
-                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                body: JSON.stringify({
-                    action: 'upload',
-                    fileName,
-                    folderId,
-                    mimeType: 'image/jpeg',
-                    base64Data: dataUrl.split(',')[1]
-                })
+                redirect: 'follow',
+                body: payloadStr
             });
             if (!res.ok) throw new Error(`Apps Script HTTP ${res.status}`);
             const text = await res.text();
             let data = null;
             try { data = JSON.parse(text); } catch (e) {
-                throw new Error('Apps Script returned HTML instead of JSON. Ensure "Who has access" is set to "Anyone".');
+                throw new Error('Apps Script returned HTML instead of JSON. In Apps Script, click Deploy -> Manage deployments -> Edit -> set "Who has access" to "Anyone" and deploy a New Version.');
             }
             if (!data || !data.fileId) throw new Error(data?.error || 'Invalid Apps Script response');
             return {
@@ -986,14 +989,31 @@
         }
 
         async function uploadBillToGoogleDrive(dataUrl, fileName) {
+            let bridgeError = null;
             if ((state.appSettings?.gdriveBridgeUrl || '').trim()) {
-                return await uploadBillViaAppsScriptBridge(dataUrl, fileName);
+                try {
+                    return await uploadBillViaAppsScriptBridge(dataUrl, fileName);
+                } catch (err) {
+                    bridgeError = err;
+                    // If no OAuth fallback is configured, surface the exact bridge error
+                    if (!getActiveDriveToken() && !(state.appSettings?.gdriveClientId || '').trim()) {
+                        const rawMsg = err?.message || String(err);
+                        if (rawMsg === 'Failed to fetch') {
+                            throw new Error('Blocked by Apps Script access setting. Open script.google.com -> Deploy -> Manage deployments -> Edit -> set "Who has access" to "Anyone" (not "Only myself") and select "New version".');
+                        }
+                        throw err;
+                    }
+                }
             }
 
             let token = getActiveDriveToken();
             if (!token) {
-                const auth = await requestGoogleDriveAccessToken('');
-                token = auth.token;
+                try {
+                    const auth = await requestGoogleDriveAccessToken('');
+                    token = auth.token;
+                } catch (authErr) {
+                    throw bridgeError || authErr;
+                }
             }
             const folderId = await ensureDriveBillsFolder(token);
             const blob = dataUrlToBlob(dataUrl);
