@@ -409,89 +409,83 @@
             display: flex;
             align-items: center;
             justify-content: space-around;
+            gap: 4px;
             width: 100%;
             max-width: 440px;
             height: 68px;
-            padding: 6px 8px;
+            padding: 8px;
             border-radius: 9999px;
+            isolation: isolate;
             pointer-events: auto;
             user-select: none;
             -webkit-user-select: none;
-            background: rgba(255, 255, 255, 0.85);
-            backdrop-filter: blur(36px) saturate(210%);
-            -webkit-backdrop-filter: blur(36px) saturate(210%);
-            border: 1px solid rgba(255, 255, 255, 0.9);
-            box-shadow: 0 24px 48px -12px rgba(0, 0, 0, 0.16), 0 8px 20px -4px rgba(0, 0, 0, 0.08), inset 0 1.5px 3px rgba(255, 255, 255, 1), inset 0 -2px 3px rgba(0, 0, 0, 0.06), inset 0 0 12px rgba(255, 255, 255, 0.5);
+            background: color-mix(in oklab, white 72%, transparent);
+            backdrop-filter: blur(22px) saturate(1.8);
+            -webkit-backdrop-filter: blur(22px) saturate(1.8);
+            border: 1px solid rgba(255, 255, 255, 0.75);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.85), 0 20px 44px -22px rgba(0, 0, 0, 0.35), 0 8px 20px -6px rgba(0, 0, 0, 0.08);
             transition: background 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
         }
 
         .dark .liquid-dock {
-            background: rgba(15, 23, 42, 0.85);
-            border: 1px solid rgba(255, 255, 255, 0.16);
-            box-shadow: 0 28px 52px -10px rgba(0, 0, 0, 0.65), 0 10px 24px -4px rgba(0, 0, 0, 0.4), inset 0 1.5px 3px rgba(255, 255, 255, 0.22), inset 0 -1.5px 3px rgba(0, 0, 0, 0.55), inset 0 0 15px rgba(99, 102, 241, 0.15);
+            background: color-mix(in oklab, #0f172a 74%, transparent);
+            border: 1px solid rgba(255, 255, 255, 0.22);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35), 0 20px 44px -22px rgba(0, 0, 0, 0.85), 0 10px 24px -4px rgba(0, 0, 0, 0.45);
         }
 
         .liquid-bubble {
             position: absolute;
-            top: 5px;
-            bottom: 5px;
+            top: 8px;
+            bottom: 8px;
             left: 0;
             border-radius: 9999px;
-            z-index: 1;
+            z-index: 0;
             pointer-events: none;
             will-change: transform, width;
             transform: translateX(0);
-            background: linear-gradient(135deg, rgba(240, 244, 255, 0.95) 0%, rgba(210, 224, 255, 0.75) 100%);
-            border: 1px solid rgba(255, 255, 255, 1);
-            box-shadow: 0 8px 20px -3px rgba(26, 98, 255, 0.18), inset 0 1.5px 2px rgba(255, 255, 255, 1), inset 0 -3px 6px rgba(26, 98, 255, 0.12);
-            transition: transform 0.4s cubic-bezier(0.25, 1, 0.35, 1), width 0.35s cubic-bezier(0.25, 1, 0.35, 1);
+            background: rgba(255, 255, 255, 0.65);
+            border: 1px solid rgba(255, 255, 255, 0.85);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.95), 0 6px 16px -4px rgba(26, 98, 255, 0.16);
+            transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.5, 1), width 0.5s cubic-bezier(0.34, 1.56, 0.5, 1);
         }
 
         .dark .liquid-bubble {
-            background: linear-gradient(135deg, rgba(99, 102, 241, 0.55) 0%, rgba(79, 70, 229, 0.35) 100%);
-            border: 1px solid rgba(165, 180, 252, 0.55);
-            box-shadow: 0 8px 20px -3px rgba(0, 0, 0, 0.45), inset 0 1.5px 2px rgba(255, 255, 255, 0.35), inset 0 -2px 4px rgba(79, 70, 229, 0.3);
+            background: rgba(255, 255, 255, 0.16);
+            border: 1px solid rgba(255, 255, 255, 0.38);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.55), 0 8px 20px -4px rgba(0, 0, 0, 0.45);
         }
 
-        .ios-glass-card {
-            background: #ffffff !important;
-            border: 1px solid rgba(226, 232, 240, 0.95) !important;
-            box-shadow: 0 8px 20px -4px rgba(0, 0, 0, 0.04), 0 4px 6px -4px rgba(0, 0, 0, 0.02) !important;
+        @media (prefers-reduced-motion: reduce) {
+            .liquid-bubble {
+                transition: none !important;
+            }
         }
-
-        .dark .ios-glass-card {
-            background: #0f172a !important;
-            border: 1px solid rgba(51, 65, 85, 0.7) !important;
-            box-shadow: 0 12px 24px -6px rgba(0, 0, 0, 0.45) !important;
-        }
-
-        .ios-glass-modal {
-            background: #ffffff !important;
-            border: 1px solid #e2e8f0 !important;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25) !important;
-        }
-
-        .dark .ios-glass-modal {
-            background: #0f172a !important;
-            border: 1px solid #334155 !important;
-            box-shadow: 0 30px 60px -15px rgba(0, 0, 0, 0.75) !important;
-        }
-
         .liquid-nav-btn {
             position: relative;
-            z-index: 2;
+            z-index: 1;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             flex: 1;
             height: 100%;
-            padding: 2px 0;
+            padding: 2px 4px;
+            border-radius: 9999px;
             background: transparent;
             border: none;
             outline: none;
             cursor: pointer;
-            transition: transform 0.15s ease;
+            transition: transform 0.15s ease, color 0.2s ease;
+        }
+
+        .liquid-nav-btn:focus-visible {
+            outline: 2px solid #6366f1;
+            outline-offset: 2px;
+        }
+
+        .dark .liquid-nav-btn:focus-visible {
+            outline: 2px solid #ffffff;
+            outline-offset: 2px;
         }
 
         .liquid-nav-btn:active {
@@ -503,298 +497,316 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            height: 26px;
-            font-size: 20px;
-            color: #475569;
-            transition: color 0.3s ease, transform 0.3s cubic-bezier(0.34, 1.5, 0.64, 1);
+            font-size: 16px;
+            margin-bottom: 2px;
+            color: #64748b;
+            transition: transform 0.28s cubic-bezier(0.34, 1.56, 0.64, 1), color 0.2s ease;
         }
 
         .dark .liquid-icon-wrap {
             color: #94a3b8;
         }
 
+        .liquid-nav-btn.is-active .liquid-icon-wrap {
+            color: #4f46e5;
+            transform: translateY(-1px) scale(1.1);
+        }
+
+        .dark .liquid-nav-btn.is-active .liquid-icon-wrap {
+            color: #a5b4fc;
+        }
+
         .liquid-label {
-            font-size: 11px;
-            font-weight: 500;
+            font-size: 10.5px;
+            font-weight: 600;
             letter-spacing: -0.01em;
-            margin-top: 3px;
             color: #64748b;
-            transition: color 0.3s ease, font-weight 0.2s ease;
+            transition: color 0.2s ease;
         }
 
         .dark .liquid-label {
             color: #94a3b8;
         }
 
-        .liquid-nav-btn.is-active .liquid-icon-wrap {
-            color: #1a62ff !important;
-            transform: translateY(-1.5px) scale(1.08);
-        }
-
-        .dark .liquid-nav-btn.is-active .liquid-icon-wrap {
-            color: #818cf8 !important;
-        }
-
         .liquid-nav-btn.is-active .liquid-label {
-            color: #1a62ff !important;
+            color: #4f46e5;
             font-weight: 700;
         }
 
         .dark .liquid-nav-btn.is-active .liquid-label {
-            color: #a5b4fc !important;
+            color: #ffffff;
         }
 
         .liquid-badge {
             position: absolute;
-            top: -2px;
-            right: -8px;
-            min-width: 17px;
-            height: 17px;
+            top: -5px;
+            right: -10px;
+            min-width: 16px;
+            height: 16px;
             padding: 0 4px;
             border-radius: 9999px;
-            background-color: #ef4444;
-            color: #ffffff;
-            font-size: 10px;
+            background: #ef4444;
+            color: white;
+            font-size: 9px;
             font-weight: 700;
             display: flex;
             align-items: center;
             justify-content: center;
-            border: 2px solid #ffffff;
-            box-shadow: 0 2px 5px rgba(239, 68, 68, 0.4);
-            line-height: 1;
-            z-index: 3;
+            box-shadow: 0 2px 6px rgba(239, 68, 68, 0.45);
         }
 
-        .dark .liquid-badge {
-            border-color: #0f172a;
+        .ios-glass-card {
+            background: rgba(255, 255, 255, 0.86);
+            backdrop-filter: blur(20px) saturate(160%);
+            -webkit-backdrop-filter: blur(20px) saturate(160%);
+            border: 1px solid rgba(226, 232, 240, 0.85);
+            transition: background-color 0.25s ease, border-color 0.25s ease;
+        }
+
+        .dark .ios-glass-card {
+            background: rgba(15, 23, 42, 0.78);
+            border: 1px solid rgba(51, 65, 85, 0.65);
+        }
+
+        .ios-glass-modal {
+            background: rgba(255, 255, 255, 0.96);
+            backdrop-filter: blur(24px) saturate(180%);
+            -webkit-backdrop-filter: blur(24px) saturate(180%);
+            border: 1px solid rgba(226, 232, 240, 0.9);
+            transition: background-color 0.25s ease, border-color 0.25s ease;
+        }
+
+        .dark .ios-glass-modal {
+            background: rgba(15, 23, 42, 0.94);
+            border: 1px solid rgba(51, 65, 85, 0.8);
         }
     </style>
 </head>
 
-<body
-    class="bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-100 flex flex-col items-stretch h-full selection:bg-indigo-500 selection:text-white">
+<body class="text-slate-800 dark:text-slate-100 antialiased selection:bg-indigo-500 selection:text-white flex flex-col">
 
-    <header id="persistent-header" class="ios-header px-4 sm:px-6 flex items-center justify-between w-full hidden"
-        style="display: none;"></header>
+    <div id="toast-container"></div>
+    <div id="modal-root"></div>
 
-    <div id="app" class="app-container w-full flex flex-col relative transition-colors duration-200">
-        <div class="flex-1 flex flex-col items-center justify-center p-6 text-center select-none">
-            <div class="relative w-16 h-16 flex items-center justify-center mx-auto mb-4">
-                <div class="absolute inset-0 simple-spinner"></div>
-                <img src="https://clickfactoryphotography.com/wp-content/uploads/2022/04/crop-logo.gif"
-                    alt="Click Factory Logo" class="w-9 h-9 object-contain"
-                    onerror="this.src='https://placehold.co/40x40/4f46e5/ffffff?text=CF'">
-            </div>
-            <p class="text-sm font-semibold text-slate-600 dark:text-slate-300 tracking-tight">Loading Expense...</p>
+    <div class="app-container max-w-lg mx-auto relative">
+        <header id="persistent-header" class="hidden ios-header px-5 sm:px-6 flex items-center justify-between"></header>
+
+        <div id="app" class="flex-1 flex flex-col min-h-0 overflow-hidden relative"></div>
+
+        <div id="persistent-nav-wrapper" class="hidden liquid-nav-container">
+            <nav id="liquid-nav" class="liquid-dock" aria-label="Primary">
+                <div id="liquid-bubble" class="liquid-bubble" aria-hidden="true"></div>
+
+                <button type="button" id="nav-btn-home" onclick="switchTab('home')" class="liquid-nav-btn is-active" aria-current="page">
+                    <div class="liquid-icon-wrap"><i class="fa-solid fa-house"></i></div>
+                    <span class="liquid-label">Home</span>
+                </button>
+
+                <button type="button" id="nav-btn-summary" onclick="switchTab('summary')" class="liquid-nav-btn">
+                    <div class="liquid-icon-wrap"><i class="fa-solid fa-chart-pie"></i></div>
+                    <span class="liquid-label">Summary</span>
+                </button>
+
+                <button type="button" id="nav-btn-users" class="liquid-nav-btn">
+                    <div class="liquid-icon-wrap"><i id="nav-users-icon" class="fa-solid fa-users"></i></div>
+                    <span id="nav-users-label" class="liquid-label">Users</span>
+                </button>
+
+                <button type="button" id="nav-btn-profile" onclick="switchTab('profile')" class="liquid-nav-btn">
+                    <div class="liquid-icon-wrap">
+                        <i class="fa-solid fa-user"></i>
+                        <span id="nav-badge" class="liquid-badge hidden">0</span>
+                    </div>
+                    <span class="liquid-label">Account</span>
+                </button>
+            </nav>
         </div>
     </div>
 
-    <div id="persistent-nav-wrapper" class="liquid-nav-container hidden" style="display: none;">
-        <nav id="liquid-nav" class="liquid-dock">
-            <div id="liquid-bubble" class="liquid-bubble"></div>
-
-            <button id="nav-btn-home" onclick="switchTab('home')" class="liquid-nav-btn is-active">
-                <div class="liquid-icon-wrap"><i class="fa-solid fa-house"></i></div>
-                <span class="liquid-label">Home</span>
-            </button>
-
-            <button id="nav-btn-summary" onclick="switchTab('summary')" class="liquid-nav-btn">
-                <div class="liquid-icon-wrap"><i class="fa-solid fa-chart-pie"></i></div>
-                <span class="liquid-label">Summary</span>
-            </button>
-
-            <button id="nav-btn-users" onclick="switchTab('users')" class="liquid-nav-btn">
-                <div class="liquid-icon-wrap"><i id="nav-users-icon" class="fa-solid fa-users"></i></div>
-                <span id="nav-users-label" class="liquid-label">Users</span>
-            </button>
-
-            <button id="nav-btn-profile" onclick="switchTab('profile')" class="liquid-nav-btn">
-                <div class="liquid-icon-wrap">
-                    <i class="fa-solid fa-circle-user"></i>
-                    <span id="nav-badge" class="liquid-badge hidden">0</span>
-                </div>
-                <span class="liquid-label">Account</span>
-            </button>
-        </nav>
-    </div>
-
-    <div id="modal-root" class="relative z-[60]"></div>
-    <div id="toast-container" class="fixed z-[70]"></div>
-
     <script>
-        const LOCAL_STORAGE_KEY = 'click_factory_current_user_v23';
-        const SESSION_COOKIE_NAME = 'cf_session_v23';
+        const LOCAL_STORAGE_KEY = 'click_factory_user_v1';
+        const SESSION_COOKIE_KEY = 'cf_user_session_v1';
         const SESSION_IDB_NAME = 'cf_session_store_v1';
-        const SESSION_CACHE_NAME = 'cf-auth-vault-v1';
         const THEME_STORAGE_KEY = 'click_factory_theme_v1';
         const SOUND_STORAGE_KEY = 'click_factory_sound_v1';
         const SOUND_VOL_STORAGE_KEY = 'click_factory_sound_vol_v1';
         const DOCK_ALPHA_STORAGE_KEY = 'click_factory_dock_alpha_v1';
-        const GDRIVE_TOKEN_CACHE_KEY = 'cf_gdrive_oauth_token_v1';
-        const LOCAL_DB_STORAGE_KEY = 'click_factory_local_db_v1';
-        const CURRENT_CLIENT_APP_VERSION = '1.1.8';
+        const LOCAL_DATA_STORAGE_KEY = 'click_factory_data_v1';
+        const GDRIVE_TOKEN_CACHE_KEY = 'click_factory_gdrive_token_v1';
+        const CURRENT_CLIENT_APP_VERSION = '2.9.0';
+        const tabOrder = ['home', 'add', 'notifications', 'admin', 'analytics', 'users', 'wallet', 'profile', 'recycle', 'userRecycle', 'requests'];
 
         const DEFAULT_SEED_USERS = [
-            { id: 'usr_dev', name: 'Lead Developer', username: 'developer', password: 'devpassword', role: 'developer', email: 'dev@clickfactory.com', wallet: 0, excessSpent: 0 },
-            { id: 'usr_adm', name: 'Admin Manager', username: 'admin', password: 'adminpassword', role: 'admin', email: 'admin@clickfactory.com', wallet: 0, excessSpent: 0 },
-            { id: 'usr_1', name: 'User One', username: 'user1', password: 'password', role: 'user', email: 'user1@clickfactory.com', wallet: 12500, excessSpent: 0 },
-            { id: 'usr_2', name: 'User Two', username: 'user2', password: 'password', role: 'user', email: 'user2@clickfactory.com', wallet: 4500, excessSpent: 0 }
+            { id: 'dev_0', name: 'Satish Kumar (Dev)', username: 'developer', password: 'devpassword', role: 'developer', email: 'developer@clickfactory.com', wallet: 0, excessSpent: 0 },
+            { id: 'admin_1', name: 'Studio Admin', username: 'admin', password: 'adminpassword', role: 'admin', email: 'admin@clickfactory.com', wallet: 0, excessSpent: 0 },
+            { id: 'user_1', name: 'Rohan Verma', username: 'user1', password: 'password', role: 'user', email: 'rohan@clickfactory.com', wallet: 5000, excessSpent: 0 },
+            { id: 'user_2', name: 'Ananya Sharma', username: 'user2', password: 'password', role: 'user', email: 'ananya@clickfactory.com', wallet: 3500, excessSpent: 0 }
         ];
 
-        function lsGet(key, fallback = null) {
-            try { const v = localStorage.getItem(key); return v === null ? fallback : v; } catch (e) { return fallback; }
+        const isDeveloper = (u) => Boolean(u && u.role === 'developer');
+        const isAdminOrDev = (u) => Boolean(u && (u.role === 'admin' || u.role === 'developer'));
+
+        function lsGet(k, fallback = null) {
+            try { const v = localStorage.getItem(k); return v !== null ? v : fallback; } catch (e) { return fallback; }
         }
-        function lsSet(key, value) { try { localStorage.setItem(key, value); } catch (e) { } }
-        function lsRemove(key) { try { localStorage.removeItem(key); } catch (e) { } }
+        function lsSet(k, v) {
+            try { localStorage.setItem(k, v); } catch (e) { }
+        }
+        function lsRemove(k) {
+            try { localStorage.removeItem(k); } catch (e) { }
+        }
 
-        function isDeveloper(user) { return Boolean(user && user.role === 'developer'); }
-        function isAdminOrDev(user) { return Boolean(user && (user.role === 'admin' || user.role === 'developer')); }
-
-        let sharedAudioCtx = null;
-        let lastHapticSoundStep = -1;
-        let lastHapticAlphaStep = -1;
-        let initialNotificationsLoaded = false;
-        let knownNotificationIds = new Set();
-        const tabOrder = ['home', 'notifications', 'admin', 'analytics', 'users', 'wallet', 'profile', 'recycle', 'userRecycle', 'requests', 'add'];
-        window.activeUnsubscribers = [];
-        window.activeCameraStream = null;
-
-        function triggerHaptic(ms = 12) {
-            try {
-                if ('vibrate' in navigator) navigator.vibrate(ms);
-            } catch (e) { }
+        function triggerHaptic(duration = 12) {
+            if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
+                try { navigator.vibrate(duration); } catch (e) { }
+            }
         }
 
         function createLocalFallbackAdapter() {
             const listeners = {};
-            function loadLocalDb() {
-                let dbData = null;
-                try { dbData = JSON.parse(lsGet(LOCAL_DB_STORAGE_KEY, 'null')); } catch (e) { }
-                if (!dbData || typeof dbData !== 'object') {
-                    dbData = {
-                        users: {},
-                        expenses: {},
-                        walletTransactions: {},
-                        notifications: {},
-                        recycleBin: {},
-                        userRecycleBin: {},
-                        passwordRequests: {},
-                        settings: {
-                            app_settings: {
-                                autoDeleteEnabled: false,
-                                currentVersion: CURRENT_CLIENT_APP_VERSION,
-                                gdriveEnabled: false,
-                                gdriveClientId: '',
-                                gdriveFolderId: '',
-                                gdriveBridgeUrl: '',
-                                gdriveSharedToken: '',
-                                gdriveSharedExpiry: 0,
-                                gdriveConnectedEmail: '',
-                                gdriveLastError: '',
-                                maintenanceMode: false,
-                                maintenanceHours: 2,
-                                maintenanceUpdatedAt: ''
-                            }
+            let store = null;
+            try { store = JSON.parse(lsGet(LOCAL_DATA_STORAGE_KEY, 'null')); } catch (e) { }
+            if (!store || typeof store !== 'object') {
+                store = {
+                    users: {},
+                    expenses: {},
+                    walletTransactions: {},
+                    notifications: {},
+                    recycleBin: {},
+                    userRecycleBin: {},
+                    passwordRequests: {},
+                    settings: {
+                        app_settings: {
+                            autoDeleteEnabled: false,
+                            currentVersion: CURRENT_CLIENT_APP_VERSION,
+                            gdriveEnabled: false,
+                            gdriveClientId: '',
+                            gdriveFolderId: '',
+                            gdriveBridgeUrl: '',
+                            gdriveSharedToken: '',
+                            gdriveSharedExpiry: 0,
+                            gdriveConnectedEmail: '',
+                            gdriveLastError: '',
+                            maintenanceMode: false,
+                            maintenanceHours: 2,
+                            maintenanceUpdatedAt: ''
                         }
-                    };
-                }
-                if (!dbData.users) dbData.users = {};
-                DEFAULT_SEED_USERS.forEach(u => {
-                    if (!dbData.users[u.id]) dbData.users[u.id] = { ...u };
-                });
-                return dbData;
+                    }
+                };
             }
-            function saveLocalDb(dbData) {
-                lsSet(LOCAL_DB_STORAGE_KEY, JSON.stringify(dbData));
+            if (!store.users) store.users = {};
+            DEFAULT_SEED_USERS.forEach(u => {
+                if (!store.users[u.id]) store.users[u.id] = { ...u };
+            });
+
+            function saveStore() {
+                lsSet(LOCAL_DATA_STORAGE_KEY, JSON.stringify(store));
             }
-            function notifyCollection(colName) {
-                const dbData = loadLocalDb();
-                const colObj = dbData[colName] || {};
-                const docs = Object.keys(colObj).map(id => ({
+            function notify(colName) {
+                const docs = Object.entries(store[colName] || {}).map(([id, data]) => ({
                     id,
-                    data: () => JSON.parse(JSON.stringify(colObj[id]))
+                    data: () => ({ ...data })
                 }));
                 (listeners[colName] || []).forEach(cb => {
                     try { cb({ docs, empty: docs.length === 0, metadata: { fromCache: false } }); } catch (e) { }
                 });
             }
+
             return {
-                db: { _isLocalFallback: true },
-                storage: { _isLocalFallback: true },
-                collection: (db, colName) => ({ colName }),
-                doc: (db, colName, id) => ({ colName, id }),
-                getDocs: async ({ colName }) => {
-                    const dbData = loadLocalDb();
-                    const colObj = dbData[colName] || {};
-                    const docs = Object.keys(colObj).map(id => ({
+                db: { _isLocal: true },
+                storage: { _isLocal: true },
+                collection: (_db, name) => ({ _col: name }),
+                doc: (_db, colName, id) => ({ _col: colName, _id: id }),
+                getDocs: async (colRef) => {
+                    const docs = Object.entries(store[colRef._col] || {}).map(([id, data]) => ({
                         id,
-                        data: () => JSON.parse(JSON.stringify(colObj[id]))
+                        data: () => ({ ...data })
                     }));
                     return { docs, empty: docs.length === 0 };
                 },
-                setDoc: async ({ colName, id }, data, options = {}) => {
-                    const dbData = loadLocalDb();
-                    if (!dbData[colName]) dbData[colName] = {};
-                    dbData[colName][id] = options.merge && dbData[colName][id]
-                        ? { ...dbData[colName][id], ...data }
+                setDoc: async (docRef, data, opts) => {
+                    if (!store[docRef._col]) store[docRef._col] = {};
+                    store[docRef._col][docRef._id] = opts && opts.merge
+                        ? { ...(store[docRef._col][docRef._id] || {}), ...data }
                         : { ...data };
-                    saveLocalDb(dbData);
-                    notifyCollection(colName);
+                    saveStore();
+                    notify(docRef._col);
                 },
-                updateDoc: async ({ colName, id }, data) => {
-                    const dbData = loadLocalDb();
-                    if (!dbData[colName]) dbData[colName] = {};
-                    if (dbData[colName][id]) {
-                        dbData[colName][id] = { ...dbData[colName][id], ...data };
-                        saveLocalDb(dbData);
-                        notifyCollection(colName);
+                updateDoc: async (docRef, data) => {
+                    if (!store[docRef._col]) store[docRef._col] = {};
+                    store[docRef._col][docRef._id] = { ...(store[docRef._col][docRef._id] || {}), ...data };
+                    saveStore();
+                    notify(docRef._col);
+                },
+                deleteDoc: async (docRef) => {
+                    if (store[docRef._col]) {
+                        delete store[docRef._col][docRef._id];
+                        saveStore();
+                        notify(docRef._col);
                     }
                 },
-                deleteDoc: async ({ colName, id }) => {
-                    const dbData = loadLocalDb();
-                    if (dbData[colName] && dbData[colName][id]) {
-                        delete dbData[colName][id];
-                        saveLocalDb(dbData);
-                        notifyCollection(colName);
-                    }
-                },
-                onSnapshot: ({ colName }, onNext) => {
-                    if (!listeners[colName]) listeners[colName] = [];
-                    listeners[colName].push(onNext);
-                    setTimeout(() => notifyCollection(colName), 0);
+                onSnapshot: (colRef, onNext) => {
+                    const name = colRef._col;
+                    if (!listeners[name]) listeners[name] = [];
+                    listeners[name].push(onNext);
+                    setTimeout(() => notify(name), 0);
                     return () => {
-                        listeners[colName] = (listeners[colName] || []).filter(fn => fn !== onNext);
+                        listeners[name] = (listeners[name] || []).filter(fn => fn !== onNext);
                     };
                 },
-                runTransaction: async (db, updateFn) => {
+                runTransaction: async (_db, updateFn) => {
                     const tx = {
-                        get: async ({ colName, id }) => {
-                            const dbData = loadLocalDb();
-                            const item = dbData[colName] && dbData[colName][id];
+                        get: async (docRef) => {
+                            const item = (store[docRef._col] || {})[docRef._id];
                             return { exists: () => Boolean(item), data: () => ({ ...item }) };
                         },
-                        update: ({ colName, id }, data) => {
-                            const dbData = loadLocalDb();
-                            if (dbData[colName] && dbData[colName][id]) {
-                                dbData[colName][id] = { ...dbData[colName][id], ...data };
-                                saveLocalDb(dbData);
-                                notifyCollection(colName);
-                            }
+                        update: (docRef, data) => {
+                            if (!store[docRef._col]) store[docRef._col] = {};
+                            store[docRef._col][docRef._id] = { ...(store[docRef._col][docRef._id] || {}), ...data };
                         }
                     };
-                    return await updateFn(tx);
+                    const res = await updateFn(tx);
+                    saveStore();
+                    notify('users');
+                    return res;
                 },
-                storageRef: (storage, path) => ({ path }),
-                uploadString: async (ref, dataUrl) => ({ ref, dataUrl }),
-                getDownloadURL: async (ref) => ref.dataUrl || '',
+                query: (c) => c,
+                orderBy: () => ({}),
+                storageRef: (_s, path) => ({ _path: path }),
+                uploadString: async (ref, dataUrl) => { ref._dataUrl = dataUrl; },
+                getDownloadURL: async (ref) => ref._dataUrl || '',
                 deleteObject: async () => { }
             };
         }
 
         window.FB = createLocalFallbackAdapter();
+        window.activeUnsubscribers = [];
+
+        let sharedAudioCtx = null;
+        let knownNotificationIds = new Set();
+        let initialNotificationsLoaded = false;
+        let lastHapticSoundStep = -1;
+        let lastHapticAlphaStep = -1;
 
         const state = {
-            currentUser: readSyncSession(),
+            currentUser: null,
+            authView: 'login',
+            activeTab: 'home',
+            slideDirection: 'animate-slide-right',
+            editingExpenseId: null,
+            tempBillData: null,
+            tempFormCache: null,
+            userFilterTab: 'all',
+            showDateFilter: false,
+            themeMode: lsGet(THEME_STORAGE_KEY, 'system'),
+            darkMode: false,
+            soundEnabled: lsGet(SOUND_STORAGE_KEY, 'true') !== 'false',
+            soundVolume: parseInt(lsGet(SOUND_VOL_STORAGE_KEY, '80'), 10) || 80,
+            dockAlpha: parseFloat(lsGet(DOCK_ALPHA_STORAGE_KEY, '0.72')) || 0.72,
+            showSoundPanel: false,
+            isSoundTesting: false,
+            isDbLoading: false,
+            justFinishedLoading: false,
             users: DEFAULT_SEED_USERS.map(u => ({ ...u })),
             expenses: [],
             walletTransactions: [],
@@ -817,154 +829,141 @@
                 maintenanceHours: 2,
                 maintenanceUpdatedAt: ''
             },
-            activeTab: 'home',
-            authView: 'login',
-            slideDirection: 'animate-slide-right',
-            isDbLoading: false,
-            justFinishedLoading: false,
-            themeMode: lsGet(THEME_STORAGE_KEY, 'system'),
-            darkMode: false,
-            soundEnabled: lsGet(SOUND_STORAGE_KEY, 'true') !== 'false',
-            soundVolume: parseInt(lsGet(SOUND_VOL_STORAGE_KEY, '80'), 10) || 80,
-            dockAlpha: parseFloat(lsGet(DOCK_ALPHA_STORAGE_KEY, '0.85')) || 0.85,
-            showSoundPanel: false,
-            isSoundTesting: false,
-            searchQuery: '',
             filterCategory: 'All',
             filterMonth: 'All',
             filterUser: 'All',
             filterStartDate: '',
             filterEndDate: '',
-            showDateFilter: false,
-            userFilterTab: 'all',
-            editingExpenseId: null,
-            tempBillData: null,
-            tempFormCache: null
+            searchQuery: ''
         };
 
         function isPtrAllowed() {
-            return Boolean(state.currentUser && !state.isDbLoading && !['add'].includes(state.activeTab));
+            return Boolean(state.currentUser && !state.isDbLoading && state.activeTab !== 'add');
         }
 
-        // 5-Layer Session Vault (localStorage + IndexedDB + CacheStorage + Cookie + window.name)
         function setSessionCookie(jsonStr) {
             try {
                 const maxAge = 60 * 60 * 24 * 365 * 5;
-                document.cookie = `${SESSION_COOKIE_NAME}=${encodeURIComponent(jsonStr)}; path=/; max-age=${maxAge}; SameSite=Lax`;
+                document.cookie = `${SESSION_COOKIE_KEY}=${encodeURIComponent(jsonStr)}; max-age=${maxAge}; path=/; SameSite=Lax`;
             } catch (e) { }
         }
 
         function getSessionCookie() {
             try {
-                const match = document.cookie.match(new RegExp('(?:^|; )' + SESSION_COOKIE_NAME + '=([^;]*)'));
-                return match ? decodeURIComponent(match[1]) : null;
-            } catch (e) { return null; }
+                const prefix = `${SESSION_COOKIE_KEY}=`;
+                const parts = document.cookie.split(';');
+                for (let part of parts) {
+                    part = part.trim();
+                    if (part.startsWith(prefix)) {
+                        return decodeURIComponent(part.substring(prefix.length));
+                    }
+                }
+            } catch (e) { }
+            return null;
         }
 
         function clearSessionCookie() {
             try {
-                document.cookie = `${SESSION_COOKIE_NAME}=; path=/; max-age=0; SameSite=Lax`;
+                document.cookie = `${SESSION_COOKIE_KEY}=; max-age=0; path=/; SameSite=Lax`;
             } catch (e) { }
         }
 
-        function saveSessionIdb(safeUser) {
-            try {
-                if (!window.indexedDB) return;
-                const req = indexedDB.open(SESSION_IDB_NAME, 1);
-                req.onupgradeneeded = (e) => {
-                    const db = e.target.result;
-                    if (!db.objectStoreNames.contains('session')) db.createObjectStore('session');
-                };
-                req.onsuccess = (e) => {
-                    try {
-                        const db = e.target.result;
-                        const tx = db.transaction('session', 'readwrite');
-                        tx.objectStore('session').put(safeUser, 'activeUser');
-                    } catch (err) { }
-                };
-            } catch (e) { }
-        }
-
-        function clearSessionIdb() {
-            try {
-                if (!window.indexedDB) return;
-                const req = indexedDB.open(SESSION_IDB_NAME, 1);
-                req.onsuccess = (e) => {
-                    try {
-                        const db = e.target.result;
-                        if (db.objectStoreNames.contains('session')) {
-                            const tx = db.transaction('session', 'readwrite');
-                            tx.objectStore('session').delete('activeUser');
-                        }
-                    } catch (err) { }
-                };
-            } catch (e) { }
-        }
-
-        function readSessionIdb() {
+        function openSessionIdb() {
             return new Promise((resolve) => {
+                if (!window.indexedDB) return resolve(null);
                 try {
-                    if (!window.indexedDB) return resolve(null);
                     const req = indexedDB.open(SESSION_IDB_NAME, 1);
                     req.onupgradeneeded = (e) => {
                         const db = e.target.result;
-                        if (!db.objectStoreNames.contains('session')) db.createObjectStore('session');
+                        if (!db.objectStoreNames.contains('session')) {
+                            db.createObjectStore('session');
+                        }
                     };
-                    req.onsuccess = (e) => {
-                        try {
-                            const db = e.target.result;
-                            const tx = db.transaction('session', 'readonly');
-                            const getReq = tx.objectStore('session').get('activeUser');
-                            getReq.onsuccess = () => resolve(getReq.result || null);
-                            getReq.onerror = () => resolve(null);
-                        } catch (err) { resolve(null); }
-                    };
+                    req.onsuccess = (e) => resolve(e.target.result);
                     req.onerror = () => resolve(null);
                 } catch (e) { resolve(null); }
             });
         }
 
-        function saveSessionCache(jsonStr) {
+        async function writeSessionIdb(userObj) {
+            const db = await openSessionIdb();
+            if (!db) return;
             try {
-                if ('caches' in window && window.caches) {
-                    caches.open(SESSION_CACHE_NAME).then(cache => {
-                        return cache.put('https://clickfactory.local/__cf_session__', new Response(jsonStr, {
-                            headers: { 'Content-Type': 'application/json' }
-                        }));
-                    }).catch(() => { });
-                }
+                const tx = db.transaction('session', 'readwrite');
+                tx.objectStore('session').put(userObj, 'active_user');
             } catch (e) { }
         }
 
-        function clearSessionCache() {
+        async function readSessionIdb() {
+            const db = await openSessionIdb();
+            if (!db) return null;
+            return new Promise((resolve) => {
+                try {
+                    const tx = db.transaction('session', 'readonly');
+                    const req = tx.objectStore('session').get('active_user');
+                    req.onsuccess = () => resolve(req.result || null);
+                    req.onerror = () => resolve(null);
+                } catch (e) { resolve(null); }
+            });
+        }
+
+        async function clearSessionIdb() {
+            const db = await openSessionIdb();
+            if (!db) return;
             try {
-                if ('caches' in window && window.caches) {
-                    caches.open(SESSION_CACHE_NAME).then(cache => cache.delete('https://clickfactory.local/__cf_session__')).catch(() => { });
-                }
+                const tx = db.transaction('session', 'readwrite');
+                tx.objectStore('session').delete('active_user');
             } catch (e) { }
         }
 
-        function readSessionCache() {
+        const SESSION_CACHE_KEY_URL = 'https://clickfactory.local/__cf_session__';
+
+        async function writeSessionCache(jsonStr) {
+            if (!('caches' in window)) return;
             try {
-                if (!('caches' in window) || !window.caches) return Promise.resolve(null);
-                return caches.open(SESSION_CACHE_NAME)
-                    .then(cache => cache.match('https://clickfactory.local/__cf_session__'))
-                    .then(res => res ? res.json() : null)
-                    .catch(() => null);
-            } catch (e) {
-                return Promise.resolve(null);
-            }
+                const cache = await caches.open('cf-auth-vault-v1');
+                await cache.put(SESSION_CACHE_KEY_URL, new Response(jsonStr, {
+                    headers: { 'Content-Type': 'application/json' }
+                }));
+            } catch (e) { }
         }
 
-        function persistCurrentUser(user) {
-            if (!user) return;
-            const { password, ...safe } = user;
-            const jsonStr = JSON.stringify(safe);
-            lsSet(LOCAL_STORAGE_KEY, jsonStr);
-            setSessionCookie(jsonStr);
-            saveSessionIdb(safe);
-            saveSessionCache(jsonStr);
-            try { window.name = 'CF_SESSION:' + jsonStr; } catch (e) { }
+        async function readSessionCache() {
+            if (!('caches' in window)) return null;
+            try {
+                const cache = await caches.open('cf-auth-vault-v1');
+                const res = await cache.match(SESSION_CACHE_KEY_URL);
+                if (!res) return null;
+                return await res.json();
+            } catch (e) { return null; }
+        }
+
+        async function clearSessionCache() {
+            if (!('caches' in window)) return;
+            try {
+                const cache = await caches.open('cf-auth-vault-v1');
+                await cache.delete(SESSION_CACHE_KEY_URL);
+            } catch (e) { }
+        }
+
+        function persistCurrentUser(userObj) {
+            if (!userObj || !userObj.id) return;
+            const safeSession = {
+                id: userObj.id,
+                name: userObj.name,
+                username: userObj.username,
+                password: userObj.password,
+                role: userObj.role,
+                email: userObj.email || '',
+                wallet: Number(userObj.wallet || 0),
+                excessSpent: Number(userObj.excessSpent || 0)
+            };
+            const serialized = JSON.stringify(safeSession);
+            lsSet(LOCAL_STORAGE_KEY, serialized);
+            setSessionCookie(serialized);
+            writeSessionIdb(safeSession);
+            writeSessionCache(serialized);
+            try { window.name = 'CF_SESSION:' + serialized; } catch (e) { }
         }
 
         function clearPersistedUser() {
@@ -1342,20 +1341,20 @@
 
             styleTag.innerHTML = `
                 .liquid-dock {
-                    background: rgba(255, 255, 255, ${lightAlpha}) !important;
-                    backdrop-filter: blur(${Math.round(24 + (state.dockAlpha * 16))}px) saturate(210%) !important;
-                    -webkit-backdrop-filter: blur(${Math.round(24 + (state.dockAlpha * 16))}px) saturate(210%) !important;
+                    background: color-mix(in oklab, white ${Math.round(state.dockAlpha * 100)}%, transparent) !important;
+                    backdrop-filter: blur(22px) saturate(1.8) !important;
+                    -webkit-backdrop-filter: blur(22px) saturate(1.8) !important;
                 }
                 .dark .liquid-dock {
-                    background: rgba(15, 23, 42, ${darkAlpha}) !important;
-                    backdrop-filter: blur(${Math.round(24 + (state.dockAlpha * 16))}px) saturate(210%) !important;
-                    -webkit-backdrop-filter: blur(${Math.round(24 + (state.dockAlpha * 16))}px) saturate(210%) !important;
+                    background: color-mix(in oklab, #0f172a ${Math.min(96, Math.round((state.dockAlpha + 0.05) * 100))}%, transparent) !important;
+                    backdrop-filter: blur(22px) saturate(1.8) !important;
+                    -webkit-backdrop-filter: blur(22px) saturate(1.8) !important;
                 }
                 .liquid-bubble {
-                    background: linear-gradient(135deg, rgba(240, 244, 255, ${bubbleLight}) 0%, rgba(210, 224, 255, ${Math.max(0.4, bubbleLight - 0.2)}) 100%) !important;
+                    background: rgba(255, 255, 255, ${Math.min(0.92, bubbleLight).toFixed(2)}) !important;
                 }
                 .dark .liquid-bubble {
-                    background: linear-gradient(135deg, rgba(99, 102, 241, ${Math.max(0.35, bubbleDark)}) 0%, rgba(79, 70, 229, ${Math.max(0.2, bubbleDark - 0.15)}) 100%) !important;
+                    background: rgba(255, 255, 255, ${Math.max(0.14, Math.min(0.32, bubbleDark * 0.45)).toFixed(2)}) !important;
                 }
             `;
         }
@@ -2757,10 +2756,12 @@
                 nav.querySelectorAll('.liquid-nav-btn').forEach(btn => {
                     if (btn.id === activeTargetId) {
                         btn.classList.add('is-active');
+                        btn.setAttribute('aria-current', 'page');
                         bubble.style.width = `${btn.offsetWidth}px`;
                         bubble.style.transform = `translateX(${btn.offsetLeft}px)`;
                     } else {
                         btn.classList.remove('is-active');
+                        btn.removeAttribute('aria-current');
                     }
                 });
             });
@@ -5709,6 +5710,33 @@
                     syncPersistentNavbar();
                 }
             }, { passive: true });
+
+            // Spring glide preview on desktop pointer hover/focus, snapping back on leave
+            document.addEventListener('pointerover', (e) => {
+                if (e.pointerType === 'touch') return;
+                const btn = e.target.closest('#liquid-nav .liquid-nav-btn');
+                const bubble = document.getElementById('liquid-bubble');
+                if (btn && bubble) {
+                    bubble.style.width = `${btn.offsetWidth}px`;
+                    bubble.style.transform = `translateX(${btn.offsetLeft}px)`;
+                }
+            });
+
+            document.addEventListener('focusin', (e) => {
+                const btn = e.target.closest('#liquid-nav .liquid-nav-btn');
+                const bubble = document.getElementById('liquid-bubble');
+                if (btn && bubble) {
+                    bubble.style.width = `${btn.offsetWidth}px`;
+                    bubble.style.transform = `translateX(${btn.offsetLeft}px)`;
+                }
+            });
+
+            document.addEventListener('pointerout', (e) => {
+                const nav = document.getElementById('liquid-nav');
+                if (nav && e.target.closest('#liquid-nav') && (!e.relatedTarget || !nav.contains(e.relatedTarget))) {
+                    syncPersistentNavbar();
+                }
+            });
         })();
 
         // Persist session across app switching, backgrounding, and reopening
