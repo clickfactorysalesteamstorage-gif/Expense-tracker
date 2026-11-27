@@ -419,18 +419,24 @@
             pointer-events: auto;
             user-select: none;
             -webkit-user-select: none;
-            background: color-mix(in oklab, white 72%, transparent);
-            backdrop-filter: blur(22px) saturate(1.8);
-            -webkit-backdrop-filter: blur(22px) saturate(1.8);
-            border: 1px solid rgba(255, 255, 255, 0.75);
-            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.85), 0 20px 44px -22px rgba(0, 0, 0, 0.35), 0 8px 20px -6px rgba(0, 0, 0, 0.08);
+            background: rgba(255, 255, 255, 0.12);
+            backdrop-filter: blur(8px) saturate(1.25);
+            -webkit-backdrop-filter: blur(8px) saturate(1.25);
+            border: 1px solid rgba(15, 23, 42, 0.10);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.65), 0 10px 24px -8px rgba(15, 23, 42, 0.12), 0 2px 8px -2px rgba(15, 23, 42, 0.05);
             transition: background 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
         }
 
         .dark .liquid-dock {
-            background: color-mix(in oklab, #0f172a 74%, transparent);
+            background: rgba(15, 23, 42, 0.10);
+            border: 1px solid rgba(255, 255, 255, 0.20);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25), 0 16px 36px -18px rgba(0, 0, 0, 0.75), 0 8px 20px -4px rgba(0, 0, 0, 0.35);
+        }
+
+        .dark .liquid-dock {
+            background: rgba(15, 23, 42, 0.14);
             border: 1px solid rgba(255, 255, 255, 0.22);
-            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35), 0 20px 44px -22px rgba(0, 0, 0, 0.85), 0 10px 24px -4px rgba(0, 0, 0, 0.45);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.3), 0 20px 44px -22px rgba(0, 0, 0, 0.8), 0 10px 24px -4px rgba(0, 0, 0, 0.4);
         }
 
         .liquid-bubble {
@@ -443,16 +449,16 @@
             pointer-events: none;
             will-change: transform, width;
             transform: translateX(0);
-            background: rgba(255, 255, 255, 0.65);
-            border: 1px solid rgba(255, 255, 255, 0.85);
-            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.95), 0 6px 16px -4px rgba(26, 98, 255, 0.16);
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.14), rgba(255, 255, 255, 0.42));
+            border: 1px solid rgba(99, 102, 241, 0.24);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9), 0 4px 12px -2px rgba(79, 70, 229, 0.14);
             transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.5, 1), width 0.5s cubic-bezier(0.34, 1.56, 0.5, 1);
         }
 
         .dark .liquid-bubble {
-            background: rgba(255, 255, 255, 0.16);
-            border: 1px solid rgba(255, 255, 255, 0.38);
-            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.55), 0 8px 20px -4px rgba(0, 0, 0, 0.45);
+            background: rgba(255, 255, 255, 0.12);
+            border: 1px solid rgba(255, 255, 255, 0.32);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.45), 0 8px 20px -4px rgba(0, 0, 0, 0.38);
         }
 
         @media (prefers-reduced-motion: reduce) {
@@ -499,7 +505,7 @@
             justify-content: center;
             font-size: 16px;
             margin-bottom: 2px;
-            color: #64748b;
+            color: #475569;
             transition: transform 0.28s cubic-bezier(0.34, 1.56, 0.64, 1), color 0.2s ease;
         }
 
@@ -520,7 +526,7 @@
             font-size: 10.5px;
             font-weight: 600;
             letter-spacing: -0.01em;
-            color: #64748b;
+            color: #475569;
             transition: color 0.2s ease;
         }
 
@@ -802,7 +808,10 @@
             darkMode: false,
             soundEnabled: lsGet(SOUND_STORAGE_KEY, 'true') !== 'false',
             soundVolume: parseInt(lsGet(SOUND_VOL_STORAGE_KEY, '80'), 10) || 80,
-            dockAlpha: parseFloat(lsGet(DOCK_ALPHA_STORAGE_KEY, '0.72')) || 0.72,
+            dockAlpha: (() => {
+                const raw = parseFloat(lsGet(DOCK_ALPHA_STORAGE_KEY, '0.08'));
+                return isNaN(raw) ? 0.08 : Math.min(0.90, Math.max(0.02, raw));
+            })(),
             showSoundPanel: false,
             isSoundTesting: false,
             isDbLoading: false,
@@ -1324,7 +1333,7 @@
         });
 
         function applyDockTransparency(val) {
-            state.dockAlpha = parseFloat(val);
+            state.dockAlpha = Math.max(0.02, Math.min(0.90, parseFloat(val)));
             lsSet(DOCK_ALPHA_STORAGE_KEY, String(state.dockAlpha));
 
             let styleTag = document.getElementById('dynamic-glass-style');
@@ -1334,27 +1343,28 @@
                 document.head.appendChild(styleTag);
             }
 
-            const lightAlpha = state.dockAlpha;
-            const darkAlpha = Math.min(0.96, state.dockAlpha + 0.05);
-            const bubbleLight = Math.min(1, state.dockAlpha + 0.08);
-            const bubbleDark = Math.max(0.3, state.dockAlpha - 0.25);
+            const lightAlpha = state.dockAlpha.toFixed(2);
+            const darkAlpha = Math.min(0.90, state.dockAlpha + 0.04).toFixed(2);
+            const bubbleLightTint = Math.min(0.24, Math.max(0.11, (state.dockAlpha * 0.25) + 0.10)).toFixed(2);
+            const bubbleLightWhite = Math.min(0.72, Math.max(0.28, state.dockAlpha + 0.24)).toFixed(2);
+            const bubbleDark = Math.min(0.32, Math.max(0.10, (state.dockAlpha * 0.45) + 0.08)).toFixed(2);
 
             styleTag.innerHTML = `
                 .liquid-dock {
-                    background: color-mix(in oklab, white ${Math.round(state.dockAlpha * 100)}%, transparent) !important;
-                    backdrop-filter: blur(22px) saturate(1.8) !important;
-                    -webkit-backdrop-filter: blur(22px) saturate(1.8) !important;
+                    background: rgba(255, 255, 255, ${lightAlpha}) !important;
+                    backdrop-filter: blur(8px) saturate(1.25) !important;
+                    -webkit-backdrop-filter: blur(8px) saturate(1.25) !important;
                 }
                 .dark .liquid-dock {
-                    background: color-mix(in oklab, #0f172a ${Math.min(96, Math.round((state.dockAlpha + 0.05) * 100))}%, transparent) !important;
-                    backdrop-filter: blur(22px) saturate(1.8) !important;
-                    -webkit-backdrop-filter: blur(22px) saturate(1.8) !important;
+                    background: rgba(15, 23, 42, ${darkAlpha}) !important;
+                    backdrop-filter: blur(8px) saturate(1.25) !important;
+                    -webkit-backdrop-filter: blur(8px) saturate(1.25) !important;
                 }
                 .liquid-bubble {
-                    background: rgba(255, 255, 255, ${Math.min(0.92, bubbleLight).toFixed(2)}) !important;
+                    background: linear-gradient(135deg, rgba(99, 102, 241, ${bubbleLightTint}), rgba(255, 255, 255, ${bubbleLightWhite})) !important;
                 }
                 .dark .liquid-bubble {
-                    background: rgba(255, 255, 255, ${Math.max(0.14, Math.min(0.32, bubbleDark * 0.45)).toFixed(2)}) !important;
+                    background: rgba(255, 255, 255, ${bubbleDark}) !important;
                 }
             `;
         }
@@ -5016,7 +5026,7 @@
                                     </span>
                                     <span id="dock-alpha-label" class="font-bold text-indigo-600 dark:text-indigo-400">${Math.round(state.dockAlpha * 100)}%</span>
                                 </div>
-                                <input type="range" min="0.30" max="0.95" step="0.02" value="${state.dockAlpha}" oninput="handleDockAlphaChange(this.value)" class="w-full accent-indigo-600 cursor-pointer h-1.5 bg-slate-200 dark:bg-slate-700 rounded-lg">
+                                <input type="range" min="0.02" max="0.90" step="0.01" value="${state.dockAlpha}" oninput="handleDockAlphaChange(this.value)" class="w-full accent-indigo-600 cursor-pointer h-1.5 bg-slate-200 dark:bg-slate-700 rounded-lg">
                             </div>
                         </div>
 
