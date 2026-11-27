@@ -650,6 +650,202 @@
         function isDeveloper(user) { return Boolean(user && user.role === 'developer'); }
         function isAdminOrDev(user) { return Boolean(user && (user.role === 'admin' || user.role === 'developer')); }
 
+        let sharedAudioCtx = null;
+        let lastHapticSoundStep = -1;
+        let lastHapticAlphaStep = -1;
+        let initialNotificationsLoaded = false;
+        let knownNotificationIds = new Set();
+        const tabOrder = ['home', 'notifications', 'admin', 'analytics', 'users', 'wallet', 'profile', 'recycle', 'userRecycle', 'requests', 'add'];
+        window.activeUnsubscribers = [];
+        window.activeCameraStream = null;
+
+        function triggerHaptic(ms = 12) {
+            try {
+                if ('vibrate' in navigator) navigator.vibrate(ms);
+            } catch (e) { }
+        }
+
+        function createLocalFallbackAdapter() {
+            const listeners = {};
+            function loadLocalDb() {
+                let dbData = null;
+                try { dbData = JSON.parse(lsGet(LOCAL_DB_STORAGE_KEY, 'null')); } catch (e) { }
+                if (!dbData || typeof dbData !== 'object') {
+                    dbData = {
+                        users: {},
+                        expenses: {},
+                        walletTransactions: {},
+                        notifications: {},
+                        recycleBin: {},
+                        userRecycleBin: {},
+                        passwordRequests: {},
+                        settings: {
+                            app_settings: {
+                                autoDeleteEnabled: false,
+                                currentVersion: CURRENT_CLIENT_APP_VERSION,
+                                gdriveEnabled: false,
+                                gdriveClientId: '',
+                                gdriveFolderId: '',
+                                gdriveBridgeUrl: '',
+                                gdriveSharedToken: '',
+                                gdriveSharedExpiry: 0,
+                                gdriveConnectedEmail: '',
+                                gdriveLastError: '',
+                                maintenanceMode: false,
+                                maintenanceHours: 2,
+                                maintenanceUpdatedAt: ''
+                            }
+                        }
+                    };
+                }
+                if (!dbData.users) dbData.users = {};
+                DEFAULT_SEED_USERS.forEach(u => {
+                    if (!dbData.users[u.id]) dbData.users[u.id] = { ...u };
+                });
+                return dbData;
+            }
+            function saveLocalDb(dbData) {
+                lsSet(LOCAL_DB_STORAGE_KEY, JSON.stringify(dbData));
+            }
+            function notifyCollection(colName) {
+                const dbData = loadLocalDb();
+                const colObj = dbData[colName] || {};
+                const docs = Object.keys(colObj).map(id => ({
+                    id,
+                    data: () => JSON.parse(JSON.stringify(colObj[id]))
+                }));
+                (listeners[colName] || []).forEach(cb => {
+                    try { cb({ docs, empty: docs.length === 0, metadata: { fromCache: false } }); } catch (e) { }
+                });
+            }
+            return {
+                db: { _isLocalFallback: true },
+                storage: { _isLocalFallback: true },
+                collection: (db, colName) => ({ colName }),
+                doc: (db, colName, id) => ({ colName, id }),
+                getDocs: async ({ colName }) => {
+                    const dbData = loadLocalDb();
+                    const colObj = dbData[colName] || {};
+                    const docs = Object.keys(colObj).map(id => ({
+                        id,
+                        data: () => JSON.parse(JSON.stringify(colObj[id]))
+                    }));
+                    return { docs, empty: docs.length === 0 };
+                },
+                setDoc: async ({ colName, id }, data, options = {}) => {
+                    const dbData = loadLocalDb();
+                    if (!dbData[colName]) dbData[colName] = {};
+                    dbData[colName][id] = options.merge && dbData[colName][id]
+                        ? { ...dbData[colName][id], ...data }
+                        : { ...data };
+                    saveLocalDb(dbData);
+                    notifyCollection(colName);
+                },
+                updateDoc: async ({ colName, id }, data) => {
+                    const dbData = loadLocalDb();
+                    if (!dbData[colName]) dbData[colName] = {};
+                    if (dbData[colName][id]) {
+                        dbData[colName][id] = { ...dbData[colName][id], ...data };
+                        saveLocalDb(dbData);
+                        notifyCollection(colName);
+                    }
+                },
+                deleteDoc: async ({ colName, id }) => {
+                    const dbData = loadLocalDb();
+                    if (dbData[colName] && dbData[colName][id]) {
+                        delete dbData[colName][id];
+                        saveLocalDb(dbData);
+                        notifyCollection(colName);
+                    }
+                },
+                onSnapshot: ({ colName }, onNext) => {
+                    if (!listeners[colName]) listeners[colName] = [];
+                    listeners[colName].push(onNext);
+                    setTimeout(() => notifyCollection(colName), 0);
+                    return () => {
+                        listeners[colName] = (listeners[colName] || []).filter(fn => fn !== onNext);
+                    };
+                },
+                runTransaction: async (db, updateFn) => {
+                    const tx = {
+                        get: async ({ colName, id }) => {
+                            const dbData = loadLocalDb();
+                            const item = dbData[colName] && dbData[colName][id];
+                            return { exists: () => Boolean(item), data: () => ({ ...item }) };
+                        },
+                        update: ({ colName, id }, data) => {
+                            const dbData = loadLocalDb();
+                            if (dbData[colName] && dbData[colName][id]) {
+                                dbData[colName][id] = { ...dbData[colName][id], ...data };
+                                saveLocalDb(dbData);
+                                notifyCollection(colName);
+                            }
+                        }
+                    };
+                    return await updateFn(tx);
+                },
+                storageRef: (storage, path) => ({ path }),
+                uploadString: async (ref, dataUrl) => ({ ref, dataUrl }),
+                getDownloadURL: async (ref) => ref.dataUrl || '',
+                deleteObject: async () => { }
+            };
+        }
+
+        window.FB = createLocalFallbackAdapter();
+
+        const state = {
+            currentUser: readSyncSession(),
+            users: DEFAULT_SEED_USERS.map(u => ({ ...u })),
+            expenses: [],
+            walletTransactions: [],
+            notifications: [],
+            recycleBin: [],
+            userRecycleBin: [],
+            passwordRequests: [],
+            appSettings: {
+                autoDeleteEnabled: false,
+                currentVersion: CURRENT_CLIENT_APP_VERSION,
+                gdriveEnabled: false,
+                gdriveClientId: '',
+                gdriveFolderId: '',
+                gdriveBridgeUrl: '',
+                gdriveSharedToken: '',
+                gdriveSharedExpiry: 0,
+                gdriveConnectedEmail: '',
+                gdriveLastError: '',
+                maintenanceMode: false,
+                maintenanceHours: 2,
+                maintenanceUpdatedAt: ''
+            },
+            activeTab: 'home',
+            authView: 'login',
+            slideDirection: 'animate-slide-right',
+            isDbLoading: false,
+            justFinishedLoading: false,
+            themeMode: lsGet(THEME_STORAGE_KEY, 'system'),
+            darkMode: false,
+            soundEnabled: lsGet(SOUND_STORAGE_KEY, 'true') !== 'false',
+            soundVolume: parseInt(lsGet(SOUND_VOL_STORAGE_KEY, '80'), 10) || 80,
+            dockAlpha: parseFloat(lsGet(DOCK_ALPHA_STORAGE_KEY, '0.85')) || 0.85,
+            showSoundPanel: false,
+            isSoundTesting: false,
+            searchQuery: '',
+            filterCategory: 'All',
+            filterMonth: 'All',
+            filterUser: 'All',
+            filterStartDate: '',
+            filterEndDate: '',
+            showDateFilter: false,
+            userFilterTab: 'all',
+            editingExpenseId: null,
+            tempBillData: null,
+            tempFormCache: null
+        };
+
+        function isPtrAllowed() {
+            return Boolean(state.currentUser && !state.isDbLoading && !['add'].includes(state.activeTab));
+        }
+
         // 5-Layer Session Vault (localStorage + IndexedDB + CacheStorage + Cookie + window.name)
         function setSessionCookie(jsonStr) {
             try {
@@ -1079,7 +1275,7 @@
                 try {
                     await fetch(bridgeUrl, {
                         method: 'POST',
-                        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                        redirect: 'follow',
                         body: JSON.stringify({ action: 'delete', fileId: driveFileId })
                     });
                 } catch (e) { }
@@ -1095,239 +1291,30 @@
             } catch (e) { }
         }
 
-        // Local Persistence & Firebase-Compatible Store Adapter (Instant boot + Offline fallback)
-        function createLocalFallbackAdapter() {
-            const listeners = {};
-            const today = todayStr();
-            let inMemoryDb = null;
-
-            function loadStore() {
-                let store = inMemoryDb;
-                if (!store) {
-                    try { store = JSON.parse(lsGet(LOCAL_DB_STORAGE_KEY, 'null')); } catch (e) { store = null; }
-                }
-
-                if (!store || !store.users) {
-                    store = {
-                        users: DEFAULT_SEED_USERS.map(u => ({ ...u })),
-                        expenses: [
-                            { id: 'exp_101', userId: 'usr_1', userName: 'User One', title: 'Studio Lighting Diffuser Kit', amount: 1850, category: 'Shoot', date: today, clientNamePlace: 'Vogue Editorial / Anna Nagar', notes: 'Softbox & grid purchase', billAttachment: null, createdAt: new Date(Date.now() - 3600000).toISOString() },
-                            { id: 'exp_102', userId: 'usr_1', userName: 'User One', title: 'High-Speed Fiber & Coffee Supplies', amount: 650, category: 'Office', date: today, clientNamePlace: '', notes: 'Monthly studio pantry', billAttachment: null, createdAt: new Date().toISOString() }
-                        ],
-                        walletTransactions: [
-                            { id: 'txn_101', userId: 'usr_1', type: 'topup', title: 'Added Wallet Funds', amount: 15000, timestamp: new Date(Date.now() - 86400000).toISOString(), performedBy: 'Admin Manager' },
-                            { id: 'txn_102', userId: 'usr_2', type: 'topup', title: 'Added Wallet Funds', amount: 4500, timestamp: new Date(Date.now() - 43200000).toISOString(), performedBy: 'Admin Manager' }
-                        ],
-                        notifications: [
-                            { id: 'notif_101', recipientId: 'usr_1', recipientRole: 'user', type: 'wallet_credit', title: 'Wallet Credited!', message: 'Admin Manager added ₹15,000 to your wallet.', amount: 15000, read: false, timestamp: new Date(Date.now() - 86400000).toISOString(), triggeredBy: 'Admin Manager' }
-                        ],
-                        recycleBin: [],
-                        userRecycleBin: [],
-                        passwordRequests: [],
-                        settings: {
-                            app_settings: {
-                                autoDeleteEnabled: false,
-                                currentVersion: CURRENT_CLIENT_APP_VERSION,
-                                gdriveEnabled: false,
-                                gdriveClientId: '',
-                                gdriveFolderId: '',
-                                gdriveBridgeUrl: '',
-                                gdriveSharedToken: '',
-                                gdriveSharedExpiry: 0,
-                                gdriveConnectedEmail: '',
-                                gdriveLastError: '',
-                                maintenanceMode: false,
-                                maintenanceHours: 2,
-                                maintenanceUpdatedAt: ''
-                            }
-                        }
-                    };
-                }
-
-                DEFAULT_SEED_USERS.forEach(seed => {
-                    if (!store.users.some(u => u.id === seed.id || u.username.toLowerCase() === seed.username)) {
-                        store.users.push({ ...seed });
-                    }
-                });
-
-                inMemoryDb = store;
-                lsSet(LOCAL_DB_STORAGE_KEY, JSON.stringify(store));
-                return store;
+        function extractDriveFileIdFromExpense(exp) {
+            if (!exp) return null;
+            if (exp.driveFileId) return exp.driveFileId;
+            const urls = [exp.billAttachment, exp.driveWebViewLink].filter(Boolean).map(String);
+            for (const u of urls) {
+                const m1 = u.match(/\/d\/([a-zA-Z0-9_-]{15,})/);
+                if (m1) return m1[1];
+                const m2 = u.match(/[?&]id=([a-zA-Z0-9_-]{15,})/);
+                if (m2) return m2[1];
             }
-
-            function saveStore(store) {
-                inMemoryDb = store;
-                lsSet(LOCAL_DB_STORAGE_KEY, JSON.stringify(store));
-            }
-
-            function emit(colName) {
-                const store = loadStore();
-                const items = colName === 'settings'
-                    ? Object.entries(store.settings || {}).map(([id, data]) => ({ id, ...data }))
-                    : (store[colName] || []);
-                const snap = {
-                    empty: items.length === 0,
-                    docs: items.map(item => ({ id: item.id, data: () => ({ ...item }) }))
-                };
-                (listeners[colName] || []).forEach(cb => {
-                    try { cb(snap); } catch (e) { console.error(e); }
-                });
-            }
-
-            const db = { __isLocalFallback: true };
-            return {
-                db,
-                storage: {},
-                collection: (_, name) => ({ __col: name }),
-                doc: (_, colName, id) => ({ __col: colName, __id: id }),
-                query: (colRef) => colRef,
-                orderBy: () => ({}),
-                storageRef: (_, path) => ({ __path: path }),
-                uploadString: async (_, dataUrl) => ({ __dataUrl: dataUrl }),
-                getDownloadURL: async (ref) => ref.__dataUrl || '',
-                deleteObject: async () => { },
-                getDocs: async (colRef) => {
-                    const store = loadStore();
-                    const items = colRef.__col === 'settings'
-                        ? Object.entries(store.settings || {}).map(([id, data]) => ({ id, ...data }))
-                        : (store[colRef.__col] || []);
-                    return { empty: items.length === 0, docs: items.map(item => ({ id: item.id, data: () => ({ ...item }) })) };
-                },
-                setDoc: async (docRef, data, opts = {}) => {
-                    const store = loadStore();
-                    if (docRef.__col === 'settings') {
-                        store.settings = store.settings || {};
-                        store.settings[docRef.__id] = opts.merge ? { ...(store.settings[docRef.__id] || {}), ...data } : { ...data };
-                    } else {
-                        store[docRef.__col] = store[docRef.__col] || [];
-                        const idx = store[docRef.__col].findIndex(x => x.id === docRef.__id);
-                        const record = { id: docRef.__id, ...(opts.merge && idx >= 0 ? store[docRef.__col][idx] : {}), ...data };
-                        if (idx >= 0) store[docRef.__col][idx] = record;
-                        else store[docRef.__col].push(record);
-                    }
-                    saveStore(store);
-                    emit(docRef.__col);
-                },
-                updateDoc: async (docRef, patch) => {
-                    const store = loadStore();
-                    if (docRef.__col === 'settings') {
-                        store.settings[docRef.__id] = { ...(store.settings[docRef.__id] || {}), ...patch };
-                    } else {
-                        const arr = store[docRef.__col] || [];
-                        const idx = arr.findIndex(x => x.id === docRef.__id);
-                        if (idx >= 0) arr[idx] = { ...arr[idx], ...patch };
-                    }
-                    saveStore(store);
-                    emit(docRef.__col);
-                },
-                deleteDoc: async (docRef) => {
-                    const store = loadStore();
-                    if (docRef.__col !== 'settings') {
-                        store[docRef.__col] = (store[docRef.__col] || []).filter(x => x.id !== docRef.__id);
-                    }
-                    saveStore(store);
-                    emit(docRef.__col);
-                },
-                runTransaction: async (_, fn) => {
-                    const store = loadStore();
-                    const tx = {
-                        get: async (docRef) => {
-                            const item = (store[docRef.__col] || []).find(x => x.id === docRef.__id);
-                            return { exists: () => Boolean(item), data: () => ({ ...item }) };
-                        },
-                        update: (docRef, patch) => {
-                            const arr = store[docRef.__col] || [];
-                            const idx = arr.findIndex(x => x.id === docRef.__id);
-                            if (idx >= 0) arr[idx] = { ...arr[idx], ...patch };
-                        }
-                    };
-                    const res = await fn(tx);
-                    saveStore(store);
-                    emit('users');
-                    return res;
-                },
-                onSnapshot: (colRef, onNext) => {
-                    const colName = colRef.__col;
-                    listeners[colName] = listeners[colName] || [];
-                    listeners[colName].push(onNext);
-                    emit(colName);
-                    return () => {
-                        listeners[colName] = (listeners[colName] || []).filter(cb => cb !== onNext);
-                    };
-                }
-            };
+            return null;
         }
 
-        window.FB = createLocalFallbackAdapter();
-
-        let state = {
-            isDbLoading: false,
-            justFinishedLoading: true,
-            currentUser: readSyncSession(),
-            adminPassword: 'adminpassword',
-            users: DEFAULT_SEED_USERS.map(u => ({ ...u })),
-            expenses: [],
-            walletTransactions: [],
-            notifications: [],
-            recycleBin: [],
-            userRecycleBin: [],
-            passwordRequests: [],
-            appSettings: {
-                autoDeleteEnabled: false,
-                currentVersion: CURRENT_CLIENT_APP_VERSION,
-                gdriveEnabled: false,
-                gdriveClientId: '',
-                gdriveFolderId: '',
-                gdriveBridgeUrl: '',
-                gdriveSharedToken: '',
-                gdriveSharedExpiry: 0,
-                gdriveConnectedEmail: '',
-                gdriveLastError: '',
-                maintenanceMode: false,
-                maintenanceHours: 2,
-                maintenanceUpdatedAt: ''
-            },
-            activeTab: 'home',
-            slideDirection: 'animate-slide-right',
-            filterCategory: 'All',
-            filterMonth: 'All',
-            filterUser: 'All',
-            filterStartDate: '',
-            filterEndDate: '',
-            showDateFilter: false,
-            searchQuery: '',
-            themeMode: lsGet(THEME_STORAGE_KEY, 'system'),
-            soundEnabled: lsGet(SOUND_STORAGE_KEY) !== 'false',
-            soundVolume: parseInt(lsGet(SOUND_VOL_STORAGE_KEY, '80'), 10),
-            dockAlpha: parseFloat(lsGet(DOCK_ALPHA_STORAGE_KEY, '0.85')),
-            showSoundPanel: false,
-            isSoundTesting: false,
-            userFilterTab: 'all',
-            darkMode: false,
-            editingExpenseId: null,
-            tempBillData: null,
-            tempFormCache: null,
-            authView: 'login'
-        };
-
-        const tabOrder = ['home', 'summary', 'admin', 'analytics', 'users', 'wallet', 'add', 'profile', 'recycle', 'userRecycle', 'requests', 'notifications'];
-        const PTR_ALLOWED_TABS = ['home', 'admin', 'analytics', 'users', 'wallet', 'profile'];
-
-        function isPtrAllowed() {
-            return state.currentUser && !state.isDbLoading && PTR_ALLOWED_TABS.includes(state.activeTab);
-        }
-
-        let knownNotificationIds = new Set();
-        let initialNotificationsLoaded = false;
-        let sharedAudioCtx = null;
-        let lastHapticAlphaStep = state.dockAlpha;
-        let lastHapticSoundStep = state.soundVolume;
-        window.activeUnsubscribers = [];
-
-        function triggerHaptic(pattern = 12) {
-            if (!state.soundEnabled) return;
-            if ('vibrate' in navigator) {
-                try { navigator.vibrate(pattern); } catch (e) { }
+        async function purgeExpenseBillFiles(exp) {
+            if (!exp) return;
+            const fileId = extractDriveFileIdFromExpense(exp);
+            if (fileId) {
+                await deleteBillFromGoogleDrive(fileId);
+            }
+            if (exp.billAttachment && String(exp.billAttachment).includes('firebasestorage') && window.FB) {
+                try {
+                    const { storage, storageRef, deleteObject } = window.FB;
+                    await deleteObject(storageRef(storage, `bills/${exp.id}.jpg`));
+                } catch (e) { }
             }
         }
 
@@ -3881,15 +3868,19 @@
                 async () => {
                     const { db, doc, deleteDoc, setDoc } = window.FB;
                     try {
+                        await purgeExpenseBillFiles(exp);
                         const recycleItem = {
                             ...exp,
+                            billAttachment: null,
+                            driveFileId: null,
+                            driveWebViewLink: null,
                             deletedAt: new Date().toISOString(),
                             deletedBy: `${state.currentUser.name} (Undo & Refunded)`
                         };
                         await setDoc(doc(db, 'recycleBin', id), recycleItem);
                         await deleteDoc(doc(db, 'expenses', id));
                         await refundExpenseToUserWallet(exp.userId, exp.amount, exp.title, exp.category);
-                        showToast(`Expense undone! ${formatCurrency(exp.amount)} added back to your wallet.`, 'success');
+                        showToast(`Expense undone & bill deleted! ${formatCurrency(exp.amount)} added back to your wallet.`, 'success');
                     } catch (err) {
                         showToast('Failed to undo expense.', 'error');
                     }
@@ -3900,16 +3891,20 @@
         function confirmDeleteExpense(id) {
             showConfirmModal(
                 'Delete Expense',
-                'Are you sure you want to delete this expense record and move it to the Recycle Bin?',
+                'Are you sure you want to delete this expense record (and its attached bill)?',
                 async () => {
                     const { db, doc, deleteDoc, setDoc } = window.FB;
                     const exp = state.expenses.find(e => e.id === id);
                     if (!exp) return;
                     try {
+                        await purgeExpenseBillFiles(exp);
                         const ownerUser = state.users.find(u => u.id === exp.userId);
                         const shouldRefund = ownerUser && !isAdminOrDev(ownerUser);
                         const recycleItem = {
                             ...exp,
+                            billAttachment: null,
+                            driveFileId: null,
+                            driveWebViewLink: null,
                             deletedAt: new Date().toISOString(),
                             deletedBy: shouldRefund ? `${state.currentUser.name} (Undo & Refunded)` : state.currentUser.name
                         };
@@ -3917,9 +3912,9 @@
                         await deleteDoc(doc(db, 'expenses', id));
                         if (shouldRefund) {
                             await refundExpenseToUserWallet(exp.userId, exp.amount, exp.title, exp.category);
-                            showToast(`Moved to Recycle Bin & refunded ${formatCurrency(exp.amount)} to ${ownerUser.name}.`, 'success');
+                            showToast(`Expense & bill deleted, and ${formatCurrency(exp.amount)} refunded to ${ownerUser.name}.`, 'success');
                         } else {
-                            showToast('Expense moved to Recycle Bin.', 'success');
+                            showToast('Expense & attached bill deleted.', 'success');
                         }
                     } catch (err) {
                         showToast('Failed to delete expense.', 'error');
