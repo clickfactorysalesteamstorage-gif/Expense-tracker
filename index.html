@@ -632,7 +632,7 @@
         const DOCK_ALPHA_STORAGE_KEY = 'click_factory_dock_alpha_v1';
         const GDRIVE_TOKEN_CACHE_KEY = 'cf_gdrive_oauth_token_v1';
         const LOCAL_DB_STORAGE_KEY = 'click_factory_local_db_v1';
-        const CURRENT_CLIENT_APP_VERSION = '1.1.7';
+        const CURRENT_CLIENT_APP_VERSION = '1.1.8';
 
         const DEFAULT_SEED_USERS = [
             { id: 'usr_dev', name: 'Lead Developer', username: 'developer', password: 'devpassword', role: 'developer', email: 'dev@clickfactory.com', wallet: 0, excessSpent: 0 },
@@ -934,7 +934,11 @@
                     mimeType: 'application/vnd.google-apps.folder'
                 })
             });
-            if (!createRes.ok) throw new Error('Could not create Drive folder');
+            if (!createRes.ok) {
+                let errTxt = `HTTP ${createRes.status}`;
+                try { const j = await createRes.json(); errTxt = j?.error?.message || errTxt; } catch (e) { }
+                throw new Error(`Folder creation failed: ${errTxt}`);
+            }
             const created = await createRes.json();
             return created.id;
         }
@@ -952,6 +956,9 @@
 
         async function uploadBillViaAppsScriptBridge(dataUrl, fileName) {
             const bridgeUrl = (state.appSettings?.gdriveBridgeUrl || '').trim();
+            if (!/^https:\/\/script\.google\.com\/macros\/s\/[^/]+\/exec(\?.*)?$/i.test(bridgeUrl)) {
+                throw new Error('Option A must be a Google Apps Script Web App URL starting with https://script.google.com/macros/s/.../exec (not your Vercel app URL).');
+            }
             const folderId = (state.appSettings?.gdriveFolderId || '').trim();
             const res = await fetch(bridgeUrl, {
                 method: 'POST',
@@ -964,9 +971,13 @@
                     base64Data: dataUrl.split(',')[1]
                 })
             });
-            if (!res.ok) throw new Error(`Bridge HTTP ${res.status}`);
-            const data = await res.json();
-            if (!data || !data.fileId) throw new Error(data?.error || 'Invalid bridge response');
+            if (!res.ok) throw new Error(`Apps Script HTTP ${res.status}`);
+            const text = await res.text();
+            let data = null;
+            try { data = JSON.parse(text); } catch (e) {
+                throw new Error('Apps Script returned HTML instead of JSON. Ensure "Who has access" is set to "Anyone".');
+            }
+            if (!data || !data.fileId) throw new Error(data?.error || 'Invalid Apps Script response');
             return {
                 driveFileId: data.fileId,
                 url: data.url || `https://lh3.googleusercontent.com/d/${data.fileId}=s1200`,
@@ -1009,7 +1020,16 @@
             });
 
             if (!uploadRes.ok) {
-                throw new Error(`Drive upload HTTP ${uploadRes.status}`);
+                let apiErr = `Drive HTTP ${uploadRes.status}`;
+                try {
+                    const errJson = await uploadRes.json();
+                    apiErr = errJson?.error?.message || apiErr;
+                } catch (e) { }
+                if (uploadRes.status === 401) {
+                    lsRemove(GDRIVE_TOKEN_CACHE_KEY);
+                    throw new Error('OAuth token expired (1-hour limit). Use Permanent Apps Script URL or reconnect Drive.');
+                }
+                throw new Error(apiErr);
             }
             const fileData = await uploadRes.json();
             const fileId = fileData.id;
@@ -1095,6 +1115,7 @@
                                 gdriveSharedToken: '',
                                 gdriveSharedExpiry: 0,
                                 gdriveConnectedEmail: '',
+                                gdriveLastError: '',
                                 maintenanceMode: false,
                                 maintenanceHours: 2,
                                 maintenanceUpdatedAt: ''
@@ -1103,7 +1124,6 @@
                     };
                 }
 
-                // Always guarantee seeded accounts exist in the store
                 DEFAULT_SEED_USERS.forEach(seed => {
                     if (!store.users.some(u => u.id === seed.id || u.username.toLowerCase() === seed.username)) {
                         store.users.push({ ...seed });
@@ -1242,6 +1262,7 @@
                 gdriveSharedToken: '',
                 gdriveSharedExpiry: 0,
                 gdriveConnectedEmail: '',
+                gdriveLastError: '',
                 maintenanceMode: false,
                 maintenanceHours: 2,
                 maintenanceUpdatedAt: ''
@@ -3702,8 +3723,18 @@
                                 driveFileId = driveRes.driveFileId;
                                 driveWebViewLink = driveRes.webViewLink;
                                 uploaded = true;
+                                if (state.appSettings.gdriveLastError) {
+                                    state.appSettings.gdriveLastError = '';
+                                    setDoc(doc(db, 'settings', 'app_settings'), { gdriveLastError: '' }, { merge: true }).catch(() => { });
+                                }
                             } catch (driveErr) {
-                                console.warn('Background Drive upload fallback:', driveErr);
+                                const errMsg = driveErr?.message || String(driveErr);
+                                console.warn('Drive upload error:', errMsg);
+                                state.appSettings.gdriveLastError = errMsg;
+                                setDoc(doc(db, 'settings', 'app_settings'), { gdriveLastError: errMsg }, { merge: true }).catch(() => { });
+                                if (isDeveloper(state.currentUser)) {
+                                    showToast(`Drive Upload Error: ${errMsg}`, 'error');
+                                }
                             }
                         }
 
@@ -4527,6 +4558,77 @@
             `;
         }
 
+        const APPS_SCRIPT_TEMPLATE = `function doPost(e) {
+  try {
+    var payload = JSON.parse(e.postData.contents);
+    if (payload.action === 'delete' && payload.fileId) {
+      DriveApp.getFileById(payload.fileId).setTrashed(true);
+      return ContentService.createTextOutput(JSON.stringify({ ok: true })).setMimeType(ContentService.MimeType.JSON);
+    }
+    var folder;
+    if (payload.folderId) {
+      folder = DriveApp.getFolderById(payload.folderId);
+    } else {
+      var folders = DriveApp.getFoldersByName('Click Factory Bills');
+      folder = folders.hasNext() ? folders.next() : DriveApp.createFolder('Click Factory Bills');
+    }
+    var bytes = Utilities.base64Decode(payload.base64Data);
+    var blob = Utilities.newBlob(bytes, payload.mimeType || 'image/jpeg', payload.fileName || ('bill_' + Date.now() + '.jpg'));
+    var file = folder.createFile(blob);
+    file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+    var fileId = file.getId();
+    return ContentService.createTextOutput(JSON.stringify({
+      ok: true,
+      fileId: fileId,
+      url: 'https://lh3.googleusercontent.com/d/' + fileId + '=s1200',
+      webViewLink: file.getUrl()
+    })).setMimeType(ContentService.MimeType.JSON);
+  } catch (err) {
+    return ContentService.createTextOutput(JSON.stringify({ ok: false, error: err.toString() })).setMimeType(ContentService.MimeType.JSON);
+  }
+}`;
+
+        function copyAppsScriptCode() {
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(APPS_SCRIPT_TEMPLATE)
+                    .then(() => showToast('Apps Script code copied to clipboard!', 'success'))
+                    .catch(() => showToast('Could not copy automatically. Select the code box manually.', 'info'));
+            } else {
+                showToast('Select and copy the script code from the box.', 'info');
+            }
+        }
+
+        async function testGoogleDriveUpload() {
+            if (!isDeveloper(state.currentUser)) return;
+            const testBtn = document.getElementById('gdrive-test-btn');
+            if (testBtn) {
+                testBtn.disabled = true;
+                testBtn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i><span>Testing Upload...</span>';
+            }
+            try {
+                // 1x1 valid JPEG test pixel
+                const tinyCanvas = document.createElement('canvas');
+                tinyCanvas.width = 40;
+                tinyCanvas.height = 40;
+                const ctx = tinyCanvas.getContext('2d');
+                ctx.fillStyle = '#4f46e5';
+                ctx.fillRect(0, 0, 40, 40);
+                const testDataUrl = tinyCanvas.toDataURL('image/jpeg', 0.8);
+
+                const res = await uploadBillToGoogleDrive(testDataUrl, `cf_connection_test_${Date.now()}.jpg`);
+                const { db, doc, setDoc } = window.FB;
+                state.appSettings.gdriveLastError = '';
+                await setDoc(doc(db, 'settings', 'app_settings'), { gdriveLastError: '' }, { merge: true });
+                showToast(`Success! Test bill uploaded to Drive (ID: ${res.driveFileId.slice(0, 8)}...)`, 'success');
+                openGoogleDriveConfigModal();
+            } catch (err) {
+                const msg = err?.message || String(err);
+                state.appSettings.gdriveLastError = msg;
+                showToast(`Upload Failed: ${msg}`, 'error');
+                openGoogleDriveConfigModal();
+            }
+        }
+
         // Developer-Only Google Drive Config Modal
         function openGoogleDriveConfigModal() {
             if (!isDeveloper(state.currentUser)) {
@@ -4557,36 +4659,54 @@
                             <button onclick="closeModal()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark"></i></button>
                         </div>
 
-                        <div class="p-3 rounded-2xl border ${isConnected ? 'bg-emerald-50/80 dark:bg-emerald-950/50 border-emerald-200 dark:border-emerald-800 text-emerald-700 dark:text-emerald-300' : 'bg-amber-50/80 dark:bg-amber-950/40 border-amber-200/80 dark:border-amber-800/60 text-amber-800 dark:text-amber-300'} text-xs flex items-center justify-between">
-                            <span class="font-semibold flex items-center gap-1.5">
-                                <span class="w-2 h-2 rounded-full ${isConnected ? 'bg-emerald-500' : 'bg-amber-500'}"></span>
-                                ${isConnected ? (hasBridge ? 'Connected (Permanent Bridge)' : 'Connected (OAuth Token)') : 'Not Connected'}
-                            </span>
-                            ${(hasToken || hasBridge || isConnected) ? `<button type="button" onclick="disconnectSharedGoogleDrive()" class="text-[11px] font-bold text-rose-600 dark:text-rose-400 hover:underline">Disconnect</button>` : ''}
+                        <div class="p-3 rounded-2xl border ${isConnected ? 'bg-emerald-50/80 dark:bg-emerald-950/50 border-emerald-200 dark:border-emerald-800 text-emerald-700 dark:text-emerald-300' : 'bg-amber-50/80 dark:bg-amber-950/40 border-amber-200/80 dark:border-amber-800/60 text-amber-800 dark:text-amber-300'} text-xs space-y-2">
+                            <div class="flex items-center justify-between">
+                                <span class="font-semibold flex items-center gap-1.5">
+                                    <span class="w-2 h-2 rounded-full ${isConnected ? 'bg-emerald-500' : 'bg-amber-500'}"></span>
+                                    ${isConnected ? (hasBridge ? 'Connected (Permanent Bridge)' : 'Connected (OAuth Token)') : 'Not Connected'}
+                                </span>
+                                ${(hasToken || hasBridge || isConnected) ? `<button type="button" onclick="disconnectSharedGoogleDrive()" class="text-[11px] font-bold text-rose-600 dark:text-rose-400 hover:underline">Disconnect</button>` : ''}
+                            </div>
+                            ${isConnected ? `
+                                <button type="button" id="gdrive-test-btn" onclick="testGoogleDriveUpload()" class="w-full py-2 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] font-semibold flex items-center justify-center gap-1.5 transition">
+                                    <i class="fa-solid fa-vial"></i><span>Test Real Bill Upload to Drive</span>
+                                </button>
+                            ` : ''}
                         </div>
+
+                        ${s.gdriveLastError ? `
+                            <div class="p-3 rounded-2xl bg-rose-50 dark:bg-rose-950/60 border border-rose-200 dark:border-rose-800 text-rose-700 dark:text-rose-300 text-[11px] break-words">
+                                <strong>Last Upload Error:</strong> ${escapeHtml(s.gdriveLastError)}
+                            </div>
+                        ` : ''}
 
                         <form onsubmit="handleSaveGoogleDriveConfig(event)" class="space-y-3">
                             <div>
-                                <label class="block text-[10px] font-bold text-violet-600 dark:text-violet-400 uppercase tracking-wider mb-1">
-                                    Option A: Permanent Apps Script Web App URL (Best — No Expiry)
-                                </label>
+                                <div class="flex items-center justify-between mb-1">
+                                    <label class="block text-[10px] font-bold text-violet-600 dark:text-violet-400 uppercase tracking-wider">
+                                        Option A: Apps Script Web App URL (No Expiry)
+                                    </label>
+                                    <button type="button" onclick="copyAppsScriptCode()" class="text-[10px] font-bold text-indigo-600 dark:text-indigo-400 hover:underline">
+                                        <i class="fa-regular fa-copy mr-0.5"></i>Copy Script
+                                    </button>
+                                </div>
                                 <input type="url" id="gdrive-bridge-url" value="${escapeHtml(s.gdriveBridgeUrl || '')}" placeholder="https://script.google.com/macros/s/.../exec" class="${inputCls}">
-                                <p class="text-[10px] text-slate-400 mt-1">Works 24/7 for all users without OAuth popups or 1-hour token timeouts.</p>
+                                <p class="text-[10px] text-slate-400 mt-1">Deploy at script.google.com as Web App (Execute as: Me, Access: Anyone). Works for all users forever.</p>
                             </div>
 
-                            <div class="pt-2 border-t border-slate-200/60 dark:border-slate-800 space-y-2.5">
+                            <div class="pt-2 border-t border-slate-200/60 dark:border-slate-800 space-y-2">
                                 <label class="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
                                     Option B: Google OAuth 2.0 Client ID
                                 </label>
                                 <input type="text" id="gdrive-client-id" value="${escapeHtml(s.gdriveClientId || '')}" placeholder="xxxx.apps.googleusercontent.com" class="${inputCls}">
                                 <div class="text-[10px] text-slate-400 bg-slate-100/70 dark:bg-slate-800/50 p-2 rounded-xl break-all">
-                                    Authorized Origin to add in Google Cloud: <span class="font-mono font-semibold text-slate-700 dark:text-slate-200">${escapeHtml(currentOrigin)}</span>
+                                    Authorized Origin: <span class="font-mono font-semibold text-slate-700 dark:text-slate-200">${escapeHtml(currentOrigin)}</span>
                                 </div>
                             </div>
 
                             <div>
                                 <label class="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">
-                                    Option C: Direct OAuth Access Token (OAuth Playground)
+                                    Option C: Direct OAuth Access Token
                                 </label>
                                 <input type="password" id="gdrive-manual-token" value="${escapeHtml(s.gdriveSharedToken || '')}" placeholder="ya29.a0..." class="${inputCls}">
                             </div>
@@ -4624,6 +4744,11 @@
             const folderId = (document.getElementById('gdrive-folder-id')?.value || '').trim();
             const enabledChk = document.getElementById('gdrive-enabled-chk')?.checked;
 
+            if (bridgeUrl && !/^https:\/\/script\.google\.com\/macros\/s\/[^/]+\/exec(\?.*)?$/i.test(bridgeUrl)) {
+                showToast('Option A must be a Google Apps Script URL (https://script.google.com/macros/s/.../exec).', 'error');
+                return;
+            }
+
             const hasCreds = Boolean(bridgeUrl || manualToken || clientId);
             const enabled = Boolean(enabledChk && hasCreds);
 
@@ -4634,7 +4759,8 @@
                     gdriveBridgeUrl: bridgeUrl,
                     gdriveClientId: clientId,
                     gdriveFolderId: folderId,
-                    gdriveEnabled: enabled
+                    gdriveEnabled: enabled,
+                    gdriveLastError: ''
                 };
                 if (manualToken && manualToken !== state.appSettings.gdriveSharedToken) {
                     updated.gdriveSharedToken = manualToken;
@@ -4661,82 +4787,11 @@
             const folderId = (document.getElementById('gdrive-folder-id')?.value || state.appSettings.gdriveFolderId || '').trim();
             const connectBtn = document.getElementById('gdrive-connect-btn');
 
-            const { db, doc, setDoc } = window.FB;
-
-            if (bridgeUrl) {
-                const updated = {
-                    ...state.appSettings,
-                    gdriveEnabled: true,
-                    gdriveBridgeUrl: bridgeUrl,
-                    gdriveClientId: clientId,
-                    gdriveFolderId: folderId
-                };
-                await setDoc(doc(db, 'settings', 'app_settings'), updated, { merge: true });
-                state.appSettings = updated;
-                showToast('Connected via Permanent Drive Bridge!', 'success');
-                openGoogleDriveConfigModal();
+            if (bridgeUrl && !/^https:\/\/script\.google\.com\/macros\/s\/[^/]+\/exec(\?.*)?$/i.test(bridgeUrl)) {
+                showToast('Option A requires a Google Apps Script URL (https://script.google.com/macros/s/.../exec), not your Vercel URL.', 'error');
                 return;
             }
 
-            if (manualToken) {
-                if (connectBtn) connectBtn.disabled = true;
-                try {
-                    const testRes = await fetch('https://www.googleapis.com/drive/v3/about?fields=user(emailAddress)', {
-                        headers: { Authorization: `Bearer ${manualToken}` }
-                    });
-                    if (!testRes.ok) throw new Error('Invalid or expired OAuth token');
-                    const about = await testRes.json();
-                    const updated = {
-                        ...state.appSettings,
-                        gdriveEnabled: true,
-                        gdriveClientId: clientId,
-                        gdriveFolderId: folderId,
-                        gdriveSharedToken: manualToken,
-                        gdriveSharedExpiry: Date.now() + (55 * 60 * 1000),
-                        gdriveConnectedEmail: about?.user?.emailAddress || ''
-                    };
-                    await setDoc(doc(db, 'settings', 'app_settings'), updated, { merge: true });
-                    state.appSettings = updated;
-                    showToast('Google Drive token verified & connected!', 'success');
-                    openGoogleDriveConfigModal();
-                } catch (err) {
-                    if (connectBtn) connectBtn.disabled = false;
-                    showToast(`Token check failed: ${err.message}`, 'error');
-                }
-                return;
-            }
-
-            if (!clientId) {
-                showToast('Enter an Apps Script URL, Client ID, or Access Token first.', 'error');
-                return;
-            }
-            state.appSettings.gdriveClientId = clientId;
-            state.appSettings.gdriveFolderId = folderId;
-
-            if (connectBtn) connectBtn.disabled = true;
-            try {
-                const auth = await requestGoogleDriveAccessToken('consent');
-                const updated = {
-                    ...state.appSettings,
-                    gdriveEnabled: true,
-                    gdriveClientId: clientId,
-                    gdriveFolderId: folderId,
-                    gdriveSharedToken: auth.token,
-                    gdriveSharedExpiry: auth.expiry
-                };
-                await setDoc(doc(db, 'settings', 'app_settings'), updated, { merge: true });
-                state.appSettings = updated;
-                showToast('Google Drive connected for all users!', 'success');
-                openGoogleDriveConfigModal();
-            } catch (err) {
-                if (connectBtn) connectBtn.disabled = false;
-                showToast(`Drive connect failed: ${err.message}`, 'error');
-            }
-        }
-
-        async function disconnectSharedGoogleDrive() {
-            if (!isDeveloper(state.currentUser)) return;
-            lsRemove(GDRIVE_TOKEN_CACHE_KEY);
             const { db, doc, setDoc } = window.FB;
             const updated = {
                 ...state.appSettings,
@@ -4744,7 +4799,8 @@
                 gdriveBridgeUrl: '',
                 gdriveSharedToken: '',
                 gdriveSharedExpiry: 0,
-                gdriveConnectedEmail: ''
+                gdriveConnectedEmail: '',
+                gdriveLastError: ''
             };
             await setDoc(doc(db, 'settings', 'app_settings'), updated, { merge: true });
             state.appSettings = updated;
@@ -5680,6 +5736,7 @@
                     gdriveSharedToken: '',
                     gdriveSharedExpiry: 0,
                     gdriveConnectedEmail: '',
+                    gdriveLastError: '',
                     maintenanceMode: false,
                     maintenanceHours: 2,
                     maintenanceUpdatedAt: ''
