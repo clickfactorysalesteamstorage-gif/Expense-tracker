@@ -362,34 +362,61 @@
 
         @keyframes slideInFromRight {
             0% {
-                transform: translateX(24px);
+                transform: translate3d(22px, 0, 0) scale(0.985);
                 opacity: 0;
             }
 
             100% {
-                transform: translateX(0);
+                transform: translate3d(0, 0, 0) scale(1);
                 opacity: 1;
             }
         }
 
         @keyframes slideInFromLeft {
             0% {
-                transform: translateX(-24px);
+                transform: translate3d(-22px, 0, 0) scale(0.985);
                 opacity: 0;
             }
 
             100% {
-                transform: translateX(0);
+                transform: translate3d(0, 0, 0) scale(1);
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideInUpSubtle {
+            0% {
+                transform: translate3d(0, 14px, 0) scale(0.985);
+                opacity: 0;
+            }
+
+            100% {
+                transform: translate3d(0, 0, 0) scale(1);
                 opacity: 1;
             }
         }
 
         .animate-slide-right {
-            animation: slideInFromRight 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+            will-change: transform, opacity;
+            animation: slideInFromRight 0.34s cubic-bezier(0.22, 1, 0.36, 1) both;
         }
 
         .animate-slide-left {
-            animation: slideInFromLeft 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+            will-change: transform, opacity;
+            animation: slideInFromLeft 0.34s cubic-bezier(0.22, 1, 0.36, 1) both;
+        }
+
+        .animate-slide-up {
+            will-change: transform, opacity;
+            animation: slideInUpSubtle 0.32s cubic-bezier(0.22, 1, 0.36, 1) both;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .animate-slide-right,
+            .animate-slide-left,
+            .animate-slide-up {
+                animation: none !important;
+            }
         }
 
         .liquid-nav-container {
@@ -419,18 +446,12 @@
             pointer-events: auto;
             user-select: none;
             -webkit-user-select: none;
-            background: rgba(255, 255, 255, 0.12);
+            background: rgba(255, 255, 255, 0.01);
             backdrop-filter: blur(8px) saturate(1.25);
             -webkit-backdrop-filter: blur(8px) saturate(1.25);
-            border: 1px solid rgba(15, 23, 42, 0.10);
+            border: 1px solid rgba(15, 23, 42, 0.08);
             box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.65), 0 10px 24px -8px rgba(15, 23, 42, 0.12), 0 2px 8px -2px rgba(15, 23, 42, 0.05);
             transition: background 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
-        }
-
-        .dark .liquid-dock {
-            background: rgba(15, 23, 42, 0.10);
-            border: 1px solid rgba(255, 255, 255, 0.20);
-            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25), 0 16px 36px -18px rgba(0, 0, 0, 0.75), 0 8px 20px -4px rgba(0, 0, 0, 0.35);
         }
 
         .dark .liquid-dock {
@@ -449,10 +470,10 @@
             pointer-events: none;
             will-change: transform, width;
             transform: translateX(0);
-            background: linear-gradient(135deg, rgba(99, 102, 241, 0.14), rgba(255, 255, 255, 0.42));
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.10), rgba(255, 255, 255, 0.18));
             border: 1px solid rgba(99, 102, 241, 0.24);
             box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9), 0 4px 12px -2px rgba(79, 70, 229, 0.14);
-            transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.5, 1), width 0.5s cubic-bezier(0.34, 1.56, 0.5, 1);
+            transition: transform 0.46s cubic-bezier(0.22, 1.35, 0.36, 1), width 0.46s cubic-bezier(0.22, 1.35, 0.36, 1);
         }
 
         .dark .liquid-bubble {
@@ -466,6 +487,7 @@
                 transition: none !important;
             }
         }
+
         .liquid-nav-btn {
             position: relative;
             z-index: 1;
@@ -506,7 +528,7 @@
             font-size: 16px;
             margin-bottom: 2px;
             color: #475569;
-            transition: transform 0.28s cubic-bezier(0.34, 1.56, 0.64, 1), color 0.2s ease;
+            transition: transform 0.34s cubic-bezier(0.22, 1.35, 0.36, 1), color 0.22s ease;
         }
 
         .dark .liquid-icon-wrap {
@@ -585,6 +607,108 @@
         .dark .ios-glass-modal {
             background: rgba(15, 23, 42, 0.94);
             border: 1px solid rgba(51, 65, 85, 0.8);
+        }
+
+        .liquid-sub-dock {
+            position: relative;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            padding: 5px;
+            border-radius: 1rem;
+            isolation: isolate;
+            user-select: none;
+            -webkit-user-select: none;
+            background: rgba(255, 255, 255, 0.01);
+            backdrop-filter: blur(8px) saturate(1.25);
+            -webkit-backdrop-filter: blur(8px) saturate(1.25);
+            border: 1px solid rgba(15, 23, 42, 0.07);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35), 0 6px 16px -6px rgba(15, 23, 42, 0.08);
+            transition: background 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .dark .liquid-sub-dock {
+            background: rgba(15, 23, 42, 0.14);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.22), 0 10px 24px -12px rgba(0, 0, 0, 0.65);
+        }
+
+        .liquid-sub-bubble {
+            position: absolute;
+            top: 5px;
+            bottom: 5px;
+            left: 0;
+            border-radius: 0.75rem;
+            z-index: 0;
+            pointer-events: none;
+            will-change: transform, width;
+            transform: translateX(0);
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.08), rgba(255, 255, 255, 0.14));
+            border: 1px solid rgba(99, 102, 241, 0.16);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5), 0 4px 12px -2px rgba(79, 70, 229, 0.14);
+            transition: transform 0.46s cubic-bezier(0.34, 1.56, 0.5, 1), width 0.46s cubic-bezier(0.34, 1.56, 0.5, 1);
+        }
+
+        .dark .liquid-sub-bubble {
+            background: rgba(255, 255, 255, 0.12);
+            border: 1px solid rgba(255, 255, 255, 0.32);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.45), 0 8px 20px -4px rgba(0, 0, 0, 0.38);
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .liquid-sub-bubble {
+                transition: none !important;
+            }
+        }
+
+        .liquid-sub-btn {
+            position: relative;
+            z-index: 1;
+            flex: 1;
+            padding: 8px 12px;
+            border-radius: 0.75rem;
+            background: transparent;
+            border: none;
+            outline: none;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 600;
+            color: #475569;
+            transition: transform 0.15s ease, color 0.22s ease;
+        }
+
+        .dark .liquid-sub-btn {
+            color: #94a3b8;
+        }
+
+        .liquid-sub-btn:active {
+            transform: scale(0.95);
+        }
+
+        .liquid-sub-btn.is-active {
+            color: #4f46e5;
+            font-weight: 700;
+        }
+
+        .dark .liquid-sub-btn.is-active {
+            color: #ffffff;
+        }
+
+        .liquid-fab {
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.14), rgba(255, 255, 255, 0.22));
+            backdrop-filter: blur(8px) saturate(1.25);
+            -webkit-backdrop-filter: blur(8px) saturate(1.25);
+            border: 1px solid rgba(99, 102, 241, 0.28);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.85), 0 12px 26px -6px rgba(79, 70, 229, 0.24), 0 4px 10px -2px rgba(15, 23, 42, 0.08);
+            color: #4f46e5;
+            transition: transform 0.28s cubic-bezier(0.22, 1.35, 0.36, 1), background 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .dark .liquid-fab {
+            background: rgba(15, 23, 42, 0.22);
+            border: 1px solid rgba(255, 255, 255, 0.26);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35), 0 16px 32px -10px rgba(0, 0, 0, 0.75), 0 6px 16px -4px rgba(0, 0, 0, 0.4);
+            color: #a5b4fc;
         }
     </style>
 </head>
@@ -809,8 +933,8 @@
             soundEnabled: lsGet(SOUND_STORAGE_KEY, 'true') !== 'false',
             soundVolume: parseInt(lsGet(SOUND_VOL_STORAGE_KEY, '80'), 10) || 80,
             dockAlpha: (() => {
-                const raw = parseFloat(lsGet(DOCK_ALPHA_STORAGE_KEY, '0.08'));
-                return isNaN(raw) ? 0.08 : Math.min(0.90, Math.max(0.02, raw));
+                const raw = parseFloat(lsGet(DOCK_ALPHA_STORAGE_KEY, '0.01'));
+                return isNaN(raw) ? 0.01 : Math.min(0.90, Math.max(0.01, raw));
             })(),
             showSoundPanel: false,
             isSoundTesting: false,
@@ -1172,7 +1296,6 @@
                 base64Data: dataUrl.split(',')[1]
             });
 
-            // Omit custom headers so browser sends a pure simple POST without CORS preflight on 302 redirect
             const res = await fetch(bridgeUrl, {
                 method: 'POST',
                 redirect: 'follow',
@@ -1199,7 +1322,6 @@
                     return await uploadBillViaAppsScriptBridge(dataUrl, fileName);
                 } catch (err) {
                     bridgeError = err;
-                    // If no OAuth fallback is configured, surface the exact bridge error
                     if (!getActiveDriveToken() && !(state.appSettings?.gdriveClientId || '').trim()) {
                         const rawMsg = err?.message || String(err);
                         if (rawMsg === 'Failed to fetch') {
@@ -1333,7 +1455,7 @@
         });
 
         function applyDockTransparency(val) {
-            state.dockAlpha = Math.max(0.02, Math.min(0.90, parseFloat(val)));
+            state.dockAlpha = Math.max(0.01, Math.min(0.90, parseFloat(val)));
             lsSet(DOCK_ALPHA_STORAGE_KEY, String(state.dockAlpha));
 
             let styleTag = document.getElementById('dynamic-glass-style');
@@ -1343,27 +1465,27 @@
                 document.head.appendChild(styleTag);
             }
 
-            const lightAlpha = state.dockAlpha.toFixed(2);
+            const lightAlpha = Math.min(0.65, state.dockAlpha * 0.45).toFixed(3);
             const darkAlpha = Math.min(0.90, state.dockAlpha + 0.04).toFixed(2);
-            const bubbleLightTint = Math.min(0.24, Math.max(0.11, (state.dockAlpha * 0.25) + 0.10)).toFixed(2);
-            const bubbleLightWhite = Math.min(0.72, Math.max(0.28, state.dockAlpha + 0.24)).toFixed(2);
+            const bubbleLightTint = Math.min(0.20, Math.max(0.08, (state.dockAlpha * 0.2) + 0.08)).toFixed(2);
+            const bubbleLightWhite = Math.min(0.45, Math.max(0.14, (state.dockAlpha * 0.4) + 0.14)).toFixed(2);
             const bubbleDark = Math.min(0.32, Math.max(0.10, (state.dockAlpha * 0.45) + 0.08)).toFixed(2);
 
             styleTag.innerHTML = `
-                .liquid-dock {
+                .liquid-dock, .liquid-sub-dock {
                     background: rgba(255, 255, 255, ${lightAlpha}) !important;
                     backdrop-filter: blur(8px) saturate(1.25) !important;
                     -webkit-backdrop-filter: blur(8px) saturate(1.25) !important;
                 }
-                .dark .liquid-dock {
+                .dark .liquid-dock, .dark .liquid-sub-dock {
                     background: rgba(15, 23, 42, ${darkAlpha}) !important;
                     backdrop-filter: blur(8px) saturate(1.25) !important;
                     -webkit-backdrop-filter: blur(8px) saturate(1.25) !important;
                 }
-                .liquid-bubble {
+                .liquid-bubble, .liquid-sub-bubble, .liquid-fab {
                     background: linear-gradient(135deg, rgba(99, 102, 241, ${bubbleLightTint}), rgba(255, 255, 255, ${bubbleLightWhite})) !important;
                 }
-                .dark .liquid-bubble {
+                .dark .liquid-bubble, .dark .liquid-sub-bubble, .dark .liquid-fab {
                     background: rgba(255, 255, 255, ${bubbleDark}) !important;
                 }
             `;
@@ -2792,7 +2914,11 @@
                 state.activeTab = tab;
             }
             const nextIndex = tabOrder.indexOf(state.activeTab);
-            state.slideDirection = nextIndex >= prevIndex ? 'animate-slide-right' : 'animate-slide-left';
+            if (state.activeTab === 'add' || state.activeTab === 'notifications') {
+                state.slideDirection = 'animate-slide-up';
+            } else {
+                state.slideDirection = nextIndex >= prevIndex ? 'animate-slide-right' : 'animate-slide-left';
+            }
 
             if (!keepEditState) {
                 state.editingExpenseId = null;
@@ -2803,6 +2929,14 @@
             syncPersistentHeader();
             syncPersistentNavbar();
             render();
+
+            const mainEl = document.getElementById('main-content');
+            if (mainEl && state.slideDirection && state.slideDirection !== 'no-anim') {
+                const animClass = state.slideDirection;
+                mainEl.classList.remove('animate-slide-right', 'animate-slide-left', 'animate-slide-up');
+                void mainEl.offsetWidth;
+                mainEl.classList.add(animClass);
+            }
         }
 
         function render() {
@@ -2857,12 +2991,14 @@
 
             if (shouldPlayZoomEntrance) triggerZoomOutEntrance();
             syncPersistentNavbar();
+            syncUserFilterBubble(false);
+            syncHomeCategoryBubble(false);
         }
 
         function fabButtonHtml() {
             return `
-                <button onclick="openNewExpenseTab()" class="fixed sm:absolute bottom-28 right-5 z-40 w-14 h-14 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 text-white rounded-full shadow-2xl flex items-center justify-center text-xl transition transform hover:scale-105 active:scale-95 border border-white/20" title="Add New Expense">
-                    <i class="fa-solid fa-plus"></i>
+                <button onclick="openNewExpenseTab()" class="fixed sm:absolute bottom-28 right-5 z-40 group w-14 h-14 rounded-full liquid-fab flex items-center justify-center hover:scale-105 active:scale-95" title="Add New Expense" aria-label="Add New Expense">
+                    <i class="fa-solid fa-plus text-lg transition-transform duration-300 group-hover:rotate-90"></i>
                 </button>
             `;
         }
@@ -2891,6 +3027,8 @@
 
             const fab = document.getElementById('add-fab-container');
             if (fab) fab.innerHTML = state.activeTab !== 'add' ? fabButtonHtml() : '';
+            syncUserFilterBubble(false);
+            syncHomeCategoryBubble(false);
         }
 
         function renderLoginPage() {
@@ -3211,39 +3349,43 @@
             });
             const sortedDates = Object.keys(groupedByDate).sort((a, b) => b.localeCompare(a));
 
-            const pillCls = (active) => active
-                ? 'bg-indigo-600 text-white shadow-md'
-                : 'ios-glass-card text-slate-600 dark:text-slate-400 border border-slate-200/80 dark:border-slate-800';
-
             return `
                 <div class="space-y-4 w-full max-w-full">
-                    <div class="bg-gradient-to-br from-indigo-600 to-violet-700 rounded-3xl p-5 sm:p-6 text-white shadow-lg shadow-indigo-500/20 relative overflow-hidden w-full border border-indigo-500/30">
-                        <div class="flex justify-between items-start mb-3 gap-2">
+                    <div class="relative overflow-hidden rounded-[2rem] p-5 sm:p-6 bg-gradient-to-br from-slate-900 via-indigo-950 to-violet-950 text-white shadow-xl shadow-indigo-950/25 border border-white/10 w-full">
+                        <div class="pointer-events-none absolute -top-12 -right-12 w-40 h-40 rounded-full bg-indigo-500/25 blur-2xl"></div>
+                        <div class="pointer-events-none absolute -bottom-14 -left-10 w-36 h-36 rounded-full bg-violet-500/20 blur-2xl"></div>
+
+                        <div class="relative flex justify-between items-start gap-2">
                             <div class="min-w-0 flex-1">
-                                <p class="text-indigo-200 text-xs font-medium uppercase tracking-wider truncate">
-                                    ${isAdmin ? 'Total Filtered Expenses' : 'My Total Expenses'}
-                                </p>
-                                <h2 class="text-2xl sm:text-3xl font-bold tracking-tight mt-0.5 break-all">${formatCurrency(totalAmount)}</h2>
+                                <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/10 border border-white/10 text-[10px] font-semibold uppercase tracking-widest text-indigo-200 mb-2">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+                                    <span class="truncate">${isAdmin ? 'Total Filtered Expenses' : 'My Total Expenses'}</span>
+                                </div>
+                                <h2 class="text-3xl sm:text-4xl font-extrabold tracking-tight text-white break-all">${formatCurrency(totalAmount)}</h2>
                             </div>
-                            <span class="bg-white/20 backdrop-blur-md text-white text-xs font-semibold px-3 py-1 rounded-full shrink-0 border border-white/20">
-                                ${filtered.length} Items
+                            <span class="bg-white/10 backdrop-blur-md text-indigo-100 text-xs font-semibold px-3 py-1.5 rounded-2xl shrink-0 border border-white/15 shadow-sm">
+                                ${filtered.length} ${filtered.length === 1 ? 'Item' : 'Items'}
                             </span>
                         </div>
 
-                        <div class="grid grid-cols-2 gap-3 mt-4 pt-4 border-t border-white/20">
-                            <div class="bg-black/15 backdrop-blur-sm rounded-2xl p-3 min-w-0 border border-white/10">
-                                <div class="flex items-center space-x-1.5 text-indigo-200 text-xs mb-1 min-w-0">
-                                    <i class="fa-solid fa-briefcase shrink-0"></i>
-                                    <span class="truncate">Office</span>
+                        <div class="relative grid grid-cols-2 gap-3 mt-5">
+                            <div class="bg-white/[0.07] backdrop-blur-md rounded-2xl p-3.5 min-w-0 border border-white/10 flex items-center gap-3">
+                                <div class="w-9 h-9 rounded-xl bg-amber-400/20 text-amber-300 border border-amber-400/25 flex items-center justify-center shrink-0">
+                                    <i class="fa-solid fa-briefcase text-sm"></i>
                                 </div>
-                                <p class="font-bold text-sm sm:text-base break-all">${formatCurrency(officeTotal)}</p>
+                                <div class="min-w-0 flex-1">
+                                    <span class="text-[11px] font-medium text-slate-300 block truncate">Office</span>
+                                    <p class="font-bold text-sm sm:text-base text-white break-all leading-tight mt-0.5">${formatCurrency(officeTotal)}</p>
+                                </div>
                             </div>
-                            <div class="bg-black/15 backdrop-blur-sm rounded-2xl p-3 min-w-0 border border-white/10">
-                                <div class="flex items-center space-x-1.5 text-indigo-200 text-xs mb-1 min-w-0">
-                                    <i class="fa-solid fa-clapperboard shrink-0"></i>
-                                    <span class="truncate">Shoot</span>
+                            <div class="bg-white/[0.07] backdrop-blur-md rounded-2xl p-3.5 min-w-0 border border-white/10 flex items-center gap-3">
+                                <div class="w-9 h-9 rounded-xl bg-indigo-400/20 text-indigo-300 border border-indigo-400/25 flex items-center justify-center shrink-0">
+                                    <i class="fa-solid fa-clapperboard text-sm"></i>
                                 </div>
-                                <p class="font-bold text-sm sm:text-base break-all">${formatCurrency(shootTotal)}</p>
+                                <div class="min-w-0 flex-1">
+                                    <span class="text-[11px] font-medium text-slate-300 block truncate">Shoot</span>
+                                    <p class="font-bold text-sm sm:text-base text-white break-all leading-tight mt-0.5">${formatCurrency(shootTotal)}</p>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -3262,11 +3404,11 @@
                                 ${hasDateFilterActive ? '<span class="absolute top-2 right-2 w-2 h-2 rounded-full bg-amber-400"></span>' : ''}
                             </button>
                         </div>
-
-                        <div class="flex items-center space-x-2 overflow-x-auto pb-1 no-scrollbar w-full">
-                            <button onclick="setFilterCategory('All')" class="px-4 py-2 rounded-2xl text-xs font-medium whitespace-nowrap transition shrink-0 ${pillCls(state.filterCategory === 'All')}">All Categories</button>
-                            <button onclick="setFilterCategory('Office')" class="px-4 py-2 rounded-2xl text-xs font-medium whitespace-nowrap transition shrink-0 ${pillCls(state.filterCategory === 'Office')}">Office Expense</button>
-                            <button onclick="setFilterCategory('Shoot')" class="px-4 py-2 rounded-2xl text-xs font-medium whitespace-nowrap transition shrink-0 ${pillCls(state.filterCategory === 'Shoot')}">Shoot Expense</button>
+                        <div id="home-category-dock" class="liquid-sub-dock w-full" role="group" aria-label="Filter expenses by category">
+                            <div id="home-category-bubble" class="liquid-sub-bubble" aria-hidden="true"></div>
+                            <button type="button" data-home-cat="All" onclick="setFilterCategory('All')" class="liquid-sub-btn px-2 whitespace-nowrap truncate ${state.filterCategory === 'All' ? 'is-active' : ''}" aria-pressed="${state.filterCategory === 'All'}">All Categories</button>
+                            <button type="button" data-home-cat="Office" onclick="setFilterCategory('Office')" class="liquid-sub-btn px-2 whitespace-nowrap truncate ${state.filterCategory === 'Office' ? 'is-active' : ''}" aria-pressed="${state.filterCategory === 'Office'}">Office Expense</button>
+                            <button type="button" data-home-cat="Shoot" onclick="setFilterCategory('Shoot')" class="liquid-sub-btn px-2 whitespace-nowrap truncate ${state.filterCategory === 'Shoot' ? 'is-active' : ''}" aria-pressed="${state.filterCategory === 'Shoot'}">Shoot Expense</button>
                         </div>
 
                         <div class="grid grid-cols-${isAdmin ? '2' : '1'} gap-2.5 w-full">
@@ -3336,37 +3478,39 @@
                     const isOffice = exp.category === 'Office';
                     const isOwner = exp.userId === state.currentUser.id;
                     return `
-                                            <div class="ios-glass-card rounded-3xl py-5 sm:py-6 px-5 sm:px-6 shadow-sm transition relative group w-full mt-3">
-                                                <div class="flex items-start space-x-3.5 w-full">
-                                                    <div class="w-10 h-10 rounded-2xl ${isOffice ? 'bg-amber-500/10 text-amber-600 dark:text-amber-400' : 'bg-indigo-500/10 text-indigo-600 dark:text-indigo-400'} flex items-center justify-center shrink-0 mt-0.5">
-                                                        <i class="fa-solid ${isOffice ? 'fa-briefcase' : 'fa-clapperboard'}"></i>
+                                            <div class="ios-glass-card rounded-[1.75rem] p-4 sm:p-5 shadow-sm hover:shadow-md transition-all relative overflow-hidden group w-full mt-3 border-l-4 ${isOffice ? 'border-l-amber-500' : 'border-l-indigo-500'}">
+                                                <div class="flex items-start gap-3.5 w-full">
+                                                    <div class="w-11 h-11 rounded-2xl ${isOffice ? 'bg-gradient-to-br from-amber-500/20 to-orange-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20' : 'bg-gradient-to-br from-indigo-500/20 to-violet-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20'} flex items-center justify-center shrink-0 mt-0.5 shadow-inner">
+                                                        <i class="fa-solid ${isOffice ? 'fa-briefcase' : 'fa-clapperboard'} text-sm"></i>
                                                     </div>
                                                     <div class="min-w-0 flex-1">
-                                                        <div class="flex items-start justify-between gap-3 w-full">
-                                                            <h4 class="font-semibold text-sm sm:text-base text-slate-900 dark:text-white leading-snug break-words flex-1 pr-1">${escapeHtml(exp.title)}</h4>
-                                                            <span class="font-bold text-base sm:text-lg text-slate-900 dark:text-white whitespace-nowrap shrink-0">${formatCurrency(exp.amount)}</span>
-                                                        </div>
-
-                                                        <div class="flex items-center flex-wrap gap-1.5 text-xs text-slate-500 dark:text-slate-400 mt-2 w-full">
-                                                            <span class="font-medium text-indigo-600 dark:text-indigo-400">${escapeHtml(exp.category)}</span>
-                                                            <span>•</span>
-                                                            <span class="italic text-slate-600 dark:text-slate-300 break-all">${escapeHtml(exp.userName)}</span>
+                                                        <div class="flex items-start justify-between gap-2.5 w-full">
+                                                            <div class="min-w-0 flex-1">
+                                                                <div class="flex items-center flex-wrap gap-1.5 mb-1">
+                                                                    <span class="px-2 py-0.5 rounded-lg text-[10px] font-bold uppercase tracking-wider ${isOffice ? 'bg-amber-500/10 text-amber-700 dark:text-amber-300 border border-amber-500/20' : 'bg-indigo-500/10 text-indigo-700 dark:text-indigo-300 border border-indigo-500/20'}">${escapeHtml(exp.category)}</span>
+                                                                    <span class="text-[11px] font-medium text-slate-500 dark:text-slate-400 truncate"><i class="fa-regular fa-user text-[9px] mr-1 opacity-75"></i>${escapeHtml(exp.userName)}</span>
+                                                                </div>
+                                                                <h4 class="font-bold text-sm sm:text-base text-slate-900 dark:text-white leading-snug break-words">${escapeHtml(exp.title)}</h4>
+                                                            </div>
+                                                            <div class="px-3 py-1.5 rounded-2xl bg-slate-100/90 dark:bg-slate-800/90 border border-slate-200/70 dark:border-slate-700/70 shrink-0">
+                                                                <span class="font-extrabold text-sm sm:text-base text-slate-900 dark:text-white whitespace-nowrap">${formatCurrency(exp.amount)}</span>
+                                                            </div>
                                                         </div>
 
                                                         ${!isOffice && exp.clientNamePlace ? `
-                                                            <div class="mt-1.5 text-xs font-medium text-violet-600 dark:text-violet-400 flex items-center space-x-1.5 min-w-0">
-                                                                <i class="fa-solid fa-location-dot shrink-0"></i>
-                                                                <span class="break-words">Client/Place: ${escapeHtml(exp.clientNamePlace)}</span>
+                                                            <div class="mt-2 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-violet-500/10 border border-violet-500/20 text-[11px] font-semibold text-violet-700 dark:text-violet-300 max-w-full">
+                                                                <i class="fa-solid fa-location-dot shrink-0 text-[10px]"></i>
+                                                                <span class="break-words">${escapeHtml(exp.clientNamePlace)}</span>
                                                             </div>
                                                         ` : ''}
 
                                                         ${exp.notes ? `<p class="text-xs text-slate-600 dark:text-slate-400 mt-2.5 bg-slate-50/80 dark:bg-slate-800/60 p-3 rounded-2xl border border-slate-200/60 dark:border-slate-700/60 break-words">${escapeHtml(exp.notes)}</p>` : ''}
 
-                                                        <div class="flex items-center justify-between mt-3 pt-2 border-t border-slate-200/50 dark:border-slate-800 w-full gap-2">
+                                                        <div class="flex items-center justify-between mt-3 pt-2.5 border-t border-slate-200/60 dark:border-slate-800 w-full gap-2">
                                                             <div>
                                                                 ${exp.billAttachment ? `
-                                                                    <button onclick="viewBillModal('${exp.id}')" class="inline-flex items-center space-x-1.5 px-3.5 py-1.5 rounded-xl bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 text-xs font-medium border border-indigo-200/60 hover:bg-indigo-100 transition">
-                                                                        <i class="fa-solid fa-paperclip"></i><span>View Attached Bill</span>
+                                                                    <button onclick="viewBillModal('${exp.id}')" class="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-xl bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 text-xs font-semibold border border-indigo-200/70 dark:border-indigo-800/70 hover:bg-indigo-100 transition">
+                                                                        <i class="fa-solid fa-paperclip"></i><span>View Bill</span>
                                                                     </button>
                                                                 ` : '<span class="text-[11px] text-slate-400 italic">No bill attached</span>'}
                                                             </div>
@@ -3379,8 +3523,8 @@
                                                                             <span>Undo</span>
                                                                         </button>
                                                                     ` : ''}
-                                                                    <button onclick="startEditExpense('${exp.id}')" class="w-8 h-8 rounded-xl bg-slate-100/80 dark:bg-slate-800/80 text-slate-600 dark:text-slate-300 hover:bg-indigo-50 hover:text-indigo-600 transition flex items-center justify-center text-xs" title="Edit"><i class="fa-solid fa-pen"></i></button>
-                                                                    <button onclick="confirmDeleteExpense('${exp.id}')" class="w-8 h-8 rounded-xl bg-slate-100/80 dark:bg-slate-800/80 text-slate-600 dark:text-slate-300 hover:bg-rose-50 hover:text-rose-600 transition flex items-center justify-center text-xs" title="Delete"><i class="fa-solid fa-trash"></i></button>
+                                                                    <button onclick="startEditExpense('${exp.id}')" class="w-8 h-8 rounded-xl bg-slate-100/90 dark:bg-slate-800/90 text-slate-600 dark:text-slate-300 hover:bg-indigo-50 hover:text-indigo-600 transition flex items-center justify-center text-xs" title="Edit"><i class="fa-solid fa-pen"></i></button>
+                                                                    <button onclick="confirmDeleteExpense('${exp.id}')" class="w-8 h-8 rounded-xl bg-slate-100/90 dark:bg-slate-800/90 text-slate-600 dark:text-slate-300 hover:bg-rose-50 hover:text-rose-600 transition flex items-center justify-center text-xs" title="Delete"><i class="fa-solid fa-trash"></i></button>
                                                                 </div>
                                                             ` : ''}
                                                         </div>
@@ -3410,7 +3554,51 @@
         }
 
         function clearSearch() { state.searchQuery = ''; renderMainContentOnly(); }
-        function setFilterCategory(cat) { state.filterCategory = cat; renderMainContentOnly(); }
+        function setFilterCategory(cat) {
+            if (state.filterCategory === cat) return;
+            const prevBubble = document.getElementById('home-category-bubble');
+            const prevLeft = prevBubble ? prevBubble.style.transform : '';
+            const prevWidth = prevBubble ? prevBubble.style.width : '';
+
+            state.filterCategory = cat;
+            renderMainContentOnly();
+
+            const newBubble = document.getElementById('home-category-bubble');
+            if (newBubble && prevLeft && prevWidth) {
+                newBubble.style.transition = 'none';
+                newBubble.style.width = prevWidth;
+                newBubble.style.transform = prevLeft;
+                void newBubble.offsetWidth;
+                newBubble.style.transition = '';
+            }
+            syncHomeCategoryBubble(true);
+        }
+
+        function syncHomeCategoryBubble(animate = true) {
+            const dock = document.getElementById('home-category-dock');
+            const bubble = document.getElementById('home-category-bubble');
+            if (!dock || !bubble) return;
+
+            const activeBtn = dock.querySelector(`[data-home-cat="${state.filterCategory}"]`);
+            if (!activeBtn) return;
+
+            if (!animate) bubble.style.transition = 'none';
+            dock.querySelectorAll('.liquid-sub-btn').forEach(btn => {
+                if (btn === activeBtn) {
+                    btn.classList.add('is-active');
+                    btn.setAttribute('aria-pressed', 'true');
+                } else {
+                    btn.classList.remove('is-active');
+                    btn.setAttribute('aria-pressed', 'false');
+                }
+            });
+            bubble.style.width = `${activeBtn.offsetWidth}px`;
+            bubble.style.transform = `translateX(${activeBtn.offsetLeft}px)`;
+            if (!animate) {
+                void bubble.offsetWidth;
+                bubble.style.transition = '';
+            }
+        }
         function setFilterMonth(month) {
             state.filterMonth = month;
             if (month !== 'All') {
@@ -4215,8 +4403,50 @@
         }
 
         function setUserFilterTab(tab) {
+            if (state.userFilterTab === tab) return;
+            const dock = document.getElementById('user-filter-dock');
+            const prevBubble = document.getElementById('user-filter-bubble');
+            const prevLeft = prevBubble ? prevBubble.style.transform : '';
+            const prevWidth = prevBubble ? prevBubble.style.width : '';
+
             state.userFilterTab = tab;
             renderMainContentOnly();
+
+            const newBubble = document.getElementById('user-filter-bubble');
+            if (dock && newBubble && prevLeft && prevWidth) {
+                newBubble.style.transition = 'none';
+                newBubble.style.width = prevWidth;
+                newBubble.style.transform = prevLeft;
+                void newBubble.offsetWidth;
+                newBubble.style.transition = '';
+            }
+            syncUserFilterBubble(true);
+        }
+
+        function syncUserFilterBubble(animate = true) {
+            const dock = document.getElementById('user-filter-dock');
+            const bubble = document.getElementById('user-filter-bubble');
+            if (!dock || !bubble) return;
+
+            const activeBtn = dock.querySelector(`[data-user-filter="${state.userFilterTab}"]`);
+            if (!activeBtn) return;
+
+            if (!animate) bubble.style.transition = 'none';
+            dock.querySelectorAll('.liquid-sub-btn').forEach(btn => {
+                if (btn === activeBtn) {
+                    btn.classList.add('is-active');
+                    btn.setAttribute('aria-pressed', 'true');
+                } else {
+                    btn.classList.remove('is-active');
+                    btn.setAttribute('aria-pressed', 'false');
+                }
+            });
+            bubble.style.width = `${activeBtn.offsetWidth}px`;
+            bubble.style.transform = `translateX(${activeBtn.offsetLeft}px)`;
+            if (!animate) {
+                void bubble.offsetWidth;
+                bubble.style.transition = '';
+            }
         }
 
         function renderUserManagementTab() {
@@ -4228,9 +4458,6 @@
 
             const showAdmins = filter === 'all' || filter === 'admin';
             const showRegular = filter === 'all' || filter === 'user';
-            const tabCls = (active) => active
-                ? 'bg-slate-100 dark:bg-slate-800 text-indigo-600 dark:text-indigo-400 shadow-sm border border-slate-200/60 dark:border-slate-700'
-                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white';
 
             return `
                 <div class="space-y-5 w-full max-w-full">
@@ -4244,10 +4471,11 @@
                         </button>
                     </div>
 
-                    <div class="flex items-center space-x-2 ios-glass-card p-1.5 rounded-2xl w-full">
-                        <button onclick="setUserFilterTab('all')" class="flex-1 py-2 px-3 rounded-xl text-xs font-semibold transition ${tabCls(filter === 'all')}">All (${visibleUsers.length})</button>
-                        <button onclick="setUserFilterTab('user')" class="flex-1 py-2 px-3 rounded-xl text-xs font-semibold transition ${tabCls(filter === 'user')}">Users (${regularUsers.length})</button>
-                        <button onclick="setUserFilterTab('admin')" class="flex-1 py-2 px-3 rounded-xl text-xs font-semibold transition ${tabCls(filter === 'admin')}">Admins (${adminUsers.length})</button>
+                    <div id="user-filter-dock" class="liquid-sub-dock w-full" role="group" aria-label="Filter users by role">
+                        <div id="user-filter-bubble" class="liquid-sub-bubble" aria-hidden="true"></div>
+                        <button type="button" data-user-filter="all" onclick="setUserFilterTab('all')" class="liquid-sub-btn ${filter === 'all' ? 'is-active' : ''}" aria-pressed="${filter === 'all'}">All (${visibleUsers.length})</button>
+                        <button type="button" data-user-filter="user" onclick="setUserFilterTab('user')" class="liquid-sub-btn ${filter === 'user' ? 'is-active' : ''}" aria-pressed="${filter === 'user'}">Users (${regularUsers.length})</button>
+                        <button type="button" data-user-filter="admin" onclick="setUserFilterTab('admin')" class="liquid-sub-btn ${filter === 'admin' ? 'is-active' : ''}" aria-pressed="${filter === 'admin'}">Admins (${adminUsers.length})</button>
                     </div>
 
                     ${showRegular ? `
@@ -4644,7 +4872,6 @@
                 testBtn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i><span>Testing Upload...</span>';
             }
             try {
-                // 1x1 valid JPEG test pixel
                 const tinyCanvas = document.createElement('canvas');
                 tinyCanvas.width = 40;
                 tinyCanvas.height = 40;
@@ -4667,7 +4894,6 @@
             }
         }
 
-        // Developer-Only Google Drive Config Modal
         function openGoogleDriveConfigModal() {
             if (!isDeveloper(state.currentUser)) {
                 showToast('Access restricted to Developer accounts.', 'error');
@@ -4876,7 +5102,6 @@
                     return;
                 }
 
-                // Option B: Google OAuth 2.0 Client ID popup flow
                 state.appSettings.gdriveClientId = clientId;
                 state.appSettings.gdriveFolderId = folderId;
                 const auth = await requestGoogleDriveAccessToken('consent');
@@ -5026,7 +5251,7 @@
                                     </span>
                                     <span id="dock-alpha-label" class="font-bold text-indigo-600 dark:text-indigo-400">${Math.round(state.dockAlpha * 100)}%</span>
                                 </div>
-                                <input type="range" min="0.02" max="0.90" step="0.01" value="${state.dockAlpha}" oninput="handleDockAlphaChange(this.value)" class="w-full accent-indigo-600 cursor-pointer h-1.5 bg-slate-200 dark:bg-slate-700 rounded-lg">
+                                <input type="range" min="0.01" max="0.90" step="0.01" value="${state.dockAlpha}" oninput="handleDockAlphaChange(this.value)" class="w-full accent-indigo-600 cursor-pointer h-1.5 bg-slate-200 dark:bg-slate-700 rounded-lg">
                             </div>
                         </div>
 
@@ -5384,7 +5609,6 @@
             return String(str).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
         }
 
-        // ---------- PREVENT DOUBLE-TAP ZOOM ----------
         let lastGlobalTouchEnd = 0;
         document.addEventListener('touchend', (e) => {
             const now = Date.now();
@@ -5402,7 +5626,6 @@
             }
         }, { passive: false });
 
-        // ---------- UNIFIED TOUCH GESTURES (PULL-TO-REFRESH, TAB SWIPE, EDGE BACK & MODAL DISMISS) ----------
         let gestureStartX = 0;
         let gestureStartY = 0;
         let gestureCurrentX = 0;
@@ -5460,7 +5683,7 @@
                 return;
             }
 
-            if (e.target.closest('#liquid-nav, input[type="range"], .overflow-x-auto')) {
+            if (e.target.closest('#liquid-nav, #user-filter-dock, #home-category-dock, input[type="range"], .overflow-x-auto')) {
                 gestureMode = 'cancelled';
                 return;
             }
@@ -5592,7 +5815,7 @@
             }
 
             if (mainContent && (activeMode === 'tab-swipe' || activeMode === 'edge-back')) {
-                mainContent.style.transition = 'transform 0.22s cubic-bezier(0.16, 1, 0.3, 1)';
+                mainContent.style.transition = 'transform 0.28s cubic-bezier(0.22, 1, 0.36, 1)';
                 mainContent.style.transform = 'translateX(0)';
             }
 
@@ -5668,7 +5891,6 @@
             hasVibrated = false;
         }
 
-        // ---------- INTERACTIVE LIQUID DOCK DRAG SCRUBBING ----------
         (function setupLiquidDockGesture() {
             let isDockDragging = false;
             let lastHoveredTab = null;
@@ -5721,7 +5943,6 @@
                 }
             }, { passive: true });
 
-            // Spring glide preview on desktop pointer hover/focus, snapping back on leave
             document.addEventListener('pointerover', (e) => {
                 if (e.pointerType === 'touch') return;
                 const btn = e.target.closest('#liquid-nav .liquid-nav-btn');
@@ -5749,7 +5970,158 @@
             });
         })();
 
-        // Persist session across app switching, backgrounding, and reopening
+        (function setupUserFilterDockGesture() {
+            let isSubDockDragging = false;
+            let lastHoveredFilter = null;
+
+            function getSubDockHitFromX(clientX) {
+                const dock = document.getElementById('user-filter-dock');
+                if (!dock) return null;
+                const buttons = Array.from(dock.querySelectorAll('.liquid-sub-btn'));
+                for (const btn of buttons) {
+                    const rect = btn.getBoundingClientRect();
+                    if (clientX >= rect.left && clientX <= rect.right) {
+                        return { btn, filter: btn.getAttribute('data-user-filter') };
+                    }
+                }
+                return null;
+            }
+
+            document.addEventListener('touchstart', (e) => {
+                if (e.target.closest('#user-filter-dock') && e.touches.length === 1) {
+                    isSubDockDragging = true;
+                    lastHoveredFilter = null;
+                }
+            }, { passive: true });
+
+            document.addEventListener('touchmove', (e) => {
+                if (!isSubDockDragging || e.touches.length !== 1) return;
+                const hit = getSubDockHitFromX(e.touches[0].clientX);
+                const bubble = document.getElementById('user-filter-bubble');
+                if (hit && bubble) {
+                    bubble.style.width = `${hit.btn.offsetWidth}px`;
+                    bubble.style.transform = `translateX(${hit.btn.offsetLeft}px)`;
+                    if (lastHoveredFilter !== hit.filter) {
+                        triggerHaptic(8);
+                        lastHoveredFilter = hit.filter;
+                    }
+                }
+            }, { passive: true });
+
+            document.addEventListener('touchend', () => {
+                if (!isSubDockDragging) return;
+                isSubDockDragging = false;
+                if (lastHoveredFilter) {
+                    setUserFilterTab(lastHoveredFilter);
+                    lastHoveredFilter = null;
+                } else {
+                    syncUserFilterBubble(true);
+                }
+            }, { passive: true });
+
+            document.addEventListener('pointerover', (e) => {
+                if (e.pointerType === 'touch') return;
+                const btn = e.target.closest('#user-filter-dock .liquid-sub-btn');
+                const bubble = document.getElementById('user-filter-bubble');
+                if (btn && bubble) {
+                    bubble.style.width = `${btn.offsetWidth}px`;
+                    bubble.style.transform = `translateX(${btn.offsetLeft}px)`;
+                }
+            });
+
+            document.addEventListener('focusin', (e) => {
+                const btn = e.target.closest('#user-filter-dock .liquid-sub-btn');
+                const bubble = document.getElementById('user-filter-bubble');
+                if (btn && bubble) {
+                    bubble.style.width = `${btn.offsetWidth}px`;
+                    bubble.style.transform = `translateX(${btn.offsetLeft}px)`;
+                }
+            });
+
+            document.addEventListener('pointerout', (e) => {
+                const dock = document.getElementById('user-filter-dock');
+                if (dock && e.target.closest('#user-filter-dock') && (!e.relatedTarget || !dock.contains(e.relatedTarget))) {
+                    syncUserFilterBubble(true);
+                }
+            });
+        })();
+
+        (function setupHomeCategoryDockGesture() {
+            let isCatDockDragging = false;
+            let lastHoveredCat = null;
+
+            function getCatDockHitFromX(clientX) {
+                const dock = document.getElementById('home-category-dock');
+                if (!dock) return null;
+                const buttons = Array.from(dock.querySelectorAll('.liquid-sub-btn'));
+                for (const btn of buttons) {
+                    const rect = btn.getBoundingClientRect();
+                    if (clientX >= rect.left && clientX <= rect.right) {
+                        return { btn, cat: btn.getAttribute('data-home-cat') };
+                    }
+                }
+                return null;
+            }
+
+            document.addEventListener('touchstart', (e) => {
+                if (e.target.closest('#home-category-dock') && e.touches.length === 1) {
+                    isCatDockDragging = true;
+                    lastHoveredCat = null;
+                }
+            }, { passive: true });
+
+            document.addEventListener('touchmove', (e) => {
+                if (!isCatDockDragging || e.touches.length !== 1) return;
+                const hit = getCatDockHitFromX(e.touches[0].clientX);
+                const bubble = document.getElementById('home-category-bubble');
+                if (hit && bubble) {
+                    bubble.style.width = `${hit.btn.offsetWidth}px`;
+                    bubble.style.transform = `translateX(${hit.btn.offsetLeft}px)`;
+                    if (lastHoveredCat !== hit.cat) {
+                        triggerHaptic(8);
+                        lastHoveredCat = hit.cat;
+                    }
+                }
+            }, { passive: true });
+
+            document.addEventListener('touchend', () => {
+                if (!isCatDockDragging) return;
+                isCatDockDragging = false;
+                if (lastHoveredCat) {
+                    setFilterCategory(lastHoveredCat);
+                    lastHoveredCat = null;
+                } else {
+                    syncHomeCategoryBubble(true);
+                }
+            }, { passive: true });
+
+            document.addEventListener('pointerover', (e) => {
+                if (e.pointerType === 'touch') return;
+                const btn = e.target.closest('#home-category-dock .liquid-sub-btn');
+                const bubble = document.getElementById('home-category-bubble');
+                if (btn && bubble) {
+                    bubble.style.width = `${btn.offsetWidth}px`;
+                    bubble.style.transform = `translateX(${btn.offsetLeft}px)`;
+                }
+            });
+
+            document.addEventListener('focusin', (e) => {
+                const btn = e.target.closest('#home-category-dock .liquid-sub-btn');
+                const bubble = document.getElementById('home-category-bubble');
+                if (btn && bubble) {
+                    bubble.style.width = `${btn.offsetWidth}px`;
+                    bubble.style.transform = `translateX(${btn.offsetLeft}px)`;
+                }
+            });
+
+            document.addEventListener('pointerout', (e) => {
+                const dock = document.getElementById('home-category-dock');
+                if (dock && e.target.closest('#home-category-dock') && (!e.relatedTarget || !dock.contains(e.relatedTarget))) {
+                    syncHomeCategoryBubble(true);
+                }
+            });
+        })();
+
         document.addEventListener('visibilitychange', () => {
             if (document.visibilityState === 'hidden') {
                 if (state.currentUser) persistCurrentUser(state.currentUser);
@@ -5786,8 +6158,16 @@
             if (state.currentUser) persistCurrentUser(state.currentUser);
         });
 
-        window.addEventListener('resize', syncPersistentNavbar);
-        window.addEventListener('orientationchange', () => setTimeout(syncPersistentNavbar, 100));
+        window.addEventListener('resize', () => {
+            syncPersistentNavbar();
+            syncUserFilterBubble(false);
+            syncHomeCategoryBubble(false);
+        });
+        window.addEventListener('orientationchange', () => setTimeout(() => {
+            syncPersistentNavbar();
+            syncUserFilterBubble(false);
+            syncHomeCategoryBubble(false);
+        }, 100));
 
         async function bootApp() {
             applyDockTransparency(state.dockAlpha);
