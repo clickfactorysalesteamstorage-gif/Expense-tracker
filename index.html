@@ -3259,68 +3259,62 @@
             return `
                 <div class="space-y-3.5 w-full max-w-full">
                     <div class="liquid-hero-card rounded-[26px] p-4 sm:p-5 text-white relative overflow-hidden w-full">
-                        <div class="relative flex items-start justify-between gap-3">
-                            <div class="min-w-0 flex-1">
-                                <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-white/10 border border-white/15 text-[9.5px] font-semibold uppercase tracking-[0.12em] text-indigo-100/90 mb-1.5">
-                                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+                        <div class="relative flex items-center justify-between gap-2.5">
+                            <div class="min-w-0 flex-1 overflow-hidden">
+                                <div class="inline-flex items-center gap-1.5 max-w-full px-2.5 py-0.5 rounded-full bg-white/10 border border-white/15 text-[9px] sm:text-[9.5px] font-semibold uppercase tracking-[0.08em] text-indigo-100/90 mb-1.5">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 shrink-0"></span>
                                     <span class="truncate">${isAdmin ? 'Total Filtered Expenses' : 'My Total Expenses'}</span>
                                 </div>
-                                <h2 class="text-2xl sm:text-3xl font-bold tracking-tight tabular-nums text-white break-all leading-none">${formatCurrency(totalAmount)}</h2>
+                                <h2 class="text-xl sm:text-3xl font-bold tracking-tight tabular-nums text-white truncate leading-tight">${formatCurrency(totalAmount)}</h2>
                             </div>
                             <div class="shrink-0">
                                 ${(() => {
-                                    const detectAutoExpenseGroup = (exp) => {
+                                    const detectAutoGroup = (exp) => {
                                         const text = `${exp.title || ''} ${exp.notes || ''}`.toLowerCase();
                                         if (/\b(tea|chai|coffee|cafe|starbucks|juice|drink|beverage|milk|water)\b/.test(text)) return 'Tea';
                                         if (/\b(petrol|diesel|fuel|gas|cng|ev\s*charg|bunk|hpcl|bpcl|iocl|shell)\b/.test(text)) return 'Petrol';
                                         if (/\b(food|lunch|dinner|breakfast|meal|biryani|snack|hotel|restaurant|zomato|swiggy|tiffin|idli|dosa|pizza|burger|catering)\b/.test(text)) return 'Food';
                                         return 'Other';
                                     };
-                                    const autoGroups = [
-                                        { key: 'Food', color: '#65a30d', textCls: 'text-lime-200', dotCls: 'bg-lime-400', amount: 0 },
-                                        { key: 'Petrol', color: '#38bdf8', textCls: 'text-sky-200', dotCls: 'bg-sky-400', amount: 0 },
-                                        { key: 'Tea', color: '#facc15', textCls: 'text-amber-200', dotCls: 'bg-amber-400', amount: 0 },
-                                        { key: 'Other', color: '#f43f5e', textCls: 'text-rose-200', dotCls: 'bg-rose-400', amount: 0 }
+                                    const buckets = [
+                                        { key: 'Food', color: '#84cc16', text: 'text-lime-300', dot: 'bg-lime-400', amount: 0 },
+                                        { key: 'Petrol', color: '#38bdf8', text: 'text-sky-300', dot: 'bg-sky-400', amount: 0 },
+                                        { key: 'Tea', color: '#facc15', text: 'text-yellow-300', dot: 'bg-yellow-400', amount: 0 },
+                                        { key: 'Other', color: '#f43f5e', text: 'text-rose-300', dot: 'bg-rose-400', amount: 0 }
                                     ];
-                                    const groupMap = Object.fromEntries(autoGroups.map(g => [g.key, g]));
-                                    filtered.forEach(exp => {
-                                        const grp = detectAutoExpenseGroup(exp);
-                                        groupMap[grp].amount += Number(exp.amount || 0);
+                                    const bMap = Object.fromEntries(buckets.map(b => [b.key, b]));
+                                    filtered.forEach(e => {
+                                        bMap[detectAutoGroup(e)].amount += Number(e.amount || 0);
                                     });
-                                    const activeGroups = autoGroups.filter(g => g.amount > 0);
-                                    const cx = 22, cy = 22, r = 17.5, sw = 4.2;
+                                    const active = buckets.filter(b => b.amount > 0).sort((a, b) => b.amount - a.amount);
+                                    const cx = 22, cy = 22, r = 16, sw = 4.5;
                                     const circ = 2 * Math.PI * r;
-                                    const gap = activeGroups.length > 1 ? 4.8 : 0;
-                                    let ringArcs = '';
-                                    if (totalAmount > 0 && activeGroups.length > 0) {
-                                        if (activeGroups.length === 1) {
-                                            ringArcs = `<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${activeGroups[0].color}" stroke-width="${sw}" stroke-linecap="round"></circle>`;
-                                        } else {
-                                            let cumFrac = 0;
-                                            ringArcs = activeGroups.map(g => {
-                                                const frac = g.amount / totalAmount;
-                                                const dash = Math.max(2, frac * circ - gap);
-                                                const offset = -(cumFrac * circ + gap / 2);
-                                                cumFrac += frac;
-                                                return `<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${g.color}" stroke-width="${sw}" stroke-linecap="round" stroke-dasharray="${dash.toFixed(2)} ${circ.toFixed(2)}" stroke-dashoffset="${offset.toFixed(2)}" transform="rotate(-90 ${cx} ${cy})"></circle>`;
-                                            }).join('');
-                                        }
-                                    }
-                                    const legendGroups = (activeGroups.length > 0 ? activeGroups : autoGroups).slice(0, 2);
-                                    const legendHtml = legendGroups.map((g, idx) => {
-                                        const pct = totalAmount > 0 ? Math.round((g.amount / totalAmount) * 100) : 0;
-                                        return `<div class="flex items-center gap-1.5 ${g.textCls} font-semibold leading-none ${idx > 0 ? 'mt-1' : ''}"><span class="w-1.5 h-1.5 rounded-full ${g.dotCls} shrink-0"></span><span class="truncate">${g.key} ${pct}%</span></div>`;
-                                    }).join('');
+                                    const gap = active.length > 1 ? 4.5 : 0;
+                                    let cum = 0;
+                                    const ringArcs = totalAmount > 0 ? active.map(seg => {
+                                        const frac = seg.amount / totalAmount;
+                                        const dash = Math.max(1.5, frac * circ - gap);
+                                        const offset = -(cum * circ + (active.length > 1 ? gap / 2 : 0));
+                                        cum += frac;
+                                        return `<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${seg.color}" stroke-width="${sw}" stroke-linecap="round" stroke-dasharray="${dash.toFixed(2)} ${circ.toFixed(2)}" stroke-dashoffset="${offset.toFixed(2)}" transform="rotate(-90 ${cx} ${cy})"></circle>`;
+                                    }).join('') : '';
+                                    const topTwo = active.slice(0, 2);
+                                    const legendHtml = topTwo.length === 0
+                                        ? `<div class="text-[9px] text-indigo-200/75 font-semibold leading-none">No data</div>`
+                                        : topTwo.map((seg, i) => {
+                                            const pct = totalAmount > 0 ? Math.round((seg.amount / totalAmount) * 100) : 0;
+                                            return `<div class="flex items-center gap-1 ${seg.text} font-semibold leading-none ${i > 0 ? 'mt-1' : ''}"><span class="w-1.5 h-1.5 rounded-full ${seg.dot} shrink-0"></span><span class="truncate">${seg.key} ${pct}%</span></div>`;
+                                        }).join('');
                                     return `
-                                    <button type="button" onclick="openHomeExpenseChartModal()" class="inline-flex items-center gap-2.5 bg-white/[0.08] hover:bg-white/[0.14] active:scale-95 transition border border-white/15 rounded-2xl px-2.5 py-2 shrink-0 text-left cursor-pointer" title="Tap for auto-detected expense category chart">
-                                        <div class="relative w-11 h-11 shrink-0 flex items-center justify-center">
-                                            <svg class="w-11 h-11 block drop-shadow-sm" viewBox="0 0 44 44" aria-hidden="true">
+                                    <button type="button" onclick="openHomeExpenseChartModal()" class="inline-flex items-center gap-2 bg-white/[0.08] hover:bg-white/[0.14] active:scale-95 transition border border-white/15 rounded-2xl px-2 py-2 shrink-0 text-left cursor-pointer" title="Tap for auto-detected expense category chart">
+                                        <div class="relative w-10 h-10 shrink-0 flex items-center justify-center">
+                                            <svg class="w-10 h-10 block drop-shadow-sm" viewBox="0 0 44 44" aria-hidden="true">
                                                 <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="rgba(255,255,255,0.14)" stroke-width="${sw}"></circle>
                                                 ${ringArcs}
                                             </svg>
-                                            <span class="absolute inset-0 flex items-center justify-center text-[9px] font-bold text-white tabular-nums leading-none pointer-events-none">${filtered.length}</span>
+                                            <span class="absolute inset-0 flex items-center justify-center text-[8.5px] font-bold text-white tabular-nums leading-none pointer-events-none">${filtered.length}</span>
                                         </div>
-                                        <div class="text-[9.5px] min-w-[58px] pr-0.5 tabular-nums flex flex-col justify-center">
+                                        <div class="text-[9px] min-w-[52px] pr-0.5 tabular-nums flex flex-col justify-center">
                                             ${legendHtml}
                                             <div class="text-[8.5px] text-indigo-200/80 font-medium leading-none mt-1.5 flex items-center gap-1"><span>Chart</span><i class="fa-solid fa-chevron-right text-[7px]"></i></div>
                                         </div>
