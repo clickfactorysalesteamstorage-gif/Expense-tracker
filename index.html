@@ -318,10 +318,12 @@
 
         @keyframes simple-spin {
             0% {
+                -webkit-transform: rotate(0deg);
                 transform: rotate(0deg);
             }
 
             100% {
+                -webkit-transform: rotate(360deg);
                 transform: rotate(360deg);
             }
         }
@@ -330,27 +332,50 @@
             border: 3px solid rgba(99, 102, 241, 0.15);
             border-top-color: #4f46e5;
             border-radius: 50%;
+            -webkit-animation: simple-spin 0.8s linear infinite;
             animation: simple-spin 0.8s linear infinite;
+        }
+
+        @-webkit-keyframes homeZoomOut {
+            0% {
+                opacity: 0;
+                -webkit-transform: scale3d(1.03, 1.03, 1);
+                transform: scale3d(1.03, 1.03, 1);
+            }
+
+            100% {
+                opacity: 1;
+                -webkit-transform: scale3d(1, 1, 1);
+                transform: scale3d(1, 1, 1);
+            }
         }
 
         @keyframes homeZoomOut {
             0% {
                 opacity: 0;
-                transform: scale(1.03);
+                -webkit-transform: scale3d(1.03, 1.03, 1);
+                transform: scale3d(1.03, 1.03, 1);
             }
 
             100% {
                 opacity: 1;
-                transform: scale(1);
+                -webkit-transform: scale3d(1, 1, 1);
+                transform: scale3d(1, 1, 1);
             }
         }
 
         .animate-fadeIn {
-            animation: homeZoomOut 0.25s ease;
+            -webkit-animation: homeZoomOut 0.25s cubic-bezier(0.22, 1, 0.36, 1) both;
+            animation: homeZoomOut 0.25s cubic-bezier(0.22, 1, 0.36, 1) both;
+            -webkit-backface-visibility: hidden;
+            backface-visibility: hidden;
         }
 
         .animate-zoom-out-enter {
-            animation: homeZoomOut 0.36s cubic-bezier(0.22, 1, 0.36, 1);
+            -webkit-animation: homeZoomOut 0.36s cubic-bezier(0.22, 1, 0.36, 1) both;
+            animation: homeZoomOut 0.36s cubic-bezier(0.22, 1, 0.36, 1) both;
+            -webkit-backface-visibility: hidden;
+            backface-visibility: hidden;
         }
 
         @keyframes pulse-ring {
@@ -374,52 +399,109 @@
             animation: pulse-ring 1.2s infinite;
         }
 
-        @keyframes tabSlideForward {
+        @-webkit-keyframes tabSlideForward {
             0% {
-                transform: translate3d(28px, 0, 0) scale(0.985);
+                -webkit-transform: translate3d(28px, 0, 0) scale3d(0.985, 0.985, 1);
+                transform: translate3d(28px, 0, 0) scale3d(0.985, 0.985, 1);
                 opacity: 0;
             }
 
             100% {
-                transform: translate3d(0, 0, 0) scale(1);
+                -webkit-transform: translate3d(0, 0, 0) scale3d(1, 1, 1);
+                transform: translate3d(0, 0, 0) scale3d(1, 1, 1);
+                opacity: 1;
+            }
+        }
+
+        @keyframes tabSlideForward {
+            0% {
+                -webkit-transform: translate3d(28px, 0, 0) scale3d(0.985, 0.985, 1);
+                transform: translate3d(28px, 0, 0) scale3d(0.985, 0.985, 1);
+                opacity: 0;
+            }
+
+            100% {
+                -webkit-transform: translate3d(0, 0, 0) scale3d(1, 1, 1);
+                transform: translate3d(0, 0, 0) scale3d(1, 1, 1);
+                opacity: 1;
+            }
+        }
+
+        @-webkit-keyframes tabSlideBackward {
+            0% {
+                -webkit-transform: translate3d(-28px, 0, 0) scale3d(0.985, 0.985, 1);
+                transform: translate3d(-28px, 0, 0) scale3d(0.985, 0.985, 1);
+                opacity: 0;
+            }
+
+            100% {
+                -webkit-transform: translate3d(0, 0, 0) scale3d(1, 1, 1);
+                transform: translate3d(0, 0, 0) scale3d(1, 1, 1);
                 opacity: 1;
             }
         }
 
         @keyframes tabSlideBackward {
             0% {
-                transform: translate3d(-28px, 0, 0) scale(0.985);
+                -webkit-transform: translate3d(-28px, 0, 0) scale3d(0.985, 0.985, 1);
+                transform: translate3d(-28px, 0, 0) scale3d(0.985, 0.985, 1);
                 opacity: 0;
             }
 
             100% {
-                transform: translate3d(0, 0, 0) scale(1);
+                -webkit-transform: translate3d(0, 0, 0) scale3d(1, 1, 1);
+                transform: translate3d(0, 0, 0) scale3d(1, 1, 1);
+                opacity: 1;
+            }
+        }
+
+        @-webkit-keyframes tabLiftUp {
+            0% {
+                -webkit-transform: translate3d(0, 22px, 0) scale3d(0.97, 0.97, 1);
+                transform: translate3d(0, 22px, 0) scale3d(0.97, 0.97, 1);
+                opacity: 0;
+            }
+
+            100% {
+                -webkit-transform: translate3d(0, 0, 0) scale3d(1, 1, 1);
+                transform: translate3d(0, 0, 0) scale3d(1, 1, 1);
                 opacity: 1;
             }
         }
 
         @keyframes tabLiftUp {
             0% {
-                transform: translate3d(0, 22px, 0) scale(0.97);
+                -webkit-transform: translate3d(0, 22px, 0) scale3d(0.97, 0.97, 1);
+                transform: translate3d(0, 22px, 0) scale3d(0.97, 0.97, 1);
                 opacity: 0;
             }
 
             100% {
-                transform: translate3d(0, 0, 0) scale(1);
+                -webkit-transform: translate3d(0, 0, 0) scale3d(1, 1, 1);
+                transform: translate3d(0, 0, 0) scale3d(1, 1, 1);
                 opacity: 1;
             }
         }
 
         .animate-slide-right {
+            -webkit-animation: tabSlideForward 0.34s cubic-bezier(0.22, 1, 0.36, 1) both;
             animation: tabSlideForward 0.34s cubic-bezier(0.22, 1, 0.36, 1) both;
+            -webkit-backface-visibility: hidden;
+            backface-visibility: hidden;
         }
 
         .animate-slide-left {
+            -webkit-animation: tabSlideBackward 0.34s cubic-bezier(0.22, 1, 0.36, 1) both;
             animation: tabSlideBackward 0.34s cubic-bezier(0.22, 1, 0.36, 1) both;
+            -webkit-backface-visibility: hidden;
+            backface-visibility: hidden;
         }
 
         .animate-slide-up {
+            -webkit-animation: tabLiftUp 0.34s cubic-bezier(0.22, 1, 0.36, 1) both;
             animation: tabLiftUp 0.34s cubic-bezier(0.22, 1, 0.36, 1) both;
+            -webkit-backface-visibility: hidden;
+            backface-visibility: hidden;
         }
 
         @media (prefers-reduced-motion: reduce) {
@@ -427,6 +509,7 @@
             .animate-slide-left,
             .animate-slide-up,
             .animate-zoom-out-enter {
+                -webkit-animation: none !important;
                 animation: none !important;
             }
         }
@@ -481,11 +564,15 @@
             z-index: 0;
             pointer-events: none;
             will-change: transform, width;
-            transform: translateX(0);
+            -webkit-backface-visibility: hidden;
+            backface-visibility: hidden;
+            -webkit-transform: translate3d(0, 0, 0);
+            transform: translate3d(0, 0, 0);
             background: rgba(148, 163, 184, 0.26);
             border: 1px solid rgba(100, 116, 139, 0.24);
             box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.72), 0 2px 8px -2px rgba(15, 23, 42, 0.08);
-            transition: transform 0.44s cubic-bezier(0.25, 1.35, 0.45, 1), width 0.44s cubic-bezier(0.25, 1.35, 0.45, 1);
+            -webkit-transition: -webkit-transform 0.44s cubic-bezier(0.25, 1.35, 0.45, 1), transform 0.44s cubic-bezier(0.25, 1.35, 0.45, 1), width 0.44s cubic-bezier(0.25, 1.35, 0.45, 1);
+            transition: -webkit-transform 0.44s cubic-bezier(0.25, 1.35, 0.45, 1), transform 0.44s cubic-bezier(0.25, 1.35, 0.45, 1), width 0.44s cubic-bezier(0.25, 1.35, 0.45, 1);
         }
 
         .dark .liquid-bubble {
@@ -631,11 +718,15 @@
             z-index: 0;
             pointer-events: none;
             will-change: transform, width;
-            transform: translateX(0);
+            -webkit-backface-visibility: hidden;
+            backface-visibility: hidden;
+            -webkit-transform: translate3d(0, 0, 0);
+            transform: translate3d(0, 0, 0);
             background: linear-gradient(135deg, rgba(99, 102, 241, 0.12), rgba(255, 255, 255, 0.32));
             border: 1px solid rgba(99, 102, 241, 0.22);
             box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8), 0 3px 10px -2px rgba(79, 70, 229, 0.12);
-            transition: transform 0.44s cubic-bezier(0.25, 1.35, 0.45, 1), width 0.44s cubic-bezier(0.25, 1.35, 0.45, 1);
+            -webkit-transition: -webkit-transform 0.44s cubic-bezier(0.25, 1.35, 0.45, 1), transform 0.44s cubic-bezier(0.25, 1.35, 0.45, 1), width 0.44s cubic-bezier(0.25, 1.35, 0.45, 1);
+            transition: -webkit-transform 0.44s cubic-bezier(0.25, 1.35, 0.45, 1), transform 0.44s cubic-bezier(0.25, 1.35, 0.45, 1), width 0.44s cubic-bezier(0.25, 1.35, 0.45, 1);
         }
 
         .dark .liquid-sub-bubble {
@@ -2928,7 +3019,8 @@
                         btn.classList.add('is-active');
                         btn.setAttribute('aria-current', 'page');
                         bubble.style.width = `${btn.offsetWidth}px`;
-                        bubble.style.transform = `translateX(${btn.offsetLeft}px)`;
+                        bubble.style.webkitTransform = `translate3d(${btn.offsetLeft}px, 0, 0)`;
+                        bubble.style.transform = `translate3d(${btn.offsetLeft}px, 0, 0)`;
                     } else {
                         btn.classList.remove('is-active');
                         btn.removeAttribute('aria-current');
@@ -3024,417 +3116,11 @@
 
             if (shouldPlayZoomEntrance) triggerZoomOutEntrance();
             syncPersistentNavbar();
-            if (typeof syncHomeCategoryBubble === 'function') syncHomeCategoryBubble(false);
-            if (typeof syncUserFilterBubble === 'function') syncUserFilterBubble(false);
-            if (typeof syncFormCategoryBubble === 'function') syncFormCategoryBubble(false);
-            if (typeof syncAppearanceBubble === 'function') syncAppearanceBubble(false);
-        }
-
-        function fabButtonHtml() {
-            return `
-                <button onclick="openNewExpenseTab()" class="liquid-fab fixed sm:absolute bottom-28 right-5 z-40 w-14 h-14 rounded-full flex items-center justify-center text-xl hover:scale-105 active:scale-90 group" title="Add New Expense" aria-label="Add New Expense">
-                    <i class="fa-solid fa-plus transition-transform duration-300 group-hover:rotate-90"></i>
-                </button>
-            `;
-        }
-
-        window.renderApp = render;
-
-        function renderMainContentOnly() {
-            const main = document.getElementById('main-content');
-            if (!main) {
-                render();
-                return;
-            }
-            syncPersistentHeader();
-            const showPtr = isPtrAllowed();
-
-            main.innerHTML = `
-                ${showPtr ? `
-                <div id="ptr-container">
-                    <div class="ptr-pill">
-                        <i id="ptr-icon" class="fa-solid fa-arrow-down"></i>
-                        <span id="ptr-text">Pull to refresh</span>
-                    </div>
-                </div>` : ''}
-                ${renderActiveTabContent()}
-            `;
-
-            const fab = document.getElementById('add-fab-container');
-            if (fab) fab.innerHTML = state.activeTab !== 'add' ? fabButtonHtml() : '';
-            if (typeof syncHomeCategoryBubble === 'function') syncHomeCategoryBubble(false);
-            if (typeof syncUserFilterBubble === 'function') syncUserFilterBubble(false);
-            if (typeof syncFormCategoryBubble === 'function') syncFormCategoryBubble(false);
-            if (typeof syncAppearanceBubble === 'function') syncAppearanceBubble(false);
-        }
-
-        function renderLoginPage() {
-            return `
-                <div class="flex-1 overflow-y-auto no-scrollbar flex flex-col justify-center px-5 py-8 max-w-sm mx-auto w-full relative">
-                    <div class="text-center mb-6">
-                        <div class="w-12 h-12 flex items-center justify-center mx-auto mb-2 logo-container">
-                            <img src="https://clickfactoryphotography.com/wp-content/uploads/2022/04/crop-logo.gif" alt="Click Factory Logo" class="w-full h-full object-contain" onerror="this.src='https://placehold.co/40x40/4f46e5/ffffff?text=CF'">
-                        </div>
-                        <h2 class="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">Click Factory</h2>
-                        <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Expense Management Portal</p>
-                    </div>
-
-                    <div class="ios-glass-card py-8 px-6 border border-slate-200/80 dark:border-slate-800 shadow-lg shadow-slate-900/5 rounded-3xl space-y-5 w-full">
-                        <form onsubmit="handleLoginSubmit(event)" class="space-y-4">
-                            <div class="w-full">
-                                <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">Username</label>
-                                <div class="relative w-full">
-                                    <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400"><i class="fa-solid fa-user text-sm"></i></span>
-                                    <input type="text" id="login-username" required autocomplete="username" autocapitalize="none" placeholder="Enter username" class="w-full pl-10 pr-4 py-3.5 bg-slate-50/80 dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 text-slate-900 dark:text-white">
-                                </div>
-                            </div>
-
-                            <div class="w-full">
-                                <div class="flex items-center justify-between mb-1.5">
-                                    <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider">Password</label>
-                                    <button type="button" onclick="setAuthView('forgot')" class="text-xs text-indigo-600 dark:text-indigo-400 font-semibold hover:underline">Forgot Password?</button>
-                                </div>
-                                <div class="relative w-full">
-                                    <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400"><i class="fa-solid fa-lock text-sm"></i></span>
-                                    <input type="password" id="login-password" required autocomplete="current-password" placeholder="••••••••" class="w-full pl-10 pr-12 py-3.5 bg-slate-50/80 dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 text-slate-900 dark:text-white">
-                                    <button type="button" onclick="togglePasswordVisibility('login-password', 'toggle-login-pass-icon')" class="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 focus:outline-none">
-                                        <i id="toggle-login-pass-icon" class="fa-solid fa-eye text-sm"></i>
-                                    </button>
-                                </div>
-                            </div>
-
-                            <button type="submit" class="w-full py-3.5 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 text-white font-semibold rounded-2xl shadow-lg shadow-indigo-500/25 transition text-sm flex items-center justify-center space-x-2">
-                                <i class="fa-solid fa-right-to-bracket"></i>
-                                <span>Sign In</span>
-                            </button>
-                        </form>
-                    </div>
-                </div>
-            `;
-        }
-
-        function syncAppearanceUI() {
-            const labelEl = document.getElementById('appearance-mode-label');
-            if (labelEl) {
-                labelEl.textContent = state.themeMode === 'system'
-                    ? `System (${state.darkMode ? 'Dark' : 'Light'})`
-                    : state.themeMode;
-            }
-            syncAppearanceBubble(true);
-        }
-
-        function syncAppearanceBubble(animate = true) {
-            const dock = document.getElementById('appearance-sub-dock');
-            const bubble = document.getElementById('appearance-sub-bubble');
-            const activeBtn = document.getElementById(`theme-btn-${state.themeMode}`);
-            if (!dock || !bubble || !activeBtn) return;
-
-            if (!animate) bubble.style.transition = 'none';
-            bubble.style.width = `${activeBtn.offsetWidth}px`;
-            bubble.style.transform = `translateX(${activeBtn.offsetLeft}px)`;
-
-            dock.querySelectorAll('.liquid-sub-btn').forEach(btn => {
-                const isActive = btn.id === activeBtn.id;
-                btn.classList.toggle('is-active', isActive);
-                btn.setAttribute('aria-selected', String(isActive));
-            });
-
-            if (!animate) {
-                requestAnimationFrame(() => {
-                    bubble.style.transition = '';
-                });
-            }
-        }
-
-        function setThemeMode(mode) {
-            if (state.themeMode === mode) {
-                syncAppearanceBubble(true);
-                return;
-            }
-            const dock = document.getElementById('appearance-sub-dock');
-            const bubble = document.getElementById('appearance-sub-bubble');
-            const prevLeft = bubble ? bubble.style.transform : '';
-            const prevWidth = bubble ? bubble.style.width : '';
-
-            state.themeMode = mode;
-            lsSet(THEME_STORAGE_KEY, mode);
-            applyTheme();
-
-            const labelEl = document.getElementById('appearance-mode-label');
-            if (labelEl) {
-                labelEl.textContent = state.themeMode === 'system'
-                    ? `System (${state.darkMode ? 'Dark' : 'Light'})`
-                    : state.themeMode;
-            }
-
-            if (dock && bubble) {
-                const targetBtn = document.getElementById(`theme-btn-${mode}`);
-                if (targetBtn) {
-                    if (prevLeft && prevWidth) {
-                        bubble.style.transition = 'none';
-                        bubble.style.width = prevWidth;
-                        bubble.style.transform = prevLeft;
-                        void bubble.offsetWidth;
-                        bubble.style.transition = '';
-                    }
-                    requestAnimationFrame(() => {
-                        bubble.style.width = `${targetBtn.offsetWidth}px`;
-                        bubble.style.transform = `translateX(${targetBtn.offsetLeft}px)`;
-                    });
-                    dock.querySelectorAll('.liquid-sub-btn').forEach(btn => {
-                        const isActive = btn.id === targetBtn.id;
-                        btn.classList.toggle('is-active', isActive);
-                        btn.setAttribute('aria-selected', String(isActive));
-                    });
-                }
-            }
-
-            const label = mode === 'system' ? 'System Auto' : (mode === 'dark' ? 'Dark Mode' : 'Light Mode');
-            showToast(`Theme set to ${label}`, 'info');
-        }
-
-        function pwField(id, iconId, label, placeholder) {
-            return `
-                <div class="w-full">
-                    <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">${label}</label>
-                    <div class="relative w-full">
-                        <input type="password" id="${id}" required placeholder="${placeholder}" class="w-full pl-4 pr-12 py-3.5 bg-slate-50/80 dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 text-slate-900 dark:text-white">
-                        <button type="button" onclick="togglePasswordVisibility('${id}', '${iconId}')" class="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 focus:outline-none">
-                            <i id="${iconId}" class="fa-solid fa-eye text-sm"></i>
-                        </button>
-                    </div>
-                </div>
-            `;
-        }
-
-        function renderForgotPasswordPage() {
-            return `
-                <div class="flex-1 overflow-y-auto no-scrollbar flex flex-col justify-center px-5 py-8 max-w-sm mx-auto w-full">
-                    <div class="text-center mb-6">
-                        <div class="w-12 h-12 bg-indigo-50 dark:bg-indigo-950/60 rounded-2xl flex items-center justify-center mx-auto mb-4 text-indigo-600 dark:text-indigo-400 text-xl shadow-sm border border-indigo-200 dark:border-indigo-800">
-                            <i class="fa-solid fa-key"></i>
-                        </div>
-                        <h2 class="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">Password Recovery</h2>
-                        <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Request a recovery code from Admin</p>
-                    </div>
-
-                    <div class="ios-glass-card py-8 px-6 border border-slate-200/80 dark:border-slate-800 shadow-lg shadow-slate-900/5 rounded-3xl space-y-4 w-full">
-                        <form onsubmit="handleForgotPasswordSubmit(event)" class="space-y-4">
-                            <div class="w-full">
-                                <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">Username</label>
-                                <input type="text" id="forgot-username" required placeholder="Enter your username" class="w-full px-4 py-3.5 bg-slate-50/80 dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 text-slate-900 dark:text-white">
-                            </div>
-
-                            <div class="w-full">
-                                <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">Admin Auth Code (6-digit)</label>
-                                <input type="text" id="forgot-auth-code" maxlength="6" placeholder="Enter code provided by Admin" class="w-full px-4 py-3.5 bg-slate-50/80 dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700 rounded-2xl text-sm tracking-widest text-center font-bold focus:outline-none focus:ring-2 focus:ring-indigo-500 text-slate-900 dark:text-white">
-                            </div>
-
-                            ${pwField('forgot-new-password', 'toggle-forgot-pass-icon', 'New Password', 'Enter new password')}
-                            ${pwField('forgot-confirm-password', 'toggle-forgot-confirm-pass-icon', 'Confirm New Password', 'Re-enter new password')}
-
-                            <div class="flex flex-col gap-2.5 pt-1 w-full">
-                                <button type="button" onclick="requestAdminAuthCode()" class="w-full py-3 bg-slate-100/90 dark:bg-slate-800/90 hover:bg-slate-200 text-indigo-600 dark:text-indigo-400 font-semibold rounded-2xl transition text-xs border border-slate-200/80 dark:border-slate-700">
-                                    <i class="fa-solid fa-paper-plane mr-1.5"></i> Request Code from Admin
-                                </button>
-                                <button type="submit" class="w-full py-3.5 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-2xl shadow-lg shadow-indigo-500/25 transition text-sm">
-                                    Reset Password with Code
-                                </button>
-                            </div>
-                        </form>
-
-                        <div class="text-center pt-2">
-                            <button type="button" onclick="setAuthView('login')" class="text-xs font-semibold text-indigo-600 dark:text-indigo-400 hover:underline">
-                                <i class="fa-solid fa-arrow-left mr-1"></i> Back to Sign In
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            `;
-        }
-
-        function setAuthView(view) {
-            state.authView = view;
-            render();
-        }
-
-        async function requestAdminAuthCode() {
-            const usernameInput = document.getElementById('forgot-username');
-            const username = usernameInput ? usernameInput.value.trim().toLowerCase() : '';
-            if (!username) {
-                showToast('Please enter your username first.', 'error');
-                return;
-            }
-
-            const user = state.users.find(u => u.username.toLowerCase() === username);
-            if (!user) {
-                showToast('Username not found in system.', 'error');
-                return;
-            }
-
-            try {
-                const existingReq = state.passwordRequests.find(r => r.username.toLowerCase() === username && r.status === 'pending');
-                const arr = new Uint32Array(1);
-                crypto.getRandomValues(arr);
-                const code = existingReq ? existingReq.code : String(100000 + (arr[0] % 900000));
-                const reqId = existingReq ? existingReq.id : 'req_' + Date.now();
-
-                const { db, doc, setDoc } = window.FB;
-                await setDoc(doc(db, 'passwordRequests', reqId), {
-                    id: reqId,
-                    username: user.username,
-                    name: user.name,
-                    code: code,
-                    status: 'pending',
-                    createdAt: existingReq ? existingReq.createdAt : new Date().toISOString()
-                });
-                showToast('Code requested successfully! Contact Admin for your 6-digit code.', 'success');
-            } catch (err) {
-                showToast('Could not send request. Check your connection.', 'error');
-            }
-        }
-
-        async function handleForgotPasswordSubmit(e) {
-            e.preventDefault();
-            const username = document.getElementById('forgot-username').value.trim().toLowerCase();
-            const authCode = document.getElementById('forgot-auth-code').value.trim();
-            const newPassword = document.getElementById('forgot-new-password').value;
-            const confirmPassword = document.getElementById('forgot-confirm-password').value;
-
-            const user = state.users.find(u => u.username.toLowerCase() === username);
-            if (!user) {
-                showToast('Username not found.', 'error');
-                return;
-            }
-
-            const req = state.passwordRequests.find(r => r.username.toLowerCase() === username && r.status === 'pending');
-            if (!req || req.code !== authCode) {
-                showToast('Invalid or unapproved code.', 'error');
-                return;
-            }
-
-            if (!newPassword || newPassword.length < 4) {
-                showToast('Password must be at least 4 characters.', 'error');
-                return;
-            }
-
-            if (newPassword !== confirmPassword) {
-                showToast('Passwords do not match.', 'error');
-                return;
-            }
-
-            try {
-                const { db, doc, updateDoc } = window.FB;
-                await updateDoc(doc(db, 'users', user.id), { password: newPassword });
-                await updateDoc(doc(db, 'passwordRequests', req.id), { status: 'approved' });
-                showToast('Password reset successfully! Please sign in.', 'success');
-                setAuthView('login');
-            } catch (err) {
-                showToast('Password reset failed. Try again.', 'error');
-            }
-        }
-
-        function handleLoginSubmit(e) {
-            e.preventDefault();
-            try {
-                const userEl = document.getElementById('login-username');
-                const passEl = document.getElementById('login-password');
-                const username = (userEl ? userEl.value : '').trim().toLowerCase();
-                const password = (passEl ? passEl.value : '').trim();
-
-                if (!username || !password) {
-                    showToast('Please enter username and password.', 'error');
-                    return;
-                }
-
-                DEFAULT_SEED_USERS.forEach(seed => {
-                    if (!state.users.some(u => u.username && u.username.toLowerCase() === seed.username)) {
-                        state.users.push({ ...seed });
-                    }
-                });
-
-                const foundUser = state.users.find(u =>
-                    (u.username || '').trim().toLowerCase() === username &&
-                    String(u.password || '').trim() === password
-                );
-
-                if (foundUser) {
-                    state.currentUser = foundUser;
-                    state.activeTab = 'home';
-                    state.justFinishedLoading = true;
-                    persistCurrentUser(foundUser);
-                    if ('Notification' in window && Notification.permission === 'default') {
-                        Notification.requestPermission().catch(() => { });
-                    }
-                    showToast(`Welcome back, ${foundUser.name}!`, 'success');
-                    render();
-                } else {
-                    showToast('Invalid username or password.', 'error');
-                }
-            } catch (err) {
-                console.error('Login error:', err);
-                showToast('Sign in failed. Please try again.', 'error');
-            }
-        }
-
-        function confirmLogout() {
-            showConfirmModal(
-                'Sign Out',
-                'Are you sure you want to sign out from your account?',
-                () => handleLogout()
-            );
-        }
-
-        function handleLogout() {
-            state.currentUser = null;
-            state.tempFormCache = null;
-            clearPersistedUser();
-            showToast('Logged out successfully.', 'info');
-            render();
-        }
-
-        function renderActiveTabContent() {
-            const isAdmin = isAdminOrDev(state.currentUser);
-            switch (state.activeTab) {
-                case 'home': return renderHomeTab();
-                case 'add': return renderAddEditTab();
-                case 'notifications': return renderNotificationsTab();
-                case 'admin': return isAdmin ? renderAdminTab() : renderHomeTab();
-                case 'recycle': return isAdmin ? renderRecycleBinTab() : renderHomeTab();
-                case 'userRecycle': return isAdmin ? renderUserRecycleBinTab() : renderHomeTab();
-                case 'requests': return isAdmin ? renderPasswordRequestsTab() : renderHomeTab();
-                case 'users': return isAdmin ? renderUserManagementTab() : renderUserWalletTab();
-                case 'wallet': return renderUserWalletTab();
-                case 'analytics': return renderUserAnalyticsTab();
-                case 'profile': return renderProfileTab();
-                default: return renderHomeTab();
-            }
-        }
-
-        function toggleDateFilter() {
-            state.showDateFilter = !state.showDateFilter;
-            renderMainContentOnly();
-        }
-
-        function getFilteredExpenses() {
-            const isAdmin = isAdminOrDev(state.currentUser);
-            return state.expenses.filter(exp => {
-                if (!isAdmin && exp.userId !== state.currentUser.id) return false;
-                if (isAdmin && state.filterUser !== 'All' && exp.userId !== state.filterUser) return false;
-                if (state.filterCategory !== 'All' && exp.category !== state.filterCategory) return false;
-                if (state.filterMonth !== 'All' && !(exp.date || '').startsWith(state.filterMonth)) return false;
-                if (state.filterStartDate && exp.date < state.filterStartDate) return false;
-                if (state.filterEndDate && exp.date > state.filterEndDate) return false;
-
-                if (state.searchQuery.trim() !== '') {
-                    const q = state.searchQuery.toLowerCase();
-                    const matchTitle = (exp.title || '').toLowerCase().includes(q);
-                    const matchNotes = exp.notes && exp.notes.toLowerCase().includes(q);
-                    const matchUser = (exp.userName || '').toLowerCase().includes(q);
-                    const matchClient = exp.clientNamePlace && exp.clientNamePlace.toLowerCase().includes(q);
-                    if (!matchTitle && !matchNotes && !matchUser && !matchClient) return false;
-                }
-                return true;
+            requestAnimationFrame(() => {
+                if (typeof syncHomeCategoryBubble === 'function') syncHomeCategoryBubble(false);
+                if (typeof syncUserFilterBubble === 'function') syncUserFilterBubble(false);
+                if (typeof syncFormCategoryBubble === 'function') syncFormCategoryBubble(false);
+                if (typeof syncAppearanceBubble === 'function') syncAppearanceBubble(false);
             });
         }
 
@@ -4027,22 +3713,124 @@
             navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' }, audio: false })
                 .then(stream => {
                     window.activeCameraStream = stream;
-                    const v = document.getElementById('camera-stream');
-                    if (v) v.srcObject = stream; else stream.getTracks().forEach(t => t.stop());
+                    const videoEl = document.getElementById('camera-stream');
+                    if (videoEl) videoEl.srcObject = stream;
                 })
                 .catch(() => {
-                    showToast('Unable to access device camera.', 'error');
+                    showToast('Unable to access camera.', 'error');
                     closeModal();
                 });
         }
 
         function takeSnapshot() {
-            const videoElement = document.getElementById('camera-stream');
-            if (!videoElement) return;
-            state.tempBillData = resizeImageToDataUrl(videoElement, videoElement.videoWidth || 640, videoElement.videoHeight || 480);
+            const video = document.getElementById('camera-stream');
+            const canvas = document.getElementById('camera-canvas');
+            if (!video || !canvas) return;
+            const w = video.videoWidth || 640;
+            const h = video.videoHeight || 480;
+            state.tempBillData = resizeImageToDataUrl(video, w, h);
             closeModal();
-            showToast('Bill captured!', 'success');
+            showToast('Bill photo captured!', 'success');
             renderMainContentOnly();
+        }
+
+        function renderMainContentOnly() {
+            const main = document.getElementById('main-content');
+            if (main) {
+                const top = main.scrollTop;
+                const showPtr = isPtrAllowed();
+                main.innerHTML = `
+                    ${showPtr ? `
+                    <div id="ptr-container">
+                        <div class="ptr-pill">
+                            <i id="ptr-icon" class="fa-solid fa-arrow-down"></i>
+                            <span id="ptr-text">Pull to refresh</span>
+                        </div>
+                    </div>` : ''}
+                    ${renderActiveTabContent()}
+                `;
+                main.scrollTop = top;
+            }
+            const fab = document.getElementById('add-fab-container');
+            if (fab) fab.innerHTML = state.activeTab !== 'add' ? fabButtonHtml() : '';
+            requestAnimationFrame(() => {
+                if (typeof syncHomeCategoryBubble === 'function') syncHomeCategoryBubble(false);
+                if (typeof syncUserFilterBubble === 'function') syncUserFilterBubble(false);
+                if (typeof syncFormCategoryBubble === 'function') syncFormCategoryBubble(false);
+                if (typeof syncAppearanceBubble === 'function') syncAppearanceBubble(false);
+            });
+        }
+        function syncAppearanceBubble(animate = true) {
+            const dock = document.getElementById('appearance-sub-dock');
+            const bubble = document.getElementById('appearance-sub-bubble');
+            const activeBtn = document.getElementById(`theme-btn-${state.themeMode}`);
+            if (!dock || !bubble || !activeBtn) return;
+
+            if (!animate) bubble.style.transition = 'none';
+            bubble.style.width = `${activeBtn.offsetWidth}px`;
+            bubble.style.webkitTransform = `translate3d(${activeBtn.offsetLeft}px, 0, 0)`;
+            bubble.style.transform = `translate3d(${activeBtn.offsetLeft}px, 0, 0)`;
+
+            dock.querySelectorAll('.liquid-sub-btn').forEach(btn => {
+                const isActive = btn.id === activeBtn.id;
+                btn.classList.toggle('is-active', isActive);
+                btn.setAttribute('aria-selected', String(isActive));
+            });
+
+            if (!animate) {
+                requestAnimationFrame(() => {
+                    bubble.style.transition = '';
+                });
+            }
+        }
+
+        function setThemeMode(mode) {
+            if (state.themeMode === mode) {
+                syncAppearanceBubble(true);
+                return;
+            }
+            const dock = document.getElementById('appearance-sub-dock');
+            const bubble = document.getElementById('appearance-sub-bubble');
+            const prevLeft = bubble ? bubble.style.transform : '';
+            const prevWidth = bubble ? bubble.style.width : '';
+
+            state.themeMode = mode;
+            lsSet(THEME_STORAGE_KEY, mode);
+            applyTheme();
+
+            const labelEl = document.getElementById('appearance-mode-label');
+            if (labelEl) {
+                labelEl.textContent = state.themeMode === 'system'
+                    ? `System (${state.darkMode ? 'Dark' : 'Light'})`
+                    : state.themeMode;
+            }
+
+            if (dock && bubble) {
+                const targetBtn = document.getElementById(`theme-btn-${mode}`);
+                if (targetBtn) {
+                    if (prevLeft && prevWidth) {
+                        bubble.style.transition = 'none';
+                        bubble.style.width = prevWidth;
+                        bubble.style.webkitTransform = prevLeft;
+                        bubble.style.transform = prevLeft;
+                        void bubble.offsetWidth;
+                        bubble.style.transition = '';
+                    }
+                    requestAnimationFrame(() => {
+                        bubble.style.width = `${targetBtn.offsetWidth}px`;
+                        bubble.style.webkitTransform = `translate3d(${targetBtn.offsetLeft}px, 0, 0)`;
+                        bubble.style.transform = `translate3d(${targetBtn.offsetLeft}px, 0, 0)`;
+                    });
+                    dock.querySelectorAll('.liquid-sub-btn').forEach(btn => {
+                        const isActive = btn.id === targetBtn.id;
+                        btn.classList.toggle('is-active', isActive);
+                        btn.setAttribute('aria-selected', String(isActive));
+                    });
+                }
+            }
+
+            const label = mode === 'system' ? 'System Auto' : (mode === 'dark' ? 'Dark Mode' : 'Light Mode');
+            showToast(`Theme set to ${label}`, 'info');
         }
 
         function removeBillAttachment(event) {
@@ -4663,21 +4451,26 @@
                         ${state.passwordRequests.map(req => {
                 const isPending = req.status === 'pending';
                 return `
-                                <div class="ios-glass-card rounded-2xl py-5 px-5 sm:px-6 shadow-sm flex items-center justify-between gap-3 w-full mt-3">
-                                    <div class="space-y-1 min-w-0 flex-1">
-                                        <div class="flex items-center space-x-2 truncate">
-                                            <h4 class="font-semibold text-sm text-slate-900 dark:text-white truncate">${escapeHtml(req.name)}</h4>
-                                            <span class="text-xs text-slate-400 shrink-0">(@${escapeHtml(req.username)})</span>
+                                <div class="ios-glass-card rounded-3xl p-5 shadow-sm space-y-3 w-full mt-3">
+                                    <div class="flex items-start justify-between gap-2">
+                                        <div class="min-w-0 flex-1">
+                                            <h4 class="font-semibold text-sm text-slate-900 dark:text-white truncate">${escapeHtml(req.userName)} (@${escapeHtml(req.username)})</h4>
+                                            <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">${formatTimestamp(req.requestedAt)}</p>
                                         </div>
-                                        <div class="flex items-center space-x-2 truncate">
-                                            <span class="text-xs text-slate-500 shrink-0">Code:</span>
-                                            <span class="px-2.5 py-0.5 bg-indigo-50 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-400 font-mono font-bold text-sm tracking-widest rounded-xl border border-indigo-200/50">${escapeHtml(req.code)}</span>
+                                        <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase ${isPending ? 'bg-amber-500/15 text-amber-600' : 'bg-emerald-500/15 text-emerald-600'}">
+                                            ${escapeHtml(req.status)}
+                                        </span>
+                                    </div>
+                                    <div class="bg-slate-50/90 dark:bg-slate-800/70 p-3 rounded-2xl border border-slate-200/70 dark:border-slate-700/70 flex items-center justify-between">
+                                        <span class="text-xs text-slate-500">Verification Code:</span>
+                                        <span class="font-mono font-bold text-base tracking-widest text-indigo-600 dark:text-indigo-400">${escapeHtml(req.code)}</span>
+                                    </div>
+                                    ${isPending ? `
+                                        <div class="grid grid-cols-2 gap-2 pt-1">
+                                            <button onclick="approvePasswordReset('${req.id}')" class="py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-semibold transition">Approve Reset</button>
+                                            <button onclick="dismissPasswordRequest('${req.id}')" class="py-2.5 bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded-xl text-xs font-semibold transition">Dismiss</button>
                                         </div>
-                                    </div>
-                                    <div class="flex items-center space-x-2 shrink-0">
-                                        <span class="px-3 py-1 rounded-full text-xs font-semibold ${isPending ? 'bg-amber-500/10 text-amber-600' : 'bg-emerald-500/10 text-emerald-600'}">${isPending ? 'Pending' : 'Approved'}</span>
-                                        ${isPending ? `<button onclick="dismissRequest('${req.id}')" class="w-8 h-8 rounded-xl bg-slate-100/90 dark:bg-slate-800 text-slate-400 hover:text-rose-600 flex items-center justify-center text-xs" title="Dismiss"><i class="fa-solid fa-xmark"></i></button>` : ''}
-                                    </div>
+                                    ` : ''}
                                 </div>
                             `;
             }).join('')}
@@ -4686,25 +4479,215 @@
             `;
         }
 
-        async function dismissRequest(reqId) {
+        async function approvePasswordReset(reqId) {
+            const req = state.passwordRequests.find(r => r.id === reqId);
+            if (!req) return;
+            const { db, doc, updateDoc } = window.FB;
+            try {
+                await updateDoc(doc(db, 'users', req.userId), { password: req.newPassword || 'password123' });
+                await updateDoc(doc(db, 'passwordRequests', reqId), { status: 'approved' });
+                showToast(`Password reset approved for ${req.userName}.`, 'success');
+            } catch (err) {
+                showToast('Failed to approve reset.', 'error');
+            }
+        }
+
+        async function dismissPasswordRequest(reqId) {
             const { db, doc, deleteDoc } = window.FB;
             try {
                 await deleteDoc(doc(db, 'passwordRequests', reqId));
                 showToast('Request dismissed.', 'info');
-            } catch (e) {
-                showToast('Failed to dismiss request.', 'error');
+            } catch (err) { }
+        }
+
+        function getFilteredExpenses() {
+            const isAdmin = isAdminOrDev(state.currentUser);
+            const q = (state.searchQuery || '').toLowerCase().trim();
+            return state.expenses.filter(exp => {
+                if (!isAdmin && exp.userId !== state.currentUser.id) return false;
+                if (isAdmin && state.filterUser !== 'All' && exp.userId !== state.filterUser) return false;
+                if (state.filterCategory !== 'All' && exp.category !== state.filterCategory) return false;
+                if (state.filterMonth !== 'All' && (!exp.date || !exp.date.startsWith(state.filterMonth))) return false;
+                if (state.filterStartDate && exp.date && exp.date < state.filterStartDate) return false;
+                if (state.filterEndDate && exp.date && exp.date > state.filterEndDate) return false;
+                if (q) {
+                    const hay = `${exp.title || ''} ${exp.notes || ''} ${exp.clientNamePlace || ''} ${exp.userName || ''} ${exp.category || ''}`.toLowerCase();
+                    if (!hay.includes(q)) return false;
+                }
+                return true;
+            });
+        }
+
+        function toggleDateFilter() {
+            state.showDateFilter = !state.showDateFilter;
+            renderMainContentOnly();
+        }
+
+        function fabButtonHtml() {
+            return `
+                <button type="button" onclick="openNewExpenseTab()" class="liquid-fab fixed bottom-[98px] right-5 sm:right-8 z-30 w-14 h-14 rounded-full flex items-center justify-center text-xl shadow-xl active:scale-90" title="Add New Expense" aria-label="Add New Expense">
+                    <i class="fa-solid fa-plus"></i>
+                </button>
+            `;
+        }
+
+        function renderActiveTabContent() {
+            switch (state.activeTab) {
+                case 'home': return renderHomeTab();
+                case 'add': return renderAddEditTab();
+                case 'notifications': return renderNotificationsTab();
+                case 'admin': return renderAdminTab();
+                case 'analytics': return renderUserAnalyticsTab();
+                case 'users': return renderUserManagementTab();
+                case 'wallet': return renderUserWalletTab();
+                case 'profile': return renderProfileTab();
+                case 'recycle': return renderRecycleBinTab();
+                case 'userRecycle': return renderUserRecycleBinTab();
+                case 'requests': return renderPasswordRequestsTab();
+                default: return renderHomeTab();
             }
         }
 
-        function syncUserFilterBubble(animate = true) {
-            const dock = document.getElementById('user-sub-dock');
-            const bubble = document.getElementById('user-sub-bubble');
-            const activeBtn = document.getElementById(`user-sub-btn-${state.userFilterTab}`);
+        function renderLoginPage() {
+            const inputCls = 'w-full pl-10 pr-4 py-3.5 liquid-input rounded-2xl text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500';
+            return `
+                <div class="flex-1 overflow-y-auto no-scrollbar flex flex-col items-center justify-center px-5 py-8 max-w-md mx-auto w-full animate-fadeIn">
+                    <div class="ios-glass-card rounded-3xl p-7 sm:p-8 shadow-2xl w-full space-y-6">
+                        <div class="text-center space-y-2">
+                            <div class="w-16 h-16 flex items-center justify-center mx-auto overflow-hidden logo-container">
+                                <img src="https://clickfactoryphotography.com/wp-content/uploads/2022/04/crop-logo.gif" alt="Click Factory Logo" class="w-full h-full object-contain" onerror="this.src='https://placehold.co/64x64/4f46e5/ffffff?text=CF'">
+                            </div>
+                            <h1 class="text-xl font-bold text-slate-900 dark:text-white tracking-tight">Click Factory</h1>
+                            <p class="text-xs text-slate-500 dark:text-slate-400">Sign in to manage studio expenses</p>
+                        </div>
+
+                        <form onsubmit="handleLoginSubmit(event)" class="space-y-4">
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">Username</label>
+                                <div class="relative">
+                                    <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400"><i class="fa-solid fa-user text-xs"></i></span>
+                                    <input type="text" id="login-username" required autocomplete="username" placeholder="Enter username" class="${inputCls}">
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">Password</label>
+                                <div class="relative">
+                                    <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400"><i class="fa-solid fa-lock text-xs"></i></span>
+                                    <input type="password" id="login-password" required autocomplete="current-password" placeholder="••••••••" class="w-full pl-10 pr-12 py-3.5 liquid-input rounded-2xl text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                                    <button type="button" onclick="togglePasswordVisibility('login-password', 'login-eye-icon')" class="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-600"><i id="login-eye-icon" class="fa-solid fa-eye text-sm"></i></button>
+                                </div>
+                            </div>
+                            <div class="flex justify-end">
+                                <button type="button" onclick="state.authView = 'forgot'; render();" class="text-xs font-semibold text-indigo-600 dark:text-indigo-400 hover:underline">Forgot Password?</button>
+                            </div>
+                            <button type="submit" class="w-full py-3.5 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 text-white font-semibold rounded-2xl shadow-lg shadow-indigo-500/25 transition text-sm">
+                                Sign In
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderForgotPasswordPage() {
+            const inputCls = 'w-full px-4 py-3.5 liquid-input rounded-2xl text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500';
+            return `
+                <div class="flex-1 overflow-y-auto no-scrollbar flex flex-col items-center justify-center px-5 py-8 max-w-md mx-auto w-full animate-fadeIn">
+                    <div class="ios-glass-card rounded-3xl p-7 sm:p-8 shadow-2xl w-full space-y-5">
+                        <div class="flex items-center gap-3">
+                            <button type="button" onclick="state.authView = 'login'; render();" class="w-9 h-9 rounded-2xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-600 dark:text-slate-300"><i class="fa-solid fa-arrow-left text-xs"></i></button>
+                            <div>
+                                <h2 class="text-base font-bold text-slate-900 dark:text-white">Reset Password</h2>
+                                <p class="text-[11px] text-slate-500">Request a reset code for admin approval</p>
+                            </div>
+                        </div>
+                        <form onsubmit="handleForgotPasswordSubmit(event)" class="space-y-4">
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">Username</label>
+                                <input type="text" id="forgot-username" required placeholder="Enter your username" class="${inputCls}">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">New Desired Password</label>
+                                <input type="password" id="forgot-new-password" required minlength="4" placeholder="••••••••" class="${inputCls}">
+                            </div>
+                            <button type="submit" class="w-full py-3.5 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-2xl shadow-md transition text-sm">Submit Reset Request</button>
+                        </form>
+                    </div>
+                </div>
+            `;
+        }
+
+        function handleLoginSubmit(e) {
+            e.preventDefault();
+            const username = (document.getElementById('login-username').value || '').trim().toLowerCase();
+            const password = document.getElementById('login-password').value;
+            const user = state.users.find(u => u.username && u.username.toLowerCase() === username && u.password === password);
+            if (!user) {
+                showToast('Invalid username or password.', 'error');
+                return;
+            }
+            state.currentUser = user;
+            state.activeTab = 'home';
+            persistCurrentUser(user);
+            showToast(`Welcome back, ${user.name}!`, 'success');
+            render();
+        }
+
+        async function handleForgotPasswordSubmit(e) {
+            e.preventDefault();
+            const username = (document.getElementById('forgot-username').value || '').trim().toLowerCase();
+            const newPassword = document.getElementById('forgot-new-password').value;
+            const user = state.users.find(u => u.username && u.username.toLowerCase() === username);
+            if (!user) {
+                showToast('Username not found.', 'error');
+                return;
+            }
+            const reqId = 'req_' + Date.now();
+            const code = String(Math.floor(100000 + Math.random() * 900000));
+            const { db, doc, setDoc } = window.FB;
+            try {
+                await setDoc(doc(db, 'passwordRequests', reqId), {
+                    id: reqId,
+                    userId: user.id,
+                    userName: user.name,
+                    username: user.username,
+                    newPassword,
+                    code,
+                    status: 'pending',
+                    requestedAt: new Date().toISOString()
+                });
+                state.authView = 'login';
+                showToast(`Reset request sent! Code: ${code}`, 'success');
+                render();
+            } catch (err) {
+                showToast('Failed to submit request.', 'error');
+            }
+        }
+
+        function confirmLogout() {
+            showConfirmModal('Sign Out', 'Are you sure you want to sign out of your account?', () => handleLogout());
+        }
+
+        function handleLogout() {
+            state.currentUser = null;
+            state.tempFormCache = null;
+            state.editingExpenseId = null;
+            state.tempBillData = null;
+            clearPersistedUser();
+            showToast('Signed out successfully.', 'info');
+            render();
+        }
+
+        function syncHomeCategoryBubble(animate = true) {
+            const dock = document.getElementById('home-cat-dock');
+            const bubble = document.getElementById('home-cat-bubble');
+            const activeBtn = document.getElementById(`home-cat-btn-${state.filterCategory}`);
             if (!dock || !bubble || !activeBtn) return;
 
             if (!animate) bubble.style.transition = 'none';
             bubble.style.width = `${activeBtn.offsetWidth}px`;
-            bubble.style.transform = `translateX(${activeBtn.offsetLeft}px)`;
+            bubble.style.webkitTransform = `translate3d(${activeBtn.offsetLeft}px, 0, 0)`;
+            bubble.style.transform = `translate3d(${activeBtn.offsetLeft}px, 0, 0)`;
 
             dock.querySelectorAll('.liquid-sub-btn').forEach(btn => {
                 const isActive = btn.id === activeBtn.id;
@@ -4719,33 +4702,61 @@
             }
         }
 
-        function setUserFilterTab(tab) {
-            if (state.userFilterTab === tab) {
-                syncUserFilterBubble(true);
+        function setFilterCategory(cat) {
+            if (state.filterCategory === cat) {
+                syncHomeCategoryBubble(true);
                 return;
             }
-            const dock = document.getElementById('user-sub-dock');
-            const bubble = document.getElementById('user-sub-bubble');
+            const dock = document.getElementById('home-cat-dock');
+            const bubble = document.getElementById('home-cat-bubble');
             const prevLeft = bubble ? bubble.style.transform : '';
             const prevWidth = bubble ? bubble.style.width : '';
 
-            state.userFilterTab = tab;
+            state.filterCategory = cat;
             renderMainContentOnly();
 
-            const newDock = document.getElementById('user-sub-dock');
-            const newBubble = document.getElementById('user-sub-bubble');
-            const targetBtn = document.getElementById(`user-sub-btn-${tab}`);
+            const newDock = document.getElementById('home-cat-dock');
+            const newBubble = document.getElementById('home-cat-bubble');
+            const targetBtn = document.getElementById(`home-cat-btn-${cat}`);
             if (newDock && newBubble && targetBtn) {
                 if (prevLeft && prevWidth) {
                     newBubble.style.transition = 'none';
                     newBubble.style.width = prevWidth;
+                    newBubble.style.webkitTransform = prevLeft;
                     newBubble.style.transform = prevLeft;
                     void newBubble.offsetWidth;
                     newBubble.style.transition = '';
                 }
                 requestAnimationFrame(() => {
                     newBubble.style.width = `${targetBtn.offsetWidth}px`;
-                    newBubble.style.transform = `translateX(${targetBtn.offsetLeft}px)`;
+                    newBubble.style.webkitTransform = `translate3d(${targetBtn.offsetLeft}px, 0, 0)`;
+                    newBubble.style.transform = `translate3d(${targetBtn.offsetLeft}px, 0, 0)`;
+                });
+            }
+        }
+
+        function syncFormCategoryBubble(animate = true) {
+            const dock = document.getElementById('form-category-dock');
+            const bubble = document.getElementById('form-category-bubble');
+            const catInput = document.getElementById('expense-category');
+            const currentCat = catInput ? catInput.value : 'Office';
+            const activeBtn = document.getElementById(`btn-cat-${currentCat.toLowerCase()}`);
+            if (!dock || !bubble || !activeBtn) return;
+
+            if (!animate) bubble.style.transition = 'none';
+            bubble.style.width = `${activeBtn.offsetWidth}px`;
+            bubble.style.webkitTransform = `translate3d(${activeBtn.offsetLeft}px, 0, 0)`;
+            bubble.style.transform = `translate3d(${activeBtn.offsetLeft}px, 0, 0)`;
+
+            dock.querySelectorAll('.liquid-sub-btn').forEach(btn => {
+                const isActive = btn.id === activeBtn.id;
+                btn.classList.toggle('is-active', isActive);
+                btn.setAttribute('aria-selected', String(isActive));
+            });
+
+            if (!animate) {
+                requestAnimationFrame(() => {
+                    bubble.style.transition = '';
                 });
             }
         }
@@ -4936,55 +4947,96 @@
                             <h3 class="font-bold text-base text-slate-900 dark:text-white">Edit User</h3>
                             <button onclick="closeModal()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark"></i></button>
                         </div>
-                        <form onsubmit="handleEditUser(event, '${user.id}')" class="space-y-3.5 w-full">
-                            <div class="w-full"><label class="${lbl}">Full Name</label><input type="text" id="edit-user-name" required value="${escapeHtml(user.name)}" class="${inputCls}"></div>
-                            <div class="w-full">
+                        <form onsubmit="handleEditUserSubmit(event, '${user.id}')" class="space-y-3.5 w-full">
+                            <div><label class="${lbl}">Full Name</label><input type="text" id="edit-user-name" value="${escapeHtml(user.name)}" required class="${inputCls}"></div>
+                            <div><label class="${lbl}">Reset Password (Optional)</label><input type="password" id="edit-user-password" placeholder="Leave blank to keep current" class="${inputCls}"></div>
+                            <div>
                                 <label class="${lbl}">Role</label>
                                 <select id="edit-user-role" class="${inputCls}">
                                     <option value="user" ${user.role === 'user' ? 'selected' : ''}>Regular User</option>
                                     <option value="admin" ${user.role === 'admin' ? 'selected' : ''}>Administrator</option>
-                                    ${(isDev || user.role === 'developer') ? `<option value="developer" ${user.role === 'developer' ? 'selected' : ''}>Developer</option>` : ''}
+                                    ${isDev ? `<option value="developer" ${user.role === 'developer' ? 'selected' : ''}>Developer</option>` : ''}
                                 </select>
                             </div>
-                            <div class="pt-2 w-full"><button id="edit-user-submit-btn" type="submit" class="w-full py-3.5 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-2xl shadow-md transition text-sm">Save Changes</button></div>
+                            <button type="submit" class="w-full py-3.5 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-2xl shadow-md transition text-sm">Save Changes</button>
                         </form>
                     </div>
                 </div>
             `;
         }
 
-        async function handleEditUser(e, userId) {
+        async function handleEditUserSubmit(e, userId) {
             e.preventDefault();
-            const submitBtn = document.getElementById('edit-user-submit-btn');
-            if (submitBtn && submitBtn.disabled) return;
-
             const name = document.getElementById('edit-user-name').value.trim();
+            const newPass = document.getElementById('edit-user-password').value;
             const role = document.getElementById('edit-user-role').value;
-
-            const user = state.users.find(u => u.id === userId);
-            if (!user || !name) return;
-
-            if (isAdminOrDev(user) && !['admin', 'developer'].includes(role) && state.users.filter(u => isAdminOrDev(u)).length <= 1) {
-                showToast('At least one administrator is required.', 'error');
-                return;
-            }
-
-            if (submitBtn) submitBtn.disabled = true;
-
+            if (!name) return;
+            const updates = { name, role };
+            if (newPass && newPass.length >= 4) updates.password = newPass;
+            const { db, doc, updateDoc } = window.FB;
             try {
-                const { db, doc, updateDoc } = window.FB;
-                await updateDoc(doc(db, 'users', userId), { name, role });
-
-                if (state.currentUser.id === userId) {
-                    state.currentUser.name = name;
-                    state.currentUser.role = role;
-                    persistCurrentUser(state.currentUser);
-                }
+                await updateDoc(doc(db, 'users', userId), updates);
                 closeModal();
                 showToast('User updated successfully!', 'success');
             } catch (err) {
-                if (submitBtn) submitBtn.disabled = false;
                 showToast('Failed to update user.', 'error');
+            }
+        }
+
+        function syncUserFilterBubble(animate = true) {
+            const dock = document.getElementById('user-sub-dock');
+            const bubble = document.getElementById('user-sub-bubble');
+            const activeBtn = document.getElementById(`user-sub-btn-${state.userFilterTab}`);
+            if (!dock || !bubble || !activeBtn) return;
+
+            if (!animate) bubble.style.transition = 'none';
+            bubble.style.width = `${activeBtn.offsetWidth}px`;
+            bubble.style.webkitTransform = `translate3d(${activeBtn.offsetLeft}px, 0, 0)`;
+            bubble.style.transform = `translate3d(${activeBtn.offsetLeft}px, 0, 0)`;
+
+            dock.querySelectorAll('.liquid-sub-btn').forEach(btn => {
+                const isActive = btn.id === activeBtn.id;
+                btn.classList.toggle('is-active', isActive);
+                btn.setAttribute('aria-selected', String(isActive));
+            });
+
+            if (!animate) {
+                requestAnimationFrame(() => {
+                    bubble.style.transition = '';
+                });
+            }
+        }
+
+        function setUserFilterTab(tab) {
+            if (state.userFilterTab === tab) {
+                syncUserFilterBubble(true);
+                return;
+            }
+            const dock = document.getElementById('user-sub-dock');
+            const bubble = document.getElementById('user-sub-bubble');
+            const prevLeft = bubble ? bubble.style.transform : '';
+            const prevWidth = bubble ? bubble.style.width : '';
+
+            state.userFilterTab = tab;
+            renderMainContentOnly();
+
+            const newDock = document.getElementById('user-sub-dock');
+            const newBubble = document.getElementById('user-sub-bubble');
+            const targetBtn = document.getElementById(`user-sub-btn-${tab}`);
+            if (newDock && newBubble && targetBtn) {
+                if (prevLeft && prevWidth) {
+                    newBubble.style.transition = 'none';
+                    newBubble.style.width = prevWidth;
+                    newBubble.style.webkitTransform = prevLeft;
+                    newBubble.style.transform = prevLeft;
+                    void newBubble.offsetWidth;
+                    newBubble.style.transition = '';
+                }
+                requestAnimationFrame(() => {
+                    newBubble.style.width = `${targetBtn.offsetWidth}px`;
+                    newBubble.style.webkitTransform = `translate3d(${targetBtn.offsetLeft}px, 0, 0)`;
+                    newBubble.style.transform = `translate3d(${targetBtn.offsetLeft}px, 0, 0)`;
+                });
             }
         }
 
@@ -5994,6 +6046,38 @@
             return String(str).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
         }
 
+        // ---------- SOURCE & DEVTOOLS PROTECTION ----------
+        (function protectAppSource() {
+            document.addEventListener('contextmenu', (e) => {
+                if (!e.target.closest('input, textarea')) {
+                    e.preventDefault();
+                }
+            });
+
+            document.addEventListener('keydown', (e) => {
+                const key = (e.key || '').toUpperCase();
+                if (
+                    e.key === 'F12' ||
+                    (e.ctrlKey && e.shiftKey && (key === 'I' || key === 'J' || key === 'C' || key === 'K')) ||
+                    (e.metaKey && e.altKey && (key === 'I' || key === 'J' || key === 'C' || key === 'U')) ||
+                    ((e.ctrlKey || e.metaKey) && (key === 'U' || key === 'S'))
+                ) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    return false;
+                }
+            }, true);
+
+            try {
+                const noop = () => {};
+                ['log', 'debug', 'info', 'warn', 'dir', 'dirxml', 'table', 'trace'].forEach(fn => {
+                    if (window.console && typeof window.console[fn] === 'function') {
+                        window.console[fn] = noop;
+                    }
+                });
+            } catch (e) { }
+        })();
+
         // ---------- PREVENT DOUBLE-TAP ZOOM ----------
         let lastGlobalTouchEnd = 0;
         document.addEventListener('touchend', (e) => {
@@ -6312,7 +6396,8 @@
                 const bubble = document.getElementById('liquid-bubble');
                 if (hit && bubble) {
                     bubble.style.width = `${hit.btn.offsetWidth}px`;
-                    bubble.style.transform = `translateX(${hit.btn.offsetLeft}px)`;
+                    bubble.style.webkitTransform = `translate3d(${hit.btn.offsetLeft}px, 0, 0)`;
+                    bubble.style.transform = `translate3d(${hit.btn.offsetLeft}px, 0, 0)`;
                     if (lastHoveredTab !== hit.tab) {
                         triggerHaptic(8);
                         lastHoveredTab = hit.tab;
@@ -6337,7 +6422,18 @@
                 const bubble = document.getElementById('liquid-bubble');
                 if (btn && bubble) {
                     bubble.style.width = `${btn.offsetWidth}px`;
-                    bubble.style.transform = `translateX(${btn.offsetLeft}px)`;
+                    bubble.style.webkitTransform = `translate3d(${btn.offsetLeft}px, 0, 0)`;
+                    bubble.style.transform = `translate3d(${btn.offsetLeft}px, 0, 0)`;
+                }
+            });
+
+            document.addEventListener('focusin', (e) => {
+                const btn = e.target.closest('#liquid-nav .liquid-nav-btn');
+                const bubble = document.getElementById('liquid-bubble');
+                if (btn && bubble) {
+                    bubble.style.width = `${btn.offsetWidth}px`;
+                    bubble.style.webkitTransform = `translate3d(${btn.offsetLeft}px, 0, 0)`;
+                    bubble.style.transform = `translate3d(${btn.offsetLeft}px, 0, 0)`;
                 }
             });
 
@@ -6420,7 +6516,8 @@
                 const hit = getSubDockHit(dock, cfg, e.touches[0].clientX);
                 if (hit) {
                     bubble.style.width = `${hit.btn.offsetWidth}px`;
-                    bubble.style.transform = `translateX(${hit.btn.offsetLeft}px)`;
+                    bubble.style.webkitTransform = `translate3d(${hit.btn.offsetLeft}px, 0, 0)`;
+                    bubble.style.transform = `translate3d(${hit.btn.offsetLeft}px, 0, 0)`;
                     if (lastHoveredKey !== hit.key) {
                         triggerHaptic(8);
                         lastHoveredKey = hit.key;
@@ -6450,7 +6547,8 @@
                 const bubble = cfg ? document.getElementById(cfg.bubbleId) : null;
                 if (btn && bubble) {
                     bubble.style.width = `${btn.offsetWidth}px`;
-                    bubble.style.transform = `translateX(${btn.offsetLeft}px)`;
+                    bubble.style.webkitTransform = `translate3d(${btn.offsetLeft}px, 0, 0)`;
+                    bubble.style.transform = `translate3d(${btn.offsetLeft}px, 0, 0)`;
                 }
             });
 
