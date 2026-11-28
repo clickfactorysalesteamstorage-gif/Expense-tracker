@@ -4270,19 +4270,15 @@
                 async () => {
                     const { db, doc, deleteDoc, setDoc } = window.FB;
                     try {
-                        await purgeExpenseBillFiles(exp);
                         const recycleItem = {
                             ...exp,
-                            billAttachment: null,
-                            driveFileId: null,
-                            driveWebViewLink: null,
                             deletedAt: new Date().toISOString(),
                             deletedBy: `${state.currentUser.name} (Undo & Refunded)`
                         };
                         await setDoc(doc(db, 'recycleBin', id), recycleItem);
                         await deleteDoc(doc(db, 'expenses', id));
                         await refundExpenseToUserWallet(exp.userId, exp.amount, exp.title, exp.category);
-                        showToast(`Expense undone & bill deleted! ${formatCurrency(exp.amount)} added back to your wallet.`, 'success');
+                        showToast(`Expense undone! ${formatCurrency(exp.amount)} added back to your wallet.`, 'success');
                     } catch (err) {
                         showToast('Failed to undo expense.', 'error');
                     }
@@ -4293,20 +4289,16 @@
         function confirmDeleteExpense(id) {
             showConfirmModal(
                 'Delete Expense',
-                'Are you sure you want to delete this expense record (and its attached bill)?',
+                'Are you sure you want to move this expense record with its attached bill to the Recycle Bin?',
                 async () => {
                     const { db, doc, deleteDoc, setDoc } = window.FB;
                     const exp = state.expenses.find(e => e.id === id);
                     if (!exp) return;
                     try {
-                        await purgeExpenseBillFiles(exp);
                         const ownerUser = state.users.find(u => u.id === exp.userId);
                         const shouldRefund = ownerUser && !isAdminOrDev(ownerUser);
                         const recycleItem = {
                             ...exp,
-                            billAttachment: null,
-                            driveFileId: null,
-                            driveWebViewLink: null,
                             deletedAt: new Date().toISOString(),
                             deletedBy: shouldRefund ? `${state.currentUser.name} (Undo & Refunded)` : state.currentUser.name
                         };
@@ -4314,9 +4306,9 @@
                         await deleteDoc(doc(db, 'expenses', id));
                         if (shouldRefund) {
                             await refundExpenseToUserWallet(exp.userId, exp.amount, exp.title, exp.category);
-                            showToast(`Expense & bill deleted, and ${formatCurrency(exp.amount)} refunded to ${ownerUser.name}.`, 'success');
+                            showToast(`Expense & attachment moved to Recycle Bin, and ${formatCurrency(exp.amount)} refunded to ${ownerUser.name}.`, 'success');
                         } else {
-                            showToast('Expense & attached bill deleted.', 'success');
+                            showToast('Expense & attachment moved to Recycle Bin.', 'success');
                         }
                     } catch (err) {
                         showToast('Failed to delete expense.', 'error');
@@ -4326,15 +4318,19 @@
         }
 
         function renderRecycleBinTab() {
+            const sortedRecycleBin = [...state.recycleBin].sort((a, b) =>
+                (b.deletedAt || '').localeCompare(a.deletedAt || '')
+            );
+
             return `
                 <div class="space-y-4 w-full max-w-full">
                     <div class="flex items-center justify-between px-1">
-                        <span class="text-xs text-slate-500">${state.recycleBin.length} deleted item(s)</span>
-                        ${state.recycleBin.length > 0 ? `<button onclick="confirmEmptyRecycleBin()" class="px-3 py-1.5 bg-rose-50 dark:bg-rose-950/60 text-rose-600 dark:text-rose-400 text-xs font-semibold rounded-xl border border-rose-200 hover:bg-rose-100 transition"><i class="fa-solid fa-trash-can mr-1"></i>Empty Bin</button>` : ''}
+                        <span class="text-xs text-slate-500">${sortedRecycleBin.length} deleted item(s)</span>
+                        ${sortedRecycleBin.length > 0 ? `<button onclick="confirmEmptyRecycleBin()" class="px-3 py-1.5 bg-rose-50 dark:bg-rose-950/60 text-rose-600 dark:text-rose-400 text-xs font-semibold rounded-xl border border-rose-200 hover:bg-rose-100 transition"><i class="fa-solid fa-trash-can mr-1"></i>Empty Bin</button>` : ''}
                     </div>
 
                     <div class="space-y-3.5 w-full">
-                        ${state.recycleBin.length === 0 ? `
+                        ${sortedRecycleBin.length === 0 ? `
                             <div class="ios-glass-card rounded-3xl p-8 text-center shadow-sm w-full mt-3">
                                 <div class="w-14 h-14 bg-amber-500/10 text-amber-600 rounded-2xl flex items-center justify-center mx-auto mb-3 text-xl"><i class="fa-solid fa-trash-can"></i></div>
                                 <h4 class="font-semibold text-slate-700 dark:text-slate-300 mb-1">Recycle Bin is Empty</h4>
@@ -4342,7 +4338,7 @@
                             </div>
                         ` : ''}
 
-                        ${state.recycleBin.map(exp => {
+                        ${sortedRecycleBin.map(exp => {
                 const wasRefunded = String(exp.deletedBy || '').includes('Undo & Refunded');
                 return `
                                 <div class="ios-glass-card rounded-3xl py-5 sm:py-6 px-5 sm:px-6 shadow-sm transition relative group w-full mt-3">
