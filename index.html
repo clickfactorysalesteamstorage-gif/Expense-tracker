@@ -29,8 +29,8 @@
         };
 
         (function () {
-            let savedTheme = 'system';
-            try { savedTheme = localStorage.getItem('click_factory_theme_v1') || 'system'; } catch (e) { }
+            let savedTheme = 'light';
+            try { savedTheme = localStorage.getItem('click_factory_theme_v1') || 'light'; } catch (e) { }
             const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
             const isDark = savedTheme === 'dark' || (savedTheme === 'system' && prefersDark);
             if (isDark) {
@@ -150,10 +150,6 @@
             min-height: 0;
             overflow: hidden;
             background-color: #ffffff;
-            background-image:
-                radial-gradient(at 15% 8%, rgba(99, 102, 241, 0.06) 0px, transparent 52%),
-                radial-gradient(at 88% 18%, rgba(168, 85, 247, 0.05) 0px, transparent 48%),
-                radial-gradient(at 50% 92%, rgba(56, 189, 248, 0.05) 0px, transparent 55%);
             display: flex;
             flex-direction: column;
             padding-top: 0;
@@ -267,10 +263,11 @@
             z-index: 70;
             display: flex;
             flex-direction: column;
-            gap: 8px;
+            align-items: center;
+            gap: 6px;
             pointer-events: none;
-            width: 90%;
-            max-width: 380px;
+            width: auto;
+            max-width: 300px;
         }
 
         .logo-container img {
@@ -485,9 +482,9 @@
             pointer-events: none;
             will-change: transform, width;
             transform: translateX(0);
-            background: linear-gradient(135deg, rgba(99, 102, 241, 0.08), rgba(255, 255, 255, 0.18));
-            border: 1px solid rgba(99, 102, 241, 0.16);
-            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.65), 0 2px 8px -2px rgba(79, 70, 229, 0.08);
+            background: rgba(148, 163, 184, 0.26);
+            border: 1px solid rgba(100, 116, 139, 0.24);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.72), 0 2px 8px -2px rgba(15, 23, 42, 0.08);
             transition: transform 0.44s cubic-bezier(0.25, 1.35, 0.45, 1), width 0.44s cubic-bezier(0.25, 1.35, 0.45, 1);
         }
 
@@ -839,7 +836,6 @@
         const SESSION_IDB_NAME = 'cf_session_store_v1';
         const THEME_STORAGE_KEY = 'click_factory_theme_v1';
         const SOUND_STORAGE_KEY = 'click_factory_sound_v1';
-        const SOUND_VOL_STORAGE_KEY = 'click_factory_sound_vol_v1';
         const DOCK_ALPHA_STORAGE_KEY = 'click_factory_dock_alpha_v1';
         const LOCAL_DATA_STORAGE_KEY = 'click_factory_data_v1';
         const GDRIVE_TOKEN_CACHE_KEY = 'click_factory_gdrive_token_v1';
@@ -991,10 +987,8 @@
         window.FB = createLocalFallbackAdapter();
         window.activeUnsubscribers = [];
 
-        let sharedAudioCtx = null;
         let knownNotificationIds = new Set();
         let initialNotificationsLoaded = false;
-        let lastHapticSoundStep = -1;
         let lastHapticAlphaStep = -1;
 
         const state = {
@@ -1007,16 +1001,13 @@
             tempFormCache: null,
             userFilterTab: 'all',
             showDateFilter: false,
-            themeMode: lsGet(THEME_STORAGE_KEY, 'system'),
+            themeMode: lsGet(THEME_STORAGE_KEY, 'light'),
             darkMode: false,
             soundEnabled: lsGet(SOUND_STORAGE_KEY, 'true') !== 'false',
-            soundVolume: parseInt(lsGet(SOUND_VOL_STORAGE_KEY, '80'), 10) || 80,
             dockAlpha: (() => {
                 const raw = parseFloat(lsGet(DOCK_ALPHA_STORAGE_KEY, '0.01'));
                 return isNaN(raw) ? 0.01 : Math.min(0.90, Math.max(0.01, raw));
             })(),
-            showSoundPanel: false,
-            isSoundTesting: false,
             isDbLoading: false,
             justFinishedLoading: false,
             users: DEFAULT_SEED_USERS.map(u => ({ ...u })),
@@ -1545,8 +1536,7 @@
 
             const lightAlpha = (state.dockAlpha * 0.45).toFixed(3);
             const darkAlpha = Math.min(0.90, state.dockAlpha + 0.04).toFixed(2);
-            const bubbleLightTint = Math.min(0.16, Math.max(0.06, (state.dockAlpha * 0.16) + 0.055)).toFixed(3);
-            const bubbleLightWhite = Math.min(0.52, Math.max(0.14, (state.dockAlpha * 0.65) + 0.13)).toFixed(3);
+            const bubbleLight = Math.min(0.42, Math.max(0.20, (state.dockAlpha * 0.35) + 0.24)).toFixed(3);
             const bubbleDark = Math.min(0.32, Math.max(0.10, (state.dockAlpha * 0.45) + 0.08)).toFixed(2);
             const cardLightAlpha = Math.min(0.88, Math.max(0.42, 0.44 + state.dockAlpha * 0.48)).toFixed(2);
             const cardDarkAlpha = Math.min(0.86, Math.max(0.44, 0.46 + state.dockAlpha * 0.44)).toFixed(2);
@@ -1566,10 +1556,12 @@
                     backdrop-filter: blur(10px) saturate(1.25) !important;
                     -webkit-backdrop-filter: blur(10px) saturate(1.25) !important;
                 }
-                .liquid-bubble,
+                .liquid-bubble {
+                    background: rgba(148, 163, 184, ${bubbleLight}) !important;
+                }
                 .liquid-sub-bubble,
                 .liquid-fab {
-                    background: linear-gradient(135deg, rgba(99, 102, 241, ${bubbleLightTint}), rgba(255, 255, 255, ${bubbleLightWhite})) !important;
+                    background: linear-gradient(135deg, rgba(99, 102, 241, 0.10), rgba(255, 255, 255, 0.35)) !important;
                     backdrop-filter: blur(14px) saturate(1.4) !important;
                     -webkit-backdrop-filter: blur(14px) saturate(1.4) !important;
                 }
@@ -1595,61 +1587,12 @@
             `;
         }
 
-        function unlockAudioContext() {
-            try {
-                const AudioCtx = window.AudioContext || window.webkitAudioContext;
-                if (!AudioCtx) return;
-                if (!sharedAudioCtx) sharedAudioCtx = new AudioCtx();
-                if (sharedAudioCtx.state === 'suspended') sharedAudioCtx.resume();
-            } catch (e) { }
-        }
-
-        document.addEventListener('click', unlockAudioContext, { once: true });
-        document.addEventListener('touchstart', unlockAudioContext, { once: true });
-
-        function playNotificationChime(type = 'wallet_credit', forcePreview = false) {
-            if (!state.soundEnabled && !forcePreview) return;
+        function playNotificationChime(type = 'wallet_credit') {
+            if (!state.soundEnabled) return;
 
             if ('vibrate' in navigator) {
                 try { navigator.vibrate(type === 'excess_spent' ? [180, 90, 220] : [120, 60, 120]); } catch (e) { }
             }
-
-            const volRatio = Math.max(0, Math.min(100, Number(state.soundVolume || 80))) / 100;
-            if (volRatio <= 0.01) return;
-
-            try {
-                const AudioCtx = window.AudioContext || window.webkitAudioContext;
-                if (!AudioCtx) return;
-                if (!sharedAudioCtx) sharedAudioCtx = new AudioCtx();
-                if (sharedAudioCtx.state === 'suspended') sharedAudioCtx.resume();
-
-                const now = sharedAudioCtx.currentTime;
-                const peakGain = 0.28 * volRatio;
-                const isExcess = type === 'excess_spent';
-                const notes = isExcess ? [659.25, 523.25] : [523.25, 783.99];
-                const step = isExcess ? 0.14 : 0.11;
-                const decay = isExcess ? 0.36 : 0.45;
-
-                notes.forEach((freq, idx) => {
-                    const osc = sharedAudioCtx.createOscillator();
-                    const gain = sharedAudioCtx.createGain();
-                    osc.type = isExcess ? 'triangle' : 'sine';
-                    const startTime = now + idx * step;
-                    osc.frequency.setValueAtTime(freq, startTime);
-                    gain.gain.setValueAtTime(0.0001, startTime);
-                    gain.gain.exponentialRampToValueAtTime(peakGain, startTime + 0.02);
-                    gain.gain.exponentialRampToValueAtTime(0.0001, startTime + decay);
-                    osc.connect(gain);
-                    gain.connect(sharedAudioCtx.destination);
-                    osc.start(startTime);
-                    osc.stop(startTime + decay + 0.02);
-                });
-            } catch (err) { }
-        }
-
-        function toggleSoundPanel() {
-            state.showSoundPanel = !state.showSoundPanel;
-            renderMainContentOnly();
         }
 
         function toggleNotificationSound(event) {
@@ -1657,30 +1600,15 @@
             state.soundEnabled = !state.soundEnabled;
             lsSet(SOUND_STORAGE_KEY, String(state.soundEnabled));
             if (state.soundEnabled) {
-                state.showSoundPanel = true;
                 if ('Notification' in window && Notification.permission === 'default') {
                     Notification.requestPermission().catch(() => { });
                 }
-                playNotificationChime('wallet_credit', true);
-                showToast('Ringer & Chime alerts enabled', 'success');
+                playNotificationChime('wallet_credit');
+                showToast('System notification alerts enabled', 'success');
             } else {
-                state.showSoundPanel = false;
                 showToast('Notification alerts muted', 'info');
             }
             render();
-        }
-
-        function handleSoundVolumeChange(val) {
-            const numVal = parseInt(val, 10);
-            state.soundVolume = isNaN(numVal) ? 80 : numVal;
-            lsSet(SOUND_VOL_STORAGE_KEY, String(state.soundVolume));
-            const labelEl = document.getElementById('sound-vol-label');
-            if (labelEl) labelEl.textContent = `${state.soundVolume}%`;
-
-            if (Math.abs(state.soundVolume - lastHapticSoundStep) >= 5) {
-                triggerHaptic(8);
-                lastHapticSoundStep = state.soundVolume;
-            }
         }
 
         function handleDockAlphaChange(val) {
@@ -1695,16 +1623,6 @@
             }
         }
 
-        function previewSoundVolume() {
-            playNotificationChime('wallet_credit', true);
-            state.isSoundTesting = true;
-            syncPersistentNavbar();
-            setTimeout(() => {
-                state.isSoundTesting = false;
-                syncPersistentNavbar();
-            }, 2000);
-        }
-
         async function requestSystemRingerPermission() {
             if (!('Notification' in window)) {
                 showToast('System notifications are not supported on this browser.', 'error');
@@ -1712,8 +1630,8 @@
             }
             const perm = await Notification.requestPermission();
             if (perm === 'granted') {
-                sendBrowserNotification('Click Factory Alerts Active', 'Notifications will now use your device Ringer Volume.', 'wallet_credit');
-                showToast('Device Ringer notifications enabled!', 'success');
+                sendBrowserNotification('Click Factory Alerts Active', 'Notifications will now use your device system notification sound.', 'wallet_credit');
+                showToast('System notifications enabled!', 'success');
             } else {
                 showToast('Permission denied in browser settings.', 'error');
             }
@@ -1866,11 +1784,31 @@
             }
         }
 
+        function syncAppearanceUI() {
+            const labelEl = document.getElementById('appearance-mode-label');
+            if (labelEl) {
+                labelEl.textContent = state.themeMode === 'system'
+                    ? `System (${state.darkMode ? 'Dark' : 'Light'})`
+                    : state.themeMode;
+            }
+            const activeColors = {
+                light: 'text-amber-600',
+                dark: 'text-indigo-500 dark:text-indigo-400',
+                system: 'text-indigo-600 dark:text-indigo-400'
+            };
+            ['light', 'dark', 'system'].forEach(mode => {
+                const btn = document.getElementById(`theme-btn-${mode}`);
+                if (!btn) return;
+                const isActive = state.themeMode === mode;
+                btn.className = `py-2.5 px-3 rounded-xl text-xs font-semibold flex items-center justify-center space-x-1.5 transition ${isActive ? `bg-white dark:bg-slate-900 ${activeColors[mode]} shadow-sm border border-slate-200/50 dark:border-slate-700` : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'}`;
+            });
+        }
+
         function setThemeMode(mode) {
             state.themeMode = mode;
             lsSet(THEME_STORAGE_KEY, mode);
             applyTheme();
-            render();
+            syncAppearanceUI();
             const label = mode === 'system' ? 'System Auto' : (mode === 'dark' ? 'Dark Mode' : 'Light Mode');
             showToast(`Theme set to ${label}`, 'info');
         }
@@ -1879,7 +1817,7 @@
             window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
                 if (state.themeMode === 'system') {
                     applyTheme();
-                    render();
+                    syncAppearanceUI();
                 }
             });
         }
@@ -2191,16 +2129,16 @@
                 icon = 'fa-circle-exclamation text-rose-200';
             }
 
-            toast.className = `${bgStyle} border px-4 py-3 rounded-2xl shadow-xl flex items-center justify-between text-xs sm:text-sm font-medium transform transition-all duration-300 translate-y-[20px] opacity-0 pointer-events-auto gap-3 backdrop-blur-xl`;
+            toast.className = `${bgStyle} border px-3 py-2 rounded-xl shadow-lg flex items-center justify-between text-[11px] sm:text-xs font-medium transform transition-all duration-300 translate-y-[20px] opacity-0 pointer-events-auto gap-2 backdrop-blur-xl`;
 
             const wantsUndo = undoCallback && (!state.currentUser || !isAdminOrDev(state.currentUser));
             const undoBtnHtml = wantsUndo
-                ? `<button id="toast-undo-btn" class="px-2.5 py-1 bg-white text-slate-900 rounded-xl font-bold text-xs hover:bg-slate-100 transition shrink-0 shadow-sm">Undo</button>`
+                ? `<button id="toast-undo-btn" class="px-2 py-0.5 bg-white text-slate-900 rounded-lg font-bold text-[11px] hover:bg-slate-100 transition shrink-0 shadow-sm">Undo</button>`
                 : '';
 
             toast.innerHTML = `
-                <div class="flex items-center space-x-2.5 min-w-0 flex-1">
-                    <i class="fa-solid ${icon} text-base shrink-0"></i>
+                <div class="flex items-center space-x-2 min-w-0 flex-1">
+                    <i class="fa-solid ${icon} text-xs shrink-0"></i>
                     <span class="flex-1 break-words leading-tight">${escapeHtml(message)}</span>
                 </div>
                 ${undoBtnHtml}
@@ -2594,7 +2532,7 @@
                             <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border border-emerald-200/70 dark:border-emerald-800">
                                 <span class="w-2 h-2 rounded-full bg-emerald-500"></span>Top-Up
                             </span>
-                            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 border border-amber-200/70 dark:border-amber-800">
+                            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 border border-amber-200/70 dark:border-emerald-800">
                                 <span class="w-2 h-2 rounded-full bg-amber-500"></span>Excess Cleared
                             </span>
                             <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-sky-50 dark:bg-sky-950/60 text-sky-700 dark:text-sky-300 border border-sky-200/70 dark:border-sky-800">
@@ -2965,11 +2903,7 @@
 
             const badgeEl = document.getElementById('nav-badge');
             if (badgeEl) {
-                if (state.isSoundTesting) {
-                    badgeEl.textContent = '🔊';
-                    badgeEl.className = 'liquid-badge bg-indigo-600 text-white volume-pulse-badge';
-                    badgeEl.classList.remove('hidden');
-                } else if (isAdmin && totalBadges > 0) {
+                if (isAdmin && totalBadges > 0) {
                     badgeEl.textContent = totalBadges;
                     badgeEl.className = 'liquid-badge';
                     badgeEl.classList.remove('hidden');
@@ -3093,6 +3027,7 @@
             if (typeof syncHomeCategoryBubble === 'function') syncHomeCategoryBubble(false);
             if (typeof syncUserFilterBubble === 'function') syncUserFilterBubble(false);
             if (typeof syncFormCategoryBubble === 'function') syncFormCategoryBubble(false);
+            if (typeof syncAppearanceBubble === 'function') syncAppearanceBubble(false);
         }
 
         function fabButtonHtml() {
@@ -3130,11 +3065,12 @@
             if (typeof syncHomeCategoryBubble === 'function') syncHomeCategoryBubble(false);
             if (typeof syncUserFilterBubble === 'function') syncUserFilterBubble(false);
             if (typeof syncFormCategoryBubble === 'function') syncFormCategoryBubble(false);
+            if (typeof syncAppearanceBubble === 'function') syncAppearanceBubble(false);
         }
 
         function renderLoginPage() {
             return `
-                <div class="flex-1 overflow-y-auto no-scrollbar flex flex-col justify-center px-4 py-8 max-w-sm mx-auto w-full relative">
+                <div class="flex-1 overflow-y-auto no-scrollbar flex flex-col justify-center px-5 py-8 max-w-sm mx-auto w-full relative">
                     <div class="text-center mb-6">
                         <div class="w-12 h-12 flex items-center justify-center mx-auto mb-2 logo-container">
                             <img src="https://clickfactoryphotography.com/wp-content/uploads/2022/04/crop-logo.gif" alt="Click Factory Logo" class="w-full h-full object-contain" onerror="this.src='https://placehold.co/40x40/4f46e5/ffffff?text=CF'">
@@ -3143,7 +3079,7 @@
                         <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Expense Management Portal</p>
                     </div>
 
-                    <div class="ios-glass-card py-8 px-6 shadow-2xl rounded-3xl space-y-5 w-full">
+                    <div class="ios-glass-card py-8 px-6 border border-slate-200/80 dark:border-slate-800 shadow-lg shadow-slate-900/5 rounded-3xl space-y-5 w-full">
                         <form onsubmit="handleLoginSubmit(event)" class="space-y-4">
                             <div class="w-full">
                                 <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">Username</label>
@@ -3177,6 +3113,86 @@
             `;
         }
 
+        function syncAppearanceUI() {
+            const labelEl = document.getElementById('appearance-mode-label');
+            if (labelEl) {
+                labelEl.textContent = state.themeMode === 'system'
+                    ? `System (${state.darkMode ? 'Dark' : 'Light'})`
+                    : state.themeMode;
+            }
+            syncAppearanceBubble(true);
+        }
+
+        function syncAppearanceBubble(animate = true) {
+            const dock = document.getElementById('appearance-sub-dock');
+            const bubble = document.getElementById('appearance-sub-bubble');
+            const activeBtn = document.getElementById(`theme-btn-${state.themeMode}`);
+            if (!dock || !bubble || !activeBtn) return;
+
+            if (!animate) bubble.style.transition = 'none';
+            bubble.style.width = `${activeBtn.offsetWidth}px`;
+            bubble.style.transform = `translateX(${activeBtn.offsetLeft}px)`;
+
+            dock.querySelectorAll('.liquid-sub-btn').forEach(btn => {
+                const isActive = btn.id === activeBtn.id;
+                btn.classList.toggle('is-active', isActive);
+                btn.setAttribute('aria-selected', String(isActive));
+            });
+
+            if (!animate) {
+                requestAnimationFrame(() => {
+                    bubble.style.transition = '';
+                });
+            }
+        }
+
+        function setThemeMode(mode) {
+            if (state.themeMode === mode) {
+                syncAppearanceBubble(true);
+                return;
+            }
+            const dock = document.getElementById('appearance-sub-dock');
+            const bubble = document.getElementById('appearance-sub-bubble');
+            const prevLeft = bubble ? bubble.style.transform : '';
+            const prevWidth = bubble ? bubble.style.width : '';
+
+            state.themeMode = mode;
+            lsSet(THEME_STORAGE_KEY, mode);
+            applyTheme();
+
+            const labelEl = document.getElementById('appearance-mode-label');
+            if (labelEl) {
+                labelEl.textContent = state.themeMode === 'system'
+                    ? `System (${state.darkMode ? 'Dark' : 'Light'})`
+                    : state.themeMode;
+            }
+
+            if (dock && bubble) {
+                const targetBtn = document.getElementById(`theme-btn-${mode}`);
+                if (targetBtn) {
+                    if (prevLeft && prevWidth) {
+                        bubble.style.transition = 'none';
+                        bubble.style.width = prevWidth;
+                        bubble.style.transform = prevLeft;
+                        void bubble.offsetWidth;
+                        bubble.style.transition = '';
+                    }
+                    requestAnimationFrame(() => {
+                        bubble.style.width = `${targetBtn.offsetWidth}px`;
+                        bubble.style.transform = `translateX(${targetBtn.offsetLeft}px)`;
+                    });
+                    dock.querySelectorAll('.liquid-sub-btn').forEach(btn => {
+                        const isActive = btn.id === targetBtn.id;
+                        btn.classList.toggle('is-active', isActive);
+                        btn.setAttribute('aria-selected', String(isActive));
+                    });
+                }
+            }
+
+            const label = mode === 'system' ? 'System Auto' : (mode === 'dark' ? 'Dark Mode' : 'Light Mode');
+            showToast(`Theme set to ${label}`, 'info');
+        }
+
         function pwField(id, iconId, label, placeholder) {
             return `
                 <div class="w-full">
@@ -3193,7 +3209,7 @@
 
         function renderForgotPasswordPage() {
             return `
-                <div class="flex-1 overflow-y-auto no-scrollbar flex flex-col justify-center px-4 py-8 max-w-sm mx-auto w-full">
+                <div class="flex-1 overflow-y-auto no-scrollbar flex flex-col justify-center px-5 py-8 max-w-sm mx-auto w-full">
                     <div class="text-center mb-6">
                         <div class="w-12 h-12 bg-indigo-50 dark:bg-indigo-950/60 rounded-2xl flex items-center justify-center mx-auto mb-4 text-indigo-600 dark:text-indigo-400 text-xl shadow-sm border border-indigo-200 dark:border-indigo-800">
                             <i class="fa-solid fa-key"></i>
@@ -3202,7 +3218,7 @@
                         <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Request a recovery code from Admin</p>
                     </div>
 
-                    <div class="ios-glass-card py-8 px-6 shadow-2xl rounded-3xl space-y-4 w-full">
+                    <div class="ios-glass-card py-8 px-6 border border-slate-200/80 dark:border-slate-800 shadow-lg shadow-slate-900/5 rounded-3xl space-y-4 w-full">
                         <form onsubmit="handleForgotPasswordSubmit(event)" class="space-y-4">
                             <div class="w-full">
                                 <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">Username</label>
@@ -3321,7 +3337,6 @@
         function handleLoginSubmit(e) {
             e.preventDefault();
             try {
-                unlockAudioContext();
                 const userEl = document.getElementById('login-username');
                 const passEl = document.getElementById('login-password');
                 const username = (userEl ? userEl.value : '').trim().toLowerCase();
@@ -3657,6 +3672,12 @@
                                                                 <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[9.5px] font-semibold tracking-wide ${isOffice ? 'bg-amber-500/10 text-amber-700 dark:text-amber-300' : 'bg-indigo-500/10 text-indigo-700 dark:text-indigo-300'}">
                                                                     ${escapeHtml(exp.category)}
                                                                 </span>
+                                                                ${!isOffice && exp.clientNamePlace ? `
+                                                                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-violet-500/10 border border-violet-500/20 text-[9.5px] font-medium text-violet-700 dark:text-violet-300 max-w-[180px]">
+                                                                        <i class="fa-solid fa-location-dot shrink-0 text-[8.5px]"></i>
+                                                                        <span class="truncate">${escapeHtml(exp.clientNamePlace)}</span>
+                                                                    </span>
+                                                                ` : ''}
                                                                 <span class="text-[10.5px] font-medium text-slate-500 dark:text-slate-400 truncate max-w-[155px]">
                                                                     • ${escapeHtml(exp.userName)}
                                                                 </span>
@@ -3669,15 +3690,9 @@
                                                     </div>
                                                 </div>
 
-                                                ${(!isOffice && exp.clientNamePlace) || exp.notes ? `
-                                                    <div class="relative mt-2.5 space-y-1.5">
-                                                        ${!isOffice && exp.clientNamePlace ? `
-                                                            <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg bg-violet-500/[0.08] border border-violet-500/20 text-[10.5px] font-medium text-violet-700 dark:text-violet-300 max-w-full">
-                                                                <i class="fa-solid fa-location-dot shrink-0 text-[9.5px]"></i>
-                                                                <span class="break-words">${escapeHtml(exp.clientNamePlace)}</span>
-                                                            </div>
-                                                        ` : ''}
-                                                        ${exp.notes ? `<p class="text-[11.5px] text-slate-600 dark:text-slate-300/90 bg-slate-900/[0.025] dark:bg-white/[0.03] px-3 py-2 rounded-xl border border-slate-200/50 dark:border-white/[0.06] break-words leading-relaxed">${escapeHtml(exp.notes)}</p>` : ''}
+                                                ${exp.notes ? `
+                                                    <div class="relative mt-2.5">
+                                                        <p class="text-[11.5px] text-slate-600 dark:text-slate-300/90 bg-slate-900/[0.025] dark:bg-white/[0.03] px-3 py-2 rounded-xl border border-slate-200/50 dark:border-white/[0.06] break-words leading-relaxed">${escapeHtml(exp.notes)}</p>
                                                     </div>
                                                 ` : ''}
 
@@ -5557,8 +5572,8 @@
                     : 'bg-emerald-50 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800');
             const roleTitle = isDev ? 'Developer' : (isAdmin ? 'Administrator' : 'Regular User');
 
-            const themeBtn = (mode, icon, label, activeColor) => `
-                <button type="button" onclick="setThemeMode('${mode}')" class="py-2.5 px-3 rounded-xl text-xs font-semibold flex items-center justify-center space-x-1.5 transition ${state.themeMode === mode ? `bg-white dark:bg-slate-900 ${activeColor} shadow-sm border border-slate-200/50 dark:border-slate-700` : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'}">
+            const themeBtn = (mode, icon, label) => `
+                <button type="button" id="theme-btn-${mode}" onclick="setThemeMode('${mode}')" class="liquid-sub-btn ${state.themeMode === mode ? 'is-active' : ''}" role="tab" aria-selected="${state.themeMode === mode}">
                     <i class="fa-solid ${icon}"></i><span>${label}</span>
                 </button>`;
             const navBtn = (onclick, icon, label, badge) => `
@@ -5633,19 +5648,20 @@
                                     <h3 class="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Appearance</h3>
                                     <p class="text-[11px] text-slate-400 dark:text-slate-500 mt-0.5">Choose Light, Dark, or match device settings</p>
                                 </div>
-                                <span class="text-[11px] font-semibold text-indigo-600 dark:text-indigo-400 capitalize">${state.themeMode === 'system' ? `System (${state.darkMode ? 'Dark' : 'Light'})` : state.themeMode}</span>
+                                <span id="appearance-mode-label" class="text-[11px] font-semibold text-indigo-600 dark:text-indigo-400 capitalize">${state.themeMode === 'system' ? `System (${state.darkMode ? 'Dark' : 'Light'})` : state.themeMode}</span>
                             </div>
-                            <div class="grid grid-cols-3 gap-2 bg-slate-100/90 dark:bg-slate-800 p-1.5 rounded-2xl border border-slate-200/60 dark:border-slate-700">
-                                ${themeBtn('light', 'fa-sun', 'Light', 'text-amber-600')}
-                                ${themeBtn('dark', 'fa-moon', 'Dark', 'text-indigo-500 dark:text-indigo-400')}
-                                ${themeBtn('system', 'fa-circle-half-stroke', 'System', 'text-indigo-600 dark:text-indigo-400')}
+                            <div id="appearance-sub-dock" class="liquid-sub-dock w-full" role="tablist" aria-label="Appearance mode">
+                                <div id="appearance-sub-bubble" class="liquid-sub-bubble" aria-hidden="true"></div>
+                                ${themeBtn('light', 'fa-sun', 'Light')}
+                                ${themeBtn('dark', 'fa-moon', 'Dark')}
+                                ${themeBtn('system', 'fa-circle-half-stroke', 'System')}
                             </div>
 
                             <div class="pt-3.5 border-t border-slate-200/50 dark:border-slate-800 space-y-2">
                                 <div class="flex items-center justify-between text-xs px-1">
                                     <span class="font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
                                         <i class="fa-solid fa-droplet text-indigo-500"></i>
-                                        <span>iOS Liquid Glass Transparency</span>
+                                        <span>Liquid Glass Transparency</span>
                                     </span>
                                     <span id="dock-alpha-label" class="font-bold text-indigo-600 dark:text-indigo-400">${Math.round(state.dockAlpha * 100)}%</span>
                                 </div>
@@ -5655,17 +5671,14 @@
 
                         <div class="pt-3 border-t border-slate-200/50 dark:border-slate-800">
                             <div class="bg-slate-50/70 dark:bg-slate-800/40 rounded-2xl border border-slate-200/70 dark:border-slate-700/60 overflow-hidden transition-all duration-200">
-                                <div onclick="toggleSoundPanel()" class="flex items-center justify-between p-3.5 cursor-pointer select-none hover:bg-slate-100/60 dark:hover:bg-slate-800/60 transition">
+                                <div class="flex items-center justify-between p-3.5 select-none">
                                     <div class="flex items-center space-x-2.5 min-w-0 pr-2">
                                         <div class="w-8 h-8 rounded-xl ${state.soundEnabled ? 'bg-indigo-500/10 text-indigo-600 dark:text-indigo-400' : 'bg-slate-200 dark:bg-slate-700 text-slate-400'} flex items-center justify-center shrink-0">
                                             <i class="fa-solid ${state.soundEnabled ? 'fa-bell' : 'fa-bell-slash'} text-xs"></i>
                                         </div>
                                         <div class="min-w-0">
-                                            <h4 class="font-semibold text-xs text-slate-900 dark:text-white flex items-center space-x-1.5">
-                                                <span class="truncate">Ringer, Chimes & Haptics</span>
-                                                <i class="fa-solid fa-chevron-down text-[10px] text-slate-400 transition-transform duration-200 ${state.showSoundPanel ? 'rotate-180 text-indigo-500' : ''}"></i>
-                                            </h4>
-                                            <p class="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5 truncate">Tap to adjust chime level & ringer settings</p>
+                                            <h4 class="font-semibold text-xs text-slate-900 dark:text-white truncate">Notification Alerts</h4>
+                                            <p class="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5 truncate">Uses device system notification sound & vibration</p>
                                         </div>
                                     </div>
                                     <button type="button" onclick="toggleNotificationSound(event)" class="relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${state.soundEnabled ? 'bg-indigo-600' : 'bg-slate-300 dark:bg-slate-700'}">
@@ -5673,30 +5686,12 @@
                                     </button>
                                 </div>
 
-                                ${state.showSoundPanel ? `
-                                    <div class="px-3.5 pb-3.5 pt-2.5 border-t border-slate-200/50 dark:border-slate-700/50 space-y-2.5 bg-white/50 dark:bg-slate-900/40">
-                                        <div class="flex items-center justify-between text-xs">
-                                            <span class="font-medium text-slate-600 dark:text-slate-300 flex items-center gap-1.5">
-                                                <i class="fa-solid fa-volume-high text-indigo-500"></i>
-                                                <span>Chime Level</span>
-                                            </span>
-                                            <span id="sound-vol-label" class="font-bold text-indigo-600 dark:text-indigo-400">${state.soundVolume}%</span>
-                                        </div>
-                                        <div class="flex items-center space-x-3">
-                                            <input type="range" min="10" max="100" step="5" value="${state.soundVolume}" oninput="handleSoundVolumeChange(this.value)" onchange="previewSoundVolume()" class="w-full accent-indigo-600 cursor-pointer h-1.5 bg-slate-200 dark:bg-slate-700 rounded-lg">
-                                            <button type="button" onclick="previewSoundVolume()" class="px-2.5 py-1 bg-indigo-50 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-400 rounded-xl text-[10px] font-semibold border border-indigo-200 dark:border-indigo-800 shrink-0">Test</button>
-                                        </div>
-                                        ${notifPermission !== 'granted' && notifPermission !== 'unsupported' ? `
-                                            <button type="button" onclick="requestSystemRingerPermission()" class="w-full py-2 px-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-[11px] font-semibold transition flex items-center justify-center space-x-1.5 shadow-sm">
-                                                <i class="fa-solid fa-mobile-screen-button"></i>
-                                                <span>Enable OS Ringer Channel Permission</span>
-                                            </button>
-                                        ` : `
-                                            <p class="text-[10px] text-emerald-600 dark:text-emerald-400 font-medium flex items-center gap-1">
-                                                <i class="fa-solid fa-circle-check"></i>
-                                                <span>OS Ringer & Haptic Vibration channel active</span>
-                                            </p>
-                                        `}
+                                ${state.soundEnabled && notifPermission !== 'granted' && notifPermission !== 'unsupported' ? `
+                                    <div class="px-3.5 pb-3.5 pt-2.5 border-t border-slate-200/50 dark:border-slate-700/50 bg-white/50 dark:bg-slate-900/40">
+                                        <button type="button" onclick="requestSystemRingerPermission()" class="w-full py-2 px-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-[11px] font-semibold transition flex items-center justify-center space-x-1.5 shadow-sm">
+                                            <i class="fa-solid fa-mobile-screen-button"></i>
+                                            <span>Enable System Notification Permission</span>
+                                        </button>
                                     </div>
                                 ` : ''}
                             </div>
@@ -6075,7 +6070,7 @@
                 return;
             }
 
-            if (e.target.closest('#liquid-nav, #user-sub-dock, #home-cat-dock, #form-category-dock, input[type="range"], .overflow-x-auto')) {
+            if (e.target.closest('#liquid-nav, #user-sub-dock, #home-cat-dock, #form-category-dock, #appearance-sub-dock, input[type="range"], .overflow-x-auto')) {
                 gestureMode = 'cancelled';
                 return;
             }
@@ -6386,6 +6381,12 @@
                     prefix: 'btn-cat-',
                     apply: (key) => setFormCategory(key === 'shoot' ? 'Shoot' : 'Office'),
                     reset: () => syncFormCategoryBubble(true)
+                },
+                'appearance-sub-dock': {
+                    bubbleId: 'appearance-sub-bubble',
+                    prefix: 'theme-btn-',
+                    apply: (key) => setThemeMode(key),
+                    reset: () => syncAppearanceBubble(true)
                 }
             };
 
@@ -6402,7 +6403,7 @@
 
             document.addEventListener('touchstart', (e) => {
                 if (e.touches.length !== 1) return;
-                const dock = e.target.closest('#user-sub-dock, #home-cat-dock, #form-category-dock');
+                const dock = e.target.closest('#user-sub-dock, #home-cat-dock, #form-category-dock, #appearance-sub-dock');
                 if (dock) {
                     activeDockId = dock.id;
                     lastHoveredKey = null;
@@ -6443,7 +6444,7 @@
 
             document.addEventListener('pointerover', (e) => {
                 if (e.pointerType === 'touch') return;
-                const btn = e.target.closest('#user-sub-dock .liquid-sub-btn, #home-cat-dock .liquid-sub-btn, #form-category-dock .liquid-sub-btn');
+                const btn = e.target.closest('#user-sub-dock .liquid-sub-btn, #home-cat-dock .liquid-sub-btn, #form-category-dock .liquid-sub-btn, #appearance-sub-dock .liquid-sub-btn');
                 const dock = btn ? btn.parentElement : null;
                 const cfg = dock ? dockConfigs[dock.id] : null;
                 const bubble = cfg ? document.getElementById(cfg.bubbleId) : null;
@@ -6454,7 +6455,7 @@
             });
 
             document.addEventListener('pointerout', (e) => {
-                const dock = e.target.closest('#user-sub-dock, #home-cat-dock, #form-category-dock');
+                const dock = e.target.closest('#user-sub-dock, #home-cat-dock, #form-category-dock, #appearance-sub-dock');
                 if (dock && (!e.relatedTarget || !dock.contains(e.relatedTarget))) {
                     const cfg = dockConfigs[dock.id];
                     if (cfg) cfg.reset();
@@ -6504,12 +6505,14 @@
             syncHomeCategoryBubble(false);
             syncUserFilterBubble(false);
             syncFormCategoryBubble(false);
+            syncAppearanceBubble(false);
         });
         window.addEventListener('orientationchange', () => setTimeout(() => {
             syncPersistentNavbar();
             syncHomeCategoryBubble(false);
             syncUserFilterBubble(false);
             syncFormCategoryBubble(false);
+            syncAppearanceBubble(false);
         }, 100));
 
         async function bootApp() {
