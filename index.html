@@ -870,6 +870,66 @@
             border: 1px solid rgba(255, 255, 255, 0.14) !important;
             box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.10);
         }
+
+        @-webkit-keyframes submitCheckDraw {
+            0% {
+                stroke-dashoffset: 36;
+                opacity: 0;
+            }
+            100% {
+                stroke-dashoffset: 0;
+                opacity: 1;
+            }
+        }
+
+        @keyframes submitCheckDraw {
+            0% {
+                stroke-dashoffset: 36;
+                opacity: 0;
+            }
+            100% {
+                stroke-dashoffset: 0;
+                opacity: 1;
+            }
+        }
+
+        @-webkit-keyframes submitPopIn {
+            0% {
+                opacity: 0;
+                -webkit-transform: scale3d(0.88, 0.88, 1);
+                transform: scale3d(0.88, 0.88, 1);
+            }
+            100% {
+                opacity: 1;
+                -webkit-transform: scale3d(1, 1, 1);
+                transform: scale3d(1, 1, 1);
+            }
+        }
+
+        @keyframes submitPopIn {
+            0% {
+                opacity: 0;
+                -webkit-transform: scale3d(0.88, 0.88, 1);
+                transform: scale3d(0.88, 0.88, 1);
+            }
+            100% {
+                opacity: 1;
+                -webkit-transform: scale3d(1, 1, 1);
+                transform: scale3d(1, 1, 1);
+            }
+        }
+
+        .submit-overlay-card {
+            -webkit-animation: submitPopIn 0.28s cubic-bezier(0.22, 1, 0.36, 1) both;
+            animation: submitPopIn 0.28s cubic-bezier(0.22, 1, 0.36, 1) both;
+        }
+
+        .submit-check-path {
+            stroke-dasharray: 36;
+            stroke-dashoffset: 0;
+            -webkit-animation: submitCheckDraw 0.38s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+            animation: submitCheckDraw 0.38s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+        }
     </style>
 </head>
 
@@ -3382,14 +3442,9 @@
                                                 <div class="relative flex items-center justify-between mt-2.5 pt-2 border-t border-slate-200/50 dark:border-white/[0.07] w-full gap-2">
                                                     <div>
                                                         ${exp.billAttachment ? `
-                                                            <div class="inline-flex items-center flex-wrap gap-1.5">
-                                                                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-[10px] font-semibold border border-emerald-500/20">
-                                                                    <i class="fa-solid fa-circle-check text-[9px]"></i><span>Bill Uploaded</span>
-                                                                </span>
-                                                                <button onclick="viewBillModal('${exp.id}')" class="inline-flex items-center space-x-1 px-2.5 py-1 rounded-lg bg-indigo-500/[0.08] dark:bg-indigo-400/10 text-indigo-600 dark:text-indigo-300 text-[10.5px] font-semibold border border-indigo-500/20 hover:bg-indigo-500/15 transition">
-                                                                    <i class="fa-solid fa-paperclip text-[9.5px]"></i><span>View Bill</span>
-                                                                </button>
-                                                            </div>
+                                                            <button onclick="viewBillModal('${exp.id}')" class="inline-flex items-center space-x-1 px-2.5 py-1 rounded-lg bg-indigo-500/[0.08] dark:bg-indigo-400/10 text-indigo-600 dark:text-indigo-300 text-[10.5px] font-semibold border border-indigo-500/20 hover:bg-indigo-500/15 transition">
+                                                                <i class="fa-solid fa-paperclip text-[9.5px]"></i><span>View Bill</span>
+                                                            </button>
                                                         ` : '<span class="text-[10.5px] text-slate-400 dark:text-slate-500 italic">No receipt</span>'}
                                                     </div>
 
@@ -3879,6 +3934,76 @@
 
         const MAX_INLINE_BILL_CHARS = 900000;
 
+        function showBillSubmitOverlay(titleText, hasBill) {
+            const root = document.getElementById('modal-root');
+            if (!root) return;
+            root.innerHTML = `
+                <div id="bill-submit-overlay" class="fixed inset-0 z-[75] bg-slate-950/65 backdrop-blur-md flex items-center justify-center p-5 select-none">
+                    <div class="submit-overlay-card ios-glass-modal rounded-3xl p-6 max-w-xs w-full shadow-2xl text-center space-y-4">
+                        <div class="relative w-16 h-16 mx-auto flex items-center justify-center">
+                            <div id="submit-spinner-ring" class="absolute inset-0 rounded-full border-[3.5px] border-indigo-500/20 border-t-indigo-600 dark:border-t-indigo-400 simple-spinner"></div>
+                            <div id="submit-icon-badge" class="w-11 h-11 rounded-2xl bg-indigo-500/12 text-indigo-600 dark:text-indigo-400 flex items-center justify-center text-lg transition-all duration-300">
+                                <i id="submit-step-icon" class="fa-solid ${hasBill ? 'fa-cloud-arrow-up' : 'fa-receipt'}"></i>
+                            </div>
+                        </div>
+                        <div class="space-y-1">
+                            <h3 id="submit-status-title" class="font-bold text-base text-slate-900 dark:text-white tracking-tight">${escapeHtml(titleText)}</h3>
+                            <p id="submit-status-sub" class="text-xs text-slate-500 dark:text-slate-400">${hasBill ? 'Uploading bill receipt...' : 'Processing expense details...'}</p>
+                        </div>
+                        <div class="w-full h-1.5 rounded-full bg-slate-200/80 dark:bg-slate-800 overflow-hidden">
+                            <div id="submit-progress-bar" class="h-full rounded-full bg-gradient-to-r from-indigo-600 via-violet-500 to-emerald-500 transition-all duration-300 ease-out" style="width: 24%;"></div>
+                        </div>
+                        <div class="flex items-center justify-center gap-1.5 text-[10.5px] font-semibold text-slate-400 dark:text-slate-500">
+                            <span id="submit-dot-1" class="w-2 h-2 rounded-full bg-indigo-600 transition-colors"></span>
+                            <span class="w-4 h-0.5 bg-slate-200 dark:bg-slate-700 rounded-full"></span>
+                            <span id="submit-dot-2" class="w-2 h-2 rounded-full bg-slate-300 dark:bg-slate-700 transition-colors"></span>
+                            <span class="w-4 h-0.5 bg-slate-200 dark:bg-slate-700 rounded-full"></span>
+                            <span id="submit-dot-3" class="w-2 h-2 rounded-full bg-slate-300 dark:bg-slate-700 transition-colors"></span>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function updateBillSubmitOverlay({ title, subtitle, progress, step = 1, icon = 'fa-receipt', completed = false }) {
+            const titleEl = document.getElementById('submit-status-title');
+            const subEl = document.getElementById('submit-status-sub');
+            const barEl = document.getElementById('submit-progress-bar');
+            const iconEl = document.getElementById('submit-step-icon');
+            const badgeEl = document.getElementById('submit-icon-badge');
+            const ringEl = document.getElementById('submit-spinner-ring');
+
+            if (titleEl && title) titleEl.textContent = title;
+            if (subEl && subtitle) subEl.textContent = subtitle;
+            if (barEl && typeof progress === 'number') barEl.style.width = `${progress}%`;
+
+            [1, 2, 3].forEach(idx => {
+                const dot = document.getElementById(`submit-dot-${idx}`);
+                if (!dot) return;
+                if (completed) {
+                    dot.className = 'w-2 h-2 rounded-full bg-emerald-500 transition-colors';
+                } else if (idx <= step) {
+                    dot.className = 'w-2 h-2 rounded-full bg-indigo-600 transition-colors';
+                } else {
+                    dot.className = 'w-2 h-2 rounded-full bg-slate-300 dark:bg-slate-700 transition-colors';
+                }
+            });
+
+            if (completed) {
+                triggerHaptic(18);
+                if (ringEl) {
+                    ringEl.classList.remove('simple-spinner', 'border-indigo-500/20', 'border-t-indigo-600', 'dark:border-t-indigo-400');
+                    ringEl.classList.add('border-emerald-500/40');
+                }
+                if (badgeEl) {
+                    badgeEl.className = 'w-12 h-12 rounded-2xl bg-emerald-500 text-white flex items-center justify-center shadow-lg shadow-emerald-500/30 transition-all duration-300 scale-105';
+                    badgeEl.innerHTML = `<svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path class="submit-check-path" d="M5 13l4 4L19 7"></path></svg>`;
+                }
+            } else if (iconEl && icon) {
+                iconEl.className = `fa-solid ${icon}`;
+            }
+        }
+
         async function handleExpenseSubmit(event) {
             event.preventDefault();
             const submitBtn = document.getElementById('expense-submit-btn');
@@ -3897,7 +4022,9 @@
             }
 
             if (submitBtn) submitBtn.disabled = true;
-            showToast('Saving expense...', 'info');
+            const hasNewBillUpload = Boolean(state.tempBillData && String(state.tempBillData).startsWith('data:image'));
+            const wasEditing = Boolean(state.editingExpenseId);
+            showBillSubmitOverlay(wasEditing ? 'Updating Expense' : 'Submitting Bill', hasNewBillUpload);
             const { db, storage, doc, setDoc, storageRef, uploadString, getDownloadURL, deleteObject } = window.FB;
 
             const expenseId = state.editingExpenseId || ('exp_' + Date.now());
@@ -3921,6 +4048,12 @@
                     driveWebViewLink = null;
                 } else if (state.tempBillData !== null && state.tempBillData !== undefined) {
                     if (state.tempBillData.startsWith('data:image')) {
+                        updateBillSubmitOverlay({
+                            subtitle: 'Uploading receipt attachment...',
+                            progress: 42,
+                            step: 1,
+                            icon: 'fa-cloud-arrow-up'
+                        });
                         const driveConfigured = isGoogleDriveConfigured();
                         let uploaded = false;
 
@@ -3957,6 +4090,7 @@
                                     billUrl = await getDownloadURL(fileRef);
                                 } catch (storageErr) {
                                     if (state.tempBillData.length > MAX_INLINE_BILL_CHARS) {
+                                        closeModal();
                                         showToast('Bill image is too large to save. Please use a smaller image.', 'error');
                                         if (submitBtn) submitBtn.disabled = false;
                                         return;
@@ -3971,6 +4105,13 @@
                 } else if (existingExp) {
                     billUrl = existingExp.billAttachment || null;
                 }
+
+                updateBillSubmitOverlay({
+                    subtitle: 'Syncing wallet & expense record...',
+                    progress: 74,
+                    step: 2,
+                    icon: 'fa-wallet'
+                });
 
                 const expenseOwnerId = existingExp ? existingExp.userId : state.currentUser.id;
                 const expenseOwnerName = existingExp ? existingExp.userName : state.currentUser.name;
@@ -4016,7 +4157,17 @@
                     });
                 }
 
-                const wasEditing = Boolean(state.editingExpenseId);
+                updateBillSubmitOverlay({
+                    title: wasEditing ? 'Expense Updated!' : 'Bill Submitted!',
+                    subtitle: `${title} • ${formatCurrency(amount)}`,
+                    progress: 100,
+                    step: 3,
+                    completed: true
+                });
+
+                await new Promise(resolve => setTimeout(resolve, 680));
+                closeModal();
+
                 state.editingExpenseId = null;
                 state.tempBillData = null;
                 state.tempFormCache = null;
@@ -4024,6 +4175,7 @@
                 switchTab('home');
             } catch (error) {
                 console.error("Failed:", error);
+                closeModal();
                 showToast('Failed to save. Please try again.', 'error');
                 if (submitBtn) submitBtn.disabled = false;
             }
