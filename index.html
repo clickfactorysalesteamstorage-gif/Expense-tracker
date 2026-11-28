@@ -4024,7 +4024,7 @@
             if (submitBtn) submitBtn.disabled = true;
             const hasNewBillUpload = Boolean(state.tempBillData && String(state.tempBillData).startsWith('data:image'));
             const wasEditing = Boolean(state.editingExpenseId);
-            showBillSubmitOverlay(wasEditing ? 'Updating Expense' : 'Submitting Bill', hasNewBillUpload);
+            showBillSubmitOverlay(wasEditing ? 'Updating Expense' : 'Submitting Expense', hasNewBillUpload);
             const { db, storage, doc, setDoc, storageRef, uploadString, getDownloadURL, deleteObject } = window.FB;
 
             const expenseId = state.editingExpenseId || ('exp_' + Date.now());
@@ -4158,7 +4158,7 @@
                 }
 
                 updateBillSubmitOverlay({
-                    title: wasEditing ? 'Expense Updated!' : 'Bill Submitted!',
+                    title: wasEditing ? 'Expense Updated!' : 'Expense Submitted!',
                     subtitle: `${title} • ${formatCurrency(amount)}`,
                     progress: 100,
                     step: 3,
