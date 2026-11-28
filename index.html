@@ -10,9 +10,57 @@
     <title>Click Factory Expense Tracker</title>
     <link rel="icon" type="image/gif"
         href="https://clickfactoryphotography.com/wp-content/uploads/2022/04/crop-logo.gif">
-    <link rel="apple-touch-icon" href="https://clickfactoryphotography.com/wp-content/uploads/2022/04/crop-logo.gif">
-    <link rel="manifest"
+    <link id="apple-touch-icon-link" rel="apple-touch-icon" sizes="512x512"
+        href="https://clickfactoryphotography.com/wp-content/uploads/2022/04/crop-logo.gif">
+    <link id="app-manifest-link" rel="manifest"
         href="data:application/manifest+json;charset=utf-8,%7B%22name%22%3A%22Expense%20tracker%22%2C%22short_name%22%3A%22ExpenseTracker%22%2C%22start_url%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22orientation%22%3A%22any%22%2C%22background_color%22%3A%22%23000000%22%2C%22theme_color%22%3A%22%23000000%22%2C%22icons%22%3A%5B%7B%22src%22%3A%22https%3A%2F%2Fclickfactoryphotography.com%2Fwp-content%2Fuploads%2F2022%2F04%2Fcrop-logo.gif%22%2C%22sizes%22%3A%22192x192%20512x512%22%2C%22type%22%3A%22image%2Fgif%22%7D%5D%7D">
+    <script>
+        (function fixSquareAppleTouchIcon() {
+            const logoUrl = 'https://clickfactoryphotography.com/wp-content/uploads/2022/04/crop-logo.gif';
+            const img = new Image();
+            img.crossOrigin = 'anonymous';
+            img.onload = function () {
+                try {
+                    const size = 512;
+                    const pad = 64;
+                    const maxInner = size - pad * 2;
+                    const canvas = document.createElement('canvas');
+                    canvas.width = size;
+                    canvas.height = size;
+                    const ctx = canvas.getContext('2d');
+                    ctx.fillStyle = '#ffffff';
+                    ctx.fillRect(0, 0, size, size);
+
+                    const ratio = Math.min(maxInner / (img.naturalWidth || size), maxInner / (img.naturalHeight || size));
+                    const drawW = Math.round((img.naturalWidth || size) * ratio);
+                    const drawH = Math.round((img.naturalHeight || size) * ratio);
+                    const drawX = Math.round((size - drawW) / 2);
+                    const drawY = Math.round((size - drawH) / 2);
+                    ctx.drawImage(img, drawX, drawY, drawW, drawH);
+
+                    const squarePng = canvas.toDataURL('image/png');
+                    const touchLink = document.getElementById('apple-touch-icon-link');
+                    if (touchLink) touchLink.setAttribute('href', squarePng);
+
+                    const manifestLink = document.getElementById('app-manifest-link');
+                    if (manifestLink) {
+                        const manifestObj = {
+                            name: 'Expense tracker',
+                            short_name: 'ExpenseTracker',
+                            start_url: '.',
+                            display: 'standalone',
+                            orientation: 'any',
+                            background_color: '#000000',
+                            theme_color: '#000000',
+                            icons: [{ src: squarePng, sizes: '512x512', type: 'image/png' }]
+                        };
+                        manifestLink.setAttribute('href', 'data:application/manifest+json;charset=utf-8,' + encodeURIComponent(JSON.stringify(manifestObj)));
+                    }
+                } catch (e) { }
+            };
+            img.src = logoUrl;
+        })();
+    </script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
