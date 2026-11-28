@@ -1199,7 +1199,7 @@
                 const raw = parseFloat(lsGet(DOCK_ALPHA_STORAGE_KEY, '0.01'));
                 return isNaN(raw) ? 0.01 : Math.min(0.90, Math.max(0.01, raw));
             })(),
-            isDbLoading: false,
+            isDbLoading: true,
             justFinishedLoading: false,
             users: DEFAULT_SEED_USERS.map(u => ({ ...u })),
             expenses: [],
@@ -3533,32 +3533,6 @@
                     </div>
                 </div>
             `;
-        }
-// ... existing code ... -->
-        function setFilterCategory(cat) {
-            if (state.filterCategory === cat) {
-                syncHomeCategoryBubble(true);
-                return;
-            }
-
-            state.filterCategory = cat;
-            syncHomeCategoryBubble(true);
-
-            const prevContainer = document.getElementById('home-expense-records-container');
-            if (prevContainer) {
-                const temp = document.createElement('div');
-                temp.innerHTML = renderHomeTab();
-                const nextHero = temp.querySelector('.liquid-hero-card');
-                const currHero = document.querySelector('#main-content .liquid-hero-card');
-                if (currHero && nextHero) currHero.innerHTML = nextHero.innerHTML;
-
-                const nextContainer = temp.querySelector('#home-expense-records-container');
-                if (nextContainer) {
-                    prevContainer.innerHTML = nextContainer.innerHTML;
-                    return;
-                }
-            }
-            renderMainContentOnly();
         }
         function setFilterMonth(month) {
             state.filterMonth = month;
